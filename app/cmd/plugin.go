@@ -45,7 +45,7 @@ var pluginCmd = &cobra.Command{
 
 			path, _ := os.Getwd()
 			dirName := filepath.Base(path)
-			dirName = strings.Replace(dirName, "-plugin", "", 0)
+			dirName = strings.Replace(dirName, "-plugin", "", -1)
 			path += fmt.Sprintf("/target/%s.hpi", dirName)
 			fmt.Println("target path", path)
 			extraParams := map[string]string{}
