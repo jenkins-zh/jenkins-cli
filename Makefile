@@ -16,10 +16,5 @@ release: clean darwin
 	mkdir release
 	cd ./bin/darwin; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli
 
-	./tag.sh
-	@if [[ -z "$NEEDS_TAG" ]]; then \
-		hub release create -c -a release/jcli-darwin-amd64.tar.gz $NEW_TAG; \
-	fi
-
 clean: ## Clean the generated artifacts
 	rm -rf bin release
