@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -43,7 +44,9 @@ var pluginCmd = &cobra.Command{
 			api := fmt.Sprintf("%s/pluginManager/uploadPlugin", jenkinsRoot)
 
 			path, _ := os.Getwd()
-			path += "/target/alauda-devops-sync.hpi"
+			dirName := filepath.Base(path)
+			dirName = strings.Replace(dirName, "-plugin", "", 0)
+			path += fmt.Sprintf("/target/%s.hpi", dirName)
 			fmt.Println("target path", path)
 			extraParams := map[string]string{}
 			request, err := newfileUploadRequest(api, extraParams, "@name", path)
