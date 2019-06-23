@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -47,11 +48,18 @@ func getCrumb() (CrumbIssuer, JenkinsServer) {
 	req.SetBasicAuth(config.UserName, config.Token)
 
 	var crumbIssuer CrumbIssuer
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	if response, err := client.Do(req); err == nil {
 		if data, err := ioutil.ReadAll(response.Body); err == nil {
-			fmt.Println(string(data))
-			json.Unmarshal(data, &crumbIssuer)
+			if response.StatusCode == 200 {
+				json.Unmarshal(data, &crumbIssuer)
+			} else {
+				fmt.Println("get curmb error")
+				log.Fatal(string(data))
+			}
 		} else {
 			log.Fatal(err)
 		}
