@@ -10,6 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//curl -k -u $JENKINS_USER:$JENKINS_TOKEN $JENKINS_URL/crumbIssuer/api/json -s
+
 // Start contains the command line options
 type CrumbIssuerOptions struct {
 	Upload bool
@@ -21,10 +23,9 @@ func init() {
 
 var versionCmd = &cobra.Command{
 	Use:   "crumb",
-	Short: "Print the version number of Hugo",
-	Long:  `Manage the plugin of Jenkins`,
+	Short: "Print crumbIssuer of Jenkins",
+	Long:  `Print crumbIssuer of Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		//curl -k -u $JENKINS_USER:$JENKINS_TOKEN $JENKINS_URL/crumbIssuer/api/json -s
 	},
 }
 
@@ -33,24 +34,22 @@ type CrumbIssuer struct {
 	CrumbRequestField string `json:"crumbRequestField"`
 }
 
-func getCrumb() (CrumbIssuer, Config) {
-	config := getConfig()
-	fmt.Println(config)
+func getCrumb() (CrumbIssuer, JenkinsServer) {
+	config := getCurrentJenkins()
 
-	jenkinsRoot := config.JenkinsServers[0].URL
+	jenkinsRoot := config.URL
 	api := fmt.Sprintf("%s/crumbIssuer/api/json", jenkinsRoot)
 
 	req, err := http.NewRequest("GET", api, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.SetBasicAuth(config.JenkinsServers[0].UserName, config.JenkinsServers[0].Token)
+	req.SetBasicAuth(config.UserName, config.Token)
 
 	var crumbIssuer CrumbIssuer
 	client := &http.Client{}
 	if response, err := client.Do(req); err == nil {
 		if data, err := ioutil.ReadAll(response.Body); err == nil {
-			fmt.Println("crumbe success")
 			fmt.Println(string(data))
 			json.Unmarshal(data, &crumbIssuer)
 		} else {

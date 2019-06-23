@@ -16,32 +16,28 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Start contains the command line options
+// PluginOptions contains the command line options
 type PluginOptions struct {
 	Upload bool
 }
 
 func init() {
 	rootCmd.AddCommand(pluginCmd)
+	pluginCmd.PersistentFlags().BoolVarP(&author.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
+	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
 
 var author PluginOptions
 
 var pluginCmd = &cobra.Command{
 	Use:   "plugin",
-	Short: "Print the version number of Hugo",
-	Long:  `Manage the plugin of Jenkins`,
+	Short: "Manage the plugins of Jenkins",
+	Long:  `Manage the plugins of Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hugo Static Site Generator v0.9 -- HEAD")
-
-		fmt.Printf("upload: %v\n", author.Upload)
 		if author.Upload {
 			crumb, config := getCrumb()
 
-			fmt.Println("crumb", crumb)
-
-			jenkinsRoot := getConfig().JenkinsServers[0].URL
-			api := fmt.Sprintf("%s/pluginManager/uploadPlugin", jenkinsRoot)
+			api := fmt.Sprintf("%s/pluginManager/uploadPlugin", config.URL)
 
 			path, _ := os.Getwd()
 			dirName := filepath.Base(path)
@@ -53,7 +49,7 @@ var pluginCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			request.SetBasicAuth(config.JenkinsServers[0].UserName, config.JenkinsServers[0].Token)
+			request.SetBasicAuth(config.UserName, config.Token)
 			request.Header.Add("Accept", "*/*")
 			request.Header.Add(crumb.CrumbRequestField, crumb.Crumb)
 			fmt.Println(request.Header)
@@ -104,9 +100,4 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	req, err := http.NewRequest("POST", uri, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req, err
-}
-
-func init() {
-	rootCmd.PersistentFlags().BoolVar(&author.Upload, "upload", false, "Upload plugin to your Jenkins server")
-	viper.BindPFlag("upload", rootCmd.PersistentFlags().Lookup("upload"))
 }

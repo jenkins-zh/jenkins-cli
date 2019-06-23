@@ -2,24 +2,30 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
 
+	"github.com/linuxsuren/jenkins-cli/app"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
 
+type RootOptions struct {
+	Version bool
+}
+
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
-				  love by spf13 and friends in Go.
-				  Complete documentation is available at http://hugo.spf13.com`,
+	Use:   "jcli",
+	Short: "jcli is a tool which could help you with your multiple Jenkins",
+	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
+				  Manage your Jenkins and your pipelines
+				  More information could found at https://jenkins-zh.cn`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Do Stuff Here
-		fmt.Println("hello")
+		fmt.Println("Jenkins CLI (jcli) manage your Jenkins")
+
+		if rootOptions.Version {
+			fmt.Printf("Version: v%.2f.%d%s", app.CurrentVersion.Number,
+				app.CurrentVersion.PatchLevel,
+				app.CurrentVersion.Suffix)
+		}
 	},
 }
 
@@ -30,40 +36,13 @@ func Execute() {
 	}
 }
 
-type JenkinsServer struct {
-	URL      string `yaml:"url"`
-	UserName string `yaml:"username"`
-	Token    string `yaml:"token"`
-}
-
-type Config struct {
-	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-}
+var rootOptions RootOptions
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
-	viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
-	viper.BindPFlag("projectbase", rootCmd.PersistentFlags().Lookup("projectbase"))
-	viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
-	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
-	viper.SetDefault("license", "apache")
-}
-
-var config Config
-
-func getConfig() Config {
-	return config
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
 }
 
 func initConfig() {
-	content, err := ioutil.ReadFile("/Users/mac/.jenkins-cli.yaml")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = yaml.Unmarshal([]byte(content), &config)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
+	loadDefaultConfig()
 }
