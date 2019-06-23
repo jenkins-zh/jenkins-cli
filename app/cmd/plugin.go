@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gosuri/uiprogress"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -43,7 +45,6 @@ var pluginCmd = &cobra.Command{
 			dirName := filepath.Base(path)
 			dirName = strings.Replace(dirName, "-plugin", "", -1)
 			path += fmt.Sprintf("/target/%s.hpi", dirName)
-			fmt.Println("target path", path)
 			extraParams := map[string]string{}
 			request, err := newfileUploadRequest(api, extraParams, "@name", path)
 			if err != nil {
@@ -52,9 +53,11 @@ var pluginCmd = &cobra.Command{
 			request.SetBasicAuth(config.UserName, config.Token)
 			request.Header.Add("Accept", "*/*")
 			request.Header.Add(crumb.CrumbRequestField, crumb.Crumb)
-			fmt.Println(request.Header)
 			if err == nil {
-				client := &http.Client{}
+				tr := &http.Transport{
+					TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				}
+				client := &http.Client{Transport: tr}
 				var response *http.Response
 				response, err = client.Do(request)
 				if err != nil {
@@ -79,14 +82,26 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	if err != nil {
 		return nil, err
 	}
+
+	var total float64
+	if stat, err := file.Stat(); err != nil {
+		panic(err)
+	} else {
+		total = float64(stat.Size())
+	}
 	defer file.Close()
 
-	body := &bytes.Buffer{}
+	// body := &bytes.Buffer{}
+	body := &ProgressIndicator{
+		Total: total,
+	}
+	body.Init()
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
 	if err != nil {
 		return nil, err
 	}
+
 	_, err = io.Copy(part, file)
 
 	for key, val := range params {
@@ -100,4 +115,32 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	req, err := http.NewRequest("POST", uri, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req, err
+}
+
+type ProgressIndicator struct {
+	bytes.Buffer
+	Total float64
+	count float64
+	bar   *uiprogress.Bar
+}
+
+func (i *ProgressIndicator) Init() {
+	uiprogress.Start()             // start rendering
+	i.bar = uiprogress.AddBar(100) // Add a new bar
+
+	// optionally, append and prepend completion and elapsed time
+	i.bar.AppendCompleted()
+	// i.bar.PrependElapsed()
+}
+
+func (i *ProgressIndicator) Write(p []byte) (n int, err error) {
+	n, err = i.Buffer.Write(p)
+	return
+}
+
+func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
+	n, err = i.Buffer.Read(p)
+	i.count += float64(n)
+	i.bar.Set((int)(i.count * 100 / i.Total))
+	return
 }
