@@ -14,29 +14,34 @@ import (
 	"strings"
 
 	"github.com/gosuri/uiprogress"
+	"github.com/linuxsuren/jenkins-cli/client"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
-	Upload bool
+	Upload      bool
+	CheckUpdate bool
+	Open        bool
 }
 
 func init() {
 	rootCmd.AddCommand(pluginCmd)
-	pluginCmd.PersistentFlags().BoolVarP(&author.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
+	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
+	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.CheckUpdate, "check", "c", false, "Checkout update center server")
+	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
 	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
 
-var author PluginOptions
+var pluginOpt PluginOptions
 
 var pluginCmd = &cobra.Command{
 	Use:   "plugin",
 	Short: "Manage the plugins of Jenkins",
 	Long:  `Manage the plugins of Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if author.Upload {
+		if pluginOpt.Upload {
 			crumb, config := getCrumb()
 
 			api := fmt.Sprintf("%s/pluginManager/uploadPlugin", config.URL)
@@ -72,6 +77,36 @@ var pluginCmd = &cobra.Command{
 				}
 			} else {
 				log.Fatal(err)
+			}
+		}
+
+		if pluginOpt.CheckUpdate {
+			jclient := &client.PluginManager{}
+
+			crumb, config := getCrumb()
+			jclient.CrumbRequestField = crumb.CrumbRequestField
+			jclient.Crumb = crumb.Crumb
+			jclient.URL = config.URL
+			jclient.UserName = config.UserName
+			jclient.Token = config.Token
+			jclient.CheckUpdate(func(response *http.Response) {
+				code := response.StatusCode
+				if code == 200 {
+					fmt.Println("update site updated.")
+				} else {
+					contentData, _ := ioutil.ReadAll(response.Body)
+					log.Fatal(fmt.Sprintf("response code is %d, content: ",
+						code, string(contentData)))
+				}
+			})
+		}
+
+		if pluginOpt.Open {
+			jenkins := getCurrentJenkins()
+			if jenkins.URL != "" {
+				open(fmt.Sprintf("%s/pluginManager", jenkins.URL))
+			} else {
+				log.Fatal(fmt.Sprintf("No URL fond from %s", jenkins.Name))
 			}
 		}
 	},
