@@ -26,6 +26,7 @@ type PluginOptions struct {
 	Open        bool
 	List        bool
 
+	Install   []string
 	Uninstall string
 }
 
@@ -35,6 +36,7 @@ func init() {
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.CheckUpdate, "check", "c", false, "Checkout update center server")
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
+	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
 	pluginCmd.PersistentFlags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
 	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
@@ -118,6 +120,12 @@ var pluginCmd = &cobra.Command{
 					fmt.Println("num:", i, "name:", plugin.ShortName, "version:", plugin.Version)
 				}
 			} else {
+				log.Fatal(err)
+			}
+		}
+
+		if pluginOpt.Install != nil && len(pluginOpt.Install) > 0 {
+			if err := jclient.InstallPlugin(pluginOpt.Install); err != nil {
 				log.Fatal(err)
 			}
 		}

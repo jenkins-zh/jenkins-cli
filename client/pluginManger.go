@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type PluginManager struct {
@@ -89,6 +90,47 @@ func (p *PluginManager) GetPlugins() (pluginList *PluginList, err error) {
 				pluginList = &PluginList{}
 				err = json.Unmarshal(data, pluginList)
 			}
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+// InstallPlugin install a plugin by name
+func (p *PluginManager) InstallPlugin(names []string) (err error) {
+	for i, name := range names {
+		names[i] = fmt.Sprintf("plugin.%s", name)
+	}
+	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, strings.Join(names, "=&"))
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		p.AuthHandle(req)
+	} else {
+		return
+	}
+
+	if err = p.CrumbHandle(req); err != nil {
+		return
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			fmt.Println("install succeed.")
 		} else {
 			log.Fatal(string(data))
 		}
