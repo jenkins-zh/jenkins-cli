@@ -24,6 +24,9 @@ type PluginOptions struct {
 	Upload      bool
 	CheckUpdate bool
 	Open        bool
+	List        bool
+
+	Uninstall string
 }
 
 func init() {
@@ -31,6 +34,8 @@ func init() {
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.CheckUpdate, "check", "c", false, "Checkout update center server")
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
+	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
+	pluginCmd.PersistentFlags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
 	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
 
@@ -80,15 +85,13 @@ var pluginCmd = &cobra.Command{
 			}
 		}
 
+		config := getCurrentJenkins()
+		jenkins := getCurrentJenkins()
+		jclient := &client.PluginManager{}
+		jclient.URL = jenkins.URL
+		jclient.UserName = config.UserName
+		jclient.Token = config.Token
 		if pluginOpt.CheckUpdate {
-			jclient := &client.PluginManager{}
-
-			crumb, config := getCrumb()
-			jclient.CrumbRequestField = crumb.CrumbRequestField
-			jclient.Crumb = crumb.Crumb
-			jclient.URL = config.URL
-			jclient.UserName = config.UserName
-			jclient.Token = config.Token
 			jclient.CheckUpdate(func(response *http.Response) {
 				code := response.StatusCode
 				if code == 200 {
@@ -102,11 +105,26 @@ var pluginCmd = &cobra.Command{
 		}
 
 		if pluginOpt.Open {
-			jenkins := getCurrentJenkins()
 			if jenkins.URL != "" {
 				open(fmt.Sprintf("%s/pluginManager", jenkins.URL))
 			} else {
 				log.Fatal(fmt.Sprintf("No URL fond from %s", jenkins.Name))
+			}
+		}
+
+		if pluginOpt.List {
+			if plugins, err := jclient.GetPlugins(); err == nil {
+				for i, plugin := range plugins.Plugins {
+					fmt.Println("num:", i, "name:", plugin.ShortName, "version:", plugin.Version)
+				}
+			} else {
+				log.Fatal(err)
+			}
+		}
+
+		if pluginOpt.Uninstall != "" {
+			if err := jclient.UninstallPlugin(pluginOpt.Uninstall); err != nil {
+				log.Fatal(err)
 			}
 		}
 	},
