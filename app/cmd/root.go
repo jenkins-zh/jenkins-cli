@@ -21,6 +21,13 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Jenkins CLI (jcli) manage your Jenkins")
 
+		current := getCurrentJenkins()
+		if current != nil {
+			fmt.Println("Current Jenkins is:", current.Name)
+		} else {
+			fmt.Println("Cannot found the configuration")
+		}
+
 		if rootOptions.Version {
 			fmt.Printf("Version: v%.2f.%d%s", app.CurrentVersion.Number,
 				app.CurrentVersion.PatchLevel,
