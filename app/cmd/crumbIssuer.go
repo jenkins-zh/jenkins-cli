@@ -35,7 +35,7 @@ type CrumbIssuer struct {
 	CrumbRequestField string `json:"crumbRequestField"`
 }
 
-func getCrumb() (CrumbIssuer, JenkinsServer) {
+func getCrumb() (CrumbIssuer, *JenkinsServer) {
 	config := getCurrentJenkins()
 
 	jenkinsRoot := config.URL

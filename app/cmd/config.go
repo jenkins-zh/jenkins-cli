@@ -111,12 +111,18 @@ func getConfig() Config {
 	return config
 }
 
-func getCurrentJenkins() (jenkinsServer JenkinsServer) {
+func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 	config := getConfig()
 	current := config.Current
+	jenkinsServer = findJenkinsByName(current)
+
+	return
+}
+
+func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	for _, cfg := range config.JenkinsServers {
-		if cfg.Name == current {
-			jenkinsServer = cfg
+		if cfg.Name == name {
+			jenkinsServer = &cfg
 			break
 		}
 	}

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"runtime"
@@ -8,20 +9,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type OpenOption struct {
+	Name   string
+	Config bool
+}
+
+var openOption OpenOption
+
 func init() {
 	rootCmd.AddCommand(openCmd)
+	openCmd.PersistentFlags().StringVarP(&openOption.Name, "name", "n", "", "Open a specific Jenkins by name")
+	openCmd.PersistentFlags().BoolVarP(&openOption.Config, "config", "c", false, "Open the configuration page of Jenkins")
 }
 
 var openCmd = &cobra.Command{
 	Use:   "open",
-	Short: "Open your Jenkins in the browse",
-	Long:  `Open your Jenkins in the browse`,
+	Short: "Open your Jenkins with a browse",
+	Long:  `Open your Jenkins with a browse`,
 	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
-		if jenkins.URL != "" {
-			open(jenkins.URL)
+		var jenkins *JenkinsServer
+
+		if openOption.Name == "" {
+			jenkins = getCurrentJenkins()
 		} else {
-			log.Fatalf("No URL found with Jenkins %s", jenkins.Name)
+			jenkins = findJenkinsByName(openOption.Name)
+		}
+
+		if jenkins != nil && jenkins.URL != "" {
+			url := jenkins.URL
+			if openOption.Config {
+				url = fmt.Sprintf("%s/configure", url)
+			}
+			open(url)
+		} else {
+			log.Fatalf("No URL found with Jenkins %s", openOption.Name)
 		}
 	},
 }
