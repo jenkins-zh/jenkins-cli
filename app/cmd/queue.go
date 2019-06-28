@@ -29,6 +29,8 @@ var queueCmd = &cobra.Command{
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
 		jclient.Token = jenkins.Token
+		jclient.Proxy = jenkins.Proxy
+		jclient.ProxyAuth = jenkins.ProxyAuth
 
 		if status, err := jclient.Get(); err == nil {
 			var data []byte

@@ -1,7 +1,6 @@
 package client
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -51,10 +50,7 @@ func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 		return
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := u.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte

@@ -78,11 +78,12 @@ var configCmd = &cobra.Command{
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name     string `yaml:"name"`
-	URL      string `yaml:"url"`
-	UserName string `yaml:"username"`
-	Token    string `yaml:"token"`
-	Proxy    string `yaml:"proxy"`
+	Name      string `yaml:"name"`
+	URL       string `yaml:"url"`
+	UserName  string `yaml:"username"`
+	Token     string `yaml:"token"`
+	Proxy     string `yaml:"proxy"`
+	ProxyAuth string `yaml:"proxyAuth"`
 }
 
 type Config struct {

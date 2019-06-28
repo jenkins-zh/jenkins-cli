@@ -1,7 +1,6 @@
 package client
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -52,10 +51,7 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 		log.Fatal(err)
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := p.GetClient()
 	if response, err := client.Do(req); err == nil {
 		p.handleCheck(handle)(response)
 	} else {
@@ -77,10 +73,7 @@ func (p *PluginManager) GetPlugins() (pluginList *PluginList, err error) {
 		return
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := p.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte
@@ -121,10 +114,7 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 		return
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := p.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte
@@ -159,10 +149,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		return
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := p.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte

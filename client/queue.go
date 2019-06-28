@@ -1,7 +1,6 @@
 package client
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -27,10 +26,7 @@ func (q *QueueClient) Get() (status *JobQueue, err error) {
 		return
 	}
 
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte
