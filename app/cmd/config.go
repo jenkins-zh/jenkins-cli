@@ -35,15 +35,19 @@ var configCmd = &cobra.Command{
 	Short: "Manage the config of jcli",
 	Long:  `Manage the config of jcli`,
 	Run: func(cmd *cobra.Command, args []string) {
+		current := getCurrentJenkins()
 		if configOptions.Show {
-			current := getCurrentJenkins()
 			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 		}
 
 		if configOptions.List {
-			fmt.Println("number-name\turl")
+			fmt.Println("number\tname\turl")
 			for i, jenkins := range getConfig().JenkinsServers {
-				fmt.Printf("%d-%s\t%s\n", i, jenkins.Name, jenkins.URL)
+				name := jenkins.Name
+				if name == current.Name {
+					name = fmt.Sprintf("*%s", name)
+				}
+				fmt.Printf("%d\t%s\t%s\n", i, name, jenkins.URL)
 			}
 		}
 
