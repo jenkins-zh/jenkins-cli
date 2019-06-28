@@ -28,6 +28,8 @@ type PluginOptions struct {
 
 	Install   []string
 	Uninstall string
+
+	Filter []string
 }
 
 func init() {
@@ -38,6 +40,7 @@ func init() {
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
 	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
 	pluginCmd.PersistentFlags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
+	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: hasUpdate, downgradable")
 	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
 
@@ -100,7 +103,7 @@ var pluginCmd = &cobra.Command{
 					fmt.Println("update site updated.")
 				} else {
 					contentData, _ := ioutil.ReadAll(response.Body)
-					log.Fatal(fmt.Sprintf("response code is %d, content: ",
+					log.Fatal(fmt.Sprintf("response code is %d, content: %s",
 						code, string(contentData)))
 				}
 			})
@@ -115,8 +118,34 @@ var pluginCmd = &cobra.Command{
 		}
 
 		if pluginOpt.List {
+			var (
+				filter       bool
+				hasUpdate    bool
+				downgradable bool
+			)
+			if pluginOpt.Filter != nil {
+				filter = true
+				for _, f := range pluginOpt.Filter {
+					switch f {
+					case "hasUpdate":
+						hasUpdate = true
+					case "downgradable":
+						downgradable = true
+					}
+				}
+			}
+
 			if plugins, err := jclient.GetPlugins(); err == nil {
 				for i, plugin := range plugins.Plugins {
+					if filter {
+						if hasUpdate && !plugin.HasUpdate {
+							continue
+						}
+
+						if downgradable && !plugin.Downgradable {
+							continue
+						}
+					}
 					fmt.Println("num:", i, "name:", plugin.ShortName, "version:", plugin.Version)
 				}
 			} else {
