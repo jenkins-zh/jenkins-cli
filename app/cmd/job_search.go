@@ -20,12 +20,13 @@ func init() {
 }
 
 var jobSearchCmd = &cobra.Command{
-	Use:   "search",
+	Use:   "search <keyword>",
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			log.Fatal("need a keyword")
+			cmd.Help()
+			return
 		}
 
 		keyword := args[0]

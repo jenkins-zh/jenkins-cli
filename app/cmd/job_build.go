@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/linuxsuren/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -12,12 +10,13 @@ func init() {
 }
 
 var jobBuildCmd = &cobra.Command{
-	Use:   "build",
+	Use:   "build -n",
 	Short: "Build the job of your Jenkins",
 	Long:  `Build the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if jobOption.Name == "" {
-			log.Fatal("need a name")
+			cmd.Help()
+			return
 		}
 
 		jenkins := getCurrentJenkins()

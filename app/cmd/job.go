@@ -25,12 +25,13 @@ func init() {
 }
 
 var jobCmd = &cobra.Command{
-	Use:   "job",
+	Use:   "job -n",
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if jobOption.Name == "" {
-			log.Fatal("need a name")
+			cmd.Help()
+			return
 		}
 
 		jenkins := getCurrentJenkins()
