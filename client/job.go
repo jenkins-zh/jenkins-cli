@@ -134,14 +134,19 @@ func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 }
 
 // Log get the log of a job
-func (q *JobClient) Log(jobName string, start int64) (jobLog JobLog, err error) {
+func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog, err error) {
 	jobItems := strings.Split(jobName, " ")
 	path := ""
 	for _, item := range jobItems {
 		path = fmt.Sprintf("%s/job/%s", path, item)
 	}
 
-	api := fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+	var api string
+	if history == -1 {
+		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+	} else {
+		api = fmt.Sprintf("%s/%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
+	}
 	var (
 		req      *http.Request
 		response *http.Response

@@ -9,12 +9,14 @@ import (
 )
 
 type JobLogOption struct {
+	History int
 }
 
 var jobLogOption JobLogOption
 
 func init() {
 	jobCmd.AddCommand(jobLogCmd)
+	jobLogCmd.PersistentFlags().IntVarP(&jobLogOption.History, "history", "s", -1, "Specific build history of log")
 }
 
 var jobLogCmd = &cobra.Command{
@@ -34,15 +36,15 @@ var jobLogCmd = &cobra.Command{
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		printLog(jclient, jobOption.Name, 0)
+		printLog(jclient, jobOption.Name, jobLogOption.History, 0)
 	},
 }
 
-func printLog(jclient *client.JobClient, jobName string, start int64) {
-	if status, err := jclient.Log(jobName, start); err == nil {
+func printLog(jclient *client.JobClient, jobName string, history int, start int64) {
+	if status, err := jclient.Log(jobName, history, start); err == nil {
 		fmt.Print(status.Text)
 		if status.HasMore {
-			printLog(jclient, jobName, status.NextStart)
+			printLog(jclient, jobName, history, status.NextStart)
 		}
 	} else {
 		log.Fatal(err)
