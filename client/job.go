@@ -88,6 +88,51 @@ func (q *JobClient) Build(jobName string) (err error) {
 	return
 }
 
+func (q *JobClient) GetJob(name string) (job *Job, err error) {
+	jobItems := strings.Split(name, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	api := fmt.Sprintf("%s/%s/api/json", q.URL, path)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			job = &Job{}
+			err = json.Unmarshal(data, job)
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
+	var job *Job
+	if job, err = q.GetJob(name); err == nil {
+		builds = job.Builds
+	}
+	return
+}
+
 // Log get the log of a job
 func (q *JobClient) Log(jobName string, start int64) (jobLog JobLog, err error) {
 	jobItems := strings.Split(jobName, " ")
@@ -147,4 +192,19 @@ type SearchResult struct {
 
 type SearchResultItem struct {
 	Name string
+}
+
+type Job struct {
+	Builds          []JobBuild
+	Color           string
+	ConcurrentBuild bool
+	Name            string
+	NextBuildNumber int
+	URL             string
+	Buildable       bool
+}
+
+type JobBuild struct {
+	Number int
+	URL    string
 }
