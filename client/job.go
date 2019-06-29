@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type JobClient struct {
@@ -44,6 +46,59 @@ func (q *JobClient) Search(keyword string) (status *SearchResult, err error) {
 		log.Fatal(err)
 	}
 	return
+}
+
+// Log get the log of a job
+func (q *JobClient) Log(jobName string, start int64) (jobLog JobLog, err error) {
+	jobItems := strings.Split(jobName, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	api := fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	jobLog = JobLog{
+		HasMore:   false,
+		Text:      "",
+		NextStart: int64(0),
+	}
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			jobLog.Text = string(data)
+
+			if response.Header != nil {
+				jobLog.HasMore = strings.ToLower(response.Header.Get("X-More-Data")) == "true"
+				jobLog.NextStart, _ = strconv.ParseInt(response.Header.Get("X-Text-Size"), 10, 64)
+			}
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+type JobLog struct {
+	HasMore   bool
+	NextStart int64
+	Text      string
 }
 
 type SearchResult struct {
