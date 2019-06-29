@@ -12,7 +12,10 @@ developer, administrator or just a regular user, it borns for you!
 
 For the mac user, you just need one command then you can own it.
 
-`brew install linuxsuren/jenkins-cli/jcli`
+```
+brew tap linuxsuren/jcli
+brew install jcli
+```
 
 # Contribution
 
