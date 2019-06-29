@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -35,6 +36,12 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the config of jcli",
 	Long:  `Manage the config of jcli`,
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return errors.New("requires at least one argument")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		current := getCurrentJenkins()
 		if configOptions.Show {
@@ -63,24 +70,10 @@ var configCmd = &cobra.Command{
 		}
 
 		if configOptions.Current != "" {
-			found := false
-			for _, jenkins := range getConfig().JenkinsServers {
-				if jenkins.Name == configOptions.Current {
-					found = true
-					break
-				}
-			}
-
-			if found {
-				config.Current = configOptions.Current
-				if err := saveConfig(); err != nil {
-					log.Fatal(err)
-				}
-			} else {
-				log.Fatalf("Cannot found Jenkins by name %s", configOptions.Current)
-			}
+			setCurrentJenkins(configOptions.Current)
 		}
 	},
+	Example: "jcli config -l",
 }
 
 // JenkinsServer holds the configuration of your Jenkins
@@ -96,6 +89,25 @@ type JenkinsServer struct {
 type Config struct {
 	Current        string          `yaml:"current"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
+}
+
+func setCurrentJenkins(name string) {
+	found := false
+	for _, jenkins := range getConfig().JenkinsServers {
+		if jenkins.Name == name {
+			found = true
+			break
+		}
+	}
+
+	if found {
+		config.Current = name
+		if err := saveConfig(); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Fatalf("Cannot found Jenkins by name %s", name)
+	}
 }
 
 func generateSampleConfig() ([]byte, error) {
@@ -117,6 +129,15 @@ var config Config
 
 func getConfig() Config {
 	return config
+}
+
+func getJenkinsNames() []string {
+	config := getConfig()
+	names := make([]string, 0)
+	for _, j := range config.JenkinsServers {
+		names = append(names, j.Name)
+	}
+	return names
 }
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
