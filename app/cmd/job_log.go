@@ -9,14 +9,12 @@ import (
 )
 
 type JobLogOption struct {
-	Name string
 }
 
 var jobLogOption JobLogOption
 
 func init() {
 	jobCmd.AddCommand(jobLogCmd)
-	jobLogCmd.PersistentFlags().StringVarP(&jobLogOption.Name, "name", "n", "", "Name of the job")
 }
 
 var jobLogCmd = &cobra.Command{
@@ -24,7 +22,7 @@ var jobLogCmd = &cobra.Command{
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if jobLogOption.Name == "" {
+		if jobOption.Name == "" {
 			log.Fatal("need a name")
 		}
 
@@ -36,7 +34,7 @@ var jobLogCmd = &cobra.Command{
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		printLog(jclient, jobLogOption.Name, 0)
+		printLog(jclient, jobOption.Name, 0)
 	},
 }
 

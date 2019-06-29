@@ -6,13 +6,16 @@ import (
 
 type JobOption struct {
 	OutputOption
+
+	Name string
 }
 
 var jobOption JobOption
 
 func init() {
 	rootCmd.AddCommand(jobCmd)
-	jobCmd.PersistentFlags().StringVarP(&queueOption.Format, "output", "o", "json", "Format the output")
+	jobCmd.PersistentFlags().StringVarP(&jobOption.Format, "output", "o", "json", "Format the output")
+	jobCmd.PersistentFlags().StringVarP(&jobOption.Name, "name", "n", "", "Name of the job")
 }
 
 var jobCmd = &cobra.Command{
