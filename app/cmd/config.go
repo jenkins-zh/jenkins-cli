@@ -134,6 +134,50 @@ func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	return
 }
 
+func addJenkins(jenkinsServer JenkinsServer) (err error) {
+	jenkinsName := jenkinsServer.Name
+	if jenkinsName == "" {
+		err = fmt.Errorf("Name cannot be empty")
+		return
+	}
+
+	if findJenkinsByName(jenkinsName) != nil {
+		err = fmt.Errorf("Jenkins %s is existed", jenkinsName)
+		return
+	}
+
+	config.JenkinsServers = append(config.JenkinsServers, jenkinsServer)
+	err = saveConfig()
+	return
+}
+
+func removeJenkins(name string) (err error) {
+	current := getCurrentJenkins()
+	if name == current.Name {
+		err = fmt.Errorf("You cannot remove current Jenkins")
+	}
+
+	index := -1
+	config := getConfig()
+	for i, jenkins := range config.JenkinsServers {
+		if name == jenkins.Name {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		err = fmt.Errorf("Cannot found by name %s", name)
+	} else {
+		config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
+		config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
+		config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
+
+		err = saveConfig()
+	}
+	return
+}
+
 func loadDefaultConfig() {
 	userHome := userHomeDir()
 	if err := loadConfig(fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)); err != nil {
