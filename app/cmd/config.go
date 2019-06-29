@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/linuxsuren/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -41,14 +42,16 @@ var configCmd = &cobra.Command{
 		}
 
 		if configOptions.List {
-			fmt.Println("number\tname\turl")
+			table := util.CreateTable(os.Stdout)
+			table.AddRow("number", "name", "url")
 			for i, jenkins := range getConfig().JenkinsServers {
 				name := jenkins.Name
 				if name == current.Name {
 					name = fmt.Sprintf("*%s", name)
 				}
-				fmt.Printf("%d\t%s\t%s\n", i, name, jenkins.URL)
+				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL)
 			}
+			table.Render()
 		}
 
 		if configOptions.Generate {
