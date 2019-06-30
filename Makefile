@@ -9,12 +9,22 @@ darwin: ## Build for OSX
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 
-build: $(GO_DEPENDENCIES) ## Build jx binary for current OS
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/$(NAME) $(MAIN_SRC_FILE)
+linux: ## Build for linux
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
+	chmod +x bin/linux/$(NAME)
 
-release: clean darwin
+win: ## Build for windows
+	go get github.com/inconshreveable/mousetrap
+	go get github.com/mattn/go-isatty
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
+
+build-all: darwin linux win
+
+release: clean build-all
 	mkdir release
 	cd ./bin/darwin; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli
+	cd ./bin/linux; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli
+	cd ./bin/windows; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
