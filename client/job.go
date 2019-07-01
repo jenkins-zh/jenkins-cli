@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -125,6 +126,94 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	return
 }
 
+func (q *JobClient) UpdatePipeline(name, script string) (err error) {
+	jobItems := strings.Split(name, " ")
+	path := ""
+	for i, item := range jobItems {
+		if i == 0 {
+			path = fmt.Sprintf("job/%s", item)
+		} else {
+			path = fmt.Sprintf("%s/job/%s", path, item)
+		}
+	}
+
+	api := fmt.Sprintf("%s/%s/wfapisu/update", q.URL, path)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	fmt.Println(api)
+	formData := url.Values{"script": {script}}
+	payload := strings.NewReader(formData.Encode())
+	req, err = http.NewRequest("POST", api, payload)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	if err = q.CrumbHandle(req); err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	// req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
+	// req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			fmt.Println("updated")
+		} else {
+			fmt.Println("code", code)
+			log.Fatal(string(data))
+		}
+	} else {
+		fmt.Println("request is error")
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
+	jobItems := strings.Split(name, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	api := fmt.Sprintf("%s/%s/wfapisu/script", q.URL, path)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			pipeline = &Pipeline{}
+			err = json.Unmarshal(data, pipeline)
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
 func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
@@ -212,4 +301,9 @@ type Job struct {
 type JobBuild struct {
 	Number int
 	URL    string
+}
+
+type Pipeline struct {
+	Script  string
+	Sandbox bool
 }

@@ -21,7 +21,7 @@ func init() {
 	rootCmd.AddCommand(jobCmd)
 	jobCmd.PersistentFlags().StringVarP(&jobOption.Format, "output", "o", "json", "Format the output")
 	jobCmd.PersistentFlags().StringVarP(&jobOption.Name, "name", "n", "", "Name of the job")
-	jobCmd.PersistentFlags().BoolVarP(&jobOption.History, "history", "", false, "Print the build history of job")
+	jobCmd.Flags().BoolVarP(&jobOption.History, "history", "", false, "Print the build history of job")
 }
 
 var jobCmd = &cobra.Command{
