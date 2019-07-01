@@ -22,9 +22,16 @@ build-all: darwin linux win
 
 release: clean build-all
 	mkdir release
-	cd ./bin/darwin; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli
-	cd ./bin/linux; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli
-	cd ./bin/windows; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe
+	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli
+	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli
+	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
+
+dep: ## Clean the generated artifacts
+	go get github.com/AlecAivazis/survey
+	go get github.com/gosuri/uiprogress
+	go get github.com/spf13/cobra
+	go get github.com/spf13/viper
+	go get gopkg.in/yaml.v2
