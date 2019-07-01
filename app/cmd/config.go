@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -35,6 +36,13 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the config of jcli",
 	Long:  `Manage the config of jcli`,
+	Args: func(cmd *cobra.Command, args []string) (err error) {
+		if !configOptions.Show && !configOptions.Generate &&
+			!configOptions.List && configOptions.Current == "" {
+			err = errors.New("need arguments")
+		}
+		return
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		current := getCurrentJenkins()
 		if configOptions.Show {
