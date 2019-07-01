@@ -15,6 +15,7 @@ import (
 
 	"github.com/gosuri/uiprogress"
 	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/linuxsuren/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -136,6 +137,8 @@ var pluginCmd = &cobra.Command{
 			}
 
 			if plugins, err := jclient.GetPlugins(); err == nil {
+				table := util.CreateTable(os.Stdout)
+				table.AddRow("number", "name", "version")
 				for i, plugin := range plugins.Plugins {
 					if filter {
 						if hasUpdate && !plugin.HasUpdate {
@@ -146,8 +149,9 @@ var pluginCmd = &cobra.Command{
 							continue
 						}
 					}
-					fmt.Println("num:", i, "name:", plugin.ShortName, "version:", plugin.Version)
+					table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version)
 				}
+				table.Render()
 			} else {
 				log.Fatal(err)
 			}
