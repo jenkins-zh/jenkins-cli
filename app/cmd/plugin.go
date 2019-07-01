@@ -17,11 +17,12 @@ import (
 	"github.com/linuxsuren/jenkins-cli/client"
 	"github.com/linuxsuren/jenkins-cli/util"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
+	OutputOption
+
 	Upload      bool
 	CheckUpdate bool
 	Open        bool
@@ -35,14 +36,14 @@ type PluginOptions struct {
 
 func init() {
 	rootCmd.AddCommand(pluginCmd)
-	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
-	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.CheckUpdate, "check", "c", false, "Checkout update center server")
-	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
-	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
-	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
-	pluginCmd.PersistentFlags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
-	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: active, hasUpdate, downgradable, enable, name=foo")
-	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
+	pluginCmd.Flags().BoolVarP(&pluginOpt.Upload, "upload", "u", false, "Upload plugin to your Jenkins server")
+	pluginCmd.Flags().BoolVarP(&pluginOpt.CheckUpdate, "check", "c", false, "Checkout update center server")
+	pluginCmd.Flags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
+	pluginCmd.Flags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
+	pluginCmd.Flags().StringVarP(&pluginOpt.Format, "format", "", TableOutputFormat, "Format the output")
+	pluginCmd.Flags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
+	pluginCmd.Flags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
+	pluginCmd.Flags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: active, hasUpdate, downgradable, enable, name=foo")
 }
 
 var pluginOpt PluginOptions
@@ -150,9 +151,8 @@ var pluginCmd = &cobra.Command{
 			}
 
 			if plugins, err := jclient.GetPlugins(); err == nil {
-				table := util.CreateTable(os.Stdout)
-				table.AddRow("number", "name", "version", "update")
-				for i, plugin := range plugins.Plugins {
+				filteredPlugins := make([]client.Plugin, 0)
+				for _, plugin := range plugins.Plugins {
 					if filter {
 						if hasUpdate && !plugin.HasUpdate {
 							continue
@@ -173,10 +173,18 @@ var pluginCmd = &cobra.Command{
 						if pluginName != "" && !strings.Contains(plugin.ShortName, pluginName) {
 							continue
 						}
+
+						filteredPlugins = append(filteredPlugins, plugin)
 					}
-					table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version, fmt.Sprintf("%v", plugin.HasUpdate))
 				}
-				table.Render()
+
+				if data, err := pluginOpt.Output(filteredPlugins); err == nil {
+					if len(data) > 0 {
+						fmt.Println(string(data))
+					}
+				} else {
+					log.Fatal(err)
+				}
 			} else {
 				log.Fatal(err)
 			}
@@ -194,6 +202,21 @@ var pluginCmd = &cobra.Command{
 			}
 		}
 	},
+}
+
+func (o *PluginOptions) Output(obj interface{}) (data []byte, err error) {
+	if data, err = o.OutputOption.Output(obj); err != nil {
+		pluginList := obj.([]client.Plugin)
+		table := util.CreateTable(os.Stdout)
+		table.AddRow("number", "name", "version", "update")
+		for i, plugin := range pluginList {
+			table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version, fmt.Sprintf("%v", plugin.HasUpdate))
+		}
+		table.Render()
+		err = nil
+		data = []byte{}
+	}
+	return
 }
 
 func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
