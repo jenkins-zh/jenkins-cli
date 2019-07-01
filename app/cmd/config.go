@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,22 +25,16 @@ var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
-	configCmd.PersistentFlags().StringVarP(&configOptions.Current, "current", "c", "", "Set the current Jenkins")
-	configCmd.PersistentFlags().BoolVarP(&configOptions.Show, "show", "s", false, "Show the current Jenkins")
-	configCmd.PersistentFlags().BoolVarP(&configOptions.Generate, "generate", "g", false, "Generate a sample config file for you")
-	configCmd.PersistentFlags().BoolVarP(&configOptions.List, "list", "l", false, "Display all your Jenkins configs")
+	configCmd.Flags().StringVarP(&configOptions.Current, "current", "c", "", "Set the current Jenkins")
+	configCmd.Flags().BoolVarP(&configOptions.Show, "show", "s", false, "Show the current Jenkins")
+	configCmd.Flags().BoolVarP(&configOptions.Generate, "generate", "g", false, "Generate a sample config file for you")
+	configCmd.Flags().BoolVarP(&configOptions.List, "list", "l", false, "Display all your Jenkins configs")
 }
 
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the config of jcli",
 	Long:  `Manage the config of jcli`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return errors.New("requires at least one argument")
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		current := getCurrentJenkins()
 		if configOptions.Show {
