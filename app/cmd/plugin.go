@@ -41,7 +41,7 @@ func init() {
 	pluginCmd.PersistentFlags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
 	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
 	pluginCmd.PersistentFlags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
-	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: hasUpdate, downgradable")
+	pluginCmd.PersistentFlags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: active, hasUpdate, downgradable, enable, name=foo")
 	viper.BindPFlag("upload", pluginCmd.PersistentFlags().Lookup("upload"))
 }
 
@@ -123,6 +123,9 @@ var pluginCmd = &cobra.Command{
 				filter       bool
 				hasUpdate    bool
 				downgradable bool
+				enable       bool
+				active       bool
+				pluginName   string
 			)
 			if pluginOpt.Filter != nil {
 				filter = true
@@ -132,13 +135,23 @@ var pluginCmd = &cobra.Command{
 						hasUpdate = true
 					case "downgradable":
 						downgradable = true
+					case "enable":
+						enable = true
+					case "active":
+						active = true
+					case "name":
+						downgradable = true
+					}
+
+					if strings.HasPrefix(f, "name=") {
+						pluginName = strings.TrimPrefix(f, "name=")
 					}
 				}
 			}
 
 			if plugins, err := jclient.GetPlugins(); err == nil {
 				table := util.CreateTable(os.Stdout)
-				table.AddRow("number", "name", "version")
+				table.AddRow("number", "name", "version", "update")
 				for i, plugin := range plugins.Plugins {
 					if filter {
 						if hasUpdate && !plugin.HasUpdate {
@@ -148,8 +161,20 @@ var pluginCmd = &cobra.Command{
 						if downgradable && !plugin.Downgradable {
 							continue
 						}
+
+						if enable && !plugin.Enable {
+							continue
+						}
+
+						if active && !plugin.Active {
+							continue
+						}
+
+						if pluginName != "" && !strings.Contains(plugin.ShortName, pluginName) {
+							continue
+						}
 					}
-					table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version)
+					table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version, fmt.Sprintf("%v", plugin.HasUpdate))
 				}
 				table.Render()
 			} else {
