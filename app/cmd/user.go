@@ -32,15 +32,9 @@ var userCmd = &cobra.Command{
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		var tokenName string
-		if len(args) > 0 {
-			tokenName = args[0]
-		}
-
-		if status, err := jclient.Create(tokenName); err == nil {
-			var data []byte
-			if data, err = userOption.Output(status); err == nil {
-				fmt.Printf("%s\n", string(data))
+		if status, err := jclient.Get(); err == nil {
+			if data, err := userOption.Output(status); err == nil {
+				fmt.Println(string(data))
 			} else {
 				log.Fatal(err)
 			}
