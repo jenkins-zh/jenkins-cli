@@ -7,8 +7,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// OutputOption represent the format of output
 type OutputOption struct {
 	Format string
+}
+
+// BatchOption represent the options for a batch operation
+type BatchOption struct {
+	Batch bool
 }
 
 type FormatOutput interface {
