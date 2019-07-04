@@ -10,12 +10,19 @@ developer, administrator or just a regular user, it borns for you!
 
 # Get started
 
-For the mac user, you just need one command then you can own it.
+We support mac, linux and windows for now.
 
+## mac
+
+You can use `brew` to install jcli.
 ```
 brew tap linuxsuren/jcli
 brew install jcli
 ```
+
+## other OS
+
+You can find the right version from the [release page](https://github.com/LinuxSuRen/jenkins-cli/releases). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
 
 # Contribution
 
