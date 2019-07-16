@@ -13,10 +13,6 @@ type OutputOption struct {
 	Format string
 }
 
-type BatchOption struct {
-	Batch bool
-}
-
 type FormatOutput interface {
 	Output(obj interface{}, format string) (data []byte, err error)
 }
