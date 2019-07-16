@@ -50,13 +50,6 @@ var pluginCmd = &cobra.Command{
 	Use:   "plugin",
 	Short: "Manage the plugins of Jenkins",
 	Long:  `Manage the plugins of Jenkins`,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Inside subCmd PreRun with args: %v\n", args)
-
-		if pluginOpt.Upload {
-			fmt.Println("sdfsdf")
-		}
-	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if pluginOpt.Upload {
 			crumb, config := getCrumb()

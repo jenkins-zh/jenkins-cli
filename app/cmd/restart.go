@@ -48,7 +48,6 @@ var restartCmd = &cobra.Command{
 			if response.StatusCode != 200 {
 				if data, err := ioutil.ReadAll(response.Body); err == nil {
 					fmt.Println(string(data))
-					fmt.Println(response.StatusCode)
 				} else {
 					log.Fatal(err)
 				}
