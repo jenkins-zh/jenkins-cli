@@ -3,9 +3,11 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/linuxsuren/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +19,7 @@ var pluginSearchOption PluginSearchOption
 
 func init() {
 	pluginCmd.AddCommand(pluginSearchCmd)
-	pluginSearchCmd.PersistentFlags().StringVarP(&queueOption.Format, "output", "o", "json", "Format the output")
+	pluginSearchCmd.PersistentFlags().StringVarP(&pluginSearchOption.Format, "output", "o", TableOutputFormat, "Format the output")
 }
 
 var pluginSearchCmd = &cobra.Command{
@@ -43,9 +45,10 @@ var pluginSearchCmd = &cobra.Command{
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
 
-			var data []byte
-			if data, err = Format(result, queueOption.Format); err == nil {
-				fmt.Printf("%s\n", string(data))
+			if data, err := pluginSearchOption.Output(result); err == nil {
+				if len(data) > 0 {
+					fmt.Println(string(data))
+				}
 			} else {
 				log.Fatal(err)
 			}
@@ -64,4 +67,20 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 		}
 	}
 	return result
+}
+
+func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
+	if data, err = o.OutputOption.Output(obj); err != nil {
+		pluginList := obj.([]client.AvailablePlugin)
+		table := util.CreateTable(os.Stdout)
+		table.AddRow("number", "name", "installed", "title")
+		for i, plugin := range pluginList {
+			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+				fmt.Sprintf("%v", plugin.Installed), plugin.Title)
+		}
+		table.Render()
+		err = nil
+		data = []byte{}
+	}
+	return
 }
