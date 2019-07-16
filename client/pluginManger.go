@@ -13,27 +13,48 @@ type PluginManager struct {
 	JenkinsCore
 }
 
-// PluginList represent a list of plugins
-type PluginList struct {
-	Plugins []Plugin
+type Plugin struct {
+	Active       bool
+	Enabled      bool
+	Bundled      bool
+	Downgradable bool
+	Deleted      bool
 }
 
-// Plugin represent the plugin from Jenkins
-type Plugin struct {
-	Active             bool
+// PluginList represent a list of plugins
+type InstalledPluginList struct {
+	Plugins []InstalledPlugin
+}
+
+type AvailablePluginList struct {
+	Data   []AvailablePlugin
+	Status string
+}
+
+type AvailablePlugin struct {
+	Plugin
+
+	// for the available list
+	Name      string
+	Installed bool
+	Website   string
+	Title     string
+}
+
+// InstalledPlugin represent the installed plugin from Jenkins
+type InstalledPlugin struct {
+	Plugin
+
+	Enable             bool
 	ShortName          string
 	LongName           string
 	Version            string
 	URL                string
 	HasUpdate          bool
-	Enable             bool
-	Downgradable       bool
 	Pinned             bool
 	RequiredCoreVesion string
 	MinimumJavaVersion string
 	SupportDynamicLoad string
-	Deleted            bool
-	Bundled            bool
 	BackVersion        string
 }
 
@@ -59,7 +80,40 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 	}
 }
 
-func (p *PluginManager) GetPlugins() (pluginList *PluginList, err error) {
+func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
+	api := fmt.Sprintf("%s/pluginManager/plugins", p.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		p.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := p.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			if err == nil {
+				pluginList = &AvailablePluginList{}
+				err = json.Unmarshal(data, pluginList)
+			}
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
 	api := fmt.Sprintf("%s/pluginManager/api/json?pretty=true&depth=1", p.URL)
 	var (
 		req      *http.Request
@@ -80,7 +134,7 @@ func (p *PluginManager) GetPlugins() (pluginList *PluginList, err error) {
 		data, err = ioutil.ReadAll(response.Body)
 		if code == 200 {
 			if err == nil {
-				pluginList = &PluginList{}
+				pluginList = &InstalledPluginList{}
 				err = json.Unmarshal(data, pluginList)
 			}
 		} else {

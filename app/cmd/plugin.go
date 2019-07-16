@@ -151,7 +151,7 @@ var pluginCmd = &cobra.Command{
 			}
 
 			if plugins, err := jclient.GetPlugins(); err == nil {
-				filteredPlugins := make([]client.Plugin, 0)
+				filteredPlugins := make([]client.InstalledPlugin, 0)
 				for _, plugin := range plugins.Plugins {
 					if filter {
 						if hasUpdate && !plugin.HasUpdate {
@@ -206,7 +206,7 @@ var pluginCmd = &cobra.Command{
 
 func (o *PluginOptions) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
-		pluginList := obj.([]client.Plugin)
+		pluginList := obj.([]client.InstalledPlugin)
 		table := util.CreateTable(os.Stdout)
 		table.AddRow("number", "name", "version", "update")
 		for i, plugin := range pluginList {
