@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=$(hub tag --list | tail -n 1)
+VERSION=$(hub tag --list | sort -V | tail -n 1)
 VERSION_BITS=(${VERSION//./ })
 VNUM1=${VERSION_BITS[0]}
 VNUM2=${VERSION_BITS[1]}
