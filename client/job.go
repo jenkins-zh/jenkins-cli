@@ -89,6 +89,48 @@ func (q *JobClient) Build(jobName string) (err error) {
 	return
 }
 
+func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
+	jobItems := strings.Split(jobName, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	var api string
+	if id == -1 {
+		api = fmt.Sprintf("%s/%s/lastBuild/api/json", q.URL, path)
+	} else {
+		api = fmt.Sprintf("%s/%s/%d/api/json", q.URL, path, id)
+	}
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			job = &JobBuild{}
+			err = json.Unmarshal(data, job)
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	jobItems := strings.Split(name, " ")
 	path := ""
@@ -299,9 +341,26 @@ type Job struct {
 	Buildable       bool
 }
 
-type JobBuild struct {
+type SimpleJobBuild struct {
 	Number int
 	URL    string
+}
+
+type JobBuild struct {
+	SimpleJobBuild
+	Building          bool
+	Description       string
+	DisplayName       string
+	Duration          int64
+	EstimatedDuration int64
+	FullDisplayName   string
+	ID                string
+	KeepLog           bool
+	QueueID           int
+	Result            string
+	Timestamp         int64
+	PreviousBuild     SimpleJobBuild
+	NextBuild         SimpleJobBuild
 }
 
 type Pipeline struct {
