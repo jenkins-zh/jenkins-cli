@@ -289,6 +289,7 @@ type SearchResultItem struct {
 }
 
 type Job struct {
+	Type            string `json:"_class"`
 	Builds          []JobBuild
 	Color           string
 	ConcurrentBuild bool

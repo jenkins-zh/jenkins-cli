@@ -64,3 +64,8 @@ func (b *BatchOption) Confirm(message string) bool {
 
 	return true
 }
+
+// WatchOption for the resources which can be watched
+type WatchOption struct {
+	Watch bool
+}
