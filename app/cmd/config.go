@@ -65,6 +65,7 @@ var configCmd = &cobra.Command{
 		if configOptions.Generate {
 			if data, err := generateSampleConfig(); err == nil {
 				fmt.Print(string(data))
+				fmt.Printf("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 			} else {
 				log.Fatal(err)
 			}
@@ -203,11 +204,14 @@ func removeJenkins(name string) (err error) {
 	return
 }
 
-func loadDefaultConfig() {
+func loadDefaultConfig() (err error) {
 	userHome := userHomeDir()
-	if err := loadConfig(fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)); err != nil {
-		log.Fatalf("error: %v", err)
+	configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	if _, err = os.Stat(configPath); err == nil {
+		err = loadConfig(configPath)
 	}
+
+	return
 }
 
 func loadConfig(path string) (err error) {

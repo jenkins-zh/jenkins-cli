@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/linuxsuren/jenkins-cli/app"
@@ -51,5 +52,12 @@ func init() {
 }
 
 func initConfig() {
-	loadDefaultConfig()
+	if err := loadDefaultConfig(); err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("No config file found.")
+			return
+		}
+
+		log.Fatalf("Config file is invalid: %v", err)
+	}
 }
