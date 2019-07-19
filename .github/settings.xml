@@ -1,0 +1,52 @@
+repository:
+  name: jenkins-cli
+  description: Jenkins CLI allows you manage your Jenkins as an easy way
+  homepage: https://jenkins-zh.cn
+  private: false
+  has_issues: true
+  has_wiki: false
+  has_downloads: false
+  default_branch: master
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+labels:
+  - name: newbie
+    color: abe7f4
+    description: 新手上路
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: feature
+    color: ffc6a3
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  - name: help wanted
+    color: 008672
+    description: Extra attention is needed
+  - name: bugfix
+    color: 0412d6
+  - name: regression
+    color: c5def5
+  - name: documentation
+    color: 5ce05e
+  - name: test
+    color: c2c2fc
+branches:
+  - name: master
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+        dismissal_restrictions:
+          users: []
+          teams: []
+      required_status_checks:
+        strict: true
+        contexts: []
+      enforce_admins: false
+      restrictions:
+        users: []
+        teams: []
