@@ -31,5 +31,6 @@ exclude-labels:
   - invalid
 
 template: |
-  <!-- Optional: add a release summary here -->
+  ## What’s Changed
+  
   $CHANGES
