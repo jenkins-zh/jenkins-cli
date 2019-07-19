@@ -16,7 +16,7 @@ type UpdateCenterManager struct {
 // UpdateCenter represents the update center of Jenkins
 type UpdateCenter struct {
 	Availables                   []Plugin
-	Jobs                         []UpdateCenterJob
+	Jobs                         []InstallationJob
 	RestartRequiredForCompletion bool
 	Sites                        []CenterSite
 }
@@ -28,12 +28,42 @@ type UpdateCenterJob struct {
 	Type         string
 }
 
+type InstallationJob struct {
+	UpdateCenterJob
+
+	Name   string
+	Status InstallationJobStatus
+}
+
+type InstallationJobStatus struct {
+	Success bool
+	Type    string
+}
+
 // CenterSite represents the site of update center
 type CenterSite struct {
 	ConnectionCheckURL string `json:"connectionCheckUrl"`
 	HasUpdates         bool
 	ID                 string `json:"id"`
 	URL                string `json:"url"`
+}
+
+type InstallStates struct {
+	Data   InstallStatesData
+	Status string
+}
+
+type InstallStatesData struct {
+	Jobs  InstallStatesJob
+	State string
+}
+
+type InstallStatesJob struct {
+	InstallStatus   string
+	Name            string
+	RequiresRestart string
+	Title           string
+	Version         string
 }
 
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
