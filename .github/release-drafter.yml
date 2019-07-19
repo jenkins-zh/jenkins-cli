@@ -1,8 +1,7 @@
 # Configuration for Release Drafter: https://github.com/toolmantim/release-drafter
 name-template: v$NEXT_MINOR_VERSION
 tag-template: $NEXT_MINOR_VERSION
-# Uses a more common 2-digit versioning. Can be replaced by semver: $MAJOR.$MINOR.$PATCH
-version-template: $MAJOR.$MINOR
+version-template: $MAJOR.$MINOR.$PATCH
 
 # Emoji reference: https://gitmoji.carloscuesta.me/
 categories:
@@ -32,5 +31,5 @@ exclude-labels:
 
 template: |
   ## What’s Changed
-  
+
   $CHANGES
