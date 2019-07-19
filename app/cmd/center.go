@@ -48,6 +48,8 @@ func printUpdateCenter(jenkins *JenkinsServer) {
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
 
 	var centerStatus string
 	if status, err := jclient.Status(); err == nil {
@@ -77,6 +79,8 @@ func printJenkinsStatus(jenkins *JenkinsServer) {
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
 
 	if status, err := jclient.Get(); err == nil {
 		fmt.Println("Jenkins Version:", status.Version)

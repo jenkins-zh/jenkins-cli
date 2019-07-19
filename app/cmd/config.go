@@ -65,7 +65,7 @@ var configCmd = &cobra.Command{
 		if configOptions.Generate {
 			if data, err := generateSampleConfig(); err == nil {
 				fmt.Print(string(data))
-				fmt.Printf("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
+				fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 			} else {
 				log.Fatal(err)
 			}
