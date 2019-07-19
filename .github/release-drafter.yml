@@ -1,8 +1,35 @@
+# Configuration for Release Drafter: https://github.com/toolmantim/release-drafter
+name-template: v$NEXT_MINOR_VERSION
+tag-template: $NEXT_MINOR_VERSION
+# Uses a more common 2-digit versioning. Can be replaced by semver: $MAJOR.$MINOR.$PATCH
+version-template: $MAJOR.$MINOR
+
+# Emoji reference: https://gitmoji.carloscuesta.me/
 categories:
   - title: '🚀 Features'
-    label: 'feature'
+    label:
+      - 'feature'
+      - 'enhancement'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
       - 'bug'
+      - 'regression'
+  - title: 📝 Documentation updates
+    label: documentation
+  - title: 👻 Maintenance
+    label: chore
+  - title: 🚦 Tests
+    labels: 
+      - test
+      - tests
+exclude-labels:
+  - reverted
+  - no-changelog
+  - skip-changelog
+  - invalid
+
+template: |
+  <!-- Optional: add a release summary here -->
+  $CHANGES
