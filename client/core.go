@@ -51,7 +51,8 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) {
 }
 
 func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
-	if c, err := j.GetCrumb(); err == nil {
+	if c, err := j.GetCrumb(); err == nil && c != nil {
+		// cannot get the crumb could be a noraml situation
 		j.CrumbRequestField = c.CrumbRequestField
 		j.Crumb = c.Crumb
 		request.Header.Add(j.CrumbRequestField, j.Crumb)
@@ -80,7 +81,10 @@ func (j *JenkinsCore) GetCrumb() (*JenkinsCrumb, error) {
 		if data, err := ioutil.ReadAll(response.Body); err == nil {
 			if response.StatusCode == 200 {
 				json.Unmarshal(data, &crumbIssuer)
+			} else if response.StatusCode == 404 {
+				return nil, err
 			} else {
+				log.Printf("Unexpected status code: %d.", response.StatusCode)
 				return nil, err
 			}
 		} else {
