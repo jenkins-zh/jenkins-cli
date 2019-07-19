@@ -46,7 +46,6 @@ var jobBuildCmd = &cobra.Command{
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
 		if job, err := jclient.GetJob(jobOption.Name); err == nil {
-			fmt.Println(job.Property)
 			if len(job.Property) != 0 {
 				for _, pro := range job.Property {
 					if len(pro.ParameterDefinitions) == 0 {
