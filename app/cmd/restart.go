@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"crypto/tls"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
 
 	"github.com/AlecAivazis/survey"
+	"github.com/linuxsuren/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +25,11 @@ var restartCmd = &cobra.Command{
 	Short: "Restart your Jenkins",
 	Long:  `Restart your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		crumb, config := getCrumb()
-
+		jenkins := getCurrentJenkins()
 		if !restartOption.Batch {
 			confirm := false
 			prompt := &survey.Confirm{
-				Message: fmt.Sprintf("Are you sure to restart Jenkins %s?", config.URL),
+				Message: fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL),
 			}
 			survey.AskOne(prompt, &confirm)
 			if !confirm {
@@ -41,30 +37,13 @@ var restartCmd = &cobra.Command{
 			}
 		}
 
-		api := fmt.Sprintf("%s/safeRestart", config.URL)
+		jclient := &client.CoreClient{}
+		jclient.URL = jenkins.URL
+		jclient.UserName = jenkins.UserName
+		jclient.Token = jenkins.Token
+		jclient.Proxy = jenkins.Proxy
+		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		req, err := http.NewRequest("POST", api, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		req.Header.Add("Accept", "*/*")
-		req.SetBasicAuth(config.UserName, config.Token)
-		req.Header.Add(crumb.CrumbRequestField, crumb.Crumb)
-
-		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-		client := &http.Client{Transport: tr}
-		if response, err := client.Do(req); err == nil {
-			if response.StatusCode != 200 {
-				if data, err := ioutil.ReadAll(response.Body); err == nil {
-					fmt.Println(string(data))
-				} else {
-					log.Fatal(err)
-				}
-			}
-		} else {
-			log.Fatal(err)
-		}
+		jclient.Restart()
 	},
 }

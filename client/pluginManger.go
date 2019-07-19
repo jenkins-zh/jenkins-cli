@@ -1,12 +1,19 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/gosuri/uiprogress"
 )
 
 type PluginManager struct {
@@ -159,12 +166,10 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 
 	req, err = http.NewRequest("POST", api, nil)
 	if err == nil {
-		p.AuthHandle(req)
+		if err = p.AuthHandle(req); err != nil {
+			log.Fatal(err)
+		}
 	} else {
-		return
-	}
-
-	if err = p.CrumbHandle(req); err != nil {
 		return
 	}
 
@@ -199,10 +204,6 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		return
 	}
 
-	if err = p.CrumbHandle(req); err != nil {
-		return
-	}
-
 	client := p.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -219,9 +220,111 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 	return
 }
 
+func (p *PluginManager) Upload() {
+	api := fmt.Sprintf("%s/pluginManager/uploadPlugin", p.URL)
+
+	path, _ := os.Getwd()
+	dirName := filepath.Base(path)
+	dirName = strings.Replace(dirName, "-plugin", "", -1)
+	path += fmt.Sprintf("/target/%s.hpi", dirName)
+	extraParams := map[string]string{}
+	request, err := newfileUploadRequest(api, extraParams, "@name", path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err == nil {
+		p.AuthHandle(request)
+	} else {
+		return
+	}
+
+	client := p.GetClient()
+	var response *http.Response
+	response, err = client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	} else if response.StatusCode != 200 {
+		var data []byte
+		if data, err = ioutil.ReadAll(response.Body); err == nil {
+			fmt.Println(string(data))
+		} else {
+			log.Fatal(err)
+		}
+	}
+}
+
 func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Response) {
 	if handle == nil {
 		handle = func(*http.Response) {}
 	}
 	return handle
+}
+
+type ProgressIndicator struct {
+	bytes.Buffer
+	Total float64
+	count float64
+	bar   *uiprogress.Bar
+}
+
+func (i *ProgressIndicator) Init() {
+	uiprogress.Start()             // start rendering
+	i.bar = uiprogress.AddBar(100) // Add a new bar
+
+	// optionally, append and prepend completion and elapsed time
+	i.bar.AppendCompleted()
+	// i.bar.PrependElapsed()
+}
+
+func (i *ProgressIndicator) Write(p []byte) (n int, err error) {
+	n, err = i.Buffer.Write(p)
+	return
+}
+
+func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
+	n, err = i.Buffer.Read(p)
+	i.count += float64(n)
+	i.bar.Set((int)(i.count * 100 / i.Total))
+	return
+}
+
+func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var total float64
+	if stat, err := file.Stat(); err != nil {
+		panic(err)
+	} else {
+		total = float64(stat.Size())
+	}
+	defer file.Close()
+
+	// body := &bytes.Buffer{}
+	body := &ProgressIndicator{
+		Total: total,
+	}
+	body.Init()
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = io.Copy(part, file)
+
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", uri, body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	return req, err
 }
