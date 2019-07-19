@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
+	"github.com/AlecAivazis/survey"
 	"github.com/linuxsuren/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -40,6 +43,43 @@ var jobBuildCmd = &cobra.Command{
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		jclient.Build(jobOption.Name)
+		paramDefs := []client.ParameterDefinition{}
+		hasParam := false
+		if job, err := jclient.GetJob(jobOption.Name); err == nil {
+			fmt.Println(job.Property)
+			if len(job.Property) != 0 {
+				for _, pro := range job.Property {
+					if len(pro.ParameterDefinitions) == 0 {
+						continue
+					}
+
+					if data, err := json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
+						content := string(data)
+						prompt := &survey.Editor{
+							Message:       "Edit your pipeline script",
+							FileName:      "*.sh",
+							Default:       content,
+							AppendDefault: true,
+						}
+
+						if err = survey.AskOne(prompt, &content); err != nil {
+							log.Fatal(err)
+						}
+
+						if err = json.Unmarshal([]byte(content), &paramDefs); err != nil {
+							log.Fatal(err)
+						}
+					}
+					hasParam = true
+					break
+				}
+			}
+		}
+
+		if hasParam {
+			jclient.BuildWithParams(jobOption.Name, paramDefs)
+		} else {
+			jclient.Build(jobOption.Name)
+		}
 	},
 }

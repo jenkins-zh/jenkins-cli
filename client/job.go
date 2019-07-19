@@ -78,7 +78,7 @@ func (q *JobClient) Build(jobName string) (err error) {
 		code := response.StatusCode
 		var data []byte
 		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
+		if code == 201 { // Jenkins will send redirect by this api
 			fmt.Println("build successfully")
 		} else {
 			log.Fatal(string(data))
@@ -122,6 +122,56 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 		if code == 200 {
 			job = &JobBuild{}
 			err = json.Unmarshal(data, job)
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
+	jobItems := strings.Split(jobName, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	api := fmt.Sprintf("%s/%s/build", q.URL, path)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	var paramJSON []byte
+
+	if len(parameters) == 1 {
+		paramJSON, err = json.Marshal(parameters[0])
+	} else {
+		paramJSON, err = json.Marshal(parameters)
+	}
+
+	formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
+	payload := strings.NewReader(formData.Encode())
+	req, err = http.NewRequest("POST", api, payload)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	if err = q.CrumbHandle(req); err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 201 { // Jenkins will send redirect by this api
+			fmt.Println("build successfully")
 		} else {
 			log.Fatal(string(data))
 		}
@@ -339,6 +389,25 @@ type Job struct {
 	NextBuildNumber int
 	URL             string
 	Buildable       bool
+
+	Property []ParametersDefinitionProperty
+}
+
+type ParametersDefinitionProperty struct {
+	ParameterDefinitions []ParameterDefinition
+}
+
+type ParameterDefinition struct {
+	Description           string
+	Name                  string `json:"name"`
+	Type                  string
+	Value                 string `json:"value"`
+	DefaultParameterValue DefaultParameterValue
+}
+
+type DefaultParameterValue struct {
+	Description string
+	Value       string
 }
 
 type SimpleJobBuild struct {
