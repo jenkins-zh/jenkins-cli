@@ -28,13 +28,13 @@ brew install jcli
 
 It's very simple to install `jcli` into your Linux OS. Just need to execute a command line at below:
 ```
-ostype=linux-amd64&&curl -s https://api.github.com/repos/LinuxSuRen/jenkins-cli/releases/latest | grep -e 'browser_download_url.*jcli-'${ostype}'.tar.gz'|awk '{print $2}'|xargs wget&&tar xzvf jcli-${ostype}.tar.gz
-sudo mv jcli /usr/local/bin/&&rm jcli-${ostype}.tar.gz
+curl -L https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-linux-amd64.tar.gz|tar xzv
+sudo mv jcli /usr/local/bin/
 ```
 
 ## Windows
 
-You can find the right version from the [release page](https://github.com/LinuxSuRen/jenkins-cli/releases). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
+You can find the latest version by [click here](https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
 
 # Contribution
 
