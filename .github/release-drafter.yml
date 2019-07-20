@@ -5,7 +5,7 @@ version-template: $MAJOR.$MINOR.$PATCH
 # Emoji reference: https://gitmoji.carloscuesta.me/
 categories:
   - title: '🚀 Features'
-    label:
+    labels:
       - 'feature'
       - 'enhancement'
   - title: '🐛 Bug Fixes'
