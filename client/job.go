@@ -218,6 +218,41 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	return
 }
 
+func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err error) {
+	api := fmt.Sprintf("%s/view/all/itemCategories?depth=3", q.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("GET", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			type innerJobCategories struct {
+				Categories []JobCategory
+			}
+			result := &innerJobCategories{}
+			err = json.Unmarshal(data, result)
+			jobCategories = result.Categories
+		} else {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
 func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	jobItems := strings.Split(name, " ")
 	path := ""
@@ -435,4 +470,19 @@ type JobBuild struct {
 type Pipeline struct {
 	Script  string
 	Sandbox bool
+}
+
+type JobCategory struct {
+	Description string
+	ID          string
+	Items       []JobCategoryItem
+	MinToShow   int
+	Name        string
+	Order       int
+}
+
+type JobCategoryItem struct {
+	Description string
+	DisplayName string
+	Order       int
 }
