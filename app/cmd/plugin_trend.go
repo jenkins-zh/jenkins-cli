@@ -6,20 +6,22 @@ import (
 )
 
 func init() {
-	pluginCmd.AddCommand(pluginDownloadCmd)
+	pluginCmd.AddCommand(pluginTrendCmd)
 }
 
-var pluginDownloadCmd = &cobra.Command{
-	Use:   "download <keyword>",
-	Short: "Download the plugins",
-	Long:  `Download the plugins`,
+var pluginTrendCmd = &cobra.Command{
+	Use:   "trend <pluginName>",
+	Short: "Show the trend of the plugin",
+	Long:  `Show the trend of the plugin`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			cmd.Help()
 			return
 		}
 
+		pluginName := args[0]
+
 		jclient := &client.PluginAPI{}
-		jclient.DownloadPlugins(args)
+		jclient.ShowTrend(pluginName)
 	},
 }
