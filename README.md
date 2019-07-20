@@ -6,7 +6,11 @@ developer, administrator or just a regular user, it borns for you!
 # Features
 
 * Multiple Jenkins support
-* Plugins manage
+* Plugins management (list, search, install, upload)
+* Job management (search, build, log)
+* Open your Jenkins with a browse
+* Restart your Jenkins
+* Connection with proxy support
 
 # Get started
 
@@ -20,9 +24,17 @@ brew tap linuxsuren/jcli
 brew install jcli
 ```
 
-## other OS
+## Linux
 
-You can find the right version from the [release page](https://github.com/LinuxSuRen/jenkins-cli/releases). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
+It's very simple to install `jcli` into your Linux OS. Just need to execute a command line at below:
+```
+curl -L https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-linux-amd64.tar.gz|tar xzv
+sudo mv jcli /usr/local/bin/
+```
+
+## Windows
+
+You can find the latest version by [click here](https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
 
 # Contribution
 
