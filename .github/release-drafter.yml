@@ -1,8 +1,7 @@
 # Configuration for Release Drafter: https://github.com/toolmantim/release-drafter
-name-template: v$NEXT_MINOR_VERSION
-tag-template: $NEXT_MINOR_VERSION
+name-template: 'v$NEXT_PATCH_VERSION 🌈'
+tag-template: 'v$NEXT_PATCH_VERSION'
 version-template: $MAJOR.$MINOR.$PATCH
-
 # Emoji reference: https://gitmoji.carloscuesta.me/
 categories:
   - title: '🚀 Features'
@@ -28,7 +27,7 @@ exclude-labels:
   - no-changelog
   - skip-changelog
   - invalid
-
+change-template: '* $TITLE (#$NUMBER) @$AUTHOR'
 template: |
   ## What’s Changed
 

@@ -33,6 +33,8 @@ labels:
     color: 5ce05e
   - name: test
     color: c2c2fc
+  - name: chore
+    color: c2c2fc
 branches:
   - name: master
     protection:
