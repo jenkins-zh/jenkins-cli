@@ -270,7 +270,6 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 		response *http.Response
 	)
 
-	fmt.Println(api)
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
 	req, err = http.NewRequest("POST", api, payload)
@@ -401,6 +400,91 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	return
 }
 
+func (q *JobClient) Create(jobName string, jobType string) (err error) {
+	api := fmt.Sprintf("%s/view/all/createItem", q.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	type playLoad struct {
+		Name string `json:"name"`
+		Mode string `json:"mode"`
+		From string
+	}
+
+	playLoadObj := &playLoad{
+		Name: jobName,
+		Mode: jobType,
+		From: "",
+	}
+
+	playLoadData, _ := json.Marshal(playLoadObj)
+
+	formData := url.Values{
+		"json": {string(playLoadData)},
+		"name": {jobName},
+		"mode": {jobType},
+	}
+	payload := strings.NewReader(formData.Encode())
+
+	req, err = http.NewRequest("POST", api, payload)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 302 || code == 200 { // Jenkins will send redirect by this api
+			fmt.Println("create successfully")
+		} else {
+			fmt.Printf("status code: %d\n", code)
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *JobClient) Delete(jobName string) (err error) {
+	api := fmt.Sprintf("%s/job/%s/doDelete", q.URL, jobName)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 302 || code == 200 { // Jenkins will send redirect by this api
+			fmt.Println("delete successfully")
+		} else {
+			fmt.Printf("status code: %d\n", code)
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
 type JobLog struct {
 	HasMore   bool
 	NextStart int64
@@ -485,4 +569,5 @@ type JobCategoryItem struct {
 	Description string
 	DisplayName string
 	Order       int
+	Class       string
 }

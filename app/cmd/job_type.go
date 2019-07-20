@@ -18,7 +18,7 @@ var jobTypeOption JobTypeOption
 
 func init() {
 	jobCmd.AddCommand(jobTypeCmd)
-	jobTypeCmd.Flags().StringVarP(&jobTypeOption.Format, "output", "o", "json", "Format the output")
+	jobTypeCmd.Flags().StringVarP(&jobTypeOption.Format, "output", "o", "table", "Format the output")
 }
 
 var jobTypeCmd = &cobra.Command{
