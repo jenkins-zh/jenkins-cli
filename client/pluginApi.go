@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/guptarohit/asciigraph"
 )
 
 type PluginAPI struct {
@@ -58,26 +56,14 @@ type PluginInstallationInfo struct {
 
 func (a *PluginAPI) ShowTrend(name string) {
 	if plugin, err := a.getPlugin(name); err == nil {
-		data := []float64{}
 		installations := plugin.Stats.Installations
 		offset := 0
 		if len(installations) > 5 {
 			offset = len(installations) - 5
 		}
 		for _, installation := range installations[offset:] {
-			data = append(data, float64(installation.Total))
+			fmt.Println(installation.Total)
 		}
-
-		min, max := 0.0, 0.0
-		for _, item := range data {
-			if item < min {
-				min = item
-			} else if item > max {
-				max = item
-			}
-		}
-
-		fmt.Println(asciigraph.Plot(data))
 	} else {
 		log.Fatal(err)
 	}
