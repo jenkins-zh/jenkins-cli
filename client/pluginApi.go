@@ -56,13 +56,36 @@ type PluginInstallationInfo struct {
 
 func (a *PluginAPI) ShowTrend(name string) {
 	if plugin, err := a.getPlugin(name); err == nil {
+		data := []float64{}
 		installations := plugin.Stats.Installations
-		offset := 0
-		if len(installations) > 5 {
-			offset = len(installations) - 5
+		offset, count := 0, 10
+		if len(installations) > count {
+			offset = len(installations) - count
 		}
 		for _, installation := range installations[offset:] {
-			fmt.Println(installation.Total)
+			data = append(data, float64(installation.Total))
+		}
+
+		min, max := 0.0, 0.0
+		for _, item := range data {
+			if item < min {
+				min = item
+			} else if item > max {
+				max = item
+			}
+		}
+
+		unit := (max - min) / 100
+		for _, num := range data {
+			total := (int)(num / unit)
+			if total == 0 {
+				total = 1
+			}
+			arr := make([]int, total)
+			for _ = range arr {
+				fmt.Print("*")
+			}
+			fmt.Println("", num)
 		}
 	} else {
 		log.Fatal(err)
