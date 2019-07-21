@@ -38,11 +38,9 @@ var jobEditCmd = &cobra.Command{
 			AppendDefault: true,
 		}
 
-		fmt.Println(content)
 		if err = survey.AskOne(prompt, &content); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(content)
 
 		jenkins := getCurrentJenkins()
 		jclient := &client.JobClient{}

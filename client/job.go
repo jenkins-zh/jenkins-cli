@@ -264,7 +264,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 		}
 	}
 
-	api := fmt.Sprintf("%s/%s/wfapisu/update", q.URL, path)
+	api := fmt.Sprintf("%s/%s/restFul/update", q.URL, path)
 	var (
 		req      *http.Request
 		response *http.Response
@@ -310,7 +310,7 @@ func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 		path = fmt.Sprintf("%s/job/%s", path, item)
 	}
 
-	api := fmt.Sprintf("%s/%s/wfapisu/script", q.URL, path)
+	api := fmt.Sprintf("%s/%s/restFul", q.URL, path)
 	var (
 		req      *http.Request
 		response *http.Response
