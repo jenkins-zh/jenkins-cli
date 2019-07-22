@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
+	"github.com/linuxsuren/jenkins-cli/util"
 )
 
 type UserClient struct {
@@ -98,7 +99,86 @@ func (q *UserClient) EditDesc(description string) (err error) {
 	return
 }
 
-func (q *UserClient) Create(newTokenName string) (status *Token, err error) {
+func (q *UserClient) Delete(username string) (err error) {
+	api := fmt.Sprintf("%s/securityRealm/user/%s/doDelete", q.URL, username)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code != 200 && code != 302 {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
+	api := fmt.Sprintf("%s/securityRealm/createAccountByAdmin", q.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	passwd := util.GeneratePassword(8)
+
+	user = &UserForCreate{
+		User:      User{FullName: username},
+		Username:  username,
+		Password1: passwd,
+		Password2: passwd,
+		Email:     fmt.Sprintf("%s@%s.com", username, username),
+	}
+
+	userData, _ := json.Marshal(user)
+	formData := url.Values{
+		"json":      {string(userData)},
+		"username":  {username},
+		"password1": {passwd},
+		"password2": {passwd},
+		"fullname":  {username},
+		"email":     {user.Email},
+	}
+	payload := strings.NewReader(formData.Encode())
+
+	req, err = http.NewRequest("POST", api, payload)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code != 200 && code != 302 {
+			log.Fatal(string(data))
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error) {
 	if newTokenName == "" {
 		newTokenName = fmt.Sprintf("jcli-%s", randomdata.SillyName())
 	}
@@ -145,8 +225,16 @@ func (q *UserClient) Create(newTokenName string) (status *Token, err error) {
 }
 
 type User struct {
-	AbsoluteUrl string
+	AbsoluteURL string `json:"absoluteUrl"`
 	Description string
-	FullName    string
+	FullName    string `json:"fullname"`
 	ID          string
+}
+
+type UserForCreate struct {
+	User      `json:inline`
+	Username  string `json:"username"`
+	Password1 string `json:"password1"`
+	Password2 string `json:"password2"`
+	Email     string `json:"email"`
 }
