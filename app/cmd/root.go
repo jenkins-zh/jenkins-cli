@@ -30,9 +30,8 @@ var rootCmd = &cobra.Command{
 		}
 
 		if rootOptions.Version {
-			fmt.Printf("Version: v%.2f.%d%s", app.CurrentVersion.Number,
-				app.CurrentVersion.PatchLevel,
-				app.CurrentVersion.Suffix)
+			fmt.Printf("Version: %s\n", app.GetVersion())
+			fmt.Printf("Commit: %s\n", app.GetCommit())
 		}
 	},
 }

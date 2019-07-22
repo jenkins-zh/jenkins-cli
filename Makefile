@@ -2,7 +2,9 @@ NAME := jcli
 CGO_ENABLED = 0
 GO := go
 BUILD_TARGET = build
-BUILDFLAGS = 
+COMMIT := $(shell git rev-parse --short HEAD)
+VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
+BUILDFLAGS = -ldflags "-X github.com/linuxsuren/jenkins-cli/app.version=$(VERSION) -X github.com/linuxsuren/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
 
 darwin: ## Build for OSX
