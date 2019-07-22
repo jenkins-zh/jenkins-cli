@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/linuxsuren/jenkins-cli/client"
@@ -8,12 +9,15 @@ import (
 )
 
 type JobDeleteOption struct {
+	BatchOption
 }
 
 var jobDeleteOption JobDeleteOption
 
 func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
+	jobDeleteOption.SetFlag(jobDeleteCmd)
+	// jobDeleteCmd.Flags().BoolVarP(&jobDeleteOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
 }
 
 var jobDeleteCmd = &cobra.Command{
@@ -27,6 +31,9 @@ var jobDeleteCmd = &cobra.Command{
 		}
 
 		jobName := args[0]
+		if !jobDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete job %s ?", jobName)) {
+			return
+		}
 
 		jenkins := getCurrentJenkins()
 		jclient := &client.JobClient{}

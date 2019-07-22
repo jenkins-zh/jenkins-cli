@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
@@ -63,6 +64,10 @@ func (b *BatchOption) Confirm(message string) bool {
 	}
 
 	return true
+}
+
+func (b *BatchOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&b.Batch, "batch", "b", false, "Batch mode, no need confirm")
 }
 
 // WatchOption for the resources which can be watched
