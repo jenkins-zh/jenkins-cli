@@ -1,14 +1,14 @@
 package app
 
-// Version represents the Jenkins CLI build version.
-type Version struct {
-	// Major and minor version.
-	Number float32
+var (
+	version string
+	commit  string
+)
 
-	// Increment this for bug releases
-	PatchLevel int
+func GetVersion() string {
+	return version
+}
 
-	// JCLI Suffix is the suffix used in the Jenkins CLI version string.
-	// It will be blank for release versions.
-	Suffix string
+func GetCommit() string {
+	return commit
 }

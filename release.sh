@@ -15,7 +15,7 @@ echo "Updating $VERSION to $NEW_TAG"
 # NEEDS_TAG=`git describe --contains $GIT_COMMIT`
 
 if [[ -z "${NEEDS_TAG}" ]]; then
-    make release
+    make release VERSION=${NEW_TAG}
     hub release create -c -a release/jcli-darwin-amd64.tar.gz \
 -a release/jcli-linux-amd64.tar.gz \
 -a release/jcli-windows-386.tar.gz ${NEW_TAG}
