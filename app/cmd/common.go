@@ -75,3 +75,13 @@ type WatchOption struct {
 	Watch    bool
 	Interval int
 }
+
+// InteractiveOption allow user to choose whether the mode is interactive
+type InteractiveOption struct {
+	Interactive bool
+}
+
+// SetFlag set the option flag to this cmd
+func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
+}
