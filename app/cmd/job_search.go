@@ -16,7 +16,7 @@ var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
-	jobSearchCmd.PersistentFlags().StringVarP(&queueOption.Format, "output", "o", "json", "Format the output")
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "json", "Format the output")
 }
 
 var jobSearchCmd = &cobra.Command{

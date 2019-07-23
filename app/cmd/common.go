@@ -35,6 +35,10 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	return nil, fmt.Errorf("not support format %s", o.Format)
 }
 
+func (o *OutputOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output (default 'json')")
+}
+
 func Format(obj interface{}, format string) (data []byte, err error) {
 	if format == JsonOutputFormat {
 		return json.MarshalIndent(obj, "", "  ")
