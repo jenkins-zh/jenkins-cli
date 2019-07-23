@@ -35,7 +35,6 @@ func init() {
 	pluginCmd.Flags().BoolVarP(&pluginOpt.Open, "open", "o", false, "Open the browse with the address of plugin manager")
 	pluginCmd.Flags().BoolVarP(&pluginOpt.List, "list", "l", false, "Print all the plugins which are installed")
 	pluginCmd.Flags().StringVarP(&pluginOpt.Format, "format", "", TableOutputFormat, "Format the output")
-	pluginCmd.Flags().StringArrayVarP(&pluginOpt.Install, "install", "", []string{}, "Install a plugin by shortName")
 	pluginCmd.Flags().StringVarP(&pluginOpt.Uninstall, "uninstall", "", "", "Uninstall a plugin by shortName")
 	pluginCmd.Flags().StringArrayVarP(&pluginOpt.Filter, "filter", "", []string{}, "Filter for the list, like: active, hasUpdate, downgradable, enable, name=foo")
 }
@@ -147,12 +146,6 @@ var pluginCmd = &cobra.Command{
 					log.Fatal(err)
 				}
 			} else {
-				log.Fatal(err)
-			}
-		}
-
-		if pluginOpt.Install != nil && len(pluginOpt.Install) > 0 {
-			if err := jclient.InstallPlugin(pluginOpt.Install); err != nil {
 				log.Fatal(err)
 			}
 		}
