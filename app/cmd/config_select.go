@@ -10,24 +10,32 @@ func init() {
 }
 
 var configSelectCmd = &cobra.Command{
-	Use:   "select",
+	Use:   "select [<name>]",
 	Short: "Select one config as current Jenkins",
 	Long:  `Select one config as current Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		target := ""
-		if currentJenkins := getCurrentJenkins(); currentJenkins != nil {
-			target = currentJenkins.Name
-		}
+		if len(args) > 0 {
+			jenkinsName := args[0]
 
-		prompt := &survey.Select{
-			Message: "Choose a Jenkins as the current one:",
-			Options: getJenkinsNames(),
-			Default: target,
-		}
-		survey.AskOne(prompt, &target)
-
-		if target != "" {
-			setCurrentJenkins(target)
+			setCurrentJenkins(jenkinsName)
+		} else {
+			selectByManual()
 		}
 	},
+}
+
+func selectByManual() {
+	target := ""
+	if currentJenkins := getCurrentJenkins(); currentJenkins != nil {
+		target = currentJenkins.Name
+	}
+
+	prompt := &survey.Select{
+		Message: "Choose a Jenkins as the current one:",
+		Options: getJenkinsNames(),
+		Default: target,
+	}
+	if err := survey.AskOne(prompt, &target); err == nil && target != "" {
+		setCurrentJenkins(target)
+	}
 }
