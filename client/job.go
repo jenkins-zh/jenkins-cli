@@ -344,6 +344,35 @@ func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
 		builds = job.Builds
+
+		for i, build := range builds {
+			api := fmt.Sprintf("%sapi/json", build.URL)
+			var (
+				req      *http.Request
+				response *http.Response
+			)
+
+			req, err = http.NewRequest("GET", api, nil)
+			if err == nil {
+				q.AuthHandle(req)
+			} else {
+				return
+			}
+			client := q.GetClient()
+			if response, err = client.Do(req); err == nil {
+				code := response.StatusCode
+				var data []byte
+				data, err = ioutil.ReadAll(response.Body)
+				if code == 200 {
+					err = json.Unmarshal(data, &build)
+					builds[i] = build
+				} else {
+					log.Fatal(string(data))
+				}
+			} else {
+				log.Fatal(err)
+			}
+		}
 	}
 	return
 }
