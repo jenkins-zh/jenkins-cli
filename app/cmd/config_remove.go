@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -24,4 +25,31 @@ var configRemoveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+func removeJenkins(name string) (err error) {
+	current := getCurrentJenkins()
+	if name == current.Name {
+		err = fmt.Errorf("You cannot remove current Jenkins")
+	}
+
+	index := -1
+	config := getConfig()
+	for i, jenkins := range config.JenkinsServers {
+		if name == jenkins.Name {
+			index = i
+			break
+		}
+	}
+
+	if index == -1 {
+		err = fmt.Errorf("Cannot found by name %s", name)
+	} else {
+		config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
+		config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
+		config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
+
+		err = saveConfig()
+	}
+	return
 }
