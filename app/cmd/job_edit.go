@@ -35,6 +35,7 @@ var jobEditCmd = &cobra.Command{
 			Message:       "Edit your pipeline script",
 			FileName:      "*.sh",
 			Default:       content,
+			HideDefault:   true,
 			AppendDefault: true,
 		}
 
