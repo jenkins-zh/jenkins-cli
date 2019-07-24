@@ -17,7 +17,6 @@ var jobDeleteOption JobDeleteOption
 func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
 	jobDeleteOption.SetFlag(jobDeleteCmd)
-	// jobDeleteCmd.Flags().BoolVarP(&jobDeleteOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
 }
 
 var jobDeleteCmd = &cobra.Command{
