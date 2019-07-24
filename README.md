@@ -12,7 +12,7 @@ developer, administrator or just a regular user, it borns for you!
 * Restart your Jenkins
 * Connection with proxy support
 
-# Get started
+# Get it
 
 We support mac, linux and windows for now.
 
@@ -35,6 +35,10 @@ sudo mv jcli /usr/local/bin/
 ## Windows
 
 You can find the latest version by [click here](https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
+
+# Get started
+
+Once you'v installed `jcli`. You should provide a config for it. Please execute cmd `jcli config -g`, then copy the output into `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.
 
 # Contribution
 

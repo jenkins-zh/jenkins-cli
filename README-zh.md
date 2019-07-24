@@ -11,7 +11,7 @@ Jenkins CLI 可以帮忙你轻松地管理 Jenkins。不管你是一名插件开
 * 重启你的 Jenkins
 * 支持通过代理连接
 
-# 开始
+# 安装
 
 我们目前支持的操作系统包括：MacOS、Linux 以及 Widnows。
 
@@ -34,6 +34,10 @@ sudo mv jcli /usr/local/bin/
 ## Windows
 
 你只要[点击这里](https://github.com/linuxsuren/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz)就可以下载到最新版本的压缩包。之后，把解压后的文件 `jcli` 拷贝到你的系统目录下即可。
+
+# 入门
+
+当安装 `jcli` 以后。你需要提供一份配置文件。请执行命令 `jcli config -g`，并把输出的内容拷贝到文件 `~/.jenkins-cli.yaml` 中，并根据你的 Jenkins 配置做相应的修改。
 
 # 贡献
 
