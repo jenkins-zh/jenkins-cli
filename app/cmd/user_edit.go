@@ -36,9 +36,10 @@ var userEditCmd = &cobra.Command{
 			description := status.Description
 
 			prompt := &survey.Editor{
-				Message:       "Edit your pipeline script",
+				Message:       "Edit user description",
 				FileName:      "*.sh",
 				Default:       description,
+				HideDefault:   true,
 				AppendDefault: true,
 			}
 
