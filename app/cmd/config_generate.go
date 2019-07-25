@@ -7,12 +7,20 @@ import (
 	"os"
 
 	"github.com/AlecAivazis/survey"
+	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
+type ConfigGenerateOption struct {
+	Copy bool
+}
+
+var configGenerateOption ConfigGenerateOption
+
 func init() {
 	configCmd.AddCommand(configGenerateCmd)
+	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false, "Copy the output into clipboard")
 }
 
 var configGenerateCmd = &cobra.Command{
@@ -57,6 +65,10 @@ var configGenerateCmd = &cobra.Command{
 			}
 
 			printCfg(data)
+
+			if configGenerateOption.Copy {
+				clipboard.WriteAll(string(data))
+			}
 		} else {
 			log.Fatal(err)
 		}
