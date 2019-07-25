@@ -22,16 +22,18 @@ func init() {
 }
 
 var jobBuildCmd = &cobra.Command{
-	Use:   "build -n",
+	Use:   "build <jobName>",
 	Short: "Build the job of your Jenkins",
 	Long:  `Build the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if jobOption.Name == "" {
+		if len(args) == 0 {
 			cmd.Help()
 			return
 		}
 
-		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", jobOption.Name)) {
+		name := args[0]
+
+		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
 			return
 		}
 
@@ -45,7 +47,7 @@ var jobBuildCmd = &cobra.Command{
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
-		if job, err := jclient.GetJob(jobOption.Name); err == nil {
+		if job, err := jclient.GetJob(name); err == nil {
 			if len(job.Property) != 0 {
 				for _, pro := range job.Property {
 					if len(pro.ParameterDefinitions) == 0 {
@@ -77,9 +79,9 @@ var jobBuildCmd = &cobra.Command{
 		}
 
 		if hasParam {
-			jclient.BuildWithParams(jobOption.Name, paramDefs)
+			jclient.BuildWithParams(name, paramDefs)
 		} else {
-			jclient.Build(jobOption.Name)
+			jclient.Build(name)
 		}
 	},
 }

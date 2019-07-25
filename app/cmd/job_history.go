@@ -22,7 +22,7 @@ func init() {
 }
 
 var jobHistoryCmd = &cobra.Command{
-	Use:   "history <keyword>",
+	Use:   "history <jobName>",
 	Short: "Print the history of job in your Jenkins",
 	Long:  `Print the history of job in your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
@@ -15,19 +14,19 @@ func init() {
 }
 
 var jobEditCmd = &cobra.Command{
-	Use:   "edit -n",
+	Use:   "edit <jobName>",
 	Short: "Edit the job of your Jenkins",
 	Long:  `Edit the job of your Jenkins`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if jobOption.Name == "" {
-			return errors.New("requires job name")
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
+
+		name := args[0]
 		var content string
 		var err error
-		if content, err = getPipeline(jobOption.Name); err != nil {
+		if content, err = getPipeline(name); err != nil {
 			log.Fatal(err)
 		}
 
@@ -39,11 +38,9 @@ var jobEditCmd = &cobra.Command{
 			AppendDefault: true,
 		}
 
-		fmt.Println(content)
 		if err = survey.AskOne(prompt, &content); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(content)
 
 		jenkins := getCurrentJenkins()
 		jclient := &client.JobClient{}
@@ -52,7 +49,7 @@ var jobEditCmd = &cobra.Command{
 		jclient.Token = jenkins.Token
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
-		if err = jclient.UpdatePipeline(jobOption.Name, content); err != nil {
+		if err = jclient.UpdatePipeline(name, content); err != nil {
 			fmt.Println("update failed")
 			log.Fatal(err)
 		}
