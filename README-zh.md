@@ -37,7 +37,7 @@ sudo mv jcli /usr/local/bin/
 
 # 入门
 
-当安装 `jcli` 以后。你需要提供一份配置文件。请执行命令 `jcli config -g`，并把输出的内容拷贝到文件 `~/.jenkins-cli.yaml` 中，并根据你的 Jenkins 配置做相应的修改。
+当安装 `jcli` 以后。你需要提供一份配置文件。请执行命令 `jcli config generate`，该命令会帮助你编辑配置文件 `~/.jenkins-cli.yaml` ，你需要根据实际的 Jenkins 配置情况做相应的修改。
 
 # 贡献
 
