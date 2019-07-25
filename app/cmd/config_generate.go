@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 
+	"github.com/AlecAivazis/survey"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -18,12 +21,51 @@ var configGenerateCmd = &cobra.Command{
 	Long:  `Generate a sample config file for you`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if data, err := generateSampleConfig(); err == nil {
-			fmt.Print(string(data))
-			fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
+			configPath := configOptions.ConfigFileLocation
+
+			if configPath == "" { // config file isn't exists
+				userHome := userHomeDir()
+				configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+			}
+
+			_, err := os.Stat(configPath)
+			if err != nil && os.IsNotExist(err) {
+				confirm := false
+				prompt := &survey.Confirm{
+					Message: "Cannot found your config file, do you want to edit it?",
+				}
+				survey.AskOne(prompt, &confirm)
+				if confirm {
+					prompt := &survey.Editor{
+						Message:       "Edit your config file",
+						FileName:      "*.yaml",
+						Default:       string(data),
+						HideDefault:   true,
+						AppendDefault: true,
+					}
+
+					var configContext string
+					if err = survey.AskOne(prompt, &configContext); err != nil {
+						log.Fatal(err)
+					} else {
+						if err = ioutil.WriteFile(configPath, []byte(configContext), 0644); err != nil {
+							log.Fatal(err)
+						}
+					}
+					return
+				}
+			}
+
+			printCfg(data)
 		} else {
 			log.Fatal(err)
 		}
 	},
+}
+
+func printCfg(data []byte) {
+	fmt.Print(string(data))
+	fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
 func generateSampleConfig() ([]byte, error) {
