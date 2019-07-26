@@ -38,7 +38,7 @@ You can find the latest version by [click here](https://github.com/linuxsuren/je
 
 # Get started
 
-Once you'v installed `jcli`. You should provide a config for it. Please execute cmd `jcli config -g`, then copy the output into `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.
+Once you'v installed `jcli`. You should provide a config for it. Please execute cmd `jcli config generate`, this will help you to edit the config file `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.
 
 # Contribution
 
