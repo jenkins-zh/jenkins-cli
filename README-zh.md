@@ -1,5 +1,7 @@
 # Jenkins CLI
 
+[![Go Report Card](https://goreportcard.com/badge/linuxsuren/jenkins-cli)](https://goreportcard.com/report/linuxsuren/jenkins-cli)
+
 Jenkins CLI 可以帮忙你轻松地管理 Jenkins。不管你是一名插件开发者、管理员或者只是一个普通的 Jenkins 用户，它都是为你而生的！
 
 # 特点
