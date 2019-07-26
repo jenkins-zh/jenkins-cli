@@ -18,6 +18,8 @@ type JenkinsCore struct {
 	Token     string
 	Proxy     string
 	ProxyAuth string
+
+	Debug bool
 }
 
 type JenkinsCrumb struct {

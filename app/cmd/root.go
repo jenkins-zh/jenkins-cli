@@ -11,6 +11,7 @@ import (
 
 type RootOptions struct {
 	Version bool
+	Debug   bool
 }
 
 var rootCmd = &cobra.Command{
@@ -48,6 +49,7 @@ var rootOptions RootOptions
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 }
 
 func initConfig() {

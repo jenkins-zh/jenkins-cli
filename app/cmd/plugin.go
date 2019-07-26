@@ -18,6 +18,9 @@ var pluginCmd = &cobra.Command{
 	Use:   "plugin",
 	Short: "Manage the plugins of Jenkins",
 	Long:  `Manage the plugins of Jenkins`,
+	Example: `  jcli plugin list
+  jcli plugin search github
+  jcli plugin check`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
