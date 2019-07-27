@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/AlecAivazis/survey"
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
