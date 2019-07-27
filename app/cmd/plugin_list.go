@@ -28,6 +28,8 @@ var pluginListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Print all the plugins which are installed",
 	Long:  `Print all the plugins which are installed`,
+	Example: `  jcli plugin list --filter name=github
+  jcli plugin list --filter hasUpdate`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jenkins := getCurrentJenkins()
 		jclient := &client.PluginManager{}

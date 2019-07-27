@@ -6,12 +6,6 @@ import (
 	"unicode/utf8"
 )
 
-// const (
-// 	ALIGN_LEFT   = 0
-// 	ALIGN_CENTER = 1
-// 	ALIGN_RIGHT  = 2
-// )
-
 type Table struct {
 	Out          io.Writer
 	Rows         [][]string

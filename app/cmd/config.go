@@ -22,14 +22,17 @@ func init() {
 }
 
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage the config of jcli",
-	Long:  `Manage the config of jcli`,
+	Use:     "config",
+	Aliases: []string{"cfg"},
+	Short:   "Manage the config of jcli",
+	Long:    `Manage the config of jcli`,
 	Run: func(cmd *cobra.Command, args []string) {
 		current := getCurrentJenkins()
 		fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 	},
-	Example: "jcli config -l",
+	Example: `  jcli config generate
+  jcli config list
+  jcli config edit`,
 }
 
 // JenkinsServer holds the configuration of your Jenkins

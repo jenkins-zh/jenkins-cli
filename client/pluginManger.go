@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gosuri/uiprogress"
+	"github.com/linuxsuren/jenkins-cli/util"
 )
 
 type PluginManager struct {
@@ -220,15 +220,11 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 	return
 }
 
-func (p *PluginManager) Upload() {
+// Upload will upload a file from local filesystem into Jenkins
+func (p *PluginManager) Upload(pluginFile string) {
 	api := fmt.Sprintf("%s/pluginManager/uploadPlugin", p.URL)
-
-	path, _ := os.Getwd()
-	dirName := filepath.Base(path)
-	dirName = strings.Replace(dirName, "-plugin", "", -1)
-	path += fmt.Sprintf("/target/%s.hpi", dirName)
 	extraParams := map[string]string{}
-	request, err := newfileUploadRequest(api, extraParams, "@name", path)
+	request, err := newfileUploadRequest(api, extraParams, "@name", pluginFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -245,9 +241,10 @@ func (p *PluginManager) Upload() {
 	if err != nil {
 		log.Fatal(err)
 	} else if response.StatusCode != 200 {
+		fmt.Println("StatusCode", response.StatusCode)
 		var data []byte
-		if data, err = ioutil.ReadAll(response.Body); err == nil {
-			fmt.Println(string(data))
+		if data, err = ioutil.ReadAll(response.Body); err == nil && p.Debug {
+			ioutil.WriteFile("debug.html", data, 0664)
 		} else {
 			log.Fatal(err)
 		}
@@ -259,34 +256,6 @@ func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Resp
 		handle = func(*http.Response) {}
 	}
 	return handle
-}
-
-type ProgressIndicator struct {
-	bytes.Buffer
-	Total float64
-	count float64
-	bar   *uiprogress.Bar
-}
-
-func (i *ProgressIndicator) Init() {
-	uiprogress.Start()             // start rendering
-	i.bar = uiprogress.AddBar(100) // Add a new bar
-
-	// optionally, append and prepend completion and elapsed time
-	i.bar.AppendCompleted()
-	// i.bar.PrependElapsed()
-}
-
-func (i *ProgressIndicator) Write(p []byte) (n int, err error) {
-	n, err = i.Buffer.Write(p)
-	return
-}
-
-func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
-	n, err = i.Buffer.Read(p)
-	i.count += float64(n)
-	i.bar.Set((int)(i.count * 100 / i.Total))
-	return
 }
 
 func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
@@ -303,12 +272,15 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	}
 	defer file.Close()
 
-	// body := &bytes.Buffer{}
-	body := &ProgressIndicator{
-		Total: total,
+	bytesBuffer := &bytes.Buffer{}
+	progressWriter := &util.ProgressIndicator{
+		Total:  total,
+		Writer: bytesBuffer,
+		Reader: bytesBuffer,
+		Title:  "Uploading",
 	}
-	body.Init()
-	writer := multipart.NewWriter(body)
+	progressWriter.Init()
+	writer := multipart.NewWriter(bytesBuffer)
 	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
 	if err != nil {
 		return nil, err
@@ -324,7 +296,7 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", uri, body)
+	req, err := http.NewRequest("POST", uri, progressWriter)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return req, err
 }
