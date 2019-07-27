@@ -1,4 +1,4 @@
-module github.com/linuxsuren/jenkins-cli
+module github.com/jenkins-zh/jenkins-cli
 
 replace github.com/AlecAivazis/survey v1.8.5 => gopkg.in/AlecAivazis/survey.v1 v1.8.5
 

@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/linuxsuren/jenkins-cli/client"
-	"github.com/linuxsuren/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 

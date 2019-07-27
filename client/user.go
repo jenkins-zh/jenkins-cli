@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
-	"github.com/linuxsuren/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 type UserClient struct {
