@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/linuxsuren/jenkins-cli/app"
+	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
 )
 

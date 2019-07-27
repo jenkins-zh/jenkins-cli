@@ -6,7 +6,7 @@ import (
 
 	"io/ioutil"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 

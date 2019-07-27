@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
