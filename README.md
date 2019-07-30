@@ -38,6 +38,12 @@ sudo mv jcli /usr/local/bin/
 
 You can find the latest version by [click here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). Then download the tar file, cp the uncompressed `jcli` directory into your system path.
 
+## Other Package Managers
+
+Here're other package managers:
+
+* [GoFish](https://gofi.sh/) users can use `gofish install jcli`.
+
 # Get started
 
 Once you'v installed `jcli`. You should provide a config for it. Please execute cmd `jcli config generate`, this will help you to edit the config file `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.

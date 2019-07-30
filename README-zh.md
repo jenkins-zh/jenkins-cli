@@ -37,6 +37,12 @@ sudo mv jcli /usr/local/bin/
 
 你只要[点击这里](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz)就可以下载到最新版本的压缩包。之后，把解压后的文件 `jcli` 拷贝到你的系统目录下即可。
 
+## 其他包管理器
+
+这里还有一些其他的包管理器：
+
+* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装。
+
 # 入门
 
 当安装 `jcli` 以后。你需要提供一份配置文件。请执行命令 `jcli config generate`，该命令会帮助你编辑配置文件 `~/.jenkins-cli.yaml` ，你需要根据实际的 Jenkins 配置情况做相应的修改。
