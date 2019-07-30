@@ -181,6 +181,45 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	return
 }
 
+func (q *JobClient) StopJob(jobName string, num int) (err error) {
+	jobItems := strings.Split(jobName, " ")
+	path := ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+
+	api := fmt.Sprintf("%s/%s/%d/stop", q.URL, path, num)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		q.AuthHandle(req)
+	} else {
+		return
+	}
+
+	client := q.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code == 200 {
+			fmt.Println("stoped successfully")
+		} else {
+			fmt.Println("status code", code)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	jobItems := strings.Split(name, " ")
 	path := ""

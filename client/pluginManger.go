@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/linuxsuren/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 type PluginManager struct {
