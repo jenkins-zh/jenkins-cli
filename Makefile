@@ -8,7 +8,7 @@ BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSIO
 COVERED_MAIN_SRC_FILE=./main
 
 darwin: ## Build for OSX
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
+	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 
 linux: ## Build for linux
@@ -31,8 +31,8 @@ release: clean build-all
 clean: ## Clean the generated artifacts
 	rm -rf bin release
 
-dep: ## Clean the generated artifacts
-	go get github.com/AlecAivazis/survey
+dep:
+	go get github.com/AlecAivazis/survey/v2
 	go get github.com/gosuri/uiprogress
 	go get github.com/spf13/cobra
 	go get github.com/spf13/viper
