@@ -173,7 +173,10 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 		if code == 201 { // Jenkins will send redirect by this api
 			fmt.Println("build successfully")
 		} else {
-			log.Fatal(string(data))
+			fmt.Println("Status code", code)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
 	} else {
 		log.Fatal(err)
@@ -594,7 +597,7 @@ type ParameterDefinition struct {
 
 type DefaultParameterValue struct {
 	Description string
-	Value       string
+	Value       interface{}
 }
 
 type SimpleJobBuild struct {
