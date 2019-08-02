@@ -12,6 +12,9 @@ import (
 
 type JobBuildOption struct {
 	BatchOption
+
+	Param string
+	Debug bool
 }
 
 var jobBuildOption JobBuildOption
@@ -19,6 +22,8 @@ var jobBuildOption JobBuildOption
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
 	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
+	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "", "Params of the job")
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Debug, "verbose", "", false, "Output the verbose")
 }
 
 var jobBuildCmd = &cobra.Command{
@@ -33,7 +38,7 @@ var jobBuildCmd = &cobra.Command{
 
 		name := args[0]
 
-		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
+		if !jobBuildOption.Batch && !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
 			return
 		}
 
@@ -47,8 +52,21 @@ var jobBuildCmd = &cobra.Command{
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
-		if job, err := jclient.GetJob(name); err == nil {
-			if len(job.Property) != 0 {
+
+		if jobBuildOption.Batch {
+			if jobBuildOption.Param != "" {
+				hasParam = true
+
+				if err := json.Unmarshal([]byte(jobBuildOption.Param), &paramDefs); err != nil {
+					log.Fatal(err)
+				}
+			}
+		} else if job, err := jclient.GetJob(name); err == nil {
+			proCount := len(job.Property)
+			if jobBuildOption.Debug {
+				fmt.Println("Found properties ", proCount)
+			}
+			if proCount != 0 {
 				for _, pro := range job.Property {
 					if len(pro.ParameterDefinitions) == 0 {
 						continue
@@ -76,11 +94,16 @@ var jobBuildCmd = &cobra.Command{
 					break
 				}
 			}
+		} else {
+			log.Fatal(err)
 		}
 
 		if hasParam {
 			jclient.BuildWithParams(name, paramDefs)
 		} else {
+			if jobBuildOption.Debug {
+				fmt.Println("Not params found")
+			}
 			jclient.Build(name)
 		}
 	},
