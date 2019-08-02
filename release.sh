@@ -18,5 +18,8 @@ if [[ -z "${NEEDS_TAG}" ]]; then
     make release VERSION=${NEW_TAG}
     hub release create -c -a release/jcli-darwin-amd64.tar.gz \
 -a release/jcli-linux-amd64.tar.gz \
--a release/jcli-windows-386.tar.gz ${NEW_TAG}
+-a release/jcli-windows-386.tar.gz \
+-a release/jcli-darwin-amd64.txt \
+-a release/jcli-linux-amd64.txt \
+-a release/jcli-windows-386.txt ${NEW_TAG}
 fi
