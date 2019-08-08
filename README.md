@@ -46,7 +46,7 @@ Here're other package managers:
 
 # Get started
 
-Once you'v installed `jcli`. You should provide a config for it. Please execute cmd `jcli config generate`, this will help you to edit the config file `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.
+Read [this document](doc/README.md) to know more details about how to use `jcli`.
 
 # Contribution
 
