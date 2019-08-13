@@ -45,9 +45,10 @@ func removeJenkins(name string) (err error) {
 	if index == -1 {
 		err = fmt.Errorf("Cannot found by name %s", name)
 	} else {
-		config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
-		config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
-		config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
+		// config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
+		// config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
+		// config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
+		config.JenkinsServers = append(config.JenkinsServers[:index], config.JenkinsServers[index+1:]...)
 
 		err = saveConfig()
 	}

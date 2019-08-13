@@ -69,9 +69,9 @@ func setCurrentJenkins(name string) {
 	}
 }
 
-var config Config
+var config *Config
 
-func getConfig() Config {
+func getConfig() *Config {
 	return config
 }
 
