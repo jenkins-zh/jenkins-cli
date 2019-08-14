@@ -30,7 +30,7 @@ var configRemoveCmd = &cobra.Command{
 func removeJenkins(name string) (err error) {
 	current := getCurrentJenkins()
 	if name == current.Name {
-		err = fmt.Errorf("You cannot remove current Jenkins config, if you want remove current Jenkins config, you can select the other Jenkins config before remove")
+		err = fmt.Errorf("You cannot remove current Jenkins, if you want to remove it, can select other items before")
 		return
 	}
 
