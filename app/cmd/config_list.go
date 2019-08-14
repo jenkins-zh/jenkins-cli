@@ -20,7 +20,7 @@ var configListCmd = &cobra.Command{
 		current := getCurrentJenkins()
 
 		table := util.CreateTable(os.Stdout)
-		table.AddRow("number", "name", "url", "descruotion")
+		table.AddRow("number", "name", "url", "description")
 		for i, jenkins := range getConfig().JenkinsServers {
 			name := jenkins.Name
 			if name == current.Name {
@@ -28,12 +28,12 @@ var configListCmd = &cobra.Command{
 			}
 			if jenkins.Description != "" {
 				if len(jenkins.Description) > 15 {
-					table.AddRow(fmt.Sprintf("%d", i, "%d"), name, jenkins.URL, jenkins.Description[0:15])
+					table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description[0:15])
 				} else {
-					table.AddRow(fmt.Sprintf("%d", i, "%d"), name, jenkins.URL, jenkins.Description)
+					table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description)
 				}
 			} else {
-				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, "null")
+				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, "")
 			}
 		}
 		table.Render()
