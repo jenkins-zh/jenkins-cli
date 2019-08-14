@@ -30,7 +30,8 @@ var configRemoveCmd = &cobra.Command{
 func removeJenkins(name string) (err error) {
 	current := getCurrentJenkins()
 	if name == current.Name {
-		err = fmt.Errorf("You cannot remove current Jenkins")
+		err = fmt.Errorf("You cannot remove current Jenkins, if you want to remove it, can select other items before")
+		return
 	}
 
 	index := -1
@@ -45,10 +46,7 @@ func removeJenkins(name string) (err error) {
 	if index == -1 {
 		err = fmt.Errorf("Cannot found by name %s", name)
 	} else {
-		config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
-		config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
-		config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
-
+		config.JenkinsServers = append(config.JenkinsServers[:index], config.JenkinsServers[index+1:]...)
 		err = saveConfig()
 	}
 	return
