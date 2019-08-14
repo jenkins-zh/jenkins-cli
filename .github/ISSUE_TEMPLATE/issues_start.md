@@ -1,12 +1,12 @@
 <-- Comment:
-请仔细阅读这里的描述
+Please read the description here carefully
 
-1. Comment 区域属于注释部分，阅读完后请删除
-2. ISSUES 标题以 `[类型] 问题概述` 命名
-3. 带星号（*）的区域是必选项
+1. The Comment area is part of the comment, please delete it after reading
+2. The ISSUES title is named after the `[type] problem overview`
+3. Areas with an asterisk (*) are required
 -->
 
-### ISSUES 类型*
+### ISSUES TYPE *
 
 - [ ] bug
 - [ ] document
@@ -14,8 +14,8 @@
 - [ ] enhancement
 - [ ] fix
 
-### 描述*
-（请在此处将所要描述的问题尽可能详细的描述清楚，以方便阅读）
+### Description *
+（Please describe the problem to be described as detailed as possible here for easy reading.）
 
-### 报错信息
+### Error Information
 
