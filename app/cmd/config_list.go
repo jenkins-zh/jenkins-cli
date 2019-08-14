@@ -26,14 +26,10 @@ var configListCmd = &cobra.Command{
 			if name == current.Name {
 				name = fmt.Sprintf("*%s", name)
 			}
-			if jenkins.Description != "" {
-				if len(jenkins.Description) > 15 {
-					table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description[0:15])
-				} else {
-					table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description)
-				}
+			if len(jenkins.Description) > 15 {
+				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description[0:15])
 			} else {
-				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, "")
+				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description)
 			}
 		}
 		table.Render()
