@@ -19,7 +19,7 @@ var jobCmd = &cobra.Command{
 	Use:   "job",
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		cmd.Help()
 	},
 }

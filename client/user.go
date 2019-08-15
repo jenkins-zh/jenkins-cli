@@ -89,8 +89,7 @@ func (q *UserClient) EditDesc(description string) (err error) {
 		code := response.StatusCode
 		var data []byte
 		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-		} else {
+		if code != 200 {
 			log.Fatal(string(data))
 		}
 	} else {

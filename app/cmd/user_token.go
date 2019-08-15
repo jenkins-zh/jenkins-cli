@@ -25,7 +25,7 @@ var userTokenCmd = &cobra.Command{
 	Use:   "token",
 	Short: "Token the user of your Jenkins",
 	Long:  `Token the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		if !userTokenOption.Generate {
 			cmd.Help()
 			return

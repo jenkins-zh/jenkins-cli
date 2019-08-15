@@ -28,7 +28,7 @@ var versionCmd = &cobra.Command{
 	Use:   "crumb",
 	Short: "Print crumbIssuer of Jenkins",
 	Long:  `Print crumbIssuer of Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		crumb, _ := getCrumb()
 		fmt.Printf("%s=%s", crumb.CrumbRequestField, crumb.Crumb)
 	},

@@ -15,7 +15,7 @@ var configRemoveCmd = &cobra.Command{
 	Use:   "remove",
 	Short: "Remove a Jenkins config",
 	Long:  `Remove a Jenkins config`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		if len(args) == 0 {
 			log.Fatal("You need to give a name")
 		}

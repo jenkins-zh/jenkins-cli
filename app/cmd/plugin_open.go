@@ -15,7 +15,7 @@ var pluginOpenCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Openout update center server",
 	Long:  `Openout update center server`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkins()
 
 		if jenkins.URL != "" {

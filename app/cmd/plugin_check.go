@@ -18,7 +18,7 @@ var pluginCheckCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Checkout update center server",
 	Long:  `Checkout update center server`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkins()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL

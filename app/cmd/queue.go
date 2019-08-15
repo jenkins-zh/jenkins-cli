@@ -23,7 +23,7 @@ var queueCmd = &cobra.Command{
 	Use:   "queue",
 	Short: "Print the queue of your Jenkins",
 	Long:  `Print the queue of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkins()
 		jclient := &client.QueueClient{}
 		jclient.URL = jenkins.URL

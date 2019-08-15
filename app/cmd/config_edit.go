@@ -18,7 +18,7 @@ var configEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit a Jenkins config",
 	Long:  `Edit a Jenkins config`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		configPath := configOptions.ConfigFileLocation
 
