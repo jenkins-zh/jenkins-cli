@@ -253,7 +253,9 @@ func (p *PluginManager) Upload(pluginFile string) {
 
 func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Response) {
 	if handle == nil {
-		handle = func(*http.Response) {}
+		handle = func(*http.Response) {
+			// Do nothing, just for avoid nil exception
+		}
 	}
 	return handle
 }
