@@ -1,3 +1,12 @@
+---
+name: issues_start
+about: Describe this issue template's purpose here.
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 <-- Comment:
 Please read the description here carefully
 
