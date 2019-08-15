@@ -28,7 +28,11 @@ var configCmd = &cobra.Command{
 	Long:    `Manage the config of jcli`,
 	Run: func(cmd *cobra.Command, args []string) {
 		current := getCurrentJenkins()
-		fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+		if current.Description != "" {
+			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+		} else {
+			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+		}
 	},
 	Example: `  jcli config generate
   jcli config list
@@ -37,12 +41,13 @@ var configCmd = &cobra.Command{
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name      string `yaml:"name"`
-	URL       string `yaml:"url"`
-	UserName  string `yaml:"username"`
-	Token     string `yaml:"token"`
-	Proxy     string `yaml:"proxy"`
-	ProxyAuth string `yaml:"proxyAuth"`
+	Name        string `yaml:"name"`
+	URL         string `yaml:"url"`
+	UserName    string `yaml:"username"`
+	Token       string `yaml:"token"`
+	Proxy       string `yaml:"proxy"`
+	ProxyAuth   string `yaml:"proxyAuth"`
+	Description string `yaml:"description"`
 }
 
 type Config struct {

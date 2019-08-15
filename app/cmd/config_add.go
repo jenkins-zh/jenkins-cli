@@ -21,6 +21,7 @@ func init() {
 	configAddCmd.Flags().StringVarP(&configAddOptions.Token, "token", "t", "", "Token of the Jenkins")
 	configAddCmd.Flags().StringVarP(&configAddOptions.Proxy, "proxy", "p", "", "Proxy of the Jenkins")
 	configAddCmd.Flags().StringVarP(&configAddOptions.ProxyAuth, "proxyAuth", "a", "", "ProxyAuth of the Jenkins")
+	configAddCmd.Flags().StringVarP(&configAddOptions.Description, "description", "d", "", "Description of the Jenkins")
 }
 
 var configAddCmd = &cobra.Command{
