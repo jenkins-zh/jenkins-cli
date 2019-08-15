@@ -79,7 +79,7 @@ func (q *UserClient) EditDesc(description string) (err error) {
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func (q *UserClient) Delete(username string) (err error) {
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -163,7 +163,7 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -200,7 +200,7 @@ func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error)
 		return
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
