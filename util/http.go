@@ -12,6 +12,11 @@ import (
 	"github.com/gosuri/uiprogress"
 )
 
+const (
+	CONTENT_TYPE = "Content-Type"
+	APP_FORM     = "application/x-www-form-urlencoded"
+)
+
 type HTTPDownloader struct {
 	TargetFilePath string
 	URL            string

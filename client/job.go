@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 type JobClient struct {
@@ -48,14 +50,8 @@ func (q *JobClient) Search(keyword string) (status *SearchResult, err error) {
 	}
 	return
 }
-
 func (q *JobClient) Build(jobName string) (err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%s/build", q.URL, path)
 	var (
 		req      *http.Request
@@ -90,12 +86,7 @@ func (q *JobClient) Build(jobName string) (err error) {
 }
 
 func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	var api string
 	if id == -1 {
 		api = fmt.Sprintf("%s/%s/lastBuild/api/json", q.URL, path)
@@ -132,12 +123,7 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 }
 
 func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%s/build", q.URL, path)
 	var (
 		req      *http.Request
@@ -164,7 +150,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -185,12 +171,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 }
 
 func (q *JobClient) StopJob(jobName string, num int) (err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%s/%d/stop", q.URL, path, num)
 	var (
 		req      *http.Request
@@ -224,12 +205,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 }
 
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(name)
 	api := fmt.Sprintf("%s/%s/api/json", q.URL, path)
 	var (
 		req      *http.Request
@@ -296,16 +272,7 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 }
 
 func (q *JobClient) UpdatePipeline(name, script string) (err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for i, item := range jobItems {
-		if i == 0 {
-			path = fmt.Sprintf("job/%s", item)
-		} else {
-			path = fmt.Sprintf("%s/job/%s", path, item)
-		}
-	}
-
+	path := parseJobPath(name)
 	api := fmt.Sprintf("%s/%s/wfapisu/update", q.URL, path)
 	var (
 		req      *http.Request
@@ -324,9 +291,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	// req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-	// req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -346,12 +311,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 }
 
 func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(name)
 	api := fmt.Sprintf("%s/%s/wfapisu/script", q.URL, path)
 	var (
 		req      *http.Request
@@ -421,12 +381,7 @@ func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 
 // Log get the log of a job
 func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog, err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	var api string
 	if history == -1 {
 		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
@@ -505,7 +460,7 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	} else {
 		return
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
@@ -530,14 +485,13 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		req      *http.Request
 		response *http.Response
 	)
-
 	req, err = http.NewRequest("POST", api, nil)
 	if err == nil {
 		q.AuthHandle(req)
 	} else {
 		return
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
@@ -552,6 +506,15 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		}
 	} else {
 		log.Fatal(err)
+	}
+	return
+}
+
+func parseJobPath(jobName string) (path string) {
+	jobItems := strings.Split(jobName, " ")
+	path = ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
 	}
 	return
 }
