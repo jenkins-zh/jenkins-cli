@@ -23,7 +23,7 @@ var userEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit the user of your Jenkins",
 	Long:  `Edit the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkins()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL

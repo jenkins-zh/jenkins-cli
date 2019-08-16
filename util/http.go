@@ -107,7 +107,7 @@ func (i *ProgressIndicator) Init() {
 	// i.bar.PrependElapsed()
 
 	if i.Title != "" {
-		i.bar.PrependFunc(func(b *uiprogress.Bar) string {
+		i.bar.PrependFunc(func(_ *uiprogress.Bar) string {
 			return fmt.Sprintf("%s: ", i.Title)
 		})
 	}

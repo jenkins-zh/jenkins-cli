@@ -30,7 +30,7 @@ var openCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Open your Jenkins with a browse",
 	Long:  `Open your Jenkins with a browse`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		var jenkins *JenkinsServer
 
 		if openOption.Name == "" && openOption.Interactive {

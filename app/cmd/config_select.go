@@ -13,7 +13,7 @@ var configSelectCmd = &cobra.Command{
 	Use:   "select [<name>]",
 	Short: "Select one config as current Jenkins",
 	Long:  `Select one config as current Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
 			jenkinsName := args[0]
 

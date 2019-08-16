@@ -16,7 +16,7 @@ var configListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all Jenkins config items",
 	Long:  `List all Jenkins config items`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 
 		table := util.CreateTable(os.Stdout)

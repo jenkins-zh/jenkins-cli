@@ -28,7 +28,7 @@ var configAddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a Jenkins config item",
 	Long:  `Add a Jenkins config item`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if err := addJenkins(configAddOptions.JenkinsServer); err != nil {
 			log.Fatal(err)
 		}

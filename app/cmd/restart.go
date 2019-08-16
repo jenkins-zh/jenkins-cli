@@ -24,7 +24,7 @@ var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart your Jenkins",
 	Long:  `Restart your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkins()
 		if !restartOption.Batch {
 			confirm := false

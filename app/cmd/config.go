@@ -26,7 +26,7 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Manage the config of jcli",
 	Long:    `Manage the config of jcli`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {
 			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)

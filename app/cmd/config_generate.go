@@ -28,7 +28,7 @@ var configGenerateCmd = &cobra.Command{
 	Aliases: []string{"gen"},
 	Short:   "Generate a sample config file for you",
 	Long:    `Generate a sample config file for you`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if data, err := generateSampleConfig(); err == nil {
 			configPath := configOptions.ConfigFileLocation
 
