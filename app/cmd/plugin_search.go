@@ -62,7 +62,7 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	result := make([]client.AvailablePlugin, 0)
 
 	for _, plugin := range plugins.Data {
-		if strings.Contains(plugin.Name, keyword) {
+		if strings.Contains(plugin.Name, strings.ToLower(keyword)) {
 			result = append(result, plugin)
 		}
 	}
@@ -72,13 +72,18 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		pluginList := obj.([]client.AvailablePlugin)
-		table := util.CreateTable(os.Stdout)
-		table.AddRow("number", "name", "installed", "title")
-		for i, plugin := range pluginList {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%v", plugin.Installed), plugin.Title)
+		if len(pluginList) == 0 {
+			fmt.Printf("Sorry, you search plugin is unavailable")
+		} else {
+			table := util.CreateTable(os.Stdout)
+			table.AddRow("number", "name", "installed", "title")
+
+			for i, plugin := range pluginList {
+				table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+					fmt.Sprintf("%v", plugin.Installed), plugin.Title)
+			}
+			table.Render()
 		}
-		table.Render()
 		err = nil
 		data = []byte{}
 	}
