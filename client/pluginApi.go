@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type PluginAPI struct {
@@ -98,7 +99,7 @@ func (d *PluginAPI) DownloadPlugins(names []string) {
 	fmt.Println("Start to collect plugin dependencies...")
 	plugins := make([]PluginInfo, 0)
 	for _, name := range names {
-		plugins = append(plugins, d.collectDependencies(name)...)
+		plugins = append(plugins, d.collectDependencies(strings.ToLower(name))...)
 	}
 
 	fmt.Printf("Ready to download plugins, total: %d.\n", len(plugins))
