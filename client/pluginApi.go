@@ -1,6 +1,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -127,7 +128,13 @@ func (d *PluginAPI) download(url string, name string) {
 }
 
 func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
-	resp, err := http.Get("https://plugins.jenkins.io/api/plugin/" + name)
+	var cli = http.Client{}
+	cli.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	resp, err := cli.Get("https://plugins.jenkins.io/api/plugin/" + name)
 	if err != nil {
 		return plugin, err
 	}
