@@ -5,16 +5,26 @@ pipeline {
 
     stages {
         stage('Build') {
-            container('golang') {
-                parallel {
-                    stage('MacOS') {
-                        sh label: 'make darwin', script: 'make darwin'
+            parallel {
+                stage('MacOS') {
+                    steps {
+                        container('golang') {
+                            sh label: 'make darwin', script: 'make darwin'
+                        }
                     }
-                    stage('Linux') {
-                        sh label: 'make linux', script: 'make linux'
+                }
+                stage('Linux') {
+                    steps {
+                        container('golang') {
+                            sh label: 'make linux', script: 'make linux'
+                        }
                     }
-                    stage('Windows') {
-                        sh label: 'make win', script: 'make win'
+                }
+                stage('Windows') {
+                    steps {
+                        container('golang') {
+                            sh label: 'make win', script: 'make win'
+                        }
                     }
                 }
             }
