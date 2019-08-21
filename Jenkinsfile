@@ -4,8 +4,8 @@ pipeline {
     }
 
     stages {
-        container('golang') {
-            stage('Build') {
+        stage('Build') {
+            container('golang') {
                 parallel {
                     stage('MacOS') {
                         sh label: 'make darwin', script: 'make darwin'
