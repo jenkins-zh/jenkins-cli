@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'golang'
+        label 'golang-1.12'
     }
 
     stages {
