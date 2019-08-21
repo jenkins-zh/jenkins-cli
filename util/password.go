@@ -5,7 +5,12 @@ import (
 	"time"
 )
 
+// GeneratePassword generates a password with the specific length
 func GeneratePassword(length int) string {
+	if length <= 0 {
+		return ""
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	digits := "0123456789"
 	specials := "~=+%^*/()[]{}/!@#$?|"

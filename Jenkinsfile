@@ -29,5 +29,17 @@ pipeline {
                 }
             }
         }
+
+        stage('Test') {
+            steps {
+                container('golang') {
+                    sh label: 'go test', script: '''
+                    go test ./util/... -v
+                    go test ./client/... -v
+                    go test ./app/... -v
+                    '''
+                }
+            }
+        }
     }
 }
