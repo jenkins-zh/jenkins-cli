@@ -153,12 +153,20 @@ func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error
 	return
 }
 
+func getPluginsInstallQuery(names []string) string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if name == "" {
+			continue
+		}
+		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+	}
+	return strings.Join(pluginNames, "&")
+}
+
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	for i, name := range names {
-		names[i] = fmt.Sprintf("plugin.%s", name)
-	}
-	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, strings.Join(names, "=&"))
+	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, getPluginsInstallQuery(names))
 	var (
 		req      *http.Request
 		response *http.Response
@@ -180,8 +188,22 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 		data, err = ioutil.ReadAll(response.Body)
 		if code == 200 {
 			fmt.Println("install succeed.")
+		} else if code == 400 {
+			if errMsg, ok := response.Header["X-Error"]; ok {
+				for _, msg := range errMsg {
+					fmt.Println(msg)
+				}
+			} else {
+				fmt.Println("Cannot found plugins", names)
+			}
 		} else {
-			log.Fatal(string(data))
+			fmt.Println(response.Header)
+			fmt.Println("status code", code)
+			if err == nil && p.Debug && len(data) > 0 {
+				ioutil.WriteFile("debug.html", data, 0664)
+			} else if err != nil {
+				log.Fatal(err)
+			}
 		}
 	} else {
 		log.Fatal(err)
