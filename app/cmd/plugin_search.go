@@ -34,7 +34,7 @@ var pluginSearchCmd = &cobra.Command{
 
 		keyword := args[0]
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

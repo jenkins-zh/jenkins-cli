@@ -34,7 +34,7 @@ var jobDeleteCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

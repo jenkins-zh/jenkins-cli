@@ -18,7 +18,7 @@ var pluginInstallCmd = &cobra.Command{
 	Short: "Install the plugins",
 	Long:  `Install the plugins`,
 	Run: func(_ *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

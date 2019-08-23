@@ -31,7 +31,7 @@ var userTokenCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

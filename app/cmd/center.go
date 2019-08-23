@@ -28,7 +28,7 @@ var centerCmd = &cobra.Command{
 	Short: "Manage your update center",
 	Long:  `Manage your update center`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins)
 
 		for {

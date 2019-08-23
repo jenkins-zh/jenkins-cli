@@ -24,7 +24,7 @@ var pluginUninstallCmd = &cobra.Command{
 
 		pluginName = args[0]
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
