@@ -35,6 +35,8 @@ labels:
     color: c2c2fc
   - name: chore
     color: c2c2fc
+  - name: no-changelog
+    color: c2c2fc
 branches:
   - name: master
     protection:
