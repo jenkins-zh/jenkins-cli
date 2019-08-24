@@ -31,6 +31,9 @@ release: clean build-all
 clean: ## Clean the generated artifacts
 	rm -rf bin release
 
+copy: darwin
+	sudo cp bin/darwin/$(NAME) $(shell which jcli)
+
 dep:
 	go get github.com/AlecAivazis/survey/v2
 	go get github.com/gosuri/uiprogress
