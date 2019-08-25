@@ -31,6 +31,9 @@ release: clean build-all
 clean: ## Clean the generated artifacts
 	rm -rf bin release
 
+copy: darwin
+	sudo cp bin/darwin/$(NAME) $(shell which jcli)
+
 test:
 	go test ./util/... -v -coverprofile bin/testcover-util.log
 	go test ./client/... -v -coverprofile bin/testcover-client.log
