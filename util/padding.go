@@ -53,13 +53,16 @@ func PadCenter(s, pad string, width int) string {
 func isHan(s string) (isHan bool) {
 	wh := []rune(s)
 	for _, r := range wh {
-		if isHan != unicode.Is(unicode.Han, r) {
-			break
-		} else if isHan != unicode.Is(unicode.Hiragana, r) {
-			break
-		} else if isHan != unicode.Is(unicode.Katakana, r) {
-			break
-		} else if isHan != unicode.Is(unicode.Common, r) {
+		if unicode.Is(unicode.Han, r) {
+			isHan = true
+		} else if unicode.Is(unicode.Hiragana, r) {
+			isHan = true
+		} else if unicode.Is(unicode.Katakana, r) {
+			isHan = true
+		} else if unicode.Is(unicode.Common, r) {
+			isHan = true
+		} else {
+			isHan = false
 			break
 		}
 	}
@@ -113,14 +116,4 @@ func Lenf(han string) (l int) {
 
 	}
 	return
-}
-
-func toHz(han string) string {
-	arg0 := Pad("0", " ", Lenf("0"), 0)
-	arg1 := Pad(han, "", Lenf(han), 0)
-	var un string
-	un += arg0 + " "
-	un += arg1 + " "
-	un += "Standalone Projects"
-	return un
 }
