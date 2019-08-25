@@ -11,7 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// RootOptions is a global option for whole cli
 type RootOptions struct {
+	Jenkins string
 	Version bool
 	Debug   bool
 }
@@ -25,7 +27,7 @@ var rootCmd = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Println("Jenkins CLI (jcli) manage your Jenkins")
 
-		current := getCurrentJenkins()
+		current := getCurrentJenkinsFromOptionsOrDie()
 		if current != nil {
 			fmt.Println("Current Jenkins is:", current.Name)
 		} else {
@@ -50,6 +52,7 @@ var rootOptions RootOptions
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 }
@@ -63,6 +66,23 @@ func initConfig() {
 
 		log.Fatalf("Config file is invalid: %v", err)
 	}
+}
+
+func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
+	jenkinsOpt := rootOptions.Jenkins
+	if jenkinsOpt == "" {
+		jenkinsServer = getCurrentJenkins()
+	} else {
+		jenkinsServer = findJenkinsByName(jenkinsOpt)
+	}
+	return
+}
+
+func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *JenkinsServer) {
+	if jenkinsServer = getCurrentJenkinsFromOptions(); jenkinsServer == nil {
+		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins) // TODO not accurate
+	}
+	return
 }
 
 func getCmdPath(cmd *cobra.Command) string {

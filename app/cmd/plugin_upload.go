@@ -83,7 +83,7 @@ var pluginUploadCmd = &cobra.Command{
 		}
 	},
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

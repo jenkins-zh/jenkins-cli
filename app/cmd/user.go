@@ -24,7 +24,7 @@ var userCmd = &cobra.Command{
 	Short: "Print the user of your Jenkins",
 	Long:  `Print the user of your Jenkins`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

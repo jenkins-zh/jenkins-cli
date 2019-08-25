@@ -29,7 +29,7 @@ var userCreateCmd = &cobra.Command{
 
 		username := args[0]
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

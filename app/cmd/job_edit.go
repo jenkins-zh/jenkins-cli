@@ -42,7 +42,7 @@ var jobEditCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

@@ -34,7 +34,7 @@ var jobParamCmd = &cobra.Command{
 		}
 
 		name := args[0]
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
