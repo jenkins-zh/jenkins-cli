@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
@@ -60,5 +62,45 @@ func initConfig() {
 		}
 
 		log.Fatalf("Config file is invalid: %v", err)
+	}
+}
+
+func getCmdPath(cmd *cobra.Command) string {
+	current := cmd.Use
+	if cmd.HasParent() {
+		parentName := getCmdPath(cmd.Parent())
+		if parentName == "" {
+			return current
+		}
+
+		return fmt.Sprintf("%s.%s", parentName, current)
+	}
+	// don't need the name of root cmd
+	return ""
+}
+
+func executePreCmd(cmd *cobra.Command, _ []string) {
+	config := getConfig()
+	if config == nil {
+		log.Fatal("Cannot find config file")
+		return
+	}
+
+	path := getCmdPath(cmd)
+	for _, preHook := range config.PreHooks {
+		if path != preHook.Path {
+			continue
+		}
+
+		execute(preHook.Command)
+	}
+}
+
+func execute(command string) {
+	array := strings.Split(command, " ")
+	cmd := exec.Command(array[0], array[1:]...)
+	cmd.Stdout = os.Stdout
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
 	}
 }

@@ -50,9 +50,15 @@ type JenkinsServer struct {
 	Description string `yaml:"description"`
 }
 
+type PreHook struct {
+	Path    string `yaml:"path"`
+	Command string `yaml:"cmd"`
+}
+
 type Config struct {
 	Current        string          `yaml:"current"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
+	PreHooks       []PreHook       `yaml:"preHooks"`
 }
 
 func setCurrentJenkins(name string) {
