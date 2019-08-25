@@ -33,13 +33,15 @@ pipeline {
         stage('Test') {
             steps {
                 container('golang') {
-                    sh label: 'go test', script: '''
-                    go test ./util/... -v
-                    go test ./client/... -v
-                    go test ./app/... -v
-                    '''
+                    sh label: 'go test', script: 'make test'
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            junit allowEmptyResults: true, testResults: "*/**/*.xml"
         }
     }
 }
