@@ -34,6 +34,11 @@ clean: ## Clean the generated artifacts
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
+test:
+	go test ./util/... -v -coverprofile bin/testcover-util.log
+	go test ./client/... -v -coverprofile bin/testcover-client.log
+	go test ./app/... -v -coverprofile bin/testcover-app.log
+
 dep:
 	go get github.com/AlecAivazis/survey/v2
 	go get github.com/gosuri/uiprogress

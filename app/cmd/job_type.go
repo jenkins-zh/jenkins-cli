@@ -26,7 +26,7 @@ var jobTypeCmd = &cobra.Command{
 	Short: "Print the types of job which in your Jenkins",
 	Long:  `Print the types of job which in your Jenkins`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

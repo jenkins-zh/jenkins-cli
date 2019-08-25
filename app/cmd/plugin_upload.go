@@ -40,7 +40,7 @@ var pluginUploadCmd = &cobra.Command{
 	Long:    `Upload a plugin from local filesystem or remote URL to your Jenkins`,
 	Example: `  jcli plugin upload --remote https://server/sample.hpi
   jcli plugin upload sample.hpi`,
-	PreRun: func(_ *cobra.Command, args []string) {
+	PreRun: func(cmd *cobra.Command, args []string) {
 		if pluginUploadOption.Remote != "" {
 			file, err := ioutil.TempFile(".", "jcli-plugin")
 			if err != nil {
@@ -70,6 +70,8 @@ var pluginUploadCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		} else if len(args) == 0 {
+			executePreCmd(cmd, args)
+
 			path, _ := os.Getwd()
 			dirName := filepath.Base(path)
 			dirName = strings.Replace(dirName, "-plugin", "", -1)
@@ -81,7 +83,7 @@ var pluginUploadCmd = &cobra.Command{
 		}
 	},
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

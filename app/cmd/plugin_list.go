@@ -31,7 +31,7 @@ var pluginListCmd = &cobra.Command{
 	Example: `  jcli plugin list --filter name=github
   jcli plugin list --filter hasUpdate`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.PluginManager{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

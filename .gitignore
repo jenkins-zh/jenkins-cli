@@ -13,3 +13,5 @@
 
 bin/
 release/
+
+*.xml

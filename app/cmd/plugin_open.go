@@ -16,7 +16,7 @@ var pluginOpenCmd = &cobra.Command{
 	Short: "Openout update center server",
 	Long:  `Openout update center server`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
 		if jenkins.URL != "" {
 			open(fmt.Sprintf("%s/pluginManager", jenkins.URL))
