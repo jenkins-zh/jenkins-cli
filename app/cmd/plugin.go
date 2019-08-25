@@ -6,6 +6,7 @@ import (
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
+	Suite string
 }
 
 var pluginOpt PluginOptions
