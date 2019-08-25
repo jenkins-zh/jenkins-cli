@@ -55,6 +55,12 @@ func isHan(s string) (isHan bool) {
 	for _, r := range wh {
 		if isHan != unicode.Is(unicode.Han, r) {
 			break
+		} else if isHan != unicode.Is(unicode.Hiragana, r) {
+			break
+		} else if isHan != unicode.Is(unicode.Katakana, r) {
+			break
+		} else if isHan != unicode.Is(unicode.Common, r) {
+			break
 		}
 	}
 	return
@@ -64,6 +70,12 @@ func countCN(s string) (count int) {
 	wh := []rune(s)
 	for _, r := range wh {
 		if unicode.Is(unicode.Han, r) {
+			count++
+		} else if unicode.Is(unicode.Hiragana, r) {
+			count++
+		} else if unicode.Is(unicode.Katakana, r) {
+			count++
+		} else if unicode.Is(unicode.Common, r) && len(string(r)) != 1 {
 			count++
 		}
 	}
@@ -83,6 +95,22 @@ func widthValue(s string, width int) (gap int) {
 		}
 	} else {
 		gap = width - l
+	}
+	return
+}
+
+func Lenf(han string) (l int) {
+	ln := len(han)
+	l = utf8.RuneCountInString(han)
+	isHan := isHan(han)
+	count := countCN(han)
+	if ln != l {
+		if isHan {
+			l = ln - l
+		} else {
+			l = ln - count
+		}
+
 	}
 	return
 }

@@ -36,21 +36,9 @@ func (t *Table) Render() {
 	for _, row := range t.Rows {
 		for ci, col := range row {
 			l := utf8.RuneCountInString(col)
-			ln := len(col)
-			isHan := isHan(col)
-			count := countCN(col)
 			t.ColumnWidths = ensureArrayCanContain(t.ColumnWidths, ci)
 			if l > t.ColumnWidths[ci] {
-				if ln != l {
-					if isHan {
-						t.ColumnWidths[ci] = ln - l
-					} else {
-						t.ColumnWidths[ci] = ln - count
-					}
-
-				} else {
-					t.ColumnWidths[ci] = l
-				}
+				t.ColumnWidths[ci] = Lenf(col)
 			}
 		}
 	}
