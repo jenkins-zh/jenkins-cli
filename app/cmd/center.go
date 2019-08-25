@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -19,8 +18,6 @@ var centerOption CenterOption
 
 func init() {
 	rootCmd.AddCommand(centerCmd)
-	centerCmd.Flags().BoolVarP(&centerOption.Watch, "watch", "w", false, "Watch Jenkins center")
-	centerCmd.Flags().IntVarP(&centerOption.Interval, "interval", "i", 1, "Interval of watch")
 }
 
 var centerCmd = &cobra.Command{
@@ -31,15 +28,7 @@ var centerCmd = &cobra.Command{
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins)
 
-		for {
-			printUpdateCenter(jenkins)
-
-			if !centerOption.Watch {
-				break
-			}
-
-			time.Sleep(time.Duration(centerOption.Interval) * time.Second)
-		}
+		printUpdateCenter(jenkins)
 	},
 }
 
