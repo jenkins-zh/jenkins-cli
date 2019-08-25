@@ -48,13 +48,3 @@ var _ = Describe("Table util test", func() {
 		})
 	})
 })
-
-func toHz(han string) string {
-	arg0 := Pad("0", " ", Lenf("0"), 0)
-	arg1 := Pad(han, "", Lenf(han), 0)
-	var un string
-	un += arg0 + " "
-	un += arg1 + " "
-	un += "Standalone Projects"
-	return un
-}
