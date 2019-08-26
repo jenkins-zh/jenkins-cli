@@ -1,3 +1,5 @@
+library identifier: 'jenkins_zh@', retriever: modernSCM([$class: 'GitSCMSource', credentialsId: '', remote: 'https://github.com/LinuxSuRen/shared-library', traits: [[$class: 'jenkins.plugins.git.traits.BranchDiscoveryTrait']]])
+
 pipeline {
     agent {
         label 'golang-1.12'
@@ -8,22 +10,28 @@ pipeline {
             parallel {
                 stage('MacOS') {
                     steps {
-                        container('golang') {
-                            sh label: 'make darwin', script: 'make darwin'
+                        script {
+                            entry.container_x('golang', 'go version'){
+                                sh label: 'make darwin', script: 'make darwin'
+                            }
                         }
                     }
                 }
                 stage('Linux') {
                     steps {
-                        container('golang') {
-                            sh label: 'make linux', script: 'make linux'
+                        script {
+                            entry.container_x('golang', 'go version'){
+                                sh label: 'make linux', script: 'make linux'
+                            }
                         }
                     }
                 }
                 stage('Windows') {
                     steps {
-                        container('golang') {
-                            sh label: 'make win', script: 'make win'
+                        script {
+                            entry.container_x('golang', 'go version'){
+                                sh label: 'make win', script: 'make win'
+                            }
                         }
                     }
                 }
@@ -32,8 +40,10 @@ pipeline {
 
         stage('Test') {
             steps {
-                container('golang') {
-                    sh label: 'go test', script: 'make test'
+                script {
+                    entry.container_x('golang', 'go version'){
+                        sh label: 'go test', script: 'make test'
+                    }
                 }
             }
         }
