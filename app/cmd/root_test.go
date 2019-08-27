@@ -22,9 +22,11 @@ var _ = Describe("Root cmd test", func() {
 		rootCmd = &cobra.Command{Use: "root"}
 		successCmd = "echo 1"
 		errorCmd = "exit 1"
+		config = nil
 	})
 
 	AfterEach(func() {
+		config = nil
 		ctrl.Finish()
 	})
 
