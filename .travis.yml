@@ -3,6 +3,10 @@ language: go
 go:
 - 1.12.x
 
+env:
+  global:
+    - GO111MODULE=on
+
 addons:
   sonarcloud:
     organization: "jenkins-zh"
