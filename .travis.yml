@@ -20,7 +20,6 @@ script:
   - make test
   # And finally run the SonarQube analysis - read the "sonar-project.properties"
   # file to see the specific configuration
-  - curl -LsS https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip > build-wrapper-linux-x86.zip
-  - unzip build-wrapper-linux-x86.zip
-  - build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make clean all
+  - curl -LsS https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip > sonar-scanner-cli-4.0.0.1744-linux.zip
+  - unzip sonar-scanner-cli-4.0.0.1744-linux.zip
   - sonar-scanner
