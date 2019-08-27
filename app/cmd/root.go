@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -99,10 +100,10 @@ func getCmdPath(cmd *cobra.Command) string {
 	return ""
 }
 
-func executePreCmd(cmd *cobra.Command, _ []string) {
+func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error) {
 	config := getConfig()
 	if config == nil {
-		log.Fatal("Cannot find config file")
+		err = fmt.Errorf("Cannot find config file")
 		return
 	}
 
@@ -112,15 +113,17 @@ func executePreCmd(cmd *cobra.Command, _ []string) {
 			continue
 		}
 
-		execute(preHook.Command)
+		if err = execute(preHook.Command, writer); err != nil {
+			return
+		}
 	}
+	return
 }
 
-func execute(command string) {
+func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
 	cmd := exec.Command(array[0], array[1:]...)
-	cmd.Stdout = os.Stdout
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Stdout = writer
+	err = cmd.Run()
+	return
 }

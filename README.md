@@ -1,6 +1,7 @@
 # Jenkins CLI
 
 [![Go Report Card](https://goreportcard.com/badge/jenkins-zh/jenkins-cli)](https://goreportcard.com/report/jenkins-zh/jenkins-cli)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status)](https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli)
 
 Jenkins CLI allows you manage your Jenkins as an easy way. No matter you're a plugin
 developer, administrator or just a regular user, it borns for you!

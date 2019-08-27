@@ -38,7 +38,7 @@ func (t *Table) Render() {
 			l := utf8.RuneCountInString(col)
 			t.ColumnWidths = ensureArrayCanContain(t.ColumnWidths, ci)
 			if l > t.ColumnWidths[ci] {
-				t.ColumnWidths[ci] = l
+				t.ColumnWidths[ci] = Lenf(col)
 			}
 		}
 	}

@@ -9,6 +9,7 @@ require (
 	github.com/golang/mock v1.3.1
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
+	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/onsi/ginkgo v1.9.0
 	github.com/onsi/gomega v1.6.0
 	github.com/spf13/cobra v0.0.5
