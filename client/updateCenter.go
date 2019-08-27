@@ -98,3 +98,37 @@ func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 	}
 	return
 }
+
+// Upgrade the Jenkins core
+func (u *UpdateCenterManager) Upgrade() (err error) {
+	api := fmt.Sprintf("%s/updateCenter/upgrade", u.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		if err = u.AuthHandle(req); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		return
+	}
+
+	client := u.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code != 200 {
+			fmt.Println("status code", code)
+		}
+		if err == nil && u.Debug && len(data) > 0 {
+			ioutil.WriteFile("debug.html", data, 0664)
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
