@@ -35,6 +35,7 @@ copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
 test:
+	mkdir -p bin
 	go test ./util/... -v -coverprofile bin/testcover-util.log
 	go test ./client/... -v -coverprofile bin/testcover-client.log
 	go test ./app/... -v -coverprofile bin/testcover-app.log
