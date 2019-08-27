@@ -70,7 +70,7 @@ var pluginUploadCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		} else if len(args) == 0 {
-			executePreCmd(cmd, args)
+			executePreCmd(cmd, args, os.Stdout)
 
 			path, _ := os.Getwd()
 			dirName := filepath.Base(path)
