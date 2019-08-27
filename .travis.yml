@@ -1,0 +1,25 @@
+language: go
+dist: trusty
+
+go:
+- 1.12.x
+
+env:
+  global:
+    - GO111MODULE=on
+
+addons:
+  sonarcloud:
+    organization: "jenkins-zh"
+    token:
+      secure: 3caad1285eb0edf2b4f65ee07b3cd8edde6c5176 # encrypted value of your token
+
+script:
+  - make clean
+  # Execute some tests
+  - make test
+  # And finally run the SonarQube analysis - read the "sonar-project.properties"
+  # file to see the specific configuration
+  - curl -LsS https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip > sonar-scanner-cli-4.0.0.1744-linux.zip
+  - unzip sonar-scanner-cli-4.0.0.1744-linux.zip
+  - sonar-scanner-4.0.0.1744-linux/bin/sonar-scanner -Dsonar.projectKey=jenkins-zh_jenkins-cli -Dsonar.organization=jenkins-zh -Dsonar.sources=. -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=674e187e300edc0ad56a05705bd0b21cbe18bd52
