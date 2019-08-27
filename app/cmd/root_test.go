@@ -138,5 +138,24 @@ var _ = Describe("Root cmd test", func() {
 			Expect(err).To(BeNil())
 			Expect(buf.String()).To(Equal(""))
 		})
+
+		It("basic use case with error command, should success", func() {
+			config = &Config{
+				PreHooks: []PreHook{PreHook{
+					Path:    "test",
+					Command: "exit 1",
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePreCmd(subCmd, nil, &buf)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })
