@@ -106,4 +106,24 @@ var _ = Describe("Table util test", func() {
 			Expect(buffer.String()).To(Equal(comp))
 		})
 	})
+
+	Context("basic function", func() {
+		It("shoud success", func() {
+			var buffer bytes.Buffer
+			table := CreateTable(&buffer)
+
+			table.Render()
+			Expect(buffer.String()).To(Equal(""))
+
+			table.AddRow("fake")
+			buffer.Reset()
+			table.Render()
+			Expect(buffer.String()).To(Equal("fake\n"))
+
+			table.Clear()
+			buffer.Reset()
+			table.Render()
+			Expect(buffer.String()).To(Equal(""))
+		})
+	})
 })
