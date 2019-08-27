@@ -22,4 +22,4 @@ script:
   # file to see the specific configuration
   - curl -LsS https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip > sonar-scanner-cli-4.0.0.1744-linux.zip
   - unzip sonar-scanner-cli-4.0.0.1744-linux.zip
-  - sonar-scanner
+  - sonar-scanner-4.0.0.1744-linux/bin/sonar-scanner
