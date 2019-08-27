@@ -51,5 +51,19 @@ var _ = Describe("Table util test", func() {
 			current = getCurrentJenkins()
 			Expect(current).To(Equal(&config.JenkinsServers[0]))
 		})
+
+		It("findSuiteByName", func() {
+			config = &Config{}
+			suite := findSuiteByName("fake")
+			Expect(suite).To(BeNil())
+
+			pluginName := "plugin-one"
+			config.PluginSuites = []PluginSuite{PluginSuite{
+				Name: pluginName,
+			}}
+			suite = findSuiteByName(pluginName)
+			Expect(suite).NotTo(BeNil())
+			Expect(suite.Name).To(Equal(pluginName))
+		})
 	})
 })
