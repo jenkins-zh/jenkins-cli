@@ -11,13 +11,17 @@ import (
 
 var _ = Describe("Root cmd test", func() {
 	var (
-		ctrl    *gomock.Controller
-		rootCmd *cobra.Command
+		ctrl       *gomock.Controller
+		rootCmd    *cobra.Command
+		successCmd string
+		errorCmd   string
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		rootCmd = &cobra.Command{Use: "root"}
+		successCmd = "echo 1"
+		errorCmd = "exit 1"
 	})
 
 	AfterEach(func() {
@@ -58,7 +62,7 @@ var _ = Describe("Root cmd test", func() {
 	Context("execute cmd test", func() {
 		It("basic command", func() {
 			var buf bytes.Buffer
-			err := execute("echo 1", &buf)
+			err := execute(successCmd, &buf)
 
 			Expect(buf.String()).To(Equal("1\n"))
 			Expect(err).To(BeNil())
@@ -66,7 +70,7 @@ var _ = Describe("Root cmd test", func() {
 
 		It("error command", func() {
 			var buf bytes.Buffer
-			err := execute("exit 1", &buf)
+			err := execute(errorCmd, &buf)
 
 			Expect(err).To(HaveOccurred())
 		})
@@ -82,7 +86,7 @@ var _ = Describe("Root cmd test", func() {
 			config = &Config{
 				PreHooks: []PreHook{PreHook{
 					Path:    "test",
-					Command: "echo 1",
+					Command: successCmd,
 				}},
 			}
 
@@ -102,13 +106,13 @@ var _ = Describe("Root cmd test", func() {
 			config = &Config{
 				PreHooks: []PreHook{PreHook{
 					Path:    "test",
-					Command: "echo 1",
+					Command: successCmd,
 				}, PreHook{
 					Path:    "test",
 					Command: "echo 2",
 				}, PreHook{
 					Path:    "fake",
-					Command: "echo 1",
+					Command: successCmd,
 				}},
 			}
 
@@ -143,7 +147,7 @@ var _ = Describe("Root cmd test", func() {
 			config = &Config{
 				PreHooks: []PreHook{PreHook{
 					Path:    "test",
-					Command: "exit 1",
+					Command: errorCmd,
 				}},
 			}
 
