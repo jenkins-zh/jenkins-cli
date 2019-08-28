@@ -45,3 +45,6 @@ dep:
 	go get github.com/spf13/viper
 	go get gopkg.in/yaml.v2
 	go get github.com/Pallinder/go-randomdata
+
+gen-mock:
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
