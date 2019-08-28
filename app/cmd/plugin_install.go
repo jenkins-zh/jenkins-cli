@@ -11,6 +11,7 @@ import (
 
 func init() {
 	pluginCmd.AddCommand(pluginInstallCmd)
+	pluginInstallCmd.Flags().StringVarP(&pluginOpt.Suite, "suite", "", "", "Suite of plugins")
 }
 
 var pluginInstallCmd = &cobra.Command{
@@ -27,6 +28,14 @@ var pluginInstallCmd = &cobra.Command{
 		jclient.ProxyAuth = jenkins.ProxyAuth
 		plugins := make([]string, len(args))
 		plugins = append(plugins, args...)
+
+		if pluginOpt.Suite != "" {
+			if suite := findSuiteByName(pluginOpt.Suite); suite != nil {
+				plugins = append(plugins, suite.Plugins...)
+			} else {
+				log.Fatal("Cannot found suite", pluginOpt.Suite)
+			}
+		}
 
 		if len(plugins) == 0 {
 			for {

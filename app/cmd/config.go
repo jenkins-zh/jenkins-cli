@@ -55,10 +55,18 @@ type PreHook struct {
 	Command string `yaml:"cmd"`
 }
 
+// PluginSuite define a suite of plugins
+type PluginSuite struct {
+	Name        string   `yaml:"name"`
+	Plugins     []string `yaml:"plugins"`
+	Description string   `yaml:"description"`
+}
+
 type Config struct {
 	Current        string          `yaml:"current"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
 	PreHooks       []PreHook       `yaml:"preHooks"`
+	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
 }
 
 func setCurrentJenkins(name string) {
@@ -107,6 +115,16 @@ func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	for _, cfg := range config.JenkinsServers {
 		if cfg.Name == name {
 			jenkinsServer = &cfg
+			break
+		}
+	}
+	return
+}
+
+func findSuiteByName(name string) (suite *PluginSuite) {
+	for _, cfg := range config.PluginSuites {
+		if cfg.Name == name {
+			suite = &cfg
 			break
 		}
 	}
