@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -10,6 +11,7 @@ import (
 type CenterWatchOption struct {
 	WatchOption
 
+	RoundTripper  http.RoundTripper
 	CeneterStatus string
 }
 
@@ -17,7 +19,7 @@ var centerWatchOption CenterWatchOption
 
 func init() {
 	centerCmd.AddCommand(centerWatchCmd)
-	centerWatchCmd.Flags().IntVarP(&centerWatchOption.Interval, "interval", "i", 1, "Interval of watch")
+	centerWatchOption.SetFlag(centerWatchCmd)
 }
 
 var centerWatchCmd = &cobra.Command{
@@ -26,10 +28,10 @@ var centerWatchCmd = &cobra.Command{
 	Long:  `Watch your update center status`,
 	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		printJenkinsStatus(jenkins)
+		printJenkinsStatus(jenkins, centerWatchOption.RoundTripper)
 
-		for {
-			printUpdateCenter(jenkins)
+		for ; centerWatchOption.Count >= 0; centerWatchOption.Count-- {
+			printUpdateCenter(jenkins, centerOption.RoundTripper)
 
 			time.Sleep(time.Duration(centerOption.Interval) * time.Second)
 		}
