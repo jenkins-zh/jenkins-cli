@@ -10,8 +10,7 @@ COVERED_MAIN_SRC_FILE=./main
 gen-mock:
 	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
-init:
-	gen-mock
+init: gen-mock
 
 darwin: init ## Build for OSX
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
