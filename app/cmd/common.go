@@ -78,6 +78,13 @@ func (b *BatchOption) SetFlag(cmd *cobra.Command) {
 type WatchOption struct {
 	Watch    bool
 	Interval int
+	Count    int
+}
+
+// SetFlag for WatchOption
+func (o *WatchOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().IntVarP(&o.Interval, "interval", "i", 1, "Interval of watch")
+	cmd.Flags().IntVarP(&o.Interval, "count", "", 9999, "Count of watch")
 }
 
 // InteractiveOption allow user to choose whether the mode is interactive

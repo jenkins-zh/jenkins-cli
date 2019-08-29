@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -11,6 +12,7 @@ import (
 type CenterOption struct {
 	WatchOption
 
+	RoundTripper  http.RoundTripper
 	CeneterStatus string
 }
 
@@ -26,14 +28,18 @@ var centerCmd = &cobra.Command{
 	Long:  `Manage your update center`,
 	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		printJenkinsStatus(jenkins)
+		printJenkinsStatus(jenkins, centerOption.RoundTripper)
 
-		printUpdateCenter(jenkins)
+		printUpdateCenter(jenkins, centerOption.RoundTripper)
 	},
 }
 
-func printUpdateCenter(jenkins *JenkinsServer) {
-	jclient := &client.UpdateCenterManager{}
+func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
+	jclient := &client.UpdateCenterManager{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: roundTripper,
+		},
+	}
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
@@ -63,8 +69,12 @@ func printUpdateCenter(jenkins *JenkinsServer) {
 	}
 }
 
-func printJenkinsStatus(jenkins *JenkinsServer) {
-	jclient := &client.JenkinsStatusClient{}
+func printJenkinsStatus(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
+	jclient := &client.JenkinsStatusClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: roundTripper,
+		},
+	}
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token

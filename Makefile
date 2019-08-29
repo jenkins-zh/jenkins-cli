@@ -7,6 +7,13 @@ VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-cou
 BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
 
+gen-mock:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+
+init: gen-mock
+
 darwin: ## Build for OSX
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)

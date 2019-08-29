@@ -19,7 +19,8 @@ type JenkinsCore struct {
 	Proxy     string
 	ProxyAuth string
 
-	Debug bool
+	Debug        bool
+	RoundTripper http.RoundTripper
 }
 
 type JenkinsCrumb struct {
@@ -28,23 +29,29 @@ type JenkinsCrumb struct {
 }
 
 func (j *JenkinsCore) GetClient() (client *http.Client) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	if j.Proxy != "" {
-		if proxyURL, err := url.Parse(j.Proxy); err == nil {
-			tr.Proxy = http.ProxyURL(proxyURL)
-		} else {
-			log.Fatal(err)
+	var roundTripper http.RoundTripper
+	if j.RoundTripper != nil {
+		roundTripper = j.RoundTripper
+	} else {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
+		if j.Proxy != "" {
+			if proxyURL, err := url.Parse(j.Proxy); err == nil {
+				tr.Proxy = http.ProxyURL(proxyURL)
+			} else {
+				log.Fatal(err)
+			}
 
-		if j.ProxyAuth != "" {
-			basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
-			tr.ProxyConnectHeader = http.Header{}
-			tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
+			if j.ProxyAuth != "" {
+				basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
+				tr.ProxyConnectHeader = http.Header{}
+				tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
+			}
 		}
+		roundTripper = tr
 	}
-	client = &http.Client{Transport: tr}
+	client = &http.Client{Transport: roundTripper}
 	return
 }
 
@@ -56,7 +63,10 @@ func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 }
 
 func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
-	request.SetBasicAuth(j.UserName, j.Token)
+	if j.UserName != "" && j.Token != "" {
+		request.SetBasicAuth(j.UserName, j.Token)
+	}
+
 	j.ProxyHandle(request)
 
 	if request.Method == "POST" {

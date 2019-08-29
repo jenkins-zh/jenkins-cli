@@ -6,6 +6,15 @@ pipeline {
     }
 
     stages {
+        stage('Init') {
+            steps {
+                script {
+                    entry.container_x('golang', 'go version'){
+                        sh label: 'make init', script: 'make init'
+                    }
+                }
+            }
+        }
         stage('Build') {
             parallel {
                 stage('MacOS') {

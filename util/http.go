@@ -25,7 +25,8 @@ type HTTPDownloader struct {
 	UserName string
 	Password string
 
-	Debug bool
+	Debug        bool
+	RoundTripper http.RoundTripper
 }
 
 // DownloadFile download a file with the progress
@@ -40,8 +41,13 @@ func (h *HTTPDownloader) DownloadFile() error {
 	if h.UserName != "" && h.Password != "" {
 		req.SetBasicAuth(h.UserName, h.Password)
 	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	var tr http.RoundTripper
+	if h.RoundTripper != nil {
+		tr = h.RoundTripper
+	} else {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Do(req)

@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // UpdateCenterManager manages the UpdateCenter
@@ -130,5 +132,24 @@ func (u *UpdateCenterManager) Upgrade() (err error) {
 	} else {
 		log.Fatal(err)
 	}
+	return
+}
+
+// DownloadJenkins download Jenkins
+func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err error) {
+	var url string
+	if lts {
+		url = "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
+	} else {
+		url = "http://mirrors.jenkins.io/war/latest/jenkins.war"
+	}
+
+	downloader := util.HTTPDownloader{
+		RoundTripper:   u.RoundTripper,
+		TargetFilePath: output,
+		URL:            url,
+		ShowProgress:   true,
+	}
+	err = downloader.DownloadFile()
 	return
 }
