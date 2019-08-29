@@ -13,7 +13,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
-var _ = Describe("center watch command", func() {
+var _ = Describe("center command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
@@ -26,8 +26,6 @@ var _ = Describe("center watch command", func() {
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
-		centerWatchOption.WatchOption.Count = -1
-		centerWatchOption.RoundTripper = roundTripper
 		centerOption.RoundTripper = roundTripper
 	})
 
@@ -58,7 +56,20 @@ var _ = Describe("center watch command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(requestCrumb).Return(responseCrumb, nil)
 
-			rootCmd.SetArgs([]string{"center", "watch"})
+			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/updateCenter/api/json?pretty=false&depth=1", nil)
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"RestartRequiredForCompletion":true}
+				`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			rootCmd.SetArgs([]string{"center"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 		})
