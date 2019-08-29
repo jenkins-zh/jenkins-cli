@@ -8,19 +8,21 @@ BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSIO
 COVERED_MAIN_SRC_FILE=./main
 
 gen-mock:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
 	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
 init: gen-mock
 
-darwin: init ## Build for OSX
+darwin: ## Build for OSX
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 
-linux: init ## Build for linux
+linux: ## Build for linux
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
 
-win: init ## Build for windows
+win: ## Build for windows
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
@@ -39,7 +41,7 @@ clean: ## Clean the generated artifacts
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
-test: init
+test:
 	mkdir -p bin
 	go test ./... -v -coverprofile coverage.out
 
