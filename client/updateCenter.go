@@ -145,6 +145,7 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 	}
 
 	downloader := util.HTTPDownloader{
+		RoundTripper:   u.RoundTripper,
 		TargetFilePath: output,
 		URL:            url,
 		ShowProgress:   true,

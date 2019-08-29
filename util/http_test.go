@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -91,6 +92,77 @@ var _ = Describe("http test", func() {
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(responseBody))
 			return
+		})
+
+		It("with error request", func() {
+			downloader = HTTPDownloader{
+				URL: "fake url",
+			}
+			err := downloader.DownloadFile()
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("with error response", func() {
+			downloader = HTTPDownloader{
+				RoundTripper: roundTripper,
+			}
+
+			request, _ := http.NewRequest("GET", "", nil)
+			response := &http.Response{}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, fmt.Errorf("fake error"))
+			err := downloader.DownloadFile()
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("status code isn't 200", func() {
+			downloader = HTTPDownloader{
+				RoundTripper: roundTripper,
+				Debug:        true,
+			}
+
+			request, _ := http.NewRequest("GET", "", nil)
+			response := &http.Response{
+				StatusCode: 400,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+			err := downloader.DownloadFile()
+			Expect(err).To(HaveOccurred())
+
+			const debugFile = "debug-download.html"
+
+			_, err = os.Stat(debugFile)
+			Expect(err).To(BeNil())
+
+			content, readErr := ioutil.ReadFile(debugFile)
+			Expect(readErr).To(BeNil())
+			Expect(string(content)).To(Equal(responseBody))
+
+			defer os.Remove(debugFile)
+		})
+
+		It("showProgress", func() {
+			downloader = HTTPDownloader{
+				RoundTripper:   roundTripper,
+				ShowProgress:   true,
+				TargetFilePath: targetFilePath,
+			}
+
+			request, _ := http.NewRequest("GET", "", nil)
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+			err := downloader.DownloadFile()
+			Expect(err).To(BeNil())
 		})
 	})
 })

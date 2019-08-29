@@ -19,7 +19,8 @@ type JenkinsCore struct {
 	Proxy     string
 	ProxyAuth string
 
-	Debug bool
+	Debug        bool
+	RoundTripper http.RoundTripper
 }
 
 type JenkinsCrumb struct {

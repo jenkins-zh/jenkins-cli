@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -11,6 +12,8 @@ import (
 type CenterDownloadOption struct {
 	LTS    bool
 	Output string
+
+	RoundTripper http.RoundTripper
 }
 
 var centerDownloadOption CenterDownloadOption
@@ -26,7 +29,11 @@ var centerDownloadCmd = &cobra.Command{
 	Short: "Download Jenkins",
 	Long:  `Download Jenkins`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jclient := &client.UpdateCenterManager{}
+		jclient := &client.UpdateCenterManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: centerDownloadOption.RoundTripper,
+			},
+		}
 
 		if err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.Output); err != nil {
 			log.Fatal(err)
