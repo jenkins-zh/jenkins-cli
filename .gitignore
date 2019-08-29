@@ -15,3 +15,5 @@ bin/
 release/
 
 *.xml
+
+mock

@@ -7,15 +7,21 @@ VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-cou
 BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
 
-darwin: ## Build for OSX
+gen-mock:
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+
+init:
+	gen-mock
+
+darwin: init ## Build for OSX
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 
-linux: ## Build for linux
+linux: init ## Build for linux
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
 
-win: ## Build for windows
+win: init ## Build for windows
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
@@ -34,7 +40,7 @@ clean: ## Clean the generated artifacts
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
-test:
+test: init
 	mkdir -p bin
 	go test ./... -v -coverprofile coverage.out
 
@@ -45,6 +51,3 @@ dep:
 	go get github.com/spf13/viper
 	go get gopkg.in/yaml.v2
 	go get github.com/Pallinder/go-randomdata
-
-gen-mock:
-	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
