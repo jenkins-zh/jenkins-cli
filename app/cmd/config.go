@@ -105,8 +105,11 @@ func getJenkinsNames() []string {
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 	config := getConfig()
-	current := config.Current
-	jenkinsServer = findJenkinsByName(current)
+
+	if config != nil {
+		current := config.Current
+		jenkinsServer = findJenkinsByName(current)
+	}
 
 	return
 }

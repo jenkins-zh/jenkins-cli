@@ -14,9 +14,10 @@ import (
 
 // RootOptions is a global option for whole cli
 type RootOptions struct {
-	Jenkins string
-	Version bool
-	Debug   bool
+	ConfigFile string
+	Jenkins    string
+	Version    bool
+	Debug      bool
 }
 
 var rootCmd = &cobra.Command{
@@ -53,20 +54,31 @@ var rootOptions RootOptions
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "", "An alternative config file")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 }
 
 func initConfig() {
-	if err := loadDefaultConfig(); err != nil {
-		if os.IsNotExist(err) {
-			log.Printf("No config file found.")
-			return
+	if rootOptions.ConfigFile == "" {
+		if err := loadDefaultConfig(); err != nil {
+			configLoadErrorHandle(err)
 		}
-
-		log.Fatalf("Config file is invalid: %v", err)
+	} else {
+		if err := loadConfig(rootOptions.ConfigFile); err != nil {
+			configLoadErrorHandle(err)
+		}
 	}
+}
+
+func configLoadErrorHandle(err error) {
+	if os.IsNotExist(err) {
+		log.Printf("No config file found.")
+		return
+	}
+
+	log.Fatalf("Config file is invalid: %v", err)
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
