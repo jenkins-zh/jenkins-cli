@@ -74,11 +74,16 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 		pluginList := obj.([]client.AvailablePlugin)
 		if len(pluginList) != 0 {
 			table := util.CreateTable(os.Stdout)
-			table.AddRow("number", "name", "installed", "title")
+			table.AddRow("number", "name", "installed", "title", "version")
 
+			jclient := &client.PluginAPI{}
+			var ver string
 			for i, plugin := range pluginList {
+				if pluginInfo, err := jclient.GetPlugin(plugin.Name); err == nil {
+					ver = pluginInfo.Version
+				}
 				table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-					fmt.Sprintf("%v", plugin.Installed), plugin.Title)
+					fmt.Sprintf("%v", plugin.Installed), plugin.Title, ver)
 			}
 			table.Render()
 		}

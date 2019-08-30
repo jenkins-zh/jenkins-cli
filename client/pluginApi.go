@@ -57,7 +57,7 @@ type PluginInstallationInfo struct {
 }
 
 func (a *PluginAPI) ShowTrend(name string) {
-	if plugin, err := a.getPlugin(name); err == nil {
+	if plugin, err := a.GetPlugin(name); err == nil {
 		data := []float64{}
 		installations := plugin.Stats.Installations
 		offset, count := 0, 10
@@ -127,7 +127,7 @@ func (d *PluginAPI) download(url string, name string) {
 	}
 }
 
-func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
+func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -151,7 +151,7 @@ func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 }
 
 func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo) {
-	plugin, err := d.getPlugin(pluginName)
+	plugin, err := d.GetPlugin(pluginName)
 	if err != nil {
 		log.Println("can't get the plugin by name:", pluginName)
 		panic(err)
