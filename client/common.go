@@ -5,12 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 )
 
+// JenkinsCore core informations of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
 	URL       string
@@ -23,6 +25,7 @@ type JenkinsCore struct {
 	RoundTripper http.RoundTripper
 }
 
+// JenkinsCrumb crumb for Jenkins
 type JenkinsCrumb struct {
 	CrumbRequestField string
 	Crumb             string
@@ -75,6 +78,7 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 	return
 }
 
+// CrumbHandle handle crum with http request
 func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
 	if c, err := j.GetCrumb(); err == nil && c != nil {
 		// cannot get the crumb could be a noraml situation
@@ -88,32 +92,47 @@ func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
 	return nil
 }
 
-func (j *JenkinsCore) GetCrumb() (*JenkinsCrumb, error) {
-	api := fmt.Sprintf("%s/crumbIssuer/api/json", j.URL)
+// GetCrumb get the crumb from Jenkins
+func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
+	var (
+		statusCode int
+		data       []byte
+	)
 
-	req, err := http.NewRequest("GET", api, nil)
-	if err != nil {
-		return nil, err
+	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
+		if statusCode == 200 {
+			json.Unmarshal(data, &crumbIssuer)
+		} else if statusCode == 404 {
+			// return 404 if Jenkins does no have crumb
+		} else {
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+		}
+	}
+
+	return
+}
+
+// Request make a common request
+func (j *JenkinsCore) Request(method, api string, headers map[string]string, payload io.Reader) (
+	statusCode int, data []byte, err error) {
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
+		return
 	}
 	j.AuthHandle(req)
 
-	var crumbIssuer JenkinsCrumb
-	client := j.GetClient()
-	if response, err := client.Do(req); err == nil {
-		if data, err := ioutil.ReadAll(response.Body); err == nil {
-			if response.StatusCode == 200 {
-				json.Unmarshal(data, &crumbIssuer)
-			} else if response.StatusCode == 404 {
-				return nil, err
-			} else {
-				log.Printf("Unexpected status code: %d.", response.StatusCode)
-				return nil, err
-			}
-		} else {
-			return nil, err
-		}
-	} else {
-		return nil, err
+	for k, v := range headers {
+		req.Header.Add(k, v)
 	}
-	return &crumbIssuer, nil
+
+	client := j.GetClient()
+	if response, err = client.Do(req); err == nil {
+		statusCode = response.StatusCode
+		data, err = ioutil.ReadAll(response.Body)
+	}
+	return
 }
