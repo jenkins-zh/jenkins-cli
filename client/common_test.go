@@ -32,7 +32,7 @@ var _ = Describe("common test", func() {
 		ctrl.Finish()
 	})
 
-	Context("requst", func() {
+	Context("Request", func() {
 		var (
 			method  string
 			api     string

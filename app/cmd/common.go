@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -95,4 +96,14 @@ type InteractiveOption struct {
 // SetFlag set the option flag to this cmd
 func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
+}
+
+func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	jenkins = getCurrentJenkinsFromOptionsOrDie()
+	jclient.URL = jenkins.URL
+	jclient.UserName = jenkins.UserName
+	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
 }
