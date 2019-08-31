@@ -22,6 +22,14 @@ type PluginDependency struct {
 	Version  string `json:"version"`
 }
 
+type PluginInfoList struct {
+	Limit   int          `json:"limit`
+	Page    int          `json:"page"`
+	Pages   int          `json:"pages"`
+	Total   int          `json:"total"`
+	Plugins []PluginInfo `json:"plugins"`
+}
+
 type PluginInfo struct {
 	BuildDate         string             `json:"buildDate"`
 	Dependencies      []PluginDependency `json:"dependencies"`
@@ -57,7 +65,7 @@ type PluginInstallationInfo struct {
 }
 
 func (a *PluginAPI) ShowTrend(name string) {
-	if plugin, err := a.GetPlugin(name); err == nil {
+	if plugin, err := a.getPlugin(name); err == nil {
 		data := []float64{}
 		installations := plugin.Stats.Installations
 		offset, count := 0, 10
@@ -127,7 +135,7 @@ func (d *PluginAPI) download(url string, name string) {
 	}
 }
 
-func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
+func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -151,7 +159,7 @@ func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
 }
 
 func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo) {
-	plugin, err := d.GetPlugin(pluginName)
+	plugin, err := d.getPlugin(pluginName)
 	if err != nil {
 		log.Println("can't get the plugin by name:", pluginName)
 		panic(err)
@@ -169,6 +177,38 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 
 			plugins = append(plugins, d.collectDependencies(dependency.Name)...)
 		}
+	}
+	return
+}
+
+func (d *PluginAPI) SearchPlugins(name string, limit ...int) (plugins *PluginInfoList) {
+	var cli = http.Client{}
+	api := "https://plugins.jenkins.io/api/plugins?q=" + name
+	var isUse bool = false
+	if limit != nil {
+		api += fmt.Sprintf("&limit=%v", limit[0])
+		isUse = true
+	}
+	cli.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	resp, err := cli.Get(api)
+	if err != nil {
+		return plugins
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	plugins = &PluginInfoList{}
+	err = json.Unmarshal(body, plugins)
+	if plugins.Total > 50 && !isUse {
+		plugins = d.SearchPlugins(name, plugins.Total)
+	}
+	if err != nil {
+		log.Println("error when unmarshal:", string(body))
 	}
 	return
 }

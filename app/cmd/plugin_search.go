@@ -45,7 +45,7 @@ var pluginSearchCmd = &cobra.Command{
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
 
-			if data, err := pluginSearchOption.Output(result); err == nil {
+			if data, err := pluginSearchOption.Output(result, keyword); err == nil {
 				if len(data) > 0 {
 					fmt.Println(string(data))
 				}
@@ -69,21 +69,27 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	return result
 }
 
-func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
+func (o *PluginSearchOption) Output(obj interface{}, keyword string) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		pluginList := obj.([]client.AvailablePlugin)
 		if len(pluginList) != 0 {
 			table := util.CreateTable(os.Stdout)
-			table.AddRow("number", "name", "installed", "title", "version")
+			table.AddRow("number", "name", "installed", "version", "title")
 
 			jclient := &client.PluginAPI{}
-			var ver string
+			plugins := jclient.SearchPlugins(keyword)
 			for i, plugin := range pluginList {
-				if pluginInfo, err := jclient.GetPlugin(plugin.Name); err == nil {
-					ver = pluginInfo.Version
+				for _, plu := range plugins.Plugins {
+					if plu.Name == plugin.Name && len(plu.Version) > 6 {
+						table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+							fmt.Sprintf("%v", plugin.Installed), fmt.Sprintf("%v...", plu.Version[0:5]), plugin.Title)
+						break
+					} else if plu.Name == plugin.Name {
+						table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+							fmt.Sprintf("%v", plugin.Installed), plu.Version, plugin.Title)
+						break
+					}
 				}
-				table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-					fmt.Sprintf("%v", plugin.Installed), plugin.Title, ver)
 			}
 			table.Render()
 		}
