@@ -414,33 +414,27 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	return
 }
 
+// Delete will delete a job by name
 func (q *JobClient) Delete(jobName string) (err error) {
-	api := fmt.Sprintf("%s/job/%s/doDelete", q.URL, jobName)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 302 || code == 200 { // Jenkins will send redirect by this api
+	api := fmt.Sprintf("/job/%s/doDelete", jobName)
+	header := map[string]string{
+		util.CONTENT_TYPE: util.APP_FORM,
+	}
+
+	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
+		if statusCode == 200 || statusCode == 302 {
 			fmt.Println("delete successfully")
 		} else {
-			fmt.Printf("status code: %d\n", code)
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
