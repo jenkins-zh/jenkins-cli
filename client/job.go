@@ -180,26 +180,15 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	return
 }
 
+// GetJobTypeCategories returns all categories of jobs
 func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err error) {
-	api := fmt.Sprintf("%s/view/all/itemCategories?depth=3", q.URL)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
+	if statusCode, data, err = q.Request("GET", "/view/all/itemCategories?depth=3", nil, nil); err == nil {
+		if statusCode == 200 {
 			type innerJobCategories struct {
 				Categories []JobCategory
 			}
@@ -207,10 +196,11 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 			err = json.Unmarshal(data, result)
 			jobCategories = result.Categories
 		} else {
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
@@ -286,6 +276,7 @@ func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 	return
 }
 
+// GetHistory returns the build history of a job
 func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
@@ -464,12 +455,14 @@ func parseJobPath(jobName string) (path string) {
 	return
 }
 
+// JobLog holds the log text
 type JobLog struct {
 	HasMore   bool
 	NextStart int64
 	Text      string
 }
 
+// SearchResult holds the result items
 type SearchResult struct {
 	Suggestions []SearchResultItem
 }

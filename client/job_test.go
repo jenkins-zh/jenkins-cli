@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -228,6 +229,55 @@ var _ = Describe("job test", func() {
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
 			Expect(result.Name).To(Equal(jobName))
+		})
+	})
+
+	Context("GetJobTypeCategories", func() {
+		It("simple case, should success", func() {
+			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/view/all/itemCategories?depth=3", jobClient.URL), nil)
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			_, err := jobClient.GetJobTypeCategories()
+			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("Delete", func() {
+		It("delete a job", func() {
+			jobName := "fakeJob"
+			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
+			request.Header.Add("CrumbRequestField", "Crumb")
+			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			responseCrumb := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    requestCrumb,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+				`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+
+			err := jobClient.Delete(jobName)
+			Expect(err).To(BeNil())
 		})
 	})
 })
