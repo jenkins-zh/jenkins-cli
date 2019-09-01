@@ -38,7 +38,8 @@ var jobStopCmd = &cobra.Command{
 			err      error
 		)
 		if buildNum, err = strconv.Atoi(args[1]); err != nil {
-			log.Fatal(err)
+			cmd.PrintErrln(err)
+			return
 		}
 
 		jobName := args[0]
