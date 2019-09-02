@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -15,6 +16,8 @@ type JobBuildOption struct {
 
 	Param string
 	Debug bool
+
+	RoundTripper http.RoundTripper
 }
 
 var jobBuildOption JobBuildOption
@@ -42,13 +45,12 @@ var jobBuildCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobBuildOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false

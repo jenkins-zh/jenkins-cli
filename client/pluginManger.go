@@ -87,68 +87,44 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 	}
 }
 
+// GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	api := fmt.Sprintf("%s/pluginManager/plugins", p.URL)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				pluginList = &AvailablePluginList{}
-				err = json.Unmarshal(data, pluginList)
-			}
+	if statusCode, data, err = p.Request("GET", "/pluginManager/plugins", nil, nil); err == nil {
+		if statusCode == 200 {
+			pluginList = &AvailablePluginList{}
+			err = json.Unmarshal(data, pluginList)
 		} else {
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if p.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
 
+// GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	api := fmt.Sprintf("%s/pluginManager/api/json?pretty=true&depth=1", p.URL)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				pluginList = &InstalledPluginList{}
-				err = json.Unmarshal(data, pluginList)
-			}
+	if statusCode, data, err = p.Request("GET", "/pluginManager/api/json?depth=1", nil, nil); err == nil {
+		if statusCode == 200 {
+			pluginList = &InstalledPluginList{}
+			err = json.Unmarshal(data, pluginList)
 		} else {
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if p.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
@@ -213,31 +189,21 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 
 // UninstallPlugin uninstall a plugin by name
 func (p *PluginManager) UninstallPlugin(name string) (err error) {
-	api := fmt.Sprintf("%s/pluginManager/plugin/%s/uninstall", p.URL, name)
+	api := fmt.Sprintf("/pluginManager/plugin/%s/uninstall", name)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
+	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
+		if statusCode == 200 {
 			fmt.Println("uninstall succeed.")
 		} else {
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if p.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }

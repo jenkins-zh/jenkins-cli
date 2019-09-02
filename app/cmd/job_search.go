@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -10,6 +10,8 @@ import (
 
 type JobSearchOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var jobSearchOption JobSearchOption
@@ -31,18 +33,17 @@ var jobSearchCmd = &cobra.Command{
 
 		keyword := args[0]
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobSearchOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if status, err := jclient.Search(keyword); err == nil {
 			var data []byte
 			if data, err = Format(status, queueOption.Format); err == nil {
-				fmt.Printf("%s\n", string(data))
+				cmd.Println(string(data))
 			} else {
 				log.Fatal(err)
 			}

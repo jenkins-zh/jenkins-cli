@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -11,6 +12,8 @@ import (
 
 type JobStopOption struct {
 	BatchOption
+
+	RoundTripper http.RoundTripper
 }
 
 var jobStopOption JobStopOption
@@ -35,7 +38,8 @@ var jobStopCmd = &cobra.Command{
 			err      error
 		)
 		if buildNum, err = strconv.Atoi(args[1]); err != nil {
-			log.Fatal(err)
+			cmd.PrintErrln(err)
+			return
 		}
 
 		jobName := args[0]
@@ -43,13 +47,12 @@ var jobStopCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobStopOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if err := jclient.StopJob(jobName, buildNum); err != nil {
 			log.Fatal(err)

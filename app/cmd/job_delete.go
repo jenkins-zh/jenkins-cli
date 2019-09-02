@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -10,6 +11,8 @@ import (
 
 type JobDeleteOption struct {
 	BatchOption
+
+	RoundTripper http.RoundTripper
 }
 
 var jobDeleteOption JobDeleteOption
@@ -34,13 +37,12 @@ var jobDeleteCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobDeleteOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if err := jclient.Delete(jobName); err != nil {
 			log.Fatal(err)
