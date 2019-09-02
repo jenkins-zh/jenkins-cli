@@ -1,9 +1,10 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
-	"os"
+	"net/http"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -13,6 +14,8 @@ import (
 
 type PluginSearchOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var pluginSearchOption PluginSearchOption
@@ -34,20 +37,19 @@ var pluginSearchCmd = &cobra.Command{
 
 		keyword := args[0]
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.PluginManager{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginSearchOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
 
 			if data, err := pluginSearchOption.Output(result); err == nil {
 				if len(data) > 0 {
-					fmt.Println(string(data))
+					cmd.Print(string(data))
 				}
 			} else {
 				log.Fatal(err)
@@ -69,11 +71,14 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	return result
 }
 
+// Output output the data into buffer
 func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		pluginList := obj.([]client.AvailablePlugin)
+		buf := new(bytes.Buffer)
+
 		if len(pluginList) != 0 {
-			table := util.CreateTable(os.Stdout)
+			table := util.CreateTable(buf)
 			table.AddRow("number", "name", "installed", "title")
 
 			for i, plugin := range pluginList {
@@ -83,7 +88,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 			table.Render()
 		}
 		err = nil
-		data = []byte{}
+		data = buf.Bytes()
 	}
 	return
 }

@@ -49,18 +49,7 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("GetAvailablePlugins", func() {
 		It("no plugin in the list", func() {
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body: ioutil.NopCloser(bytes.NewBufferString(`{
-					"status": "ok",
-					"data": []
-				}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareForEmptyAvaiablePluginList(roundTripper, pluginMgr.URL)
 
 			pluginList, err := pluginMgr.GetAvailablePlugins()
 			Expect(err).To(BeNil())
@@ -69,20 +58,7 @@ var _ = Describe("PluginManager test", func() {
 		})
 
 		It("one plugin in the list", func() {
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body: ioutil.NopCloser(bytes.NewBufferString(`{
-					"status": "ok",
-					"data": [{
-						"name": "fake"
-					}]
-				}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareForOneAvaiablePlugin(roundTripper, pluginMgr.URL)
 
 			pluginList, err := pluginMgr.GetAvailablePlugins()
 			Expect(err).To(BeNil())
