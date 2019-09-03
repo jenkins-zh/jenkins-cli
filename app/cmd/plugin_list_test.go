@@ -72,7 +72,7 @@ var _ = Describe("plugin list command", func() {
 			Expect(err).To(BeNil())
 
 			Expect(buf.String()).To(Equal(`number name version update
-0      fake 1.0     false
+0      fake 1.0     true
 `))
 		})
 
@@ -110,7 +110,7 @@ func pluginsJSON() string {
     "LongName": "",
     "Version": "1.0",
     "URL": "",
-    "HasUpdate": false,
+    "HasUpdate": true,
     "Pinned": false,
     "RequiredCoreVesion": "",
     "MinimumJavaVersion": "",

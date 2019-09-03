@@ -73,7 +73,7 @@ func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 			"plugins": [{
 				"shortName": "fake",
 				"version": "1.0",
-				"update": false
+				"hasUpdate": true
 			}]
 		}`))
 	return
