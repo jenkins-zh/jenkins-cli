@@ -85,7 +85,7 @@ var _ = Describe("plugin list command", func() {
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "json", "--filter", "hasUpdate", "--filter", "name=fake"})
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "json", "--filter", "hasUpdate", "--filter", "name=fake", "--filter", "enable", "--filter", "active"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -100,12 +100,12 @@ var _ = Describe("plugin list command", func() {
 func pluginsJSON() string {
 	return `[
   {
-    "Active": false,
+    "Active": true,
     "Enabled": false,
     "Bundled": false,
     "Downgradable": false,
     "Deleted": false,
-    "Enable": false,
+    "Enable": true,
     "ShortName": "fake",
     "LongName": "",
     "Version": "1.0",

@@ -63,8 +63,6 @@ var pluginListCmd = &cobra.Command{
 					enable = true
 				case "active":
 					active = true
-				case "name":
-					downgradable = true
 				}
 
 				if strings.HasPrefix(f, "name=") {
