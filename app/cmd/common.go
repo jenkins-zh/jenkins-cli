@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -36,8 +36,9 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	return nil, fmt.Errorf("not support format %s", o.Format)
 }
 
+// SetFlag set flag of output format
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output (default 'json')")
+	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output, supported formats: table, json, yaml")
 }
 
 func Format(obj interface{}, format string) (data []byte, err error) {
