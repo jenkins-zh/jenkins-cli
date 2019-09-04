@@ -141,18 +141,3 @@ var _ = Describe("common test", func() {
 		})
 	})
 })
-
-// RequestCrumb only for the test case
-func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) {
-	requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, "/crumbIssuer/api/json"), nil)
-	responseCrumb := &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    requestCrumb,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`
-		{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
-		`)),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(requestCrumb).Return(responseCrumb, nil)
-}

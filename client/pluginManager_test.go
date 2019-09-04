@@ -113,48 +113,22 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("UninstallPlugin", func() {
 		var (
-			api        string
 			pluginName string
 		)
 
 		BeforeEach(func() {
 			pluginName = "fake"
-			api = fmt.Sprintf("%s/pluginManager/plugin/%s/uninstall", pluginMgr.URL, pluginName)
 		})
 
 		It("normal case, should success", func() {
-			request, _ := http.NewRequest("POST", api, nil)
-			request.Header.Add("CrumbRequestField", "Crumb")
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
-
-			// common crumb request
-			RequestCrumb(roundTripper, pluginMgr.URL)
+			PrepareForUninstallPlugin(roundTripper, pluginMgr.URL, pluginName)
 
 			err := pluginMgr.UninstallPlugin(pluginName)
 			Expect(err).To(BeNil())
 		})
 
 		It("response with 500", func() {
-			request, _ := http.NewRequest("POST", api, nil)
-			request.Header.Add("CrumbRequestField", "Crumb")
-			response := &http.Response{
-				StatusCode: 500,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
-
-			// common crumb request
-			RequestCrumb(roundTripper, pluginMgr.URL)
+			PrepareForUninstallPluginWith500(roundTripper, pluginMgr.URL, pluginName)
 
 			err := pluginMgr.UninstallPlugin(pluginName)
 			Expect(err).To(HaveOccurred())
