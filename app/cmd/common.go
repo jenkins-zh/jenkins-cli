@@ -99,6 +99,12 @@ func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
 }
 
+// HookOption is the option whether skip command hook
+type HookOption struct {
+	SkipPreHook bool
+	SkipPostHook bool
+}
+
 func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL

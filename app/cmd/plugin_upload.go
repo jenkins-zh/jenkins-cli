@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,11 @@ type PluginUploadOption struct {
 	RemoteUser     string
 	RemotePassword string
 	RemoteJenkins  string
+	ShowProgress   bool
+
+	RoundTripper http.RoundTripper
+
+	HookOption
 
 	pluginFilePath string
 }
@@ -27,10 +33,14 @@ var pluginUploadOption PluginUploadOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUploadCmd)
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true, "Whether show the upload progress")
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "", "Remote plugin URL")
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "", "User of remote plugin URL")
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "", "Password of remote plugin URL")
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "", "Remote Jenkins which will find from config list")
+
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false, "Whether skip the previous command hook")
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false, "Whether skip the post command hook")
 }
 
 var pluginUploadCmd = &cobra.Command{
@@ -39,7 +49,8 @@ var pluginUploadCmd = &cobra.Command{
 	Short:   "Upload a plugin  to your Jenkins",
 	Long:    `Upload a plugin from local filesystem or remote URL to your Jenkins`,
 	Example: `  jcli plugin upload --remote https://server/sample.hpi
-  jcli plugin upload sample.hpi`,
+jcli plugin upload sample.hpi
+jcli plugin upload sample.hpi --show-progress=false`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if pluginUploadOption.Remote != "" {
 			file, err := ioutil.TempFile(".", "jcli-plugin")
@@ -70,7 +81,9 @@ var pluginUploadCmd = &cobra.Command{
 				log.Fatal(err)
 			}
 		} else if len(args) == 0 {
-			executePreCmd(cmd, args, os.Stdout)
+			if !pluginUploadOption.SkipPreHook {
+				executePreCmd(cmd, args, os.Stdout)
+			}
 
 			path, _ := os.Getwd()
 			dirName := filepath.Base(path)
@@ -82,14 +95,22 @@ var pluginUploadCmd = &cobra.Command{
 			pluginUploadOption.pluginFilePath = args[0]
 		}
 	},
-	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.PluginManager{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+	PostRun: func(cmd *cobra.Command, args []string) {
+		if pluginUploadOption.SkipPostHook {
+			return
+		}
+
+		executePostCmd(cmd, args, cmd.OutOrStdout())
+	},
+	Run: func(cmd *cobra.Command, _ []string) {
+		jclient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginUploadOption.RoundTripper,
+				Output:       cmd.OutOrStdout(),
+			},
+			ShowProgress: pluginUploadOption.ShowProgress,
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 		jclient.Debug = rootOptions.Debug
 
 		if pluginUploadOption.Remote != "" {

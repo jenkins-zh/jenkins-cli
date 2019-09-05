@@ -120,12 +120,32 @@ func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error)
 	}
 
 	path := getCmdPath(cmd)
-	for _, preHook := range config.PreHooks {
-		if path != preHook.Path {
+	for _, hook := range config.PreHooks {
+		if path != hook.Path {
 			continue
 		}
 
-		if err = execute(preHook.Command, writer); err != nil {
+		if err = execute(hook.Command, writer); err != nil {
+			return
+		}
+	}
+	return
+}
+
+func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error) {
+	config := getConfig()
+	if config == nil {
+		err = fmt.Errorf("Cannot find config file")
+		return
+	}
+
+	path := getCmdPath(cmd)
+	for _, hook := range config.PostHooks {
+		if path != hook.Path {
+			continue
+		}
+
+		if err = execute(hook.Command, writer); err != nil {
 			return
 		}
 	}

@@ -86,7 +86,7 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with one preHook, should success", func() {
 			config = &Config{
-				PreHooks: []PreHook{PreHook{
+				PreHooks: []CommndHook{CommndHook{
 					Path:    "test",
 					Command: successCmd,
 				}},
@@ -106,13 +106,13 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with many preHooks, should success", func() {
 			config = &Config{
-				PreHooks: []PreHook{PreHook{
+				PreHooks: []CommndHook{CommndHook{
 					Path:    "test",
 					Command: successCmd,
-				}, PreHook{
+				}, CommndHook{
 					Path:    "test",
 					Command: "echo 2",
-				}, PreHook{
+				}, CommndHook{
 					Path:    "fake",
 					Command: successCmd,
 				}},
@@ -147,7 +147,7 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with error command, should success", func() {
 			config = &Config{
-				PreHooks: []PreHook{PreHook{
+				PreHooks: []CommndHook{CommndHook{
 					Path:    "test",
 					Command: errorCmd,
 				}},

@@ -22,6 +22,7 @@ type JenkinsCore struct {
 	ProxyAuth string
 
 	Debug        bool
+	Output       io.Writer
 	RoundTripper http.RoundTripper
 }
 
