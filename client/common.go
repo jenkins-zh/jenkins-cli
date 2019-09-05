@@ -113,6 +113,48 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 	return
 }
 
+// RequestWithData requests the api and parse the data into an interface
+func (j *JenkinsCore) RequestWithData(method, api string, headers map[string]string,
+	payload io.Reader, successCode int, obj interface{}) (err error) {
+	var (
+		statusCode int
+		data       []byte
+	)
+
+	if statusCode, data, err = j.Request(method, api, headers, payload); err == nil {
+		if statusCode == successCode {
+			json.Unmarshal(data, obj)
+		} else {
+			err = j.ErrorHandle(statusCode, data)
+		}
+	}
+	return
+}
+
+// RequestWithoutData requests the api without handling data
+func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]string,
+	payload io.Reader, successCode int) (err error) {
+	var (
+		statusCode int
+		data       []byte
+	)
+
+	if statusCode, data, err = j.Request(method, api, headers, payload); err == nil &&
+		statusCode != successCode {
+		err = j.ErrorHandle(statusCode, data)
+	}
+	return
+}
+
+// ErrorHandle handles the error cases
+func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
+	err = fmt.Errorf("unexpected status code: %d", statusCode)
+	if j.Debug {
+		ioutil.WriteFile("debug.html", data, 0664)
+	}
+	return
+}
+
 // Request make a common request
 func (j *JenkinsCore) Request(method, api string, headers map[string]string, payload io.Reader) (
 	statusCode int, data []byte, err error) {

@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -92,43 +91,13 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 
 // GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = p.Request("GET", "/pluginManager/plugins", nil, nil); err == nil {
-		if statusCode == 200 {
-			pluginList = &AvailablePluginList{}
-			err = json.Unmarshal(data, pluginList)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = p.RequestWithData("GET", "/pluginManager/plugins", nil, nil, 200, &pluginList)
 	return
 }
 
 // GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = p.Request("GET", "/pluginManager/api/json?depth=1", nil, nil); err == nil {
-		if statusCode == 200 {
-			pluginList = &InstalledPluginList{}
-			err = json.Unmarshal(data, pluginList)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	return
 }
 
@@ -193,21 +162,7 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 // UninstallPlugin uninstall a plugin by name
 func (p *PluginManager) UninstallPlugin(name string) (err error) {
 	api := fmt.Sprintf("/pluginManager/plugin/%s/uninstall", name)
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
-		if statusCode == 200 {
-			fmt.Println("uninstall succeed.")
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = p.RequestWithoutData("POST", api, nil, nil, 200)
 	return
 }
 
