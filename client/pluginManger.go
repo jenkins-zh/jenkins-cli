@@ -261,7 +261,6 @@ func (p *PluginManager) newfileUploadRequest(uri string, params map[string]strin
 
 	bytesBuffer := &bytes.Buffer{}
 	writer := multipart.NewWriter(bytesBuffer)
-	writer.SetBoundary(filepath.Base(path)) // TODO at most 70 bytes long.
 
 	var part io.Writer
 	part, err = writer.CreateFormFile(paramName, filepath.Base(path))

@@ -99,14 +99,10 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 
 	bytesBuffer := &bytes.Buffer{}
 	writer := multipart.NewWriter(bytesBuffer)
-	writer.SetBoundary(filepath.Base(tmpfile.Name()))
 	part, _ := writer.CreateFormFile("@name", filepath.Base(tmpfile.Name()))
 
 	io.Copy(part, tmpfile)
 
-	// progressWriter := &util.ProgressIndicator{
-	// 	Reader: bytesBuffer,
-	// }
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/uploadPlugin", rootURL), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
 	request.Header.Set("Content-Type", writer.FormDataContentType())
