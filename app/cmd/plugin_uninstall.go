@@ -1,11 +1,18 @@
 package cmd
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
+
+// PluginUninstallOption the option of uninstall a plugin
+type PluginUninstallOption struct {
+	RoundTripper http.RoundTripper
+}
+
+var pluginUninstallOption PluginUninstallOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUninstallCmd)
@@ -24,16 +31,15 @@ var pluginUninstallCmd = &cobra.Command{
 
 		pluginName = args[0]
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.PluginManager{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginUninstallOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if err := jclient.UninstallPlugin(pluginName); err != nil {
-			log.Fatal(err)
+			cmd.PrintErr(err)
 		}
 	},
 }
