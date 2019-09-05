@@ -161,8 +161,20 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 
 // UninstallPlugin uninstall a plugin by name
 func (p *PluginManager) UninstallPlugin(name string) (err error) {
-	api := fmt.Sprintf("/pluginManager/plugin/%s/uninstall", name)
-	err = p.RequestWithoutData("POST", api, nil, nil, 200)
+	api := fmt.Sprintf("/pluginManager/plugin/%s/doUninstall", name)
+	var (
+		statusCode int
+		data       []byte
+	)
+
+	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
+		if statusCode != 200 {
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if p.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
+		}
+	}
 	return
 }
 
