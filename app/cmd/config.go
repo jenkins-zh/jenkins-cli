@@ -50,7 +50,8 @@ type JenkinsServer struct {
 	Description string `yaml:"description"`
 }
 
-type PreHook struct {
+// CommndHook is a hook
+type CommndHook struct {
 	Path    string `yaml:"path"`
 	Command string `yaml:"cmd"`
 }
@@ -62,10 +63,12 @@ type PluginSuite struct {
 	Description string   `yaml:"description"`
 }
 
+// Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []PreHook       `yaml:"preHooks"`
+	PreHooks       []CommndHook    `yaml:"preHooks"`
+	PostHooks      []CommndHook    `yaml:"postHooks"`
 	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
 }
 

@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,8 +15,11 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// PluginManager is the client of plugin manager
 type PluginManager struct {
 	JenkinsCore
+
+	ShowProgress bool
 }
 
 type Plugin struct {
@@ -89,43 +91,13 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 
 // GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = p.Request("GET", "/pluginManager/plugins", nil, nil); err == nil {
-		if statusCode == 200 {
-			pluginList = &AvailablePluginList{}
-			err = json.Unmarshal(data, pluginList)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = p.RequestWithData("GET", "/pluginManager/plugins", nil, nil, 200, &pluginList)
 	return
 }
 
 // GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = p.Request("GET", "/pluginManager/api/json?depth=1", nil, nil); err == nil {
-		if statusCode == 200 {
-			pluginList = &InstalledPluginList{}
-			err = json.Unmarshal(data, pluginList)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	return
 }
 
@@ -207,34 +179,27 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 }
 
 // Upload will upload a file from local filesystem into Jenkins
-func (p *PluginManager) Upload(pluginFile string) {
+func (p *PluginManager) Upload(pluginFile string) (err error) {
 	api := fmt.Sprintf("%s/pluginManager/uploadPlugin", p.URL)
 	extraParams := map[string]string{}
-	request, err := newfileUploadRequest(api, extraParams, "@name", pluginFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err == nil {
-		p.AuthHandle(request)
-	} else {
+	var request *http.Request
+	if request, err = p.newfileUploadRequest(api, extraParams, "@name", pluginFile); err != nil {
 		return
 	}
 
+	p.AuthHandle(request)
+
 	client := p.GetClient()
 	var response *http.Response
-	response, err = client.Do(request)
-	if err != nil {
-		log.Fatal(err)
+	if response, err = client.Do(request); err != nil {
+		return
 	} else if response.StatusCode != 200 {
-		fmt.Println("StatusCode", response.StatusCode)
-		var data []byte
-		if data, err = ioutil.ReadAll(response.Body); err == nil && p.Debug {
+		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
+		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
 			ioutil.WriteFile("debug.html", data, 0664)
-		} else {
-			log.Fatal(err)
 		}
 	}
+	return err
 }
 
 func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Response) {
@@ -246,32 +211,28 @@ func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Resp
 	return handle
 }
 
-func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
-	file, err := os.Open(path)
+func (p *PluginManager) newfileUploadRequest(uri string, params map[string]string, paramName, path string) (req *http.Request, err error) {
+	var file *os.File
+	file, err = os.Open(path)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	var total float64
-	if stat, err := file.Stat(); err != nil {
-		panic(err)
-	} else {
-		total = float64(stat.Size())
+	var stat os.FileInfo
+	if stat, err = file.Stat(); err != nil {
+		return
 	}
+	total = float64(stat.Size())
 	defer file.Close()
 
 	bytesBuffer := &bytes.Buffer{}
-	progressWriter := &util.ProgressIndicator{
-		Total:  total,
-		Writer: bytesBuffer,
-		Reader: bytesBuffer,
-		Title:  "Uploading",
-	}
-	progressWriter.Init()
 	writer := multipart.NewWriter(bytesBuffer)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+
+	var part io.Writer
+	part, err = writer.CreateFormFile(paramName, filepath.Base(path))
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	_, err = io.Copy(part, file)
@@ -281,10 +242,23 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	}
 	err = writer.Close()
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	req, err := http.NewRequest("POST", uri, progressWriter)
+	var progressWriter *util.ProgressIndicator
+	if p.ShowProgress {
+		progressWriter = &util.ProgressIndicator{
+			Total:  total,
+			Writer: bytesBuffer,
+			Reader: bytesBuffer,
+			Title:  "Uploading",
+		}
+		progressWriter.Init()
+		req, err = http.NewRequest("POST", uri, progressWriter)
+	} else {
+		req, err = http.NewRequest("POST", uri, bytesBuffer)
+	}
+
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	return req, err
+	return
 }

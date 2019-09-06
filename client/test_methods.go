@@ -3,8 +3,11 @@ package client
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
+	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -89,6 +92,34 @@ func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, root
 	return
 }
 
+// PrepareForUploadPlugin only for test
+func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	request *http.Request, response *http.Response, requestCrumb *http.Request, responseCrumb *http.Response) {
+	tmpfile, _ := ioutil.TempFile("", "example")
+
+	bytesBuffer := &bytes.Buffer{}
+	writer := multipart.NewWriter(bytesBuffer)
+	part, _ := writer.CreateFormFile("@name", filepath.Base(tmpfile.Name()))
+
+	io.Copy(part, tmpfile)
+
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/uploadPlugin", rootURL), nil)
+	request.Header.Add("CrumbRequestField", "Crumb")
+	request.Header.Set("Content-Type", writer.FormDataContentType())
+	response = &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+
+	// common crumb request
+	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)
+	return
+}
+
 // PrepareForUninstallPlugin only for test
 func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName string) (
 	request *http.Request, response *http.Response, requestCrumb *http.Request, responseCrumb *http.Response) {
@@ -101,7 +132,7 @@ func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pl
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
 	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)

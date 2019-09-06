@@ -134,4 +134,15 @@ var _ = Describe("PluginManager test", func() {
 			Expect(err).To(HaveOccurred())
 		})
 	})
+
+	Context("Upload", func() {
+		It("normal case, should success", func() {
+			tmpfile, err := ioutil.TempFile("", "example")
+			Expect(err).To(BeNil())
+
+			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
+
+			pluginMgr.Upload(tmpfile.Name())
+		})
+	})
 })

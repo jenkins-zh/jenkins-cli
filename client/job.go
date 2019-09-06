@@ -20,40 +20,14 @@ type JobClient struct {
 
 // Search find a set of jobs by name
 func (q *JobClient) Search(keyword string) (status *SearchResult, err error) {
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = q.Request("GET", fmt.Sprintf("/search/suggest?query=%s", keyword), nil, nil); err == nil {
-		if statusCode == 200 {
-			json.Unmarshal(data, &status)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-		}
-	}
+	err = q.RequestWithData("GET", fmt.Sprintf("/search/suggest?query=%s", keyword), nil, nil, 200, &status)
 	return
 }
 
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
 	path := parseJobPath(jobName)
-
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = q.Request("POST", fmt.Sprintf("%s/build", path), nil, nil); err == nil {
-		if statusCode == 201 {
-			fmt.Println("build successfully")
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
 	return
 }
 
@@ -67,22 +41,7 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 		api = fmt.Sprintf("%s/%d/api/json", path, id)
 	}
 
-	var (
-		statusCode int
-		data       []byte
-	)
-
-	if statusCode, data, err = q.Request("GET", api, nil, nil); err == nil {
-		if statusCode == 200 {
-			job = &JobBuild{}
-			err = json.Unmarshal(data, job)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
 	return
 }
 
@@ -139,21 +98,8 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 func (q *JobClient) StopJob(jobName string, num int) (err error) {
 	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%d/stop", path, num)
-	var (
-		statusCode int
-		data       []byte
-	)
 
-	if statusCode, data, err = q.Request("POST", api, nil, nil); err == nil {
-		if statusCode == 200 {
-			fmt.Println("stoped successfully")
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = q.RequestWithoutData("POST", api, nil, nil, 200)
 	return
 }
 
@@ -161,22 +107,8 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	path := parseJobPath(name)
 	api := fmt.Sprintf("%s/api/json", path)
-	var (
-		statusCode int
-		data       []byte
-	)
 
-	if statusCode, data, err = q.Request("GET", api, nil, nil); err == nil {
-		if statusCode == 200 {
-			job = &Job{}
-			err = json.Unmarshal(data, job)
-		} else {
-			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	}
+	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
 	return
 }
 
