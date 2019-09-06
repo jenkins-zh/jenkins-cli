@@ -86,7 +86,7 @@ type WatchOption struct {
 // SetFlag for WatchOption
 func (o *WatchOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().IntVarP(&o.Interval, "interval", "i", 1, "Interval of watch")
-	cmd.Flags().IntVarP(&o.Interval, "count", "", 9999, "Count of watch")
+	cmd.Flags().IntVarP(&o.Count, "count", "", 9999, "Count of watch")
 }
 
 // InteractiveOption allow user to choose whether the mode is interactive
@@ -101,7 +101,7 @@ func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
 
 // HookOption is the option whether skip command hook
 type HookOption struct {
-	SkipPreHook bool
+	SkipPreHook  bool
 	SkipPostHook bool
 }
 

@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
@@ -39,7 +40,7 @@ var _ = Describe("center watch command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("should success", func() {
+		It("should success, center watch command", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
@@ -61,6 +62,31 @@ var _ = Describe("center watch command", func() {
 			rootCmd.SetArgs([]string{"center", "watch"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
+		})
+
+		It("allPluginsCompleted", func() {
+			Expect(allPluginsCompleted(nil)).To(Equal(false))
+
+			status := &client.UpdateCenter{}
+			Expect(allPluginsCompleted(status)).To(Equal(false))
+
+			// all install job is completed
+			status.Jobs = []client.InstallationJob{client.InstallationJob{
+				UpdateCenterJob: client.UpdateCenterJob{Type: "InstallationJob"},
+				Status: client.InstallationJobStatus{
+					Success: true,
+				},
+			}}
+			Expect(allPluginsCompleted(status)).To(Equal(true))
+
+			// there's one install job is not completed
+			status.Jobs = append(status.Jobs, client.InstallationJob{
+				UpdateCenterJob: client.UpdateCenterJob{Type: "InstallationJob"},
+				Status: client.InstallationJobStatus{
+					Success: false,
+				},
+			})
+			Expect(allPluginsCompleted(status)).To(Equal(false))
 		})
 	})
 })
