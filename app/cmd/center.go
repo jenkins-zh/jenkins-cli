@@ -34,20 +34,17 @@ var centerCmd = &cobra.Command{
 	},
 }
 
-func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
+func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) (
+	status *client.UpdateCenter, err error) {
 	jclient := &client.UpdateCenterManager{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: roundTripper,
 		},
 	}
-	jclient.URL = jenkins.URL
-	jclient.UserName = jenkins.UserName
-	jclient.Token = jenkins.Token
-	jclient.Proxy = jenkins.Proxy
-	jclient.ProxyAuth = jenkins.ProxyAuth
+	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 	var centerStatus string
-	if status, err := jclient.Status(); err == nil {
+	if status, err = jclient.Status(); err == nil {
 		centerStatus += fmt.Sprintf("RestartRequiredForCompletion: %v\n", status.RestartRequiredForCompletion)
 		if status.Jobs != nil {
 			for i, job := range status.Jobs {
@@ -64,9 +61,8 @@ func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
 
 			fmt.Printf("%s", centerStatus)
 		}
-	} else {
-		log.Fatal(err)
 	}
+	return
 }
 
 func printJenkinsStatus(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
