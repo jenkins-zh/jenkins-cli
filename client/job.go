@@ -19,8 +19,8 @@ type JobClient struct {
 }
 
 // Search find a set of jobs by name
-func (q *JobClient) Search(keyword string) (status *SearchResult, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/search/suggest?query=%s", keyword), nil, nil, 200, &status)
+func (q *JobClient) Search(keyword string, max int) (status *SearchResult, err error) {
+	err = q.RequestWithData("GET", fmt.Sprintf("/search/suggest?query=%s&max=%d", keyword, max), nil, nil, 200, &status)
 	return
 }
 
