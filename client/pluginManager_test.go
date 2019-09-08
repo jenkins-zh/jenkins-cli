@@ -27,9 +27,9 @@ var _ = Describe("PluginManager test", func() {
 		pluginMgr.URL = "http://localhost"
 	})
 
-	AfterEach(func() {
-		ctrl.Finish()
-	})
+	// AfterEach(func() {
+	// 	ctrl.Finish()
+	// })
 
 	Context("basic function test", func() {
 		It("get install plugin query string", func() {

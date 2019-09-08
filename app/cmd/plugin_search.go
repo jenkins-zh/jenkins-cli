@@ -46,8 +46,8 @@ var pluginSearchCmd = &cobra.Command{
 
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
-
-			if data, err := pluginSearchOption.Output(result); err == nil {
+			p := showVersionPlugins(result)
+			if data, err := pluginSearchOption.Output(p); err == nil {
 				if len(data) > 0 {
 					cmd.Print(string(data))
 				}
@@ -71,19 +71,103 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	return result
 }
 
-// Output output the data into buffer
+func showVersionPlugins(plugins []client.AvailablePlugin) (p []client.CenterPlugin) {
+	p = make([]client.CenterPlugin, 0)
+	jclient := &client.UpdateCenterManager{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: pluginSearchOption.RoundTripper,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+	site, err := jclient.GetSite()
+	if err != nil {
+		log.Fatal(err)
+	}
+	jclient1 := &client.PluginManager{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: pluginSearchOption.RoundTripper,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jclient1.JenkinsCore))
+	plu, err := jclient1.GetPlugins()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, plugin := range plugins {
+		for _, up := range site.UpdatePlugins {
+			if plugin.Name == up.Name {
+				p = append(p, up)
+				break
+			}
+		}
+		for _, av := range site.AvailablesPlugins {
+			if plugin.Name == av.Name {
+				p = append(p, av)
+				break
+			}
+		}
+		for _, pl := range plu.Plugins {
+			if plugin.Name == pl.ShortName {
+				s := client.CenterPlugin{}
+				s.CompatibleWithInstalledVersion = false
+				s.Name = pl.ShortName
+				s.Installed.Active = true
+				s.Installed.Version = pl.Version
+				s.Title = plugin.Title
+				p = append(p, s)
+				break
+			}
+		}
+	}
+	return
+}
+
 func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
-		pluginList := obj.([]client.AvailablePlugin)
+		pluginList := obj.([]client.CenterPlugin)
 		buf := new(bytes.Buffer)
 
 		if len(pluginList) != 0 {
 			table := util.CreateTable(buf)
-			table.AddRow("number", "name", "installed", "title")
+			table.AddRow("number", "name", "installed", "version", "usedVersion", "title")
 
 			for i, plugin := range pluginList {
-				table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-					fmt.Sprintf("%v", plugin.Installed), plugin.Title)
+				installed := plugin.Installed
+				if installed != (client.InstalledPlugin{}) {
+					if plugin.CompatibleWithInstalledVersion {
+						if len(plugin.Version) > 6 && len(installed.Version) > 6 {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+						} else if len(plugin.Version) > 6 {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), installed.Version, plugin.Title)
+						} else if len(installed.Version) > 6 {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+						} else {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
+						}
+
+					} else {
+						if len(installed.Version) > 6 {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", false), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+						} else {
+							table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+								fmt.Sprintf("%t", false), " ", installed.Version, plugin.Title)
+						}
+					}
+				} else {
+					if len(plugin.Version) > 6 {
+						table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+							fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
+					} else {
+						table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+							fmt.Sprintf("%t", false), fmt.Sprintf("%v", plugin.Version), " ", plugin.Title)
+					}
+				}
 			}
 			table.Render()
 		}

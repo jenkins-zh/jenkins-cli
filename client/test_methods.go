@@ -14,7 +14,7 @@ import (
 
 // PrepareForEmptyAvaiablePluginList only for test
 func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response) {
+	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -27,12 +27,14 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
+	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
+	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 
 // PrepareForOneAvaiablePlugin only for test
 func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response) {
+	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -48,6 +50,8 @@ func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL s
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
+	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
+	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 
@@ -161,5 +165,21 @@ func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	}
 	roundTripper.EXPECT().
 		RoundTrip(requestCrumb).Return(responseCrumb, nil)
+	return
+}
+
+// RequestUpdateCenter only for the test case
+func RequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	responseCenter = &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    requestCenter,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`{
+			
+		}`)),
+	}
+	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
 	return
 }
