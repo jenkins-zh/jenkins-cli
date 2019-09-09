@@ -2,8 +2,6 @@ package client
 
 import (
 	"fmt"
-
-	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // QueueClient is the client of queue
@@ -20,10 +18,10 @@ func (q *QueueClient) Get() (status *JobQueue, err error) {
 // Cancel will cancel a job from the queue
 func (q *QueueClient) Cancel(id int) (err error) {
 	api := fmt.Sprintf("/queue/cancelItem?id=%d", id)
-	header := make(map[string]string)
-	header["Content-Type"] = util.APP_FORM
 	var statusCode int
-	if statusCode, err = q.RequestWithoutData("POST", api, header, nil, 302); err != nil && statusCode == 200 {
+	if statusCode, err = q.RequestWithoutData("POST", api, nil, nil, 302); err != nil &&
+		(statusCode == 200 ||
+			statusCode == 404) { // 404 should be an error, but no idea why it can be triggered successful
 		err = nil
 	}
 	return

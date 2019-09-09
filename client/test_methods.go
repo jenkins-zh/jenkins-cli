@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PrepareForEmptyAvaiablePluginList only for test
@@ -152,7 +151,6 @@ func PrepareForUninstallPluginWith500(roundTripper *mhttp.MockRoundTripper, root
 func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/queue/cancelItem?id=1", rootURL), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
-	request.Header.Add("Content-Type", util.APP_FORM)
 	response := &http.Response{
 		StatusCode: 200,
 		Header:     map[string][]string{},
@@ -160,7 +158,6 @@ func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
-	// response.Header.Add("Location", "fake-location") // TODO should to have a location, but comment it because the errors
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
 	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)

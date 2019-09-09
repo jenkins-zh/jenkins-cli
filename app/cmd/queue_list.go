@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -11,6 +12,8 @@ import (
 // QueueListOption represents the option of queue list command
 type QueueListOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var queueListOption QueueListOption
@@ -25,13 +28,13 @@ var queueListCmd = &cobra.Command{
 	Short: "Print the queue of your Jenkins",
 	Long:  `Print the queue of your Jenkins`,
 	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.QueueClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.QueueClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: queueListOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if status, err := jclient.Get(); err == nil {
 			var data []byte

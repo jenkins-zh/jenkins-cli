@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net/http"
 	"strconv"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -9,6 +10,7 @@ import (
 
 // QueueCancelOption represents the option of queue cancel command
 type QueueCancelOption struct {
+	RoundTripper http.RoundTripper
 }
 
 var queueCancelOption QueueCancelOption
@@ -38,7 +40,7 @@ var queueCancelCmd = &cobra.Command{
 
 		jclient := &client.QueueClient{
 			JenkinsCore: client.JenkinsCore{
-				RoundTripper: pluginListOption.RoundTripper,
+				RoundTripper: queueCancelOption.RoundTripper,
 				Debug:        rootOptions.Debug,
 			},
 		}
