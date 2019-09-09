@@ -133,41 +133,6 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 			table.AddRow("number", "name", "installed", "version", "usedVersion", "title")
 
 			for i, plugin := range pluginList {
-				// installed := plugin.Installed
-				// if installed != (client.InstalledPlugin{}) {
-				// 	if plugin.CompatibleWithInstalledVersion {
-				// 		if len(plugin.Version) > 6 && len(installed.Version) > 6 {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
-				// 		} else if len(plugin.Version) > 6 {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), installed.Version, plugin.Title)
-				// 		} else if len(installed.Version) > 6 {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
-				// 		} else {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
-				// 		}
-
-				// 	} else {
-				// 		if len(installed.Version) > 6 {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
-				// 		} else {
-				// 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 				fmt.Sprintf("%t", true), " ", installed.Version, plugin.Title)
-				// 		}
-				// 	}
-				// } else {
-				// 	if len(plugin.Version) > 6 {
-				// 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 			fmt.Sprintf("%t", false), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
-				// 	} else {
-				// 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				// 			fmt.Sprintf("%t", false), fmt.Sprintf("%v", plugin.Version), " ", plugin.Title)
-				// 	}
-				// }
 				formatTab(&table, i, plugin)
 			}
 			table.Render()
