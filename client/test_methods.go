@@ -176,9 +176,38 @@ func RequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
 		Request:    requestCenter,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`{
-			
-		}`)),
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
+		{
+			"_class": "hudson.model.UpdateSite",
+			"connectionCheckUrl": "http://www.google.com/",
+			"dataTimestamp": 1567999067717,
+			"hasUpdates": true,
+			"id": "default",
+			"updates": [{
+				"name": "fake-ocean",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.19.011",
+				"title": "fake-ocean",
+				"sourceId": "default",
+				"installed": {
+					"active": true,
+					"backupVersion": "1.17.011",
+					"hasUpdate": true,
+					"version": "1.18.111"
+				}
+			}],
+			"availables": [{
+				"name": "fake-oa",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.13.011",
+				"title": "fake-oa",
+				"installed": null
+			}],
+			"url": "https://updates.jenkins.io/update-center.json"
+		}
+		`)),
 	}
 	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
 	return

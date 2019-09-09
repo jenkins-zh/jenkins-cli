@@ -117,4 +117,26 @@ var _ = Describe("update center test", func() {
 			Expect(status.RestartRequiredForCompletion).Should(BeTrue())
 		})
 	})
+
+	Context("SitePlugin", func() {
+		It("basic cases", func() {
+			manager.RoundTripper = roundTripper
+			manager.URL = ""
+
+			requestCenter, _ := http.NewRequest("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil)
+			responseCenter := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    requestCenter,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"_class": "hudson.model.UpdateSite"}
+				`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCenter).Return(responseCenter, nil)
+
+			_, err := manager.GetSite()
+			Expect(err).To(BeNil())
+		})
+	})
 })
