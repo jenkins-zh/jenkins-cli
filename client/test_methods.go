@@ -96,7 +96,7 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
 	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
-	requestAvliable, responseAvliable = PrepareForManyInstalledPlugin(roundTripper, rootURL)
+	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 
@@ -129,57 +129,6 @@ func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 				"enable": true,
 				"active": true
 			}]
-		}`))
-	return
-}
-
-// PrepareForManyInstalledPlugin only for test
-func PrepareForManyInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response) {
-	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
-	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
-			"plugins": [{
-				"shortName": "fake-ocean",
-				"version": "1.18.111",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			},{
-				"shortName": "fake-ln",
-				"version": "1.18.1",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			},
-			{
-				"shortName": "fake-is",
-				"version": "1.18.111",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			},
-			{
-				"shortName": "fake-oa",
-				"version": "1.13.011",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			},
-			{
-				"shortName": "fake-open",
-				"version": "1.13.0",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			},
-			{
-				"shortName": "fake",
-				"version": "1.0",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			}
-			]
 		}`))
 	return
 }

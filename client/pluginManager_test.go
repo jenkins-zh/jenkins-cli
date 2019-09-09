@@ -67,6 +67,16 @@ var _ = Describe("PluginManager test", func() {
 			Expect(pluginList.Data[0].Name).To(Equal("fake"))
 		})
 
+		It("many plugin in the list", func() {
+			PrepareForManyAvaiablePlugin(roundTripper, pluginMgr.URL)
+
+			pluginList, err := pluginMgr.GetAvailablePlugins()
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Data)).To(Equal(6))
+			Expect(pluginList.Data[0].Name).To(Equal("fake-ocean"))
+		})
+
 		It("response with 500", func() {
 			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
 			response := &http.Response{
