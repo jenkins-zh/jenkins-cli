@@ -165,7 +165,7 @@ func formatTab(table *util.Table, i int, plugin client.CenterPlugin) {
 				fmt.Sprintf("%t", false), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
 		} else {
 			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", false), fmt.Sprintf("%v", plugin.Version), " ", plugin.Title)
+				fmt.Sprintf("%t", false), plugin.Version, " ", plugin.Title)
 		}
 	}
 }

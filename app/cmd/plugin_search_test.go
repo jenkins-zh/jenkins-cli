@@ -75,8 +75,11 @@ var _ = Describe("plugin search command", func() {
 			Expect(err).To(BeNil())
 			Expect(buf.String()).To(Equal(`number name       installed version   usedVersion title
 0      fake-ocean true      1.19.0... 1.18.1...   fake-ocean
-1      fake-oa    false     1.13.0...             fake-oa
-2      fake       true                1.0         fake
+1      fake-ln    true      1.19.0... 1.18.1      fake-ln
+2      fake-is    true      1.19.1    1.18.1...   fake-is
+3      fake-oa    false     1.13.0...             fake-oa
+4      fake-open  false     1.13.0                fake-open
+5      fake       true                1.0         fake
 `))
 		})
 	})
