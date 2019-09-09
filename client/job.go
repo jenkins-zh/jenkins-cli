@@ -27,7 +27,7 @@ func (q *JobClient) Search(keyword string, max int) (status *SearchResult, err e
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
 	path := parseJobPath(jobName)
-	err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
 	return
 }
 
@@ -99,7 +99,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%d/stop", path, num)
 
-	err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
 	return
 }
 
