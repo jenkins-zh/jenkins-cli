@@ -63,7 +63,7 @@ var _ = Describe("plugin search command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _, requestCenter, _, requestAvliable, _ := client.PrepareForOneAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
+			request, _, requestCenter, _, requestAvliable, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
 			requestCenter.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			requestAvliable.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -73,9 +73,10 @@ var _ = Describe("plugin search command", func() {
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal(`number name installed version usedVersion title
-0      fake false             1.0         fake
+			Expect(buf.String()).To(Equal(`number name       installed version   usedVersion title
+0      fake-ocean true      1.19.0... 1.18.1...   fake-ocean
+1      fake-oa    false     1.13.0...             fake-oa
+2      fake       true                1.0         fake
 `))
 		})
 	})

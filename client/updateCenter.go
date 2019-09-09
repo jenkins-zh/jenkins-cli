@@ -46,7 +46,7 @@ type InstallationJobStatus struct {
 type CenterSite struct {
 	AvailablesPlugins  []CenterPlugin `json:"availables"`
 	ConnectionCheckURL string         `json:"connectionCheckUrl"`
-	DataTimestamp      int            `json:"dataTimestamp"`
+	DataTimestamp      int64          `json:"dataTimestamp"`
 	HasUpdates         bool           `json:"hasUpdates"`
 	ID                 string         `json:"id"`
 	UpdatePlugins      []CenterPlugin `json:"updates"`
@@ -86,19 +86,8 @@ type CenterPlugin struct {
 }
 
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
-	api := fmt.Sprintf("%s/updateCenter/api/json?pretty=false&depth=1", u.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		u.AuthHandle(req)
-	} else {
-		return
-	}
-
+	req := u.commonGet("/updateCenter/api/json?pretty=false&depth=1")
+	var response *http.Response
 	client := u.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -172,17 +161,8 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 }
 
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
-	api := fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", u.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		u.AuthHandle(req)
-	} else {
-		return
-	}
+	req := u.commonGet("/updateCenter/site/default/api/json?pretty=true&depth=2")
+	var response *http.Response
 	client := u.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -198,6 +178,18 @@ func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
 		}
 	} else {
 		log.Fatal(err)
+	}
+	return
+}
+
+func (u *UpdateCenterManager) commonGet(url string) (req *http.Request) {
+	api := fmt.Sprintf("%s%s", u.URL, url)
+
+	req, err := http.NewRequest("GET", api, nil)
+	if err == nil {
+		u.AuthHandle(req)
+	} else {
+		return
 	}
 	return
 }

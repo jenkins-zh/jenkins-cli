@@ -139,4 +139,11 @@ var _ = Describe("update center test", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Context("CommonGet", func() {
+		It("basic cases", func() {
+			req := manager.commonGet("/updateCenter/site/default/api/json?pretty=true&depth=2")
+			Expect(fmt.Sprintf("%s", req.URL)).To(Equal("/updateCenter/site/default/api/json?pretty=true&depth=2"))
+		})
+	})
 })

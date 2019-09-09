@@ -43,9 +43,42 @@ func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL s
 		Body: ioutil.NopCloser(bytes.NewBufferString(`{
 			"status": "ok",
 			"data": [{
-				"name": "fake",
-				"title": "fake"
+					"name": "fake",
+					"title": "fake"
 			}]
+		}`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
+	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
+	return
+}
+
+// PrepareForManyAvaiablePlugin only for test
+func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
+	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
+	response = &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`{
+			"status": "ok",
+			"data": [
+				{
+					"name": "fake-ocean",
+					"title": "fake-ocean"
+				},
+				{
+					"name": "fake-oa",
+					"title": "fake-oa"
+				},
+				{
+					"name": "fake",
+					"title": "fake"
+				}
+			]
 		}`)),
 	}
 	roundTripper.EXPECT().
