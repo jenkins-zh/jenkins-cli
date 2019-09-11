@@ -9,135 +9,45 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// JobClient is client for operate jobs
 type JobClient struct {
 	JenkinsCore
 }
 
 // Search find a set of jobs by name
-func (q *JobClient) Search(keyword string) (status *SearchResult, err error) {
-	api := fmt.Sprintf("%s/search/suggest?query=%s", q.URL, keyword)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &SearchResult{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+func (q *JobClient) Search(keyword string, max int) (status *SearchResult, err error) {
+	err = q.RequestWithData("GET", fmt.Sprintf("/search/suggest?query=%s&max=%d", keyword, max), nil, nil, 200, &status)
 	return
 }
 
+// Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
-	api := fmt.Sprintf("%s/%s/build", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 201 { // Jenkins will send redirect by this api
-			fmt.Println("build successfully")
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	path := parseJobPath(jobName)
+	err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
 	return
 }
 
+// GetBuild get build information of a job
 func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	var api string
 	if id == -1 {
-		api = fmt.Sprintf("%s/%s/lastBuild/api/json", q.URL, path)
+		api = fmt.Sprintf("%s/lastBuild/api/json", path)
 	} else {
-		api = fmt.Sprintf("%s/%s/%d/api/json", q.URL, path, id)
-	}
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
+		api = fmt.Sprintf("%s/%d/api/json", path, id)
 	}
 
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			job = &JobBuild{}
-			err = json.Unmarshal(data, job)
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
 	return
 }
 
+// BuildWithParams build a job which has params
 func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	api := fmt.Sprintf("%s/%s/build", q.URL, path)
 	var (
 		req      *http.Request
@@ -164,7 +74,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -173,7 +83,10 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 		if code == 201 { // Jenkins will send redirect by this api
 			fmt.Println("build successfully")
 		} else {
-			log.Fatal(string(data))
+			fmt.Println("Status code", code)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
 	} else {
 		log.Fatal(err)
@@ -181,63 +94,33 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	return
 }
 
+// StopJob stops a job build
+func (q *JobClient) StopJob(jobName string, num int) (err error) {
+	path := parseJobPath(jobName)
+	api := fmt.Sprintf("%s/%d/stop", path, num)
+
+	err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	return
+}
+
+// GetJob returns the job info
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
+	path := parseJobPath(name)
+	api := fmt.Sprintf("%s/api/json", path)
 
-	api := fmt.Sprintf("%s/%s/api/json", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			job = &Job{}
-			err = json.Unmarshal(data, job)
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
 	return
 }
 
+// GetJobTypeCategories returns all categories of jobs
 func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err error) {
-	api := fmt.Sprintf("%s/view/all/itemCategories?depth=3", q.URL)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
+	if statusCode, data, err = q.Request("GET", "/view/all/itemCategories?depth=3", nil, nil); err == nil {
+		if statusCode == 200 {
 			type innerJobCategories struct {
 				Categories []JobCategory
 			}
@@ -245,10 +128,11 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 			err = json.Unmarshal(data, result)
 			jobCategories = result.Categories
 		} else {
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
@@ -282,9 +166,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	// req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-	// req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -340,22 +222,47 @@ func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 	return
 }
 
+// GetHistory returns the build history of a job
 func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
 		builds = job.Builds
+
+		for i, build := range builds {
+			api := fmt.Sprintf("%sapi/json", build.URL)
+			var (
+				req      *http.Request
+				response *http.Response
+			)
+
+			req, err = http.NewRequest("GET", api, nil)
+			if err == nil {
+				q.AuthHandle(req)
+			} else {
+				return
+			}
+			client := q.GetClient()
+			if response, err = client.Do(req); err == nil {
+				code := response.StatusCode
+				var data []byte
+				data, err = ioutil.ReadAll(response.Body)
+				if code == 200 {
+					err = json.Unmarshal(data, &build)
+					builds[i] = build
+				} else {
+					log.Fatal(string(data))
+				}
+			} else {
+				log.Fatal(err)
+			}
+		}
 	}
 	return
 }
 
 // Log get the log of a job
 func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog, err error) {
-	jobItems := strings.Split(jobName, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
-
+	path := parseJobPath(jobName)
 	var api string
 	if history == -1 {
 		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
@@ -434,7 +341,7 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	} else {
 		return
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
 
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
@@ -453,44 +360,49 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	return
 }
 
+// Delete will delete a job by name
 func (q *JobClient) Delete(jobName string) (err error) {
-	api := fmt.Sprintf("%s/job/%s/doDelete", q.URL, jobName)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
+	api := fmt.Sprintf("/job/%s/doDelete", jobName)
+	header := map[string]string{
+		util.CONTENT_TYPE: util.APP_FORM,
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 302 || code == 200 { // Jenkins will send redirect by this api
+	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
+		if statusCode == 200 || statusCode == 302 {
 			fmt.Println("delete successfully")
 		} else {
-			fmt.Printf("status code: %d\n", code)
-			log.Fatal(string(data))
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if q.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
 
+// parseJobPath leads with slash
+func parseJobPath(jobName string) (path string) {
+	jobItems := strings.Split(jobName, " ")
+	path = ""
+	for _, item := range jobItems {
+		path = fmt.Sprintf("%s/job/%s", path, item)
+	}
+	return
+}
+
+// JobLog holds the log text
 type JobLog struct {
 	HasMore   bool
 	NextStart int64
 	Text      string
 }
 
+// SearchResult holds the result items
 type SearchResult struct {
 	Suggestions []SearchResultItem
 }
@@ -526,7 +438,7 @@ type ParameterDefinition struct {
 
 type DefaultParameterValue struct {
 	Description string
-	Value       string
+	Value       interface{}
 }
 
 type SimpleJobBuild struct {

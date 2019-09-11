@@ -3,8 +3,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/AlecAivazis/survey"
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +23,8 @@ var userEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit the user of your Jenkins",
 	Long:  `Edit the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
+	Run: func(_ *cobra.Command, _ []string) {
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
@@ -36,9 +36,10 @@ var userEditCmd = &cobra.Command{
 			description := status.Description
 
 			prompt := &survey.Editor{
-				Message:       "Edit your pipeline script",
+				Message:       "Edit user description",
 				FileName:      "*.sh",
 				Default:       description,
+				HideDefault:   true,
 				AppendDefault: true,
 			}
 

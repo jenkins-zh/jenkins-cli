@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var pluginDownloadCmd = &cobra.Command{
 			return
 		}
 
-		jclient := &client.PluginDownloader{}
+		jclient := &client.PluginAPI{}
 		jclient.DownloadPlugins(args)
 	},
 }

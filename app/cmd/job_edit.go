@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 
-	"github.com/AlecAivazis/survey"
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -15,19 +14,19 @@ func init() {
 }
 
 var jobEditCmd = &cobra.Command{
-	Use:   "edit -n",
+	Use:   "edit <jobName>",
 	Short: "Edit the job of your Jenkins",
 	Long:  `Edit the job of your Jenkins`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if jobOption.Name == "" {
-			return errors.New("requires job name")
-		}
-		return nil
-	},
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
+
+		name := args[0]
 		var content string
 		var err error
-		if content, err = getPipeline(jobOption.Name); err != nil {
+		if content, err = getPipeline(name); err != nil {
 			log.Fatal(err)
 		}
 
@@ -35,6 +34,7 @@ var jobEditCmd = &cobra.Command{
 			Message:       "Edit your pipeline script",
 			FileName:      "*.sh",
 			Default:       content,
+			HideDefault:   true,
 			AppendDefault: true,
 		}
 
@@ -42,14 +42,14 @@ var jobEditCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
 		jclient.Token = jenkins.Token
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
-		if err = jclient.UpdatePipeline(jobOption.Name, content); err != nil {
+		if err = jclient.UpdatePipeline(name, content); err != nil {
 			fmt.Println("update failed")
 			log.Fatal(err)
 		}

@@ -6,10 +6,13 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 
 type OpenOption struct {
+	InteractiveOption
+
 	Name   string
 	Config bool
 }
@@ -20,19 +23,29 @@ func init() {
 	rootCmd.AddCommand(openCmd)
 	openCmd.PersistentFlags().StringVarP(&openOption.Name, "name", "n", "", "Open a specific Jenkins by name")
 	openCmd.PersistentFlags().BoolVarP(&openOption.Config, "config", "c", false, "Open the configuration page of Jenkins")
+	openOption.SetFlag(openCmd)
 }
 
 var openCmd = &cobra.Command{
 	Use:   "open",
 	Short: "Open your Jenkins with a browse",
 	Long:  `Open your Jenkins with a browse`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		var jenkins *JenkinsServer
 
-		if openOption.Name == "" {
-			jenkins = getCurrentJenkins()
-		} else {
+		if openOption.Name == "" && openOption.Interactive {
+			jenkinsNames := getJenkinsNames()
+			prompt := &survey.Select{
+				Message: "Choose a Jenkins that you want to open:",
+				Options: jenkinsNames,
+			}
+			survey.AskOne(prompt, &(openOption.Name))
+		}
+
+		if openOption.Name != "" {
 			jenkins = findJenkinsByName(openOption.Name)
+		} else {
+			jenkins = getCurrentJenkins()
 		}
 
 		if jenkins != nil && jenkins.URL != "" {

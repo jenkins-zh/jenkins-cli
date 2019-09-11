@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/spf13/cobra"
 )
@@ -26,7 +28,7 @@ var versionCmd = &cobra.Command{
 	Use:   "crumb",
 	Short: "Print crumbIssuer of Jenkins",
 	Long:  `Print crumbIssuer of Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		crumb, _ := getCrumb()
 		fmt.Printf("%s=%s", crumb.CrumbRequestField, crumb.Crumb)
 	},
@@ -52,6 +54,18 @@ func getCrumb() (CrumbIssuer, *JenkinsServer) {
 	var crumbIssuer CrumbIssuer
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	if config.ProxyAuth != "" {
+		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(config.ProxyAuth))
+		req.Header.Add("Proxy-Authorization", basicAuth)
+
+		tr.ProxyConnectHeader = http.Header{}
+		tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
+
+		if proxyURL, err := url.Parse(config.Proxy); err == nil {
+			tr.Proxy = http.ProxyURL(proxyURL)
+		}
 	}
 	client := &http.Client{Transport: tr}
 	if response, err := client.Do(req); err == nil {

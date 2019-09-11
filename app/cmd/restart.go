@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/AlecAivazis/survey"
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -24,8 +24,8 @@ var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart your Jenkins",
 	Long:  `Restart your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
+	Run: func(_ *cobra.Command, _ []string) {
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		if !restartOption.Batch {
 			confirm := false
 			prompt := &survey.Confirm{

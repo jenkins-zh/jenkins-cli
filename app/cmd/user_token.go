@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -25,13 +25,13 @@ var userTokenCmd = &cobra.Command{
 	Use:   "token",
 	Short: "Token the user of your Jenkins",
 	Long:  `Token the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		if !userTokenOption.Generate {
 			cmd.Help()
 			return
 		}
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
@@ -40,7 +40,7 @@ var userTokenCmd = &cobra.Command{
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
 		tokenName := userTokenOption.Name
-		if status, err := jclient.Create(tokenName); err == nil {
+		if status, err := jclient.CreateToken(tokenName); err == nil {
 			var data []byte
 			if data, err = userOption.Output(status); err == nil {
 				fmt.Printf("%s\n", string(data))

@@ -3,8 +3,8 @@ package cmd
 import (
 	"log"
 
-	"github.com/AlecAivazis/survey"
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ var jobCreateCmd = &cobra.Command{
 
 		jobName := args[0]
 
-		jenkins := getCurrentJenkins()
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

@@ -1,24 +1,17 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
 
-	"github.com/linuxsuren/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
 type ConfigOptions struct {
-	Current  string
-	Show     bool
-	Generate bool
-	List     bool
-
 	ConfigFileLocation string
 }
 
@@ -26,71 +19,57 @@ var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
-	configCmd.Flags().StringVarP(&configOptions.Current, "current", "c", "", "Set the current Jenkins")
-	configCmd.Flags().BoolVarP(&configOptions.Show, "show", "s", false, "Show the current Jenkins")
-	configCmd.Flags().BoolVarP(&configOptions.Generate, "generate", "g", false, "Generate a sample config file for you")
-	configCmd.Flags().BoolVarP(&configOptions.List, "list", "l", false, "Display all your Jenkins configs")
 }
 
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage the config of jcli",
-	Long:  `Manage the config of jcli`,
-	Args: func(cmd *cobra.Command, args []string) (err error) {
-		if !configOptions.Show && !configOptions.Generate &&
-			!configOptions.List && configOptions.Current == "" {
-			err = errors.New("need arguments")
-		}
-		return
-	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:     "config",
+	Aliases: []string{"cfg"},
+	Short:   "Manage the config of jcli",
+	Long:    `Manage the config of jcli`,
+	Run: func(_ *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
-		if configOptions.Show {
+		if current.Description != "" {
+			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+		} else {
 			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 		}
-
-		if configOptions.List {
-			table := util.CreateTable(os.Stdout)
-			table.AddRow("number", "name", "url")
-			for i, jenkins := range getConfig().JenkinsServers {
-				name := jenkins.Name
-				if name == current.Name {
-					name = fmt.Sprintf("*%s", name)
-				}
-				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL)
-			}
-			table.Render()
-		}
-
-		if configOptions.Generate {
-			if data, err := generateSampleConfig(); err == nil {
-				fmt.Print(string(data))
-				fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
-			} else {
-				log.Fatal(err)
-			}
-		}
-
-		if configOptions.Current != "" {
-			setCurrentJenkins(configOptions.Current)
-		}
 	},
-	Example: "jcli config -l",
+	Example: `  jcli config generate
+  jcli config list
+  jcli config edit`,
 }
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name      string `yaml:"name"`
-	URL       string `yaml:"url"`
-	UserName  string `yaml:"username"`
-	Token     string `yaml:"token"`
-	Proxy     string `yaml:"proxy"`
-	ProxyAuth string `yaml:"proxyAuth"`
+	Name        string `yaml:"name"`
+	URL         string `yaml:"url"`
+	UserName    string `yaml:"username"`
+	Token       string `yaml:"token"`
+	Proxy       string `yaml:"proxy"`
+	ProxyAuth   string `yaml:"proxyAuth"`
+	Description string `yaml:"description"`
 }
 
+// CommndHook is a hook
+type CommndHook struct {
+	Path    string `yaml:"path"`
+	Command string `yaml:"cmd"`
+}
+
+// PluginSuite define a suite of plugins
+type PluginSuite struct {
+	Name        string   `yaml:"name"`
+	Plugins     []string `yaml:"plugins"`
+	Description string   `yaml:"description"`
+}
+
+// Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
+	PreHooks       []CommndHook    `yaml:"preHooks"`
+	PostHooks      []CommndHook    `yaml:"postHooks"`
+	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
 }
 
 func setCurrentJenkins(name string) {
@@ -112,24 +91,9 @@ func setCurrentJenkins(name string) {
 	}
 }
 
-func generateSampleConfig() ([]byte, error) {
-	sampleConfig := Config{
-		Current: "yourServer",
-		JenkinsServers: []JenkinsServer{
-			{
-				Name:     "yourServer",
-				URL:      "http://localhost:8080/jenkins",
-				UserName: "admin",
-				Token:    "111e3a2f0231198855dceaff96f20540a9",
-			},
-		},
-	}
-	return yaml.Marshal(&sampleConfig)
-}
+var config *Config
 
-var config Config
-
-func getConfig() Config {
+func getConfig() *Config {
 	return config
 }
 
@@ -144,8 +108,11 @@ func getJenkinsNames() []string {
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 	config := getConfig()
-	current := config.Current
-	jenkinsServer = findJenkinsByName(current)
+
+	if config != nil {
+		current := config.Current
+		jenkinsServer = findJenkinsByName(current)
+	}
 
 	return
 }
@@ -160,46 +127,12 @@ func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	return
 }
 
-func addJenkins(jenkinsServer JenkinsServer) (err error) {
-	jenkinsName := jenkinsServer.Name
-	if jenkinsName == "" {
-		err = fmt.Errorf("Name cannot be empty")
-		return
-	}
-
-	if findJenkinsByName(jenkinsName) != nil {
-		err = fmt.Errorf("Jenkins %s is existed", jenkinsName)
-		return
-	}
-
-	config.JenkinsServers = append(config.JenkinsServers, jenkinsServer)
-	err = saveConfig()
-	return
-}
-
-func removeJenkins(name string) (err error) {
-	current := getCurrentJenkins()
-	if name == current.Name {
-		err = fmt.Errorf("You cannot remove current Jenkins")
-	}
-
-	index := -1
-	config := getConfig()
-	for i, jenkins := range config.JenkinsServers {
-		if name == jenkins.Name {
-			index = i
+func findSuiteByName(name string) (suite *PluginSuite) {
+	for _, cfg := range config.PluginSuites {
+		if cfg.Name == name {
+			suite = &cfg
 			break
 		}
-	}
-
-	if index == -1 {
-		err = fmt.Errorf("Cannot found by name %s", name)
-	} else {
-		config.JenkinsServers[index] = config.JenkinsServers[len(config.JenkinsServers)-1]
-		config.JenkinsServers[len(config.JenkinsServers)-1] = JenkinsServer{}
-		config.JenkinsServers = config.JenkinsServers[:len(config.JenkinsServers)-1]
-
-		err = saveConfig()
 	}
 	return
 }

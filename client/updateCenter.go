@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // UpdateCenterManager manages the UpdateCenter
@@ -96,5 +98,58 @@ func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 	} else {
 		log.Fatal(err)
 	}
+	return
+}
+
+// Upgrade the Jenkins core
+func (u *UpdateCenterManager) Upgrade() (err error) {
+	api := fmt.Sprintf("%s/updateCenter/upgrade", u.URL)
+	var (
+		req      *http.Request
+		response *http.Response
+	)
+
+	req, err = http.NewRequest("POST", api, nil)
+	if err == nil {
+		if err = u.AuthHandle(req); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		return
+	}
+
+	client := u.GetClient()
+	if response, err = client.Do(req); err == nil {
+		code := response.StatusCode
+		var data []byte
+		data, err = ioutil.ReadAll(response.Body)
+		if code != 200 {
+			fmt.Println("status code", code)
+		}
+		if err == nil && u.Debug && len(data) > 0 {
+			ioutil.WriteFile("debug.html", data, 0664)
+		}
+	} else {
+		log.Fatal(err)
+	}
+	return
+}
+
+// DownloadJenkins download Jenkins
+func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err error) {
+	var url string
+	if lts {
+		url = "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
+	} else {
+		url = "http://mirrors.jenkins.io/war/latest/jenkins.war"
+	}
+
+	downloader := util.HTTPDownloader{
+		RoundTripper:   u.RoundTripper,
+		TargetFilePath: output,
+		URL:            url,
+		ShowProgress:   true,
+	}
+	err = downloader.DownloadFile()
 	return
 }

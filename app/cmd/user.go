@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +23,8 @@ var userCmd = &cobra.Command{
 	Use:   "user",
 	Short: "Print the user of your Jenkins",
 	Long:  `Print the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
+	Run: func(_ *cobra.Command, _ []string) {
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.UserClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

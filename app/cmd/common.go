@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/AlecAivazis/survey"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
@@ -32,6 +34,11 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	}
 
 	return nil, fmt.Errorf("not support format %s", o.Format)
+}
+
+// SetFlag set flag of output format
+func (o *OutputOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output, supported formats: table, json, yaml")
 }
 
 func Format(obj interface{}, format string) (data []byte, err error) {
@@ -65,8 +72,45 @@ func (b *BatchOption) Confirm(message string) bool {
 	return true
 }
 
+func (b *BatchOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&b.Batch, "batch", "b", false, "Batch mode, no need confirm")
+}
+
 // WatchOption for the resources which can be watched
 type WatchOption struct {
 	Watch    bool
 	Interval int
+	Count    int
+}
+
+// SetFlag for WatchOption
+func (o *WatchOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().IntVarP(&o.Interval, "interval", "i", 1, "Interval of watch")
+	cmd.Flags().IntVarP(&o.Count, "count", "", 9999, "Count of watch")
+}
+
+// InteractiveOption allow user to choose whether the mode is interactive
+type InteractiveOption struct {
+	Interactive bool
+}
+
+// SetFlag set the option flag to this cmd
+func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
+	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
+}
+
+// HookOption is the option whether skip command hook
+type HookOption struct {
+	SkipPreHook  bool
+	SkipPostHook bool
+}
+
+func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	jenkins = getCurrentJenkinsFromOptionsOrDie()
+	jclient.URL = jenkins.URL
+	jclient.UserName = jenkins.UserName
+	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
 }

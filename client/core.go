@@ -31,7 +31,9 @@ func (q *CoreClient) Restart() (err error) {
 		code := response.StatusCode
 		var data []byte
 		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 || err != nil {
+		if code == 503 { // Jenkins could be behind of a proxy
+			fmt.Println("Please wait while Jenkins is restarting")
+		} else if code != 200 || err != nil {
 			log.Fatalf("Error code: %d, response: %s, errror: %v", code, string(data), err)
 		} else {
 			fmt.Println("restart successfully")

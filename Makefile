@@ -2,11 +2,20 @@ NAME := jcli
 CGO_ENABLED = 0
 GO := go
 BUILD_TARGET = build
-BUILDFLAGS = 
+COMMIT := $(shell git rev-parse --short HEAD)
+VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
+BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
 
+gen-mock:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+
+init: gen-mock
+
 darwin: ## Build for OSX
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
+	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 
 linux: ## Build for linux
@@ -22,15 +31,22 @@ build-all: darwin linux win
 
 release: clean build-all
 	mkdir release
-	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli
-	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli
-	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe
+	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-darwin-amd64.tar.gz > jcli-darwin-amd64.txt
+	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-linux-amd64.tar.gz > jcli-linux-amd64.txt
+	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe; cd ../../release/; shasum -a 256 jcli-windows-386.tar.gz > jcli-windows-386.txt
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
 
-dep: ## Clean the generated artifacts
-	go get github.com/AlecAivazis/survey
+copy: darwin
+	sudo cp bin/darwin/$(NAME) $(shell which jcli)
+
+test:
+	mkdir -p bin
+	go test ./... -v -coverprofile coverage.out
+
+dep:
+	go get github.com/AlecAivazis/survey/v2
 	go get github.com/gosuri/uiprogress
 	go get github.com/spf13/cobra
 	go get github.com/spf13/viper

@@ -6,12 +6,6 @@ import (
 	"unicode/utf8"
 )
 
-// const (
-// 	ALIGN_LEFT   = 0
-// 	ALIGN_CENTER = 1
-// 	ALIGN_RIGHT  = 2
-// )
-
 type Table struct {
 	Out          io.Writer
 	Rows         [][]string
@@ -44,7 +38,7 @@ func (t *Table) Render() {
 			l := utf8.RuneCountInString(col)
 			t.ColumnWidths = ensureArrayCanContain(t.ColumnWidths, ci)
 			if l > t.ColumnWidths[ci] {
-				t.ColumnWidths[ci] = l
+				t.ColumnWidths[ci] = Lenf(col)
 			}
 		}
 	}

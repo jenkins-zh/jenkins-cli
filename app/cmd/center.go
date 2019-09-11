@@ -3,15 +3,16 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"time"
+	"net/http"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
 type CenterOption struct {
 	WatchOption
 
+	RoundTripper  http.RoundTripper
 	CeneterStatus string
 }
 
@@ -19,40 +20,31 @@ var centerOption CenterOption
 
 func init() {
 	rootCmd.AddCommand(centerCmd)
-	centerCmd.Flags().BoolVarP(&centerOption.Watch, "watch", "w", false, "Watch Jenkins center")
-	centerCmd.Flags().IntVarP(&centerOption.Interval, "interval", "i", 1, "Interval of watch")
 }
 
 var centerCmd = &cobra.Command{
 	Use:   "center",
 	Short: "Manage your update center",
 	Long:  `Manage your update center`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
-		printJenkinsStatus(jenkins)
+	Run: func(_ *cobra.Command, _ []string) {
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
+		printJenkinsStatus(jenkins, centerOption.RoundTripper)
 
-		for {
-			printUpdateCenter(jenkins)
-
-			if !centerOption.Watch {
-				break
-			}
-
-			time.Sleep(time.Duration(centerOption.Interval) * time.Second)
-		}
+		printUpdateCenter(jenkins, centerOption.RoundTripper)
 	},
 }
 
-func printUpdateCenter(jenkins *JenkinsServer) {
-	jclient := &client.UpdateCenterManager{}
-	jclient.URL = jenkins.URL
-	jclient.UserName = jenkins.UserName
-	jclient.Token = jenkins.Token
-	jclient.Proxy = jenkins.Proxy
-	jclient.ProxyAuth = jenkins.ProxyAuth
+func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) (
+	status *client.UpdateCenter, err error) {
+	jclient := &client.UpdateCenterManager{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: roundTripper,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 	var centerStatus string
-	if status, err := jclient.Status(); err == nil {
+	if status, err = jclient.Status(); err == nil {
 		centerStatus += fmt.Sprintf("RestartRequiredForCompletion: %v\n", status.RestartRequiredForCompletion)
 		if status.Jobs != nil {
 			for i, job := range status.Jobs {
@@ -69,13 +61,16 @@ func printUpdateCenter(jenkins *JenkinsServer) {
 
 			fmt.Printf("%s", centerStatus)
 		}
-	} else {
-		log.Fatal(err)
 	}
+	return
 }
 
-func printJenkinsStatus(jenkins *JenkinsServer) {
-	jclient := &client.JenkinsStatusClient{}
+func printJenkinsStatus(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
+	jclient := &client.JenkinsStatusClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: roundTripper,
+		},
+	}
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token

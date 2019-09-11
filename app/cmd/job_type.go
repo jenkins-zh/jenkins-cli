@@ -1,17 +1,20 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
-	"os"
+	"net/http"
 
-	"github.com/linuxsuren/jenkins-cli/client"
-	"github.com/linuxsuren/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
 type JobTypeOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var jobTypeOption JobTypeOption
@@ -25,20 +28,19 @@ var jobTypeCmd = &cobra.Command{
 	Use:   "type",
 	Short: "Print the types of job which in your Jenkins",
 	Long:  `Print the types of job which in your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+	Run: func(cmd *cobra.Command, _ []string) {
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: centerUpgradeOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if status, err := jclient.GetJobTypeCategories(); err == nil {
 			var data []byte
 			if data, err = jobTypeOption.Output(status); err == nil {
 				if len(data) > 0 {
-					fmt.Printf("%s\n", string(data))
+					cmd.Print(string(data))
 				}
 			} else {
 				log.Fatal(err)
@@ -49,10 +51,13 @@ var jobTypeCmd = &cobra.Command{
 	},
 }
 
+// Output renders data into a table
 func (o *JobTypeOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
+		buf := new(bytes.Buffer)
+
 		jobCategories := obj.([]client.JobCategory)
-		table := util.CreateTable(os.Stdout)
+		table := util.CreateTable(buf)
 		table.AddRow("number", "name", "type")
 		for _, jobCategory := range jobCategories {
 			for i, item := range jobCategory.Items {
@@ -62,7 +67,7 @@ func (o *JobTypeOption) Output(obj interface{}) (data []byte, err error) {
 		}
 		table.Render()
 		err = nil
-		data = []byte{}
+		data = buf.Bytes()
 	}
 	return
 }

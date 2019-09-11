@@ -1,19 +1,25 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
 type JobDeleteOption struct {
+	BatchOption
+
+	RoundTripper http.RoundTripper
 }
 
 var jobDeleteOption JobDeleteOption
 
 func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
+	jobDeleteOption.SetFlag(jobDeleteCmd)
 }
 
 var jobDeleteCmd = &cobra.Command{
@@ -27,14 +33,16 @@ var jobDeleteCmd = &cobra.Command{
 		}
 
 		jobName := args[0]
+		if !jobDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete job %s ?", jobName)) {
+			return
+		}
 
-		jenkins := getCurrentJenkins()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobDeleteOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if err := jclient.Delete(jobName); err != nil {
 			log.Fatal(err)

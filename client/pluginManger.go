@@ -2,7 +2,6 @@ package client
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,11 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gosuri/uiprogress"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// PluginManager is the client of plugin manager
 type PluginManager struct {
 	JenkinsCore
+
+	ShowProgress bool
 }
 
 type Plugin struct {
@@ -65,30 +67,6 @@ type InstalledPlugin struct {
 	BackVersion        string
 }
 
-type PluginDependency struct {
-	Name     string `json:"name"`
-	Implied  bool   `json:"implied"`
-	Optional bool   `json:"optional"`
-	Title    string `json:"title"`
-	Version  string `json:"version"`
-}
-
-type PluginInfo struct {
-	BuildDate         string             `json:"buildDate"`
-	Dependencies      []PluginDependency `json:"dependencies"`
-	Excerpt           string             `json:"excerpt"`
-	FirstRelease      string             `json:"firstRelease"`
-	Gav               string             `json:"gav"`
-	Name              string             `json:"name"`
-	PreviousTimestamp string             `json:"previousTimestamp"`
-	PreviousVersion   string             `json:"previousVersion"`
-	ReleaseTimestamp  string             `json:"releaseTimestamp"`
-	RequireCore       string             `json:"RequireCore"`
-	Title             string             `json:"title"`
-	URL               string             `json:"url"`
-	Version           string             `json:"version"`
-}
-
 // CheckUpdate fetch the lastest plugins from update center site
 func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 	api := fmt.Sprintf("%s/pluginManager/checkUpdatesServer", p.URL)
@@ -111,78 +89,32 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
 	}
 }
 
+// GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	api := fmt.Sprintf("%s/pluginManager/plugins", p.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				pluginList = &AvailablePluginList{}
-				err = json.Unmarshal(data, pluginList)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = p.RequestWithData("GET", "/pluginManager/plugins", nil, nil, 200, &pluginList)
 	return
 }
 
+// GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	api := fmt.Sprintf("%s/pluginManager/api/json?pretty=true&depth=1", p.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				pluginList = &InstalledPluginList{}
-				err = json.Unmarshal(data, pluginList)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	return
+}
+
+func getPluginsInstallQuery(names []string) string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if name == "" {
+			continue
+		}
+		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+	}
+	return strings.Join(pluginNames, "&")
 }
 
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	for i, name := range names {
-		names[i] = fmt.Sprintf("plugin.%s", name)
-	}
-	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, strings.Join(names, "=&"))
+	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, getPluginsInstallQuery(names))
 	var (
 		req      *http.Request
 		response *http.Response
@@ -204,8 +136,22 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 		data, err = ioutil.ReadAll(response.Body)
 		if code == 200 {
 			fmt.Println("install succeed.")
+		} else if code == 400 {
+			if errMsg, ok := response.Header["X-Error"]; ok {
+				for _, msg := range errMsg {
+					fmt.Println(msg)
+				}
+			} else {
+				fmt.Println("Cannot found plugins", names)
+			}
 		} else {
-			log.Fatal(string(data))
+			fmt.Println(response.Header)
+			fmt.Println("status code", code)
+			if err == nil && p.Debug && len(data) > 0 {
+				ioutil.WriteFile("debug.html", data, 0664)
+			} else if err != nil {
+				log.Fatal(err)
+			}
 		}
 	} else {
 		log.Fatal(err)
@@ -215,127 +161,78 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 
 // UninstallPlugin uninstall a plugin by name
 func (p *PluginManager) UninstallPlugin(name string) (err error) {
-	api := fmt.Sprintf("%s/pluginManager/plugin/%s/uninstall", p.URL, name)
+	api := fmt.Sprintf("/pluginManager/plugin/%s/doUninstall", name)
 	var (
-		req      *http.Request
-		response *http.Response
+		statusCode int
+		data       []byte
 	)
 
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			fmt.Println("uninstall succeed.")
-		} else {
-			log.Fatal(string(data))
+	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
+		if statusCode != 200 {
+			err = fmt.Errorf("unexpected status code: %d", statusCode)
+			if p.Debug {
+				ioutil.WriteFile("debug.html", data, 0664)
+			}
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
 
-func (p *PluginManager) Upload() {
+// Upload will upload a file from local filesystem into Jenkins
+func (p *PluginManager) Upload(pluginFile string) (err error) {
 	api := fmt.Sprintf("%s/pluginManager/uploadPlugin", p.URL)
-
-	path, _ := os.Getwd()
-	dirName := filepath.Base(path)
-	dirName = strings.Replace(dirName, "-plugin", "", -1)
-	path += fmt.Sprintf("/target/%s.hpi", dirName)
 	extraParams := map[string]string{}
-	request, err := newfileUploadRequest(api, extraParams, "@name", path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err == nil {
-		p.AuthHandle(request)
-	} else {
+	var request *http.Request
+	if request, err = p.newfileUploadRequest(api, extraParams, "@name", pluginFile); err != nil {
 		return
 	}
 
+	p.AuthHandle(request)
+
 	client := p.GetClient()
 	var response *http.Response
-	response, err = client.Do(request)
-	if err != nil {
-		log.Fatal(err)
+	if response, err = client.Do(request); err != nil {
+		return
 	} else if response.StatusCode != 200 {
-		var data []byte
-		if data, err = ioutil.ReadAll(response.Body); err == nil {
-			fmt.Println(string(data))
-		} else {
-			log.Fatal(err)
+		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
+		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
+			ioutil.WriteFile("debug.html", data, 0664)
 		}
 	}
+	return err
 }
 
 func (p *PluginManager) handleCheck(handle func(*http.Response)) func(*http.Response) {
 	if handle == nil {
-		handle = func(*http.Response) {}
+		handle = func(*http.Response) {
+			// Do nothing, just for avoid nil exception
+		}
 	}
 	return handle
 }
 
-type ProgressIndicator struct {
-	bytes.Buffer
-	Total float64
-	count float64
-	bar   *uiprogress.Bar
-}
-
-func (i *ProgressIndicator) Init() {
-	uiprogress.Start()             // start rendering
-	i.bar = uiprogress.AddBar(100) // Add a new bar
-
-	// optionally, append and prepend completion and elapsed time
-	i.bar.AppendCompleted()
-	// i.bar.PrependElapsed()
-}
-
-func (i *ProgressIndicator) Write(p []byte) (n int, err error) {
-	n, err = i.Buffer.Write(p)
-	return
-}
-
-func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
-	n, err = i.Buffer.Read(p)
-	i.count += float64(n)
-	i.bar.Set((int)(i.count * 100 / i.Total))
-	return
-}
-
-func newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
-	file, err := os.Open(path)
+func (p *PluginManager) newfileUploadRequest(uri string, params map[string]string, paramName, path string) (req *http.Request, err error) {
+	var file *os.File
+	file, err = os.Open(path)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	var total float64
-	if stat, err := file.Stat(); err != nil {
-		panic(err)
-	} else {
-		total = float64(stat.Size())
+	var stat os.FileInfo
+	if stat, err = file.Stat(); err != nil {
+		return
 	}
+	total = float64(stat.Size())
 	defer file.Close()
 
-	// body := &bytes.Buffer{}
-	body := &ProgressIndicator{
-		Total: total,
-	}
-	body.Init()
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	bytesBuffer := &bytes.Buffer{}
+	writer := multipart.NewWriter(bytesBuffer)
+
+	var part io.Writer
+	part, err = writer.CreateFormFile(paramName, filepath.Base(path))
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	_, err = io.Copy(part, file)
@@ -345,87 +242,23 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 	}
 	err = writer.Close()
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	req, err := http.NewRequest("POST", uri, body)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	return req, err
-}
-
-type PluginDownloader struct {
-	dependencyMap map[string]string
-}
-
-// DownloadPlugins will download those plugins from update center
-func (d *PluginDownloader) DownloadPlugins(names []string) {
-	d.dependencyMap = make(map[string]string)
-	fmt.Println("Start to collect plugin dependencies...")
-	plugins := make([]PluginInfo, 0)
-	for _, name := range names {
-		plugins = append(plugins, d.collectDependencies(name)...)
-	}
-
-	fmt.Printf("Ready to download plugins, total: %d.\n", len(plugins))
-	for i, plugin := range plugins {
-		fmt.Printf("Start to download plugin %s, version: %s, number: %d\n",
-			plugin.Name, plugin.Version, i)
-
-		d.download(plugin.URL, plugin.Name)
-	}
-}
-
-func (d *PluginDownloader) download(url string, name string) {
-	if resp, err := http.Get(url); err != nil {
-		fmt.Println(err)
+	var progressWriter *util.ProgressIndicator
+	if p.ShowProgress {
+		progressWriter = &util.ProgressIndicator{
+			Total:  total,
+			Writer: bytesBuffer,
+			Reader: bytesBuffer,
+			Title:  "Uploading",
+		}
+		progressWriter.Init()
+		req, err = http.NewRequest("POST", uri, progressWriter)
 	} else {
-		defer resp.Body.Close()
-		if body, err := ioutil.ReadAll(resp.Body); err != nil {
-			fmt.Println(err)
-		} else {
-			if err = ioutil.WriteFile(fmt.Sprintf("%s.hpi", name), body, 0644); err != nil {
-				fmt.Println(err)
-			}
-		}
-	}
-}
-
-func (d *PluginDownloader) getPlugin(name string) (plugin *PluginInfo, err error) {
-	resp, err := http.Get("https://plugins.jenkins.io/api/plugin/" + name)
-	if err != nil {
-		return plugin, err
+		req, err = http.NewRequest("POST", uri, bytesBuffer)
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	plugin = &PluginInfo{}
-	err = json.Unmarshal(body, plugin)
-	if err != nil {
-		log.Println("error when unmarshal:", string(body))
-	}
-	return
-}
-
-func (d *PluginDownloader) collectDependencies(pluginName string) (plugins []PluginInfo) {
-	plugin, err := d.getPlugin(pluginName)
-	if err != nil {
-		log.Println("can't get the plugin by name:", pluginName)
-		panic(err)
-	}
-
-	plugins = make([]PluginInfo, 0)
-	plugins = append(plugins, *plugin)
-
-	for _, dependency := range plugin.Dependencies {
-		if dependency.Optional {
-			continue
-		}
-		if _, ok := d.dependencyMap[dependency.Name]; !ok {
-			d.dependencyMap[dependency.Name] = dependency.Version
-
-			plugins = append(plugins, d.collectDependencies(dependency.Name)...)
-		}
-	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 	return
 }

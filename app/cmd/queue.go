@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +23,8 @@ var queueCmd = &cobra.Command{
 	Use:   "queue",
 	Short: "Print the queue of your Jenkins",
 	Long:  `Print the queue of your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		jenkins := getCurrentJenkins()
+	Run: func(_ *cobra.Command, _ []string) {
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.QueueClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName

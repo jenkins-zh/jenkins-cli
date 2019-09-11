@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/linuxsuren/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
@@ -28,16 +28,17 @@ func init() {
 }
 
 var jobLogCmd = &cobra.Command{
-	Use:   "log -n",
+	Use:   "log <jobName>",
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if jobOption.Name == "" {
+		if len(args) == 0 {
 			cmd.Help()
 			return
 		}
 
-		jenkins := getCurrentJenkins()
+		name := args[0]
+		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
 		jclient.URL = jenkins.URL
 		jclient.UserName = jenkins.UserName
@@ -47,7 +48,7 @@ var jobLogCmd = &cobra.Command{
 
 		lastBuildID := -1
 		for {
-			if build, err := jclient.GetBuild(jobOption.Name, -1); err == nil {
+			if build, err := jclient.GetBuild(name, -1); err == nil {
 				jobLogOption.LastBuildID = build.Number
 				jobLogOption.LastBuildURL = build.URL
 			}
@@ -56,7 +57,7 @@ var jobLogCmd = &cobra.Command{
 				fmt.Println("Current build number:", jobLogOption.LastBuildID)
 				fmt.Println("Current build url:", jobLogOption.LastBuildURL)
 
-				printLog(jclient, jobOption.Name, jobLogOption.History, 0)
+				printLog(jclient, name, jobLogOption.History, 0)
 			}
 
 			if !jobLogOption.Watch {
