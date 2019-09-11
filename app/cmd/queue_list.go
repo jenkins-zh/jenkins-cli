@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -27,7 +26,7 @@ var queueListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Print the queue of your Jenkins",
 	Long:  `Print the queue of your Jenkins`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.QueueClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: queueListOption.RoundTripper,
@@ -39,7 +38,7 @@ var queueListCmd = &cobra.Command{
 		if status, err := jclient.Get(); err == nil {
 			var data []byte
 			if data, err = Format(status, queueListOption.Format); err == nil {
-				fmt.Printf("%s\n", string(data))
+				cmd.Printf("%s\n", string(data))
 			} else {
 				log.Fatal(err)
 			}
