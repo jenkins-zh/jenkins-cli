@@ -249,6 +249,23 @@ var _ = Describe("job test", func() {
 		})
 	})
 
+	Context("GetPipeline", func() {
+		It("simple case, should success", func() {
+			PrepareForPipelineJob(roundTripper, jobClient.URL, "", "")
+			job, err := jobClient.GetPipeline("test")
+			Expect(err).To(BeNil())
+			Expect(job.Script).To(Equal("script"))
+		})
+	})
+
+	Context("UpdatePipeline", func() {
+		It("simple case, should success", func() {
+			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "")
+			err := jobClient.UpdatePipeline("test", "")
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("Delete", func() {
 		It("delete a job", func() {
 			jobName := "fakeJob"
