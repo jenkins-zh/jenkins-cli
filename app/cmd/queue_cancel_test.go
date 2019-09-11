@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
@@ -58,6 +59,40 @@ var _ = Describe("queue cancel command", func() {
 		BeforeEach(func() {
 			roundTripper = mhttp.NewMockRoundTripper(ctrl)
 			queueCancelOption.RoundTripper = roundTripper
+		})
+
+		It("should success", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			client.PrepareCancelQueue(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"queue", "cancel", "1"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("should have error with invalid number", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			rootCmd.SetArgs([]string{"queue", "cancel", "a"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal("strconv.Atoi: parsing \"a\": invalid syntax\n"))
 		})
 	})
 })
