@@ -137,88 +137,22 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 	return
 }
 
-func (q *JobClient) UpdatePipeline(name, script string) (err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for i, item := range jobItems {
-		if i == 0 {
-			path = fmt.Sprintf("job/%s", item)
-		} else {
-			path = fmt.Sprintf("%s/job/%s", path, item)
-		}
-	}
-
-	api := fmt.Sprintf("%s/%s/restFul/update", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	formData := url.Values{"script": {script}}
-	payload := strings.NewReader(formData.Encode())
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			fmt.Println("updated")
-		} else {
-			fmt.Println("code", code)
-			log.Fatal(string(data))
-		}
-	} else {
-		fmt.Println("request is error")
-		log.Fatal(err)
-	}
+// GetPipeline return the pipeline object
+func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
+	path := parseJobPath(name)
+	api := fmt.Sprintf("%s/restFul", path)
+	err = q.RequestWithData("GET", api, nil, nil, 200, &pipeline)
 	return
 }
 
-func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
-	jobItems := strings.Split(name, " ")
-	path := ""
-	for _, item := range jobItems {
-		path = fmt.Sprintf("%s/job/%s", path, item)
-	}
+// UpdatePipeline updates the pipeline script
+func (q *JobClient) UpdatePipeline(name, script string) (err error) {
+	path := parseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/update", path)
 
-	api := fmt.Sprintf("%s/%s/restFul", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			pipeline = &Pipeline{}
-			err = json.Unmarshal(data, pipeline)
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	formData := url.Values{"script": {script}}
+	payload := strings.NewReader(formData.Encode())
+	err = q.RequestWithoutData("POST", api, map[string]string{util.CONTENT_TYPE: util.APP_FORM}, payload, 200)
 	return
 }
 
