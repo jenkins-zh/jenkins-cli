@@ -1,54 +1,38 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
 )
 
+// QueueClient is the client of queue
 type QueueClient struct {
 	JenkinsCore
 }
 
+// Get returns the job queue
 func (q *QueueClient) Get() (status *JobQueue, err error) {
-	api := fmt.Sprintf("%s/queue/api/json", q.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
+	err = q.RequestWithData("GET", "/queue/api/json", nil, nil, 200, &status)
+	return
+}
 
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &JobQueue{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
+// Cancel will cancel a job from the queue
+func (q *QueueClient) Cancel(id int) (err error) {
+	api := fmt.Sprintf("/queue/cancelItem?id=%d", id)
+	var statusCode int
+	if statusCode, err = q.RequestWithoutData("POST", api, nil, nil, 302); err != nil &&
+		(statusCode == 200 ||
+			statusCode == 404) { // 404 should be an error, but no idea why it can be triggered successful
+		err = nil
 	}
 	return
 }
 
+// JobQueue represent the job queue
 type JobQueue struct {
 	Items []QueueItem
 }
 
+// QueueItem is the item of job queue
 type QueueItem struct {
 	Blocked                    bool
 	Buildable                  bool
@@ -63,12 +47,14 @@ type QueueItem struct {
 	Actions                    []CauseAction
 }
 
+// CauseAction is the collection of causes
 type CauseAction struct {
 	Causes []Cause
 }
 
+// Cause represent the reason why job is triggered
 type Cause struct {
-	UpstreamUrl      string
+	UpstreamURL      string
 	UpstreamProject  string
 	UpstreamBuild    int
 	ShortDescription string

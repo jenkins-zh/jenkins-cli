@@ -147,6 +147,67 @@ func PrepareForUninstallPluginWith500(roundTripper *mhttp.MockRoundTripper, root
 	return
 }
 
+// PrepareCancelQueue only for test
+func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/queue/cancelItem?id=1", rootURL), nil)
+	request.Header.Add("CrumbRequestField", "Crumb")
+	response := &http.Response{
+		StatusCode: 200,
+		Header:     map[string][]string{},
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+
+	if user != "" && passwd != "" {
+		request.SetBasicAuth(user, passwd)
+		requestCrumb.SetBasicAuth(user, passwd)
+	}
+}
+
+// PrepareGetQueue only for test
+func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/queue/api/json", rootURL), nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Header:     map[string][]string{},
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
+		{
+			"_class" : "hudson.modexl.Queue",
+			"discoverableItems" : [],
+			"items" : [
+			  {
+				"actions" : [],
+				"blocked" : false,
+				"buildable" : true,
+				"id" : 62,
+				"inQueueSince" : 1567753826770,
+				"params" : "",
+				"stuck" : true,
+				"task" : {
+				  "_class" : "org.jenkinsci.plugins.workflow.support.steps.ExecutorStepExecution$PlaceholderTask"
+				},
+				"url" : "queue/item/62/",
+				"why" : "等待下一个可用的执行器",
+				"buildableStartMilliseconds" : 1567753826770,
+				"pending" : false
+			  }
+			]
+		  }`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+
+	if user != "" && passwd != "" {
+		request.SetBasicAuth(user, passwd)
+	}
+}
+
 // RequestCrumb only for the test case
 func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	requestCrumb *http.Request, responseCrumb *http.Response) {

@@ -133,10 +133,9 @@ func (j *JenkinsCore) RequestWithData(method, api string, headers map[string]str
 
 // RequestWithoutData requests the api without handling data
 func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]string,
-	payload io.Reader, successCode int) (err error) {
+	payload io.Reader, successCode int) (statusCode int, err error) {
 	var (
-		statusCode int
-		data       []byte
+		data []byte
 	)
 
 	if statusCode, data, err = j.Request(method, api, headers, payload); err == nil &&
