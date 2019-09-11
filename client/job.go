@@ -152,7 +152,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
-	err = q.RequestWithoutData("POST", api, map[string]string{util.CONTENT_TYPE: util.APP_FORM}, payload, 200)
+	_, err = q.RequestWithoutData("POST", api, map[string]string{util.CONTENT_TYPE: util.APP_FORM}, payload, 200)
 	return
 }
 
