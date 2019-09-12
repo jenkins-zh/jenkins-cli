@@ -5,7 +5,8 @@ import (
 	"net/http"
 )
 
-type requestMatcher struct {
+// RequestMatcher to match the http request
+type RequestMatcher struct {
 	request *http.Request
 	verbose bool
 
@@ -17,21 +18,23 @@ type matchOptions struct {
 }
 
 // NewRequestMatcher create a request matcher will match request method and request path
-func NewRequestMatcher(request *http.Request) *requestMatcher {
-	return &requestMatcher{request: request}
+func NewRequestMatcher(request *http.Request) *RequestMatcher {
+	return &RequestMatcher{request: request}
 }
 
 // NewVerboseRequestMatcher create a verbose request matcher will match request method and request path
-func NewVerboseRequestMatcher(request *http.Request) *requestMatcher {
-	return &requestMatcher{request: request, verbose: true}
+func NewVerboseRequestMatcher(request *http.Request) *RequestMatcher {
+	return &RequestMatcher{request: request, verbose: true}
 }
 
-func (request *requestMatcher) WithQuery() *requestMatcher {
+// WithQuery returns a matcher with query
+func (request *RequestMatcher) WithQuery() *RequestMatcher {
 	request.matchOptions.withQuery = true
 	return request
 }
 
-func (request *requestMatcher) Matches(x interface{}) bool {
+// Matches returns a matcher with given function
+func (request *RequestMatcher) Matches(x interface{}) bool {
 	target := x.(*http.Request)
 
 	if request.verbose {
@@ -52,6 +55,7 @@ func (request *requestMatcher) Matches(x interface{}) bool {
 	return match
 }
 
-func (*requestMatcher) String() string {
+// String returns the text of current object
+func (*RequestMatcher) String() string {
 	return "request matcher"
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobBuildOption is the job build option
 type JobBuildOption struct {
 	BatchOption
 

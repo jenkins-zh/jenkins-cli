@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PluginSearchOption is the plugin search option
 type PluginSearchOption struct {
 	OutputOption
 

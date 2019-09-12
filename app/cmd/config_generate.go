@@ -12,6 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
 	Copy bool
 }

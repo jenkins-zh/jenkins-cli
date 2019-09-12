@@ -15,6 +15,7 @@ type Table struct {
 	Separator    string
 }
 
+// CreateTable init a table object
 func CreateTable(out io.Writer) Table {
 	return Table{
 		Out:       out,
@@ -32,6 +33,7 @@ func (t *Table) AddRow(col ...string) {
 	t.Rows = append(t.Rows, col)
 }
 
+// Render render the table into byte array
 func (t *Table) Render() {
 	// lets figure out the max widths of each column
 	for _, row := range t.Rows {
@@ -53,7 +55,7 @@ func (t *Table) Render() {
 			}
 			l := t.ColumnWidths[ci]
 			align := t.GetColumnAlign(ci)
-			if ci >= lastColumn && align != ALIGN_CENTER && align != ALIGN_RIGHT {
+			if ci >= lastColumn && align != AlignCenter && align != AlignRight {
 				fmt.Fprint(out, col)
 			} else {
 				fmt.Fprint(out, Pad(col, " ", l, align))

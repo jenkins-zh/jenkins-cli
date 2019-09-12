@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ConfigAddOptions is the config ad option
 type ConfigAddOptions struct {
 	JenkinsServer
 }

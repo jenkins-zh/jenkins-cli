@@ -11,6 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// ConfigOptions is the config cmd option
 type ConfigOptions struct {
 	ConfigFileLocation string
 }

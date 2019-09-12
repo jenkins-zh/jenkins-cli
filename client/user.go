@@ -13,21 +13,25 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// UserClient for connect the user
 type UserClient struct {
 	JenkinsCore
 }
 
+// Token is the token of user
 type Token struct {
 	Status string
 	Data   TokenData
 }
 
+// TokenData represents the token
 type TokenData struct {
 	TokenName  string
-	TokenUuid  string
+	TokenUUID  string
 	TokenValue string
 }
 
+// Get returns a user's detail
 func (q *UserClient) Get() (status *User, err error) {
 	api := fmt.Sprintf("%s/user/%s/api/json", q.URL, q.UserName)
 	var (
@@ -61,6 +65,7 @@ func (q *UserClient) Get() (status *User, err error) {
 	return
 }
 
+// EditDesc update the description of a user
 func (q *UserClient) EditDesc(description string) (err error) {
 	api := fmt.Sprintf("%s/user/%s/submitDescription", q.URL, q.UserName)
 	var (
@@ -79,7 +84,7 @@ func (q *UserClient) EditDesc(description string) (err error) {
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
@@ -98,6 +103,7 @@ func (q *UserClient) EditDesc(description string) (err error) {
 	return
 }
 
+// Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
 	api := fmt.Sprintf("%s/securityRealm/user/%s/doDelete", q.URL, username)
 	var (
@@ -112,7 +118,7 @@ func (q *UserClient) Delete(username string) (err error) {
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -127,6 +133,7 @@ func (q *UserClient) Delete(username string) (err error) {
 	return
 }
 
+// Create will create a user in Jenkins
 func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 	api := fmt.Sprintf("%s/securityRealm/createAccountByAdmin", q.URL)
 	var (
@@ -162,7 +169,7 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -177,6 +184,7 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 	return
 }
 
+// CreateToken create a token in Jenkins
 func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error) {
 	if newTokenName == "" {
 		newTokenName = fmt.Sprintf("jcli-%s", randomdata.SillyName())
@@ -199,7 +207,7 @@ func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error)
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
@@ -223,6 +231,7 @@ func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error)
 	return
 }
 
+// User for Jenkins
 type User struct {
 	AbsoluteURL string `json:"absoluteUrl"`
 	Description string
@@ -230,6 +239,7 @@ type User struct {
 	ID          string
 }
 
+// UserForCreate is the data for creatig a user
 type UserForCreate struct {
 	User      `json:",inline"`
 	Username  string `json:"username"`

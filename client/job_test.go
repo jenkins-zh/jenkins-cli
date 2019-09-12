@@ -271,7 +271,7 @@ var _ = Describe("job test", func() {
 			jobName := "fakeJob"
 			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
-			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

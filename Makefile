@@ -41,6 +41,9 @@ clean: ## Clean the generated artifacts
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
+tools:
+	go get -u golang.org/x/lint/golint
+
 verify:
 	go vet ./...
 	golint ./...

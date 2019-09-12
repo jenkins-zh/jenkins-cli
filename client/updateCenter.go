@@ -30,6 +30,7 @@ type UpdateCenterJob struct {
 	Type         string
 }
 
+// InstallationJob represents the installation job
 type InstallationJob struct {
 	UpdateCenterJob
 
@@ -37,6 +38,7 @@ type InstallationJob struct {
 	Status InstallationJobStatus
 }
 
+// InstallationJobStatus represents the installation job status
 type InstallationJobStatus struct {
 	Success bool
 	Type    string
@@ -50,16 +52,19 @@ type CenterSite struct {
 	URL                string `json:"url"`
 }
 
+// InstallStates is the installation states
 type InstallStates struct {
 	Data   InstallStatesData
 	Status string
 }
 
+// InstallStatesData is the installation state data
 type InstallStatesData struct {
 	Jobs  InstallStatesJob
 	State string
 }
 
+// InstallStatesJob is the installation state job
 type InstallStatesJob struct {
 	InstallStatus   string
 	Name            string
@@ -68,6 +73,7 @@ type InstallStatesJob struct {
 	Version         string
 }
 
+// Status returns the status of Jenkins
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 	api := fmt.Sprintf("%s/updateCenter/api/json?pretty=false&depth=1", u.URL)
 	var (

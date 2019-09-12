@@ -13,9 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//curl -k -u $JENKINS_USER:$JENKINS_TOKEN $JENKINS_URL/crumbIssuer/api/json -s
-
-// Start contains the command line options
+// CrumbIssuerOptions contains the command line options
 type CrumbIssuerOptions struct {
 	Upload bool
 }
@@ -34,6 +32,7 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+// CrumbIssuer represents Jenkins crumb
 type CrumbIssuer struct {
 	Crumb             string `json:"crumb"`
 	CrumbRequestField string `json:"crumbRequestField"`

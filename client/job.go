@@ -74,7 +74,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Add(util.ContentType, util.ApplicationForm)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -152,7 +152,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", api, map[string]string{util.CONTENT_TYPE: util.APP_FORM}, payload, 200)
+	_, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -241,6 +241,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	return
 }
 
+// Create can create a job
 func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	api := fmt.Sprintf("%s/view/all/createItem", q.URL)
 	var (
@@ -275,7 +276,7 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	} else {
 		return
 	}
-	req.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Add(util.ContentType, util.ApplicationForm)
 
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
@@ -303,7 +304,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 
 	api := fmt.Sprintf("/job/%s/doDelete", jobName)
 	header := map[string]string{
-		util.CONTENT_TYPE: util.APP_FORM,
+		util.ContentType: util.ApplicationForm,
 	}
 
 	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
@@ -341,10 +342,12 @@ type SearchResult struct {
 	Suggestions []SearchResultItem
 }
 
+// SearchResultItem hold the result item
 type SearchResultItem struct {
 	Name string
 }
 
+// Job represents a job
 type Job struct {
 	Type            string `json:"_class"`
 	Builds          []JobBuild
@@ -358,10 +361,12 @@ type Job struct {
 	Property []ParametersDefinitionProperty
 }
 
+// ParametersDefinitionProperty holds the param definition property
 type ParametersDefinitionProperty struct {
 	ParameterDefinitions []ParameterDefinition
 }
 
+// ParameterDefinition holds the parameter definition
 type ParameterDefinition struct {
 	Description           string
 	Name                  string `json:"name"`
@@ -370,16 +375,19 @@ type ParameterDefinition struct {
 	DefaultParameterValue DefaultParameterValue
 }
 
+// DefaultParameterValue represents the default value for param
 type DefaultParameterValue struct {
 	Description string
 	Value       interface{}
 }
 
+// SimpleJobBuild represents a simple job build
 type SimpleJobBuild struct {
 	Number int
 	URL    string
 }
 
+// JobBuild represents a job build
 type JobBuild struct {
 	SimpleJobBuild
 	Building          bool
@@ -397,11 +405,13 @@ type JobBuild struct {
 	NextBuild         SimpleJobBuild
 }
 
+// Pipeline represents a pipeline
 type Pipeline struct {
 	Script  string
 	Sandbox bool
 }
 
+// JobCategory represents a job category
 type JobCategory struct {
 	Description string
 	ID          string
@@ -411,6 +421,7 @@ type JobCategory struct {
 	Order       int
 }
 
+// JobCategoryItem represents a job category item
 type JobCategoryItem struct {
 	Description string
 	DisplayName string

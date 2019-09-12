@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobParamOption is the job param option
 type JobParamOption struct {
 	OutputOption
 
