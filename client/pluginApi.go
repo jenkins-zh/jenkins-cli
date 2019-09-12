@@ -172,3 +172,23 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 	}
 	return
 }
+
+func (d *PluginAPI) newPlugins()(plugin *PluginInfo, err error) {
+	var cli = http.Client{}
+	cli.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+	resp, err := cli.Get("https://plugins.jenkins.io/api/plugins/new")
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	plugin = &PluginInfo{}
+	err = json.Unmarshal(body, plugin)
+	if err != nil {
+		log.Println("error when unmarshal:", string(body))
+	}
+	return
+}
