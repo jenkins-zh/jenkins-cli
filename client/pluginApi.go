@@ -173,7 +173,7 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 	return
 }
 
-func (d *PluginAPI) newPlugins()(plugin *PluginInfo, err error) {
+func (d *PluginAPI) NewPlugins()(plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
