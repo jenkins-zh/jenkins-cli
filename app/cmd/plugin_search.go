@@ -46,8 +46,8 @@ var pluginSearchCmd = &cobra.Command{
 
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
-			p := matchPluginsData(result)
-			if data, err := pluginSearchOption.Output(p); err == nil {
+			resultData := matchPluginsData(result)
+			if data, err := pluginSearchOption.Output(resultData); err == nil {
 				if len(data) > 0 {
 					cmd.Print(string(data))
 				}
