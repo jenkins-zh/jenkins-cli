@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/jenkins-zh/jenkins-cli/app"
 )
 
 // JenkinsCore core informations of Jenkins
@@ -32,6 +34,7 @@ type JenkinsCrumb struct {
 	Crumb             string
 }
 
+// GetClient get the default http Jenkins client
 func (j *JenkinsCore) GetClient() (client *http.Client) {
 	var roundTripper http.RoundTripper
 	if j.RoundTripper != nil {
@@ -59,6 +62,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 	return
 }
 
+// ProxyHandle takes care of the proxy setting
 func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	if j.ProxyAuth != "" {
 		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
@@ -66,13 +70,20 @@ func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	}
 }
 
+// AuthHandle takes care of the auth
 func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 	if j.UserName != "" && j.Token != "" {
 		request.SetBasicAuth(j.UserName, j.Token)
 	}
 
+	// not add the User-Agent for tests
+	if j.RoundTripper == nil {
+		request.Header.Set("User-Agent", app.GetCombinedVersion())
+	}
+
 	j.ProxyHandle(request)
 
+	// all post request to Jenkins must be has the crumb
 	if request.Method == "POST" {
 		err = j.CrumbHandle(request)
 	}
