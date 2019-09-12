@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -30,6 +29,7 @@ type UpdateCenterJob struct {
 	Type         string
 }
 
+// InstallationJob represents current job
 type InstallationJob struct {
 	UpdateCenterJob
 
@@ -37,6 +37,7 @@ type InstallationJob struct {
 	Status InstallationJobStatus
 }
 
+// InstallationJobStatus represents the status for current
 type InstallationJobStatus struct {
 	Success bool
 	Type    string
@@ -53,16 +54,19 @@ type CenterSite struct {
 	URL                string         `json:"url"`
 }
 
+// InstallStates represents the status for InstallStatesData
 type InstallStates struct {
 	Data   InstallStatesData
 	Status string
 }
 
+// InstallStatesData represents the data for InstallStatesJob
 type InstallStatesData struct {
 	Jobs  InstallStatesJob
 	State string
 }
 
+// InstallStatesJob represents the job being installed
 type InstallStatesJob struct {
 	InstallStatus   string
 	Name            string
@@ -71,11 +75,12 @@ type InstallStatesJob struct {
 	Version         string
 }
 
+// CenterPlugin represents the all plugin from UpdateCenter
 type CenterPlugin struct {
 	CompatibleWithInstalledVersion bool
-	excerpt                        string
+	Excerpt                        string
 	Installed                      InstalledPlugin
-	minimumJavaVersion             string
+	MinimumJavaVersion             string
 	Name                           string
 	RequiredCore                   string
 	SourceId                       string
@@ -85,25 +90,9 @@ type CenterPlugin struct {
 	Wiki                           string
 }
 
+// Status
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
-	req := u.commonGet("/updateCenter/api/json?pretty=false&depth=1")
-	var response *http.Response
-	client := u.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &UpdateCenter{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = u.RequestWithData("GET", "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
 	return
 }
 
@@ -160,25 +149,9 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 	return
 }
 
+// GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
-	req := u.commonGet("/updateCenter/site/default/api/json?pretty=true&depth=2")
-	var response *http.Response
-	client := u.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				site = &CenterSite{}
-				err = json.Unmarshal(data, site)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
 	return
 }
 

@@ -17,6 +17,7 @@ var _ = Describe("PluginManager test", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 		pluginMgr    PluginManager
+		updateMgr    UpdateCenterManager
 	)
 
 	BeforeEach(func() {
@@ -25,11 +26,14 @@ var _ = Describe("PluginManager test", func() {
 		pluginMgr = PluginManager{}
 		pluginMgr.RoundTripper = roundTripper
 		pluginMgr.URL = "http://localhost"
+		updateMgr = UpdateCenterManager{}
+		updateMgr.RoundTripper = roundTripper
+		updateMgr.URL = "http://localhost"
 	})
 
-	// AfterEach(func() {
-	// 	ctrl.Finish()
-	// })
+	AfterEach(func() {
+		ctrl.Finish()
+	})
 
 	Context("basic function test", func() {
 		It("get install plugin query string", func() {
@@ -67,7 +71,7 @@ var _ = Describe("PluginManager test", func() {
 			Expect(pluginList.Data[0].Name).To(Equal("fake"))
 		})
 
-		It("many plugin in the list", func() {
+		It("many plugins in the list", func() {
 			PrepareForManyAvaiablePlugin(roundTripper, pluginMgr.URL)
 
 			pluginList, err := pluginMgr.GetAvailablePlugins()
@@ -153,6 +157,18 @@ var _ = Describe("PluginManager test", func() {
 			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
 
 			pluginMgr.Upload(tmpfile.Name())
+		})
+	})
+
+	Context("UpdateCenter", func() {
+		It("normal case, should success", func() {
+
+			RequestUpdateCenter(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
 		})
 	})
 })

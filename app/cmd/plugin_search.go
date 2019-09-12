@@ -46,7 +46,7 @@ var pluginSearchCmd = &cobra.Command{
 
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
-			p := showVersionPlugins(result)
+			p := matchPluginsData(result)
 			if data, err := pluginSearchOption.Output(p); err == nil {
 				if len(data) > 0 {
 					cmd.Print(string(data))
@@ -71,8 +71,8 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	return result
 }
 
-func showVersionPlugins(plugins []client.AvailablePlugin) (p []client.CenterPlugin) {
-	p = make([]client.CenterPlugin, 0)
+func matchPluginsData(plugins []client.AvailablePlugin) (result []client.CenterPlugin) {
+	result = make([]client.CenterPlugin, 0)
 	jclient := &client.UpdateCenterManager{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: pluginSearchOption.RoundTripper,
@@ -81,29 +81,29 @@ func showVersionPlugins(plugins []client.AvailablePlugin) (p []client.CenterPlug
 	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
-	jclient1 := &client.PluginManager{
+	pluginJclient := &client.PluginManager{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: pluginSearchOption.RoundTripper,
 		},
 	}
-	getCurrentJenkinsAndClient(&(jclient1.JenkinsCore))
-	plu, err := jclient1.GetPlugins()
+	getCurrentJenkinsAndClient(&(pluginJclient.JenkinsCore))
+	plu, err := pluginJclient.GetPlugins()
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	for _, plugin := range plugins {
-		for _, up := range site.UpdatePlugins {
-			if plugin.Name == up.Name {
-				p = append(p, up)
+		for _, updatePlugin := range site.UpdatePlugins {
+			if plugin.Name == updatePlugin.Name {
+				result = append(result, updatePlugin)
 				break
 			}
 		}
-		for _, av := range site.AvailablesPlugins {
-			if plugin.Name == av.Name {
-				p = append(p, av)
+		for _, availablePlugin := range site.AvailablesPlugins {
+			if plugin.Name == availablePlugin.Name {
+				result = append(result, availablePlugin)
 				break
 			}
 		}
@@ -115,7 +115,7 @@ func showVersionPlugins(plugins []client.AvailablePlugin) (p []client.CenterPlug
 				s.Installed.Active = true
 				s.Installed.Version = pl.Version
 				s.Title = plugin.Title
-				p = append(p, s)
+				result = append(result, s)
 				break
 			}
 		}

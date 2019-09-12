@@ -14,7 +14,7 @@ import (
 
 // PrepareForEmptyAvaiablePluginList only for test
 func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
+	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -27,14 +27,12 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
-	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
-	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 
 // PrepareForOneAvaiablePlugin only for test
 func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
+	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -50,14 +48,12 @@ func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL s
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
-	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
-	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 
 // PrepareForManyAvaiablePlugin only for test
 func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	request *http.Request, response *http.Response, requestCenter *http.Request, responseCenter *http.Response, requestAvliable *http.Request, responseAvliable *http.Response) {
+	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -95,8 +91,6 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
-	requestCenter, responseCenter = RequestUpdateCenter(roundTripper, rootURL)
-	requestAvliable, responseAvliable = PrepareForOneInstalledPlugin(roundTripper, rootURL)
 	return
 }
 

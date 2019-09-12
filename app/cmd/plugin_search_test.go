@@ -42,11 +42,12 @@ var _ = Describe("plugin search command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _, requestCenter, _, requestAvliable, _ := client.PrepareForEmptyAvaiablePluginList(roundTripper, "http://localhost:8080/jenkins")
+			request, _ := client.PrepareForEmptyAvaiablePluginList(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			requestCenter.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			requestAvliable.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-
+			request, _ = client.RequestUpdateCenter(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			request, _ = client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 
 			buf := new(bytes.Buffer)
@@ -57,15 +58,17 @@ var _ = Describe("plugin search command", func() {
 			Expect(buf.String()).To(Equal(""))
 		})
 
-		It("one plugin in the list", func() {
+		It("many plugins in the list", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _, requestCenter, _, requestAvliable, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
-			requestCenter.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			requestAvliable.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			request, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			request, _ = client.RequestUpdateCenter(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			request, _ = client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
