@@ -25,7 +25,7 @@ func init() {
 }
 
 var pluginUpgradeCmd = &cobra.Command{
-	Use:   "upgrade",
+	Use:   "upgrade [plugin name]",
 	Short: "Upgrade the specific plugin",
 	Long:  `Upgrade the specific plugin`,
 	Run: func(cmd *cobra.Command, args []string) {
