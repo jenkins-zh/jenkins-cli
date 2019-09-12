@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 )
 
+// Table for console print
 type Table struct {
 	Out          io.Writer
 	Rows         [][]string
