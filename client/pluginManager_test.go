@@ -111,6 +111,23 @@ var _ = Describe("PluginManager test", func() {
 		})
 	})
 
+	Context("InstallPlugin", func() {
+		var (
+			pluginName string
+		)
+
+		BeforeEach(func() {
+			pluginName = "fake"
+		})
+
+		It("normal case, should success", func() {
+			PrepareForInstallPlugin(roundTripper, pluginMgr.URL, pluginName, "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("UninstallPlugin", func() {
 		var (
 			pluginName string
