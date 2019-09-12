@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
-	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -74,28 +74,31 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	filteredPlugins []client.InstalledPlugin, err error) {
 	var (
 		pluginName string
+		plugins *client.InstalledPluginList
 	)
 	if p.Filter != nil {
 		for _, f := range p.Filter {
 			if strings.HasPrefix(f, "name=") {
 				pluginName = strings.TrimPrefix(f, "name=")
+				break
 			}
 		}
 	}
 
-	var plugins *client.InstalledPluginList
-	if plugins, err = jclient.GetPlugins(); err == nil {
-		for _, plugin := range plugins.Plugins {
-			if !plugin.HasUpdate {
-				continue
-			}
+	if plugins, err = jclient.GetPlugins(); err != nil {
+		return
+	}
 
-			if pluginName != "" && !strings.Contains(plugin.ShortName, pluginName) {
-				continue
-			}
-
-			filteredPlugins = append(filteredPlugins, plugin)
+	for _, plugin := range plugins.Plugins {
+		if !plugin.HasUpdate {
+			continue
 		}
+
+		if pluginName != "" && !strings.Contains(plugin.ShortName, pluginName) {
+			continue
+		}
+
+		filteredPlugins = append(filteredPlugins, plugin)
 	}
 	return
 }
