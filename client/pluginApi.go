@@ -173,6 +173,7 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 	return
 }
 
+// New Plugins will list all the new plugins that can be installed.
 func (d *PluginAPI) NewPlugins()(plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	cli.Transport = &http.Transport{
