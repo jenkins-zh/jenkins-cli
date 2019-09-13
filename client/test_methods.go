@@ -273,23 +273,7 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 // PrepareForUpdatePipelineJob only for test
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
-	request.Header.Add("CrumbRequestField", "Crumb")
-	response := &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
-
-	// common crumb request
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
-
-	if user != "" && passwd != "" {
-		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
-	}
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -317,24 +301,7 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
-	request.Header.Add("CrumbRequestField", "Crumb")
-	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response := &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
-
-	// common crumb request
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
-
-	if user != "" && passwd != "" {
-		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
-	}
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -345,6 +312,19 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareForDeleteUser only for test
+func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareCommonPost only for test
+func PrepareCommonPost(request *http.Request,roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) {
 	request.Header.Add("CrumbRequestField", "Crumb")
 	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response := &http.Response{
@@ -363,5 +343,4 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 		request.SetBasicAuth(user, passwd)
 		requestCrumb.SetBasicAuth(user, passwd)
 	}
-	return
 }

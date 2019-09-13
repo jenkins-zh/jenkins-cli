@@ -76,31 +76,7 @@ func (q *UserClient) EditDesc(description string) (err error) {
 
 // Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
-	api := fmt.Sprintf("%s/securityRealm/user/%s/doDelete", q.URL, username)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.ContentType, util.ApplicationForm)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 && code != 302 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }
 

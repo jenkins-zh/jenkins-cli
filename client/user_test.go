@@ -37,4 +37,14 @@ var _ = Describe("user test", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Context("Delete", func() {
+		It("should success", func() {
+			userName := "fakeName"
+			PrepareForDeleteUser(roundTripper, userClient.URL, userName, "", "")
+
+			err := userClient.Delete(userName)
+			Expect(err).To(BeNil())
+		})
+	})
 })
