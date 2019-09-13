@@ -51,7 +51,7 @@ var jobSearchCmd = &cobra.Command{
 
 		if status, err := jclient.Search(keyword, jobSearchOption.Max); err == nil {
 			var data []byte
-			if data, err = Format(status, queueOption.Format); err == nil {
+			if data, err = Format(status, jobSearchOption.Format); err == nil {
 				cmd.Println(string(data))
 			} else {
 				log.Fatal(err)

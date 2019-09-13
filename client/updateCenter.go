@@ -29,7 +29,7 @@ type UpdateCenterJob struct {
 	Type         string
 }
 
-// InstallationJob represents current job
+// InstallationJob represents the installation job
 type InstallationJob struct {
 	UpdateCenterJob
 
@@ -37,7 +37,7 @@ type InstallationJob struct {
 	Status InstallationJobStatus
 }
 
-// InstallationJobStatus represents the status for current
+// InstallationJobStatus represents the installation job status
 type InstallationJobStatus struct {
 	Success bool
 	Type    string
@@ -54,19 +54,19 @@ type CenterSite struct {
 	URL                string         `json:"url"`
 }
 
-// InstallStates represents the status for InstallStatesData
+// InstallStates is the installation states
 type InstallStates struct {
 	Data   InstallStatesData
 	Status string
 }
 
-// InstallStatesData represents the data for InstallStatesJob
+// InstallStatesData is the installation state data
 type InstallStatesData struct {
 	Jobs  InstallStatesJob
 	State string
 }
 
-// InstallStatesJob represents the job being installed
+// InstallStatesJob is the installation state job
 type InstallStatesJob struct {
 	InstallStatus   string
 	Name            string
@@ -90,7 +90,7 @@ type CenterPlugin struct {
 	Wiki                           string
 }
 
-// Status
+// Status returns the status of Jenkins
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 	err = u.RequestWithData("GET", "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
 	return
@@ -152,17 +152,5 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 // GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
 	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
-	return
-}
-
-func (u *UpdateCenterManager) commonGet(url string) (req *http.Request) {
-	api := fmt.Sprintf("%s%s", u.URL, url)
-
-	req, err := http.NewRequest("GET", api, nil)
-	if err == nil {
-		u.AuthHandle(req)
-	} else {
-		return
-	}
 	return
 }

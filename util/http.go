@@ -13,10 +13,13 @@ import (
 )
 
 const (
-	CONTENT_TYPE = "Content-Type"
-	APP_FORM     = "application/x-www-form-urlencoded"
+	// ContentType is for the http header of content type
+	ContentType = "Content-Type"
+	// ApplicationForm is for the form submit
+	ApplicationForm     = "application/x-www-form-urlencoded"
 )
 
+// HTTPDownloader is the downloader for http request
 type HTTPDownloader struct {
 	TargetFilePath string
 	URL            string
@@ -119,12 +122,14 @@ func (i *ProgressIndicator) Init() {
 	}
 }
 
+// Write writes the progress
 func (i *ProgressIndicator) Write(p []byte) (n int, err error) {
 	n, err = i.Writer.Write(p)
 	i.setBar(n)
 	return
 }
 
+// Read reads the progress
 func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
 	n, err = i.Reader.Read(p)
 	i.setBar(n)

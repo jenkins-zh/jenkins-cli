@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobDeleteOption is the job delete option
 type JobDeleteOption struct {
 	BatchOption
 

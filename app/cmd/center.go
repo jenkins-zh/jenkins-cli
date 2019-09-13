@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CenterOption is the center cmd option
 type CenterOption struct {
 	WatchOption
 

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UserDeleteOption is user delete cmd option
 type UserDeleteOption struct {
 	BatchOption
 }

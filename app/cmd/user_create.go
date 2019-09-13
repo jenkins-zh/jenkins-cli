@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UserCreateOption is user create cmd option
 type UserCreateOption struct {
 }
 

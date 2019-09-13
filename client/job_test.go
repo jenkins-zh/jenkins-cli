@@ -249,12 +249,37 @@ var _ = Describe("job test", func() {
 		})
 	})
 
+	Context("GetPipeline", func() {
+		It("simple case, should success", func() {
+			PrepareForPipelineJob(roundTripper, jobClient.URL, "", "")
+			job, err := jobClient.GetPipeline("test")
+			Expect(err).To(BeNil())
+			Expect(job.Script).To(Equal("script"))
+		})
+	})
+
+	Context("UpdatePipeline", func() {
+		It("simple case, should success", func() {
+			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "")
+			err := jobClient.UpdatePipeline("test", "")
+			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("Create", func() {
+		It("simple case, should success", func() {
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "jobName", "jobType", "", "")
+			err := jobClient.Create("jobName", "jobType")
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("Delete", func() {
 		It("delete a job", func() {
 			jobName := "fakeJob"
 			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
-			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

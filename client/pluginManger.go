@@ -22,6 +22,7 @@ type PluginManager struct {
 	ShowProgress bool
 }
 
+// Plugin represents a plugin of Jenkins
 type Plugin struct {
 	Active       bool
 	Enabled      bool
@@ -30,16 +31,18 @@ type Plugin struct {
 	Deleted      bool
 }
 
-// PluginList represent a list of plugins
+// InstalledPluginList represent a list of plugins
 type InstalledPluginList struct {
 	Plugins []InstalledPlugin
 }
 
+// AvailablePluginList represents a list of available plugins
 type AvailablePluginList struct {
 	Data   []AvailablePlugin
 	Status string
 }
 
+// AvailablePlugin represetns a available plugin
 type AvailablePlugin struct {
 	Plugin
 
@@ -114,48 +117,19 @@ func getPluginsInstallQuery(names []string) string {
 
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, getPluginsInstallQuery(names))
-	var (
-		req      *http.Request
-		response *http.Response
-	)
+	api := fmt.Sprintf("/pluginManager/install?%s", getPluginsInstallQuery(names))
+	_, err = p.RequestWithoutData("POST", api, nil, nil, 200)
 
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		if err = p.AuthHandle(req); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		return
-	}
-
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			fmt.Println("install succeed.")
-		} else if code == 400 {
-			if errMsg, ok := response.Header["X-Error"]; ok {
-				for _, msg := range errMsg {
-					fmt.Println(msg)
-				}
-			} else {
-				fmt.Println("Cannot found plugins", names)
-			}
-		} else {
-			fmt.Println(response.Header)
-			fmt.Println("status code", code)
-			if err == nil && p.Debug && len(data) > 0 {
-				ioutil.WriteFile("debug.html", data, 0664)
-			} else if err != nil {
-				log.Fatal(err)
-			}
-		}
-	} else {
-		log.Fatal(err)
-	}
+	// TODO needs to consider the following cases
+	// code == 400 {
+	// 	if errMsg, ok := response.Header["X-Error"]; ok {
+	// 		for _, msg := range errMsg {
+	// 			fmt.Println(msg)
+	// 		}
+	// 	} else {
+	// 		fmt.Println("Cannot found plugins", names)
+	// 	}
+	// }
 	return
 }
 

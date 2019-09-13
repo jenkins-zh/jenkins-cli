@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobTypeOption is the job type cmd option
 type JobTypeOption struct {
 	OutputOption
 

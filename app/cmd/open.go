@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// OpenOption is the open cmd option
 type OpenOption struct {
 	InteractiveOption
 

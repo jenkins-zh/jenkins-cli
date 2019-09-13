@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobLogOption is the job log option
 type JobLogOption struct {
 	WatchOption
 	History int
