@@ -48,7 +48,7 @@ var _ = Describe("job delete command", func() {
 			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/doDelete", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

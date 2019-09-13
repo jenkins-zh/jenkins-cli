@@ -7,11 +7,12 @@ import (
 	"net/http"
 )
 
+// CoreClient hold the client of Jenkins core
 type CoreClient struct {
 	JenkinsCore
 }
 
-// Search find a set of jobs by name
+// Restart will send the restart request
 func (q *CoreClient) Restart() (err error) {
 	api := fmt.Sprintf("%s/safeRestart", q.URL)
 	var (

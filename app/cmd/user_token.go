@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UserTokenOption represents a user token cmd option
 type UserTokenOption struct {
 	Generate bool
 	Name     string

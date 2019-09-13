@@ -8,6 +8,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"strings"
+	"net/url"
+	"encoding/json"
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -269,7 +273,60 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 // PrepareForUpdatePipelineJob only for test
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareForCreatePipelineJob only for test
+func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, jobType, user, passwd string) {
+	type playLoad struct {
+		Name string `json:"name"`
+		Mode string `json:"mode"`
+		From string
+	}
+
+	playLoadObj := &playLoad{
+		Name: jobName,
+		Mode: jobType,
+		From: "",
+	}
+
+	playLoadData, _ := json.Marshal(playLoadObj)
+
+	formData := url.Values{
+		"json": {string(playLoadData)},
+		"name": {jobName},
+		"mode": {jobType},
+	}
+	payload := strings.NewReader(formData.Encode())
+
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareForEditUserDesc only for test
+func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userName, description, user, passwd string) {
+	formData := url.Values{}
+	formData.Add("description", description)
+	payload := strings.NewReader(formData.Encode())
+
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareForDeleteUser only for test
+func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareCommonPost only for test
+func PrepareCommonPost(request *http.Request,roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) {
 	request.Header.Add("CrumbRequestField", "Crumb")
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
@@ -286,5 +343,4 @@ func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 		request.SetBasicAuth(user, passwd)
 		requestCrumb.SetBasicAuth(user, passwd)
 	}
-	return
 }

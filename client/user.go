@@ -13,21 +13,25 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// UserClient for connect the user
 type UserClient struct {
 	JenkinsCore
 }
 
+// Token is the token of user
 type Token struct {
 	Status string
 	Data   TokenData
 }
 
+// TokenData represents the token
 type TokenData struct {
 	TokenName  string
-	TokenUuid  string
+	TokenUUID  string
 	TokenValue string
 }
 
+// Get returns a user's detail
 func (q *UserClient) Get() (status *User, err error) {
 	api := fmt.Sprintf("%s/user/%s/api/json", q.URL, q.UserName)
 	var (
@@ -61,72 +65,22 @@ func (q *UserClient) Get() (status *User, err error) {
 	return
 }
 
+// EditDesc update the description of a user
 func (q *UserClient) EditDesc(description string) (err error) {
-	api := fmt.Sprintf("%s/user/%s/submitDescription", q.URL, q.UserName)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
 	formData := url.Values{}
 	formData.Add("description", description)
 	payload := strings.NewReader(formData.Encode())
-
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
+// Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
-	api := fmt.Sprintf("%s/securityRealm/user/%s/doDelete", q.URL, username)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 && code != 302 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }
 
+// Create will create a user in Jenkins
 func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 	api := fmt.Sprintf("%s/securityRealm/createAccountByAdmin", q.URL)
 	var (
@@ -162,7 +116,7 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	client := q.GetClient()
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
@@ -177,6 +131,7 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 	return
 }
 
+// CreateToken create a token in Jenkins
 func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error) {
 	if newTokenName == "" {
 		newTokenName = fmt.Sprintf("jcli-%s", randomdata.SillyName())
@@ -199,7 +154,7 @@ func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error)
 		return
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
+	req.Header.Set(util.ContentType, util.ApplicationForm)
 	if err = q.CrumbHandle(req); err != nil {
 		log.Fatal(err)
 	}
@@ -223,6 +178,7 @@ func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error)
 	return
 }
 
+// User for Jenkins
 type User struct {
 	AbsoluteURL string `json:"absoluteUrl"`
 	Description string
@@ -230,8 +186,9 @@ type User struct {
 	ID          string
 }
 
+// UserForCreate is the data for creatig a user
 type UserForCreate struct {
-	User      `json:inline`
+	User      `json:",inline"`
 	Username  string `json:"username"`
 	Password1 string `json:"password1"`
 	Password2 string `json:"password2"`

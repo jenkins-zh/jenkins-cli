@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobCreateOption is the job create option
 type JobCreateOption struct {
 }
 

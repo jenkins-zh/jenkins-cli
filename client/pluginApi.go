@@ -10,10 +10,12 @@ import (
 	"strings"
 )
 
+// PluginAPI represetns a plugin API
 type PluginAPI struct {
 	dependencyMap map[string]string
 }
 
+// PluginDependency represents a plugin dependency
 type PluginDependency struct {
 	Name     string `json:"name"`
 	Implied  bool   `json:"implied"`
@@ -22,6 +24,7 @@ type PluginDependency struct {
 	Version  string `json:"version"`
 }
 
+// PluginInfo hold the info of a plugin
 type PluginInfo struct {
 	BuildDate         string             `json:"buildDate"`
 	Dependencies      []PluginDependency `json:"dependencies"`
@@ -40,6 +43,7 @@ type PluginInfo struct {
 	Stats PluginInfoStats
 }
 
+// PluginInfoStats is the plugin info stats
 type PluginInfoStats struct {
 	CurrentInstalls                   int
 	Installations                     []PluginInstallationInfo
@@ -49,6 +53,7 @@ type PluginInfoStats struct {
 	Trend                             int
 }
 
+// PluginInstallationInfo represents the plugin installation info
 type PluginInstallationInfo struct {
 	Timestamp  int64
 	Total      int
@@ -56,8 +61,9 @@ type PluginInstallationInfo struct {
 	Percentage float64
 }
 
-func (a *PluginAPI) ShowTrend(name string) {
-	if plugin, err := a.getPlugin(name); err == nil {
+// ShowTrend show the trend of plugins
+func (d *PluginAPI) ShowTrend(name string) {
+	if plugin, err := d.getPlugin(name); err == nil {
 		data := []float64{}
 		installations := plugin.Stats.Installations
 		offset, count := 0, 10
@@ -84,7 +90,7 @@ func (a *PluginAPI) ShowTrend(name string) {
 				total = 1
 			}
 			arr := make([]int, total)
-			for _ = range arr {
+			for range arr {
 				fmt.Print("*")
 			}
 			fmt.Println("", num)

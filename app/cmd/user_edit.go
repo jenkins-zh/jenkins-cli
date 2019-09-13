@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UserEditOption is the user edit cmd option
 type UserEditOption struct {
 	Description bool
 }

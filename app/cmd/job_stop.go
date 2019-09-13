@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobStopOption is the job stop option
 type JobStopOption struct {
 	BatchOption
 

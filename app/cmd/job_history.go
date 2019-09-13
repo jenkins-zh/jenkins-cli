@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// JobHistoryOption is the job history option
 type JobHistoryOption struct {
 	OutputOption
 }
@@ -55,6 +56,7 @@ var jobHistoryCmd = &cobra.Command{
 	},
 }
 
+// Output print the output
 func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		buildList := obj.([]client.JobBuild)

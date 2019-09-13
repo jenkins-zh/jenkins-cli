@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// UserOption is the user cmd option
 type UserOption struct {
 	OutputOption
 }

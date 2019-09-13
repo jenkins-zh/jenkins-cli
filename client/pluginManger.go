@@ -22,6 +22,7 @@ type PluginManager struct {
 	ShowProgress bool
 }
 
+// Plugin represents a plugin of Jenkins
 type Plugin struct {
 	Active       bool
 	Enabled      bool
@@ -30,16 +31,18 @@ type Plugin struct {
 	Deleted      bool
 }
 
-// PluginList represent a list of plugins
+// InstalledPluginList represent a list of plugins
 type InstalledPluginList struct {
 	Plugins []InstalledPlugin
 }
 
+// AvailablePluginList represents a list of available plugins
 type AvailablePluginList struct {
 	Data   []AvailablePlugin
 	Status string
 }
 
+// AvailablePlugin represetns a available plugin
 type AvailablePlugin struct {
 	Plugin
 

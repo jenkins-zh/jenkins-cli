@@ -15,19 +15,24 @@ type OutputOption struct {
 	Format string
 }
 
+// FormatOutput is the interface of format output
 type FormatOutput interface {
 	Output(obj interface{}, format string) (data []byte, err error)
 }
 
 const (
-	JsonOutputFormat  string = "json"
+	// JSONOutputFormat is the format of json
+	JSONOutputFormat  string = "json"
+	// YAMLOutputFormat is the format of yaml
 	YAMLOutputFormat  string = "yaml"
+	// TableOutputFormat is the format of table
 	TableOutputFormat string = "table"
 )
 
+// Output print the object into byte array
 func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	switch o.Format {
-	case JsonOutputFormat:
+	case JSONOutputFormat:
 		return json.MarshalIndent(obj, "", "  ")
 	case YAMLOutputFormat:
 		return yaml.Marshal(obj)
@@ -41,8 +46,9 @@ func (o *OutputOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output, supported formats: table, json, yaml")
 }
 
+// Format format the object into byte array
 func Format(obj interface{}, format string) (data []byte, err error) {
-	if format == JsonOutputFormat {
+	if format == JSONOutputFormat {
 		return json.MarshalIndent(obj, "", "  ")
 	} else if format == YAMLOutputFormat {
 		return yaml.Marshal(obj)
@@ -72,6 +78,7 @@ func (b *BatchOption) Confirm(message string) bool {
 	return true
 }
 
+// SetFlag the flag for batch option
 func (b *BatchOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&b.Batch, "batch", "b", false, "Batch mode, no need confirm")
 }

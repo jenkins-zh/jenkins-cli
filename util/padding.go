@@ -8,22 +8,27 @@ import (
 )
 
 const (
-	ALIGN_LEFT   = 0
-	ALIGN_CENTER = 1
-	ALIGN_RIGHT  = 2
+	// AlignLeft align left
+	AlignLeft   = 0
+	// AlignCenter align center
+	AlignCenter = 1
+	// AlignRight align right
+	AlignRight  = 2
 )
 
+// Pad give a pad
 func Pad(s, pad string, width int, align int) string {
 	switch align {
-	case ALIGN_CENTER:
+	case AlignCenter:
 		return PadCenter(s, pad, width)
-	case ALIGN_RIGHT:
+	case AlignRight:
 		return PadLeft(s, pad, width)
 	default:
 		return PadRight(s, pad, width)
 	}
 }
 
+// PadRight pas as right
 func PadRight(s, pad string, width int) string {
 	gap := widthValue(s, width)
 	if gap > 0 {
@@ -32,6 +37,7 @@ func PadRight(s, pad string, width int) string {
 	return s
 }
 
+// PadLeft pad as left
 func PadLeft(s, pad string, width int) string {
 	gap := widthValue(s, width)
 	if gap > 0 {
@@ -40,6 +46,7 @@ func PadLeft(s, pad string, width int) string {
 	return s
 }
 
+// PadCenter pad as center
 func PadCenter(s, pad string, width int) string {
 	gap := widthValue(s, width)
 	if gap > 0 {
@@ -102,6 +109,7 @@ func widthValue(s string, width int) (gap int) {
 	return
 }
 
+// Lenf counts the number
 func Lenf(han string) (l int) {
 	ln := len(han)
 	l = utf8.RuneCountInString(han)
