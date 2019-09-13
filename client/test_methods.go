@@ -8,6 +8,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"strings"
+	"net/url"
+	"encoding/json"
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -270,6 +274,51 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
+	response := &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+
+	// common crumb request
+	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+
+	if user != "" && passwd != "" {
+		request.SetBasicAuth(user, passwd)
+		requestCrumb.SetBasicAuth(user, passwd)
+	}
+	return
+}
+
+// PrepareForCreatePipelineJob only for test
+func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, jobType, user, passwd string) {
+	type playLoad struct {
+		Name string `json:"name"`
+		Mode string `json:"mode"`
+		From string
+	}
+
+	playLoadObj := &playLoad{
+		Name: jobName,
+		Mode: jobType,
+		From: "",
+	}
+
+	playLoadData, _ := json.Marshal(playLoadObj)
+
+	formData := url.Values{
+		"json": {string(playLoadData)},
+		"name": {jobName},
+		"mode": {jobType},
+	}
+	payload := strings.NewReader(formData.Encode())
+
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
+	request.Header.Add("CrumbRequestField", "Crumb")
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",

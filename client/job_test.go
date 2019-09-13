@@ -266,6 +266,14 @@ var _ = Describe("job test", func() {
 		})
 	})
 
+	Context("Create", func() {
+		It("simple case, should success", func() {
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "jobName", "jobType", "", "")
+			err := jobClient.Create("jobName", "jobType")
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("Delete", func() {
 		It("delete a job", func() {
 			jobName := "fakeJob"

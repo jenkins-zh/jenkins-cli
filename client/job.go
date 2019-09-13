@@ -243,12 +243,6 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 
 // Create can create a job
 func (q *JobClient) Create(jobName string, jobType string) (err error) {
-	api := fmt.Sprintf("%s/view/all/createItem", q.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
 	type playLoad struct {
 		Name string `json:"name"`
 		Mode string `json:"mode"`
@@ -270,27 +264,10 @@ func (q *JobClient) Create(jobName string, jobType string) (err error) {
 	}
 	payload := strings.NewReader(formData.Encode())
 
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-	req.Header.Add(util.ContentType, util.ApplicationForm)
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 302 || code == 200 { // Jenkins will send redirect by this api
-			fmt.Println("create successfully")
-		} else {
-			fmt.Printf("status code: %d\n", code)
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
+	var code int
+	code, err = q.RequestWithoutData("POST", "/view/all/createItem", map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	if code == 302 {
+		err = nil
 	}
 	return
 }
