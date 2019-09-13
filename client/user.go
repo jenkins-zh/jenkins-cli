@@ -67,39 +67,10 @@ func (q *UserClient) Get() (status *User, err error) {
 
 // EditDesc update the description of a user
 func (q *UserClient) EditDesc(description string) (err error) {
-	api := fmt.Sprintf("%s/user/%s/submitDescription", q.URL, q.UserName)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
 	formData := url.Values{}
 	formData.Add("description", description)
 	payload := strings.NewReader(formData.Encode())
-
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.ContentType, util.ApplicationForm)
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 

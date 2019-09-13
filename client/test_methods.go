@@ -337,3 +337,31 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	}
 	return
 }
+
+// PrepareForEditUserDesc only for test
+func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userName, description, user, passwd string) {
+	formData := url.Values{}
+	formData.Add("description", description)
+	payload := strings.NewReader(formData.Encode())
+
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
+	request.Header.Add("CrumbRequestField", "Crumb")
+	request.Header.Add(util.ContentType, util.ApplicationForm)
+	response := &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+
+	// common crumb request
+	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+
+	if user != "" && passwd != "" {
+		request.SetBasicAuth(user, passwd)
+		requestCrumb.SetBasicAuth(user, passwd)
+	}
+	return
+}
