@@ -21,7 +21,7 @@ func Pad(s, pad string, width int, align int) string {
 	switch align {
 	case AlignCenter:
 		return PadCenter(s, pad, width)
-	case AlignLeft:
+	case AlignRight:
 		return PadLeft(s, pad, width)
 	default:
 		return PadRight(s, pad, width)
