@@ -83,7 +83,7 @@ type CenterPlugin struct {
 	MinimumJavaVersion             string
 	Name                           string
 	RequiredCore                   string
-	SourceId                       string
+	SourceID                       string
 	Title                          string
 	URL                            string
 	Version                        string

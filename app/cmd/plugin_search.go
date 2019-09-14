@@ -124,6 +124,7 @@ func matchPluginsData(plugins []client.AvailablePlugin) (result []client.CenterP
 	return
 }
 
+// Output output the data into buffer
 func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		pluginList := obj.([]client.CenterPlugin)
