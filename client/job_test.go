@@ -305,4 +305,22 @@ var _ = Describe("job test", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Context("GetJobInputActions", func() {
+		It("simple case, should success", func() {
+			PrepareForGetJobInputActions(roundTripper, jobClient.URL, "", "", "jobName", 1)
+			actions, err := jobClient.GetJobInputActions("jobName", 1)
+			Expect(err).To(BeNil())
+			Expect(len(actions)).To(Equal(1))
+			Expect(actions[0].Message).To(Equal("message"))
+		})
+	})
+
+	Context("JobInputSubmit", func() {
+		It("simple case, should success", func() {
+			PrepareForSubmitInput(roundTripper, jobClient.URL, "/job/jobName/1/wfapi/inputSubmit?inputId=Eff7d5dba32b4da32d9a67a519434d3f", "", "")
+			err := jobClient.JobInputSubmit("/job/jobName/1/wfapi/inputSubmit?inputId=Eff7d5dba32b4da32d9a67a519434d3f", nil)
+			Expect(err).To(BeNil())
+		})
+	})
 })

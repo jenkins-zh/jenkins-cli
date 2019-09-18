@@ -297,6 +297,39 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	return
 }
 
+// GetJobInputActions returns the all pending actions
+func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []JobInputItem, err error) {
+	path := parseJobPath(jobName)
+	err = q.RequestWithData("GET", fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, 200, &actions)
+	return
+}
+
+// JobInputSubmit submit the params
+func (q *JobClient) JobInputSubmit(submitURL string, params map[string]string) (err error) {
+	paramDefs := []ParameterDefinition{}
+
+	for k, v := range params {
+		paramDefs = append(paramDefs, ParameterDefinition{
+			Name:  k,
+			Value: v,
+		})
+	}
+
+	paramsMap := map[string][]ParameterDefinition{}
+	paramsMap["parameter"] = paramDefs
+
+	json, _ := json.Marshal(paramsMap)
+	formData := url.Values{
+		"json": []string{string(json)},
+	}
+	payload := strings.NewReader(formData.Encode())
+	fmt.Println(formData.Encode())
+	fmt.Println(submitURL)
+
+	_, err = q.RequestWithoutData("POST", submitURL, nil, payload, 200)
+	return
+}
+
 // parseJobPath leads with slash
 func parseJobPath(jobName string) (path string) {
 	jobItems := strings.Split(jobName, " ")
@@ -404,4 +437,14 @@ type JobCategoryItem struct {
 	DisplayName string
 	Order       int
 	Class       string
+}
+
+// JobInputItem represents a job input action
+type JobInputItem struct {
+	ID                  string
+	AbortURL            string
+	Message             string
+	ProceedText         string
+	ProceedURL          string
+	RedirectApprovalURL string
 }
