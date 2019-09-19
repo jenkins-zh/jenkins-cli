@@ -46,7 +46,7 @@ var jobInputCmd = &cobra.Command{
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: jobInputOption.RoundTripper,
-				Debug: rootOptions.Debug,
+				Debug:        rootOptions.Debug,
 			},
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
@@ -62,9 +62,9 @@ var jobInputCmd = &cobra.Command{
 
 			fmt.Println(actions[0])
 			if action == "process" {
-				err = jclient.JobInputSubmit(actions[0].ProceedURL, nil)
+				err = jclient.JobInputSubmitTest(jobName, actions[0].ID, buildID, false, nil)
 			} else if action == "abort" {
-				err = jclient.JobInputSubmit(actions[0].AbortURL, nil)
+				err = jclient.JobInputSubmitTest(jobName, actions[0].ID, buildID, true, nil)
 			} else {
 				cmd.PrintErrln("Only process or abort is accepted!")
 			}

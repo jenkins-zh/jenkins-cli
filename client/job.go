@@ -304,6 +304,65 @@ func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []J
 	return
 }
 
+// jenkinsInputParametersRequest represents the parameters for the Jenkins input request
+type jenkinsInputParametersRequest struct {
+	Parameter []jenkinsPipelineParameter `json:"parameter"`
+}
+
+type jenkinsPipelineParameter struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+func (q *JobClient) JobInputSubmitTest(jobName, inputID string, buildID int, abort bool, params map[string]string) (err error) {
+	jobPath := parseJobPath(jobName)
+	// /job/pipeline/1/input/inputid/proceed
+	// /job/pipeline/1/input/inputid/abort
+	var api string
+	if abort {
+		api = fmt.Sprintf("%s/%d/input/%s/abort", jobPath, buildID, inputID)
+	} else {
+		api = fmt.Sprintf("%s/%d/input/%s/proceed", jobPath, buildID, inputID)
+	}
+
+	request := jenkinsInputParametersRequest{
+		Parameter: make([]jenkinsPipelineParameter, 0),
+	}
+
+	for k, v := range params {
+		request.Parameter = append(request.Parameter, jenkinsPipelineParameter{
+			Name:  k,
+			Value: v,
+		})
+	}
+
+	var paramData []byte
+	// var payload *strings.Reader
+	// if paramData, err = json.Marshal(request); err == nil {
+	// 	payload = strings.NewReader(url.Values{"json": {string(paramData)}}.Encode())
+	// }
+	paramData, _ = json.Marshal(request)
+
+	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
+
+	// header := map[string]string{
+	// 	"Content-Type": "application/x-www-form-urlencoded",
+	// }
+
+	// if len(params) == 0 {
+	// 	_, err = q.RequestWithoutData(http.MethodPost, api, header, nil, 200)
+	// 	payload = nil
+	// } else {
+	// 	_, err = q.RequestWithoutData(http.MethodPost, api, header, payload, 200)
+	// }
+	// fmt.Println(payload)
+	fmt.Println(api)
+
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+
+	return
+}
+
 // JobInputSubmit submit the params
 func (q *JobClient) JobInputSubmit(submitURL string, params map[string]string) (err error) {
 	paramDefs := []ParameterDefinition{}
