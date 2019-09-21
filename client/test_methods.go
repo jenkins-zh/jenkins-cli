@@ -132,6 +132,45 @@ func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 	return
 }
 
+// PrepareForManyInstalledPlugin only for test
+func PrepareForManyInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	request *http.Request, response *http.Response) {
+	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
+			"plugins": [
+				{
+					"shortName": "fake-ocean",
+					"version": "1.18.111",
+					"hasUpdate": false,
+					"enable": true,
+					"active": true
+				},
+				{
+					"shortName": "fake-ln",
+					"version": "1.18.1",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true
+				},
+				{
+					"shortName": "fake-is",
+					"version": "1.18.111",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true
+				},
+				{
+					"shortName": "fake",
+					"version": "1.0",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true
+				}
+			]
+		}`))
+	return
+}
+
 // PrepareFor500InstalledPluginList only for test
 func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
@@ -343,6 +382,33 @@ func RequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 				"title": "fake-open",
 				"installed": null
 			}
+			],
+			"url": "https://updates.jenkins.io/update-center.json"
+		}
+		`)),
+	}
+	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	return
+}
+
+// RequestNullUpdateCenter only for the test case
+func RequestNullUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	responseCenter = &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    requestCenter,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
+		{
+			"_class": "hudson.model.UpdateSite",
+			"connectionCheckUrl": "http://www.google.com/",
+			"dataTimestamp": 1567999067717,
+			"hasUpdates": true,
+			"id": "default",
+			"updates": [
+			],
+			"availables": [
 			],
 			"url": "https://updates.jenkins.io/update-center.json"
 		}

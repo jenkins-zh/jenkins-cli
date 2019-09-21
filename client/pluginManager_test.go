@@ -179,7 +179,6 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("UpdateCenter", func() {
 		It("normal case, should success", func() {
-
 			RequestUpdateCenter(roundTripper, pluginMgr.URL)
 
 			site, err := updateMgr.GetSite()

@@ -47,7 +47,7 @@ var pluginSearchCmd = &cobra.Command{
 
 		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
 			result := searchPlugins(plugins, keyword)
-			resultData := matchPluginsData(result)
+			resultData := matchPluginsData(result, jclient)
 			if data, err := pluginSearchOption.Output(resultData); err == nil {
 				if len(data) > 0 {
 					cmd.Print(string(data))
@@ -72,7 +72,10 @@ func searchPlugins(plugins *client.AvailablePluginList, keyword string) []client
 	return result
 }
 
-func matchPluginsData(plugins []client.AvailablePlugin) (result []client.CenterPlugin) {
+func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.PluginManager) (result []client.CenterPlugin) {
+	if len(plugins) == 0 {
+		return
+	}
 	result = make([]client.CenterPlugin, 0)
 	jclient := &client.UpdateCenterManager{
 		JenkinsCore: client.JenkinsCore{
@@ -81,44 +84,59 @@ func matchPluginsData(plugins []client.AvailablePlugin) (result []client.CenterP
 	}
 	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
+	hasSite := false
 	if err != nil {
-		return
+		hasSite = true
 	}
-	pluginJclient := &client.PluginManager{
-		JenkinsCore: client.JenkinsCore{
-			RoundTripper: pluginSearchOption.RoundTripper,
-		},
-	}
-	getCurrentJenkinsAndClient(&(pluginJclient.JenkinsCore))
-	plu, err := pluginJclient.GetPlugins()
+	installedPlugins, err := pluginJclient.GetPlugins()
+	hasInstalledPlugin := false
 	if err != nil {
-		return
+		hasInstalledPlugin = true
 	}
-
 	for _, plugin := range plugins {
-		for _, updatePlugin := range site.UpdatePlugins {
-			if plugin.Name == updatePlugin.Name {
-				result = append(result, updatePlugin)
-				break
+		isTrue := false
+		if !hasSite {
+			if len(site.UpdatePlugins) > 0 && site != nil {
+				for _, updatePlugin := range site.UpdatePlugins {
+					if plugin.Name == updatePlugin.Name {
+						result = append(result, updatePlugin)
+						isTrue = true
+						break
+					}
+				}
+			}
+			if len(site.AvailablesPlugins) > 0 && !isTrue {
+				for _, availablePlugin := range site.AvailablesPlugins {
+					if plugin.Name == availablePlugin.Name {
+						result = append(result, availablePlugin)
+						isTrue = true
+						break
+					}
+				}
 			}
 		}
-		for _, availablePlugin := range site.AvailablesPlugins {
-			if plugin.Name == availablePlugin.Name {
-				result = append(result, availablePlugin)
-				break
+		if !hasInstalledPlugin && installedPlugins != nil && len(installedPlugins.Plugins) > 0 && !isTrue {
+			for _, installPlugin := range installedPlugins.Plugins {
+				if plugin.Name == installPlugin.ShortName {
+					resultPlugin := client.CenterPlugin{}
+					resultPlugin.CompatibleWithInstalledVersion = false
+					resultPlugin.Name = installPlugin.ShortName
+					resultPlugin.Installed.Active = true
+					resultPlugin.Installed.Version = installPlugin.Version
+					resultPlugin.Title = plugin.Title
+					result = append(result, resultPlugin)
+					isTrue = true
+					break
+				}
 			}
 		}
-		for _, pl := range plu.Plugins {
-			if plugin.Name == pl.ShortName {
-				s := client.CenterPlugin{}
-				s.CompatibleWithInstalledVersion = false
-				s.Name = pl.ShortName
-				s.Installed.Active = true
-				s.Installed.Version = pl.Version
-				s.Title = plugin.Title
-				result = append(result, s)
-				break
-			}
+		if !isTrue {
+			resultPlugin := client.CenterPlugin{}
+			resultPlugin.CompatibleWithInstalledVersion = false
+			resultPlugin.Name = plugin.Name
+			resultPlugin.Installed.Active = plugin.Installed
+			resultPlugin.Title = plugin.Title
+			result = append(result, resultPlugin)
 		}
 	}
 	return
@@ -132,7 +150,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 
 		if len(pluginList) != 0 {
 			table := util.CreateTable(buf)
-			table.AddRow("number", "name", "installed", "version", "usedVersion", "title")
+			table.AddRow("number", "name", "installed", "version", "installedVersion", "title")
 
 			for i, plugin := range pluginList {
 				formatTab(&table, i, plugin)
@@ -148,26 +166,26 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 func formatTab(table *util.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
 	if installed != (client.InstalledPlugin{}) {
-		if len(plugin.Version) > 6 && len(installed.Version) > 6 {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
-		} else if len(plugin.Version) > 6 {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), installed.Version, plugin.Title)
-		} else if len(installed.Version) > 6 {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
-		} else {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
-		}
+		// if len(plugin.Version) > 6 && len(installed.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+		// } else if len(plugin.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), installed.Version, plugin.Title)
+		// } else if len(installed.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+		// } else {
+		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+			fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
+		// }
 	} else {
-		if len(plugin.Version) > 6 {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", false), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
-		} else {
-			table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
-				fmt.Sprintf("%t", false), plugin.Version, " ", plugin.Title)
-		}
+		// if len(plugin.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", false), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
+		// } else {
+		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+			fmt.Sprintf("%t", false), plugin.Version, " ", plugin.Title)
+		// }
 	}
 }
