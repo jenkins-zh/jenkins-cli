@@ -44,10 +44,6 @@ var _ = Describe("plugin search command", func() {
 
 			request, _ := client.PrepareForEmptyAvaiablePluginList(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			// request, _ = client.RequestUpdateCenter(roundTripper, "http://localhost:8080/jenkins")
-			// request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			// request, _ = client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
-			// request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 
 			buf := new(bytes.Buffer)

@@ -89,9 +89,9 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 		noSite = true
 	}
 	installedPlugins, err := pluginJclient.GetPlugins()
-	hasInstalledPlugin := false
+	noInstalledPlugin := false
 	if err != nil && installedPlugins == nil {
-		hasInstalledPlugin = true
+		noInstalledPlugin = true
 	}
 	for _, plugin := range plugins {
 		isTrue := false
@@ -115,7 +115,7 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 				}
 			}
 		}
-		if !hasInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isTrue {
+		if !noInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isTrue {
 			for _, installPlugin := range installedPlugins.Plugins {
 				if plugin.Name == installPlugin.ShortName {
 					resultPlugin := client.CenterPlugin{}
@@ -166,10 +166,26 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 func formatTab(table *util.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
 	if installed != (client.InstalledPlugin{}) {
+		// if len(plugin.Version) > 6 && len(installed.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+		// } else if len(plugin.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), fmt.Sprintf("%v...", plugin.Version[0:6]), installed.Version, plugin.Title)
+		// } else if len(installed.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", true), plugin.Version, fmt.Sprintf("%v...", installed.Version[0:6]), plugin.Title)
+		// } else {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
 			fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
+		// }
 	} else {
+		// if len(plugin.Version) > 6 {
+		// 	table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
+		// 		fmt.Sprintf("%t", false), fmt.Sprintf("%v...", plugin.Version[0:6]), " ", plugin.Title)
+		// } else {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
 			fmt.Sprintf("%t", false), plugin.Version, " ", plugin.Title)
+		// }
 	}
 }
