@@ -38,33 +38,24 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 // PrepareForOneAvaiablePlugin only for test
 func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
-	response = &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    request,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`{
+	request, response = PrepareForEmptyAvaiablePluginList(roundTripper, rootURL)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"status": "ok",
 			"data": [{
 					"name": "fake",
 					"title": "fake"
 			}]
-		}`)),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		}`))
+	// roundTripper.EXPECT().
+	// 	RoundTrip(request).Return(response, nil)
 	return
 }
 
 // PrepareForManyAvaiablePlugin only for test
 func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
-	response = &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    request,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`{
+	request, response = PrepareForEmptyAvaiablePluginList(roundTripper, rootURL)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"status": "ok",
 			"data": [
 				{
@@ -92,10 +83,9 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 					"title": "fake"
 				}
 			]
-		}`)),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		}`))
+	// roundTripper.EXPECT().
+	// 	RoundTrip(request).Return(response, nil)
 	return
 }
 
@@ -391,8 +381,8 @@ func RequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	return
 }
 
-// RequestNullUpdateCenter only for the test case
-func RequestNullUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+// NoAvailablePlugins only for the test case
+func NoAvailablePlugins(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	requestCenter *http.Request, responseCenter *http.Response) {
 	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
 	responseCenter = &http.Response{
@@ -415,6 +405,14 @@ func RequestNullUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL strin
 		`)),
 	}
 	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	return
+}
+
+// Request500UpdateCenter only for the test case
+func Request500UpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, responseCenter = NoAvailablePlugins(roundTripper, rootURL)
+	responseCenter.StatusCode = 500
 	return
 }
 

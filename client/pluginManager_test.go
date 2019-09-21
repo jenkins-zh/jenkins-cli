@@ -187,4 +187,36 @@ var _ = Describe("PluginManager test", func() {
 			Expect(site.ID).To(Equal("default"))
 		})
 	})
+
+	Context("NullUpdateCenter", func() {
+		It("normal case, should success", func() {
+			NoAvailablePlugins(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
+		})
+	})
+
+	Context("ManyInstalledPlugin", func() {
+		It("normal case, should success", func() {
+			PrepareForManyInstalledPlugin(roundTripper, pluginMgr.URL)
+
+			pluginList, err := pluginMgr.GetPlugins()
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Plugins)).To(Equal(4))
+			Expect(pluginList.Plugins[0].ShortName).To(Equal("fake-ocean"))
+		})
+	})
+
+	Context("500UpdateCenter", func() {
+		It("normal case, should success", func() {
+			Request500UpdateCenter(roundTripper, pluginMgr.URL)
+
+			_, err := updateMgr.GetSite()
+			Expect(err).To(HaveOccurred())
+		})
+	})
 })
