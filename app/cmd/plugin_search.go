@@ -94,51 +94,82 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 		noInstalledPlugin = true
 	}
 	for _, plugin := range plugins {
-		isTrue := false
-		if !noSite {
-			if len(site.UpdatePlugins) > 0 {
-				for _, updatePlugin := range site.UpdatePlugins {
-					if plugin.Name == updatePlugin.Name {
-						result = append(result, updatePlugin)
-						isTrue = true
-						break
-					}
-				}
-			}
-			if len(site.AvailablesPlugins) > 0 && !isTrue {
-				for _, availablePlugin := range site.AvailablesPlugins {
-					if plugin.Name == availablePlugin.Name {
-						result = append(result, availablePlugin)
-						isTrue = true
-						break
-					}
-				}
-			}
+		result = buildData(noSite, site, plugin, result, noInstalledPlugin, installedPlugins)
+	}
+	return
+}
+
+func buildData(noSite bool, site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin, noInstalledPlugin bool, installedPlugins *client.InstalledPluginList) (resultData []client.CenterPlugin) {
+	isTrue := false
+	if !noSite {
+		if len(site.UpdatePlugins) > 0 {
+			resultData, isTrue = buildUpdatePlugins(site, plugin, result)
 		}
-		if !noInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isTrue {
-			for _, installPlugin := range installedPlugins.Plugins {
-				if plugin.Name == installPlugin.ShortName {
-					resultPlugin := client.CenterPlugin{}
-					resultPlugin.CompatibleWithInstalledVersion = false
-					resultPlugin.Name = installPlugin.ShortName
-					resultPlugin.Installed.Active = true
-					resultPlugin.Installed.Version = installPlugin.Version
-					resultPlugin.Title = plugin.Title
-					result = append(result, resultPlugin)
-					isTrue = true
-					break
-				}
-			}
-		}
-		if !isTrue {
-			resultPlugin := client.CenterPlugin{}
-			resultPlugin.CompatibleWithInstalledVersion = false
-			resultPlugin.Name = plugin.Name
-			resultPlugin.Installed.Active = plugin.Installed
-			resultPlugin.Title = plugin.Title
-			result = append(result, resultPlugin)
+
+		if len(site.AvailablesPlugins) > 0 && !isTrue {
+			resultData, isTrue = buildAvailablePlugins(site, plugin, result)
 		}
 	}
+	if !noInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isTrue {
+		resultData, isTrue = buildInstalledPlugins(installedPlugins, plugin, result)
+	}
+	if !isTrue {
+		resultData = buildNoMatchPlugins(plugin, result)
+	}
+	return
+}
+
+func buildUpdatePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
+	isTrue = false
+	resultData = result
+	for _, updatePlugin := range site.UpdatePlugins {
+		if plugin.Name == updatePlugin.Name {
+			resultData = append(result, updatePlugin)
+			isTrue = true
+			break
+		}
+	}
+	return
+}
+
+func buildAvailablePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
+	resultData = result
+	for _, availablePlugin := range site.AvailablesPlugins {
+		if plugin.Name == availablePlugin.Name {
+			resultData = append(result, availablePlugin)
+			isTrue = true
+			break
+		}
+	}
+	return
+}
+
+func buildInstalledPlugins(installedPlugins *client.InstalledPluginList, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
+	resultData = result
+	for _, installPlugin := range installedPlugins.Plugins {
+		if plugin.Name == installPlugin.ShortName {
+			resultPlugin := client.CenterPlugin{}
+			resultPlugin.CompatibleWithInstalledVersion = false
+			resultPlugin.Name = installPlugin.ShortName
+			resultPlugin.Installed.Active = true
+			resultPlugin.Installed.Version = installPlugin.Version
+			resultPlugin.Title = plugin.Title
+			resultData = append(result, resultPlugin)
+			isTrue = true
+			break
+		}
+	}
+	return
+}
+
+func buildNoMatchPlugins(plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin) {
+	resultData = result
+	resultPlugin := client.CenterPlugin{}
+	resultPlugin.CompatibleWithInstalledVersion = false
+	resultPlugin.Name = plugin.Name
+	resultPlugin.Installed.Active = plugin.Installed
+	resultPlugin.Title = plugin.Title
+	resultData = append(result, resultPlugin)
 	return
 }
 
