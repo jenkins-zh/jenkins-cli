@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"encoding/json"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -51,20 +52,47 @@ var jobInputCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if actions, err := jclient.GetJobInputActions(jobName, buildID); err != nil {
+		if inputActions, err := jclient.GetJobInputActions(jobName, buildID); err != nil {
 			log.Fatal(err)
-		} else if len(actions) >= 1 {
+		} else if len(inputActions) >= 1 {
+			inputAction := inputActions[0]
+			params := make(map[string]string)
+
+			if len(inputAction.Inputs) > 0 {
+				inputsJSON, _ := json.MarshalIndent(inputAction.Inputs, "", " ")
+				content := string(inputsJSON)
+
+				prompt := &survey.Editor{
+					Message:       "Edit your pipeline input parameters",
+					FileName:      "*.json",
+					Default:       content,
+					HideDefault:   true,
+					AppendDefault: true,
+				}
+		
+				if err = survey.AskOne(prompt, &content); err != nil {
+					log.Fatal(err)
+				}
+
+				if err = json.Unmarshal([]byte(content), &(inputAction.Inputs)); err != nil {
+					log.Fatal(err)
+				}
+
+				for _, input := range inputAction.Inputs {
+					params[input.Name] = input.Value
+				}
+			}
+
 			action := ""
 			prompt := &survey.Input{
-				Message: fmt.Sprintf("Are you going to process or abort this input: %s?", actions[0].Message),
+				Message: fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
 			}
 			survey.AskOne(prompt, &action)
 
-			fmt.Println(actions[0])
 			if action == "process" {
-				err = jclient.JobInputSubmitTest(jobName, actions[0].ID, buildID, false, nil)
+				err = jclient.JobInputSubmit(jobName, inputAction.ID, buildID, false, params)
 			} else if action == "abort" {
-				err = jclient.JobInputSubmitTest(jobName, actions[0].ID, buildID, true, nil)
+				err = jclient.JobInputSubmit(jobName, inputAction.ID, buildID, true, params)
 			} else {
 				cmd.PrintErrln("Only process or abort is accepted!")
 			}
