@@ -62,7 +62,7 @@ var _ = Describe("plugin search command", func() {
 
 			request, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.RequestUpdateCenter(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForRequestUpdateCenter(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -91,9 +91,9 @@ var _ = Describe("plugin search command", func() {
 
 			request, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.NoAvailablePlugins(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForNoAvailablePlugins(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.PrepareForManyInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForManyInstalledPlugins(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 
@@ -120,7 +120,7 @@ var _ = Describe("plugin search command", func() {
 
 			request, _ := client.PrepareForManyAvaiablePlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.Request500UpdateCenter(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForRequest500UpdateCenter(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareFor500InstalledPluginList(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")

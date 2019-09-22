@@ -179,7 +179,7 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("UpdateCenter", func() {
 		It("normal case, should success", func() {
-			RequestUpdateCenter(roundTripper, pluginMgr.URL)
+			PrepareForRequestUpdateCenter(roundTripper, pluginMgr.URL)
 
 			site, err := updateMgr.GetSite()
 			Expect(err).To(BeNil())
@@ -190,7 +190,7 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("NullUpdateCenter", func() {
 		It("normal case, should success", func() {
-			NoAvailablePlugins(roundTripper, pluginMgr.URL)
+			PrepareForNoAvailablePlugins(roundTripper, pluginMgr.URL)
 
 			site, err := updateMgr.GetSite()
 			Expect(err).To(BeNil())
@@ -199,9 +199,9 @@ var _ = Describe("PluginManager test", func() {
 		})
 	})
 
-	Context("ManyInstalledPlugin", func() {
+	Context("ManyInstalledPlugins", func() {
 		It("normal case, should success", func() {
-			PrepareForManyInstalledPlugin(roundTripper, pluginMgr.URL)
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL)
 
 			pluginList, err := pluginMgr.GetPlugins()
 			Expect(err).To(BeNil())
@@ -213,7 +213,7 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("500UpdateCenter", func() {
 		It("normal case, should success", func() {
-			Request500UpdateCenter(roundTripper, pluginMgr.URL)
+			PrepareForRequest500UpdateCenter(roundTripper, pluginMgr.URL)
 
 			_, err := updateMgr.GetSite()
 			Expect(err).To(HaveOccurred())
