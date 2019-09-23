@@ -1,7 +1,6 @@
 package client
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -46,10 +45,13 @@ type InstallationJobStatus struct {
 
 // CenterSite represents the site of update center
 type CenterSite struct {
-	ConnectionCheckURL string `json:"connectionCheckUrl"`
-	HasUpdates         bool
-	ID                 string `json:"id"`
-	URL                string `json:"url"`
+	AvailablesPlugins  []CenterPlugin `json:"availables"`
+	ConnectionCheckURL string         `json:"connectionCheckUrl"`
+	DataTimestamp      int64          `json:"dataTimestamp"`
+	HasUpdates         bool           `json:"hasUpdates"`
+	ID                 string         `json:"id"`
+	UpdatePlugins      []CenterPlugin `json:"updates"`
+	URL                string         `json:"url"`
 }
 
 // InstallStates is the installation states
@@ -73,37 +75,24 @@ type InstallStatesJob struct {
 	Version         string
 }
 
+// CenterPlugin represents the all plugin from UpdateCenter
+type CenterPlugin struct {
+	CompatibleWithInstalledVersion bool
+	Excerpt                        string
+	Installed                      InstalledPlugin
+	MinimumJavaVersion             string
+	Name                           string
+	RequiredCore                   string
+	SourceID                       string
+	Title                          string
+	URL                            string
+	Version                        string
+	Wiki                           string
+}
+
 // Status returns the status of Jenkins
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
-	api := fmt.Sprintf("%s/updateCenter/api/json?pretty=false&depth=1", u.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		u.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := u.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &UpdateCenter{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = u.RequestWithData("GET", "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
 	return
 }
 
@@ -157,5 +146,11 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 		ShowProgress:   true,
 	}
 	err = downloader.DownloadFile()
+	return
+}
+
+// GetSite is get Available Plugins and Updated Plugins from UpdateCenter
+func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
+	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
 	return
 }
