@@ -84,15 +84,9 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 	}
 	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
-	noSite := false
-	if err != nil && site == nil {
-		noSite = true
-	}
+	noSite := (err != nil || site == nil)
 	installedPlugins, err := pluginJclient.GetPlugins()
-	noInstalledPlugin := false
-	if err != nil && installedPlugins == nil {
-		noInstalledPlugin = true
-	}
+	noInstalledPlugin := (err != nil || installedPlugins == nil)
 	for _, plugin := range plugins {
 		result = buildData(noSite, site, plugin, result, noInstalledPlugin, installedPlugins)
 	}
@@ -100,51 +94,51 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 }
 
 func buildData(noSite bool, site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin, noInstalledPlugin bool, installedPlugins *client.InstalledPluginList) (resultData []client.CenterPlugin) {
-	isTrue := false
+	isMatched := false
 	if !noSite {
 		if len(site.UpdatePlugins) > 0 {
-			resultData, isTrue = buildUpdatePlugins(site, plugin, result)
+			resultData, isMatched = buildUpdatePlugins(site, plugin, result)
 		}
 
-		if len(site.AvailablesPlugins) > 0 && !isTrue {
-			resultData, isTrue = buildAvailablePlugins(site, plugin, result)
+		if len(site.AvailablesPlugins) > 0 && !isMatched {
+			resultData, isMatched = buildAvailablePlugins(site, plugin, result)
 		}
 	}
-	if !noInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isTrue {
-		resultData, isTrue = buildInstalledPlugins(installedPlugins, plugin, result)
+	if !noInstalledPlugin && len(installedPlugins.Plugins) > 0 && !isMatched {
+		resultData, isMatched = buildInstalledPlugins(installedPlugins, plugin, result)
 	}
-	if !isTrue {
+	if !isMatched {
 		resultData = buildNoMatchPlugins(plugin, result)
 	}
 	return
 }
 
-func buildUpdatePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
-	isTrue = false
+func buildUpdatePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isMatched bool) {
+	isMatched = false
 	resultData = result
 	for _, updatePlugin := range site.UpdatePlugins {
 		if plugin.Name == updatePlugin.Name {
 			resultData = append(result, updatePlugin)
-			isTrue = true
+			isMatched = true
 			break
 		}
 	}
 	return
 }
 
-func buildAvailablePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
+func buildAvailablePlugins(site *client.CenterSite, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isMatched bool) {
 	resultData = result
 	for _, availablePlugin := range site.AvailablesPlugins {
 		if plugin.Name == availablePlugin.Name {
 			resultData = append(result, availablePlugin)
-			isTrue = true
+			isMatched = true
 			break
 		}
 	}
 	return
 }
 
-func buildInstalledPlugins(installedPlugins *client.InstalledPluginList, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isTrue bool) {
+func buildInstalledPlugins(installedPlugins *client.InstalledPluginList, plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin, isMatched bool) {
 	resultData = result
 	for _, installPlugin := range installedPlugins.Plugins {
 		if plugin.Name == installPlugin.ShortName {
@@ -155,7 +149,7 @@ func buildInstalledPlugins(installedPlugins *client.InstalledPluginList, plugin 
 			resultPlugin.Installed.Version = installPlugin.Version
 			resultPlugin.Title = plugin.Title
 			resultData = append(result, resultPlugin)
-			isTrue = true
+			isMatched = true
 			break
 		}
 	}
@@ -184,7 +178,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 			table.AddRow("number", "name", "installed", "version", "installedVersion", "title")
 
 			for i, plugin := range pluginList {
-				formatTab(&table, i, plugin)
+				formatTable(&table, i, plugin)
 			}
 			table.Render()
 		}
@@ -194,7 +188,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	return
 }
 
-func formatTab(table *util.Table, i int, plugin client.CenterPlugin) {
+func formatTable(table *util.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
 	if installed != (client.InstalledPlugin{}) {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
