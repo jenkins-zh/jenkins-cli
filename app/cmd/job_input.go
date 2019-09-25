@@ -10,12 +10,14 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
+	"github.com/AlecAivazis/survey/v2/terminal"
 )
 
 // JobInputOption is the job delete option
 type JobInputOption struct {
 	BatchOption
 	RoundTripper http.RoundTripper
+	Stdio terminal.Stdio
 }
 
 var jobInputOption JobInputOption
@@ -83,11 +85,16 @@ var jobInputCmd = &cobra.Command{
 				}
 			}
 
+			render := &survey.Renderer{}
+			render.WithStdio(jobInputOption.Stdio)
+
 			action := ""
 			prompt := &survey.Input{
+				Renderer: *render,
 				Message: fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
 			}
 			survey.AskOne(prompt, &action)
+			fmt.Println("=====sdfs=dfs=dfs=f", action, "sdfsf")
 
 			if action == "process" {
 				err = jclient.JobInputSubmit(jobName, inputAction.ID, buildID, false, params)
