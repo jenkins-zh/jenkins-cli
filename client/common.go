@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 )
@@ -58,7 +59,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		}
 		roundTripper = tr
 	}
-	client = &http.Client{Transport: roundTripper}
+	client = &http.Client{Transport: roundTripper, Timeout: time.Duration(5 * time.Second)}
 	return
 }
 
