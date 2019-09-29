@@ -58,4 +58,5 @@ Read [this document](doc/README.md) to know more details about how to use `jcli`
 
 # Contribution
 
-It's still under very early develope time. Any contribution is welcome.
+If you're interested in this project. Please go through the
+[contribution guide](CONTRIBUTING.md). Any contributions are welcome.
