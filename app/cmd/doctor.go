@@ -59,11 +59,11 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer) {
 		jclient.Token = jenkinsServer.Token
 		jclient.Proxy = jenkinsServer.Proxy
 		jclient.ProxyAuth = jenkinsServer.ProxyAuth
-		fmt.Printf("checking the number: %d, name: %s's status now: ", i, jenkinsServer.Name)
+		fmt.Printf("checking the No.%d - %s status: ", i, jenkinsServer.Name)
 		if _, err := jclient.GetPlugins(); err == nil {
-			fmt.Println("***ok***")
+			fmt.Println("***available***")
 		} else {
-			fmt.Println(err)
+			fmt.Println("***unavailable***", err)
 		}
 	}
 }
