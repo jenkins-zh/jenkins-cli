@@ -18,7 +18,7 @@ const (
 	gendocFrontmatterTemplate = `---
 date: %s
 title: "%s"
-slug: %s
+anchor: %s
 url: %s
 ---
 `

@@ -6,6 +6,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 	"bytes"
+	"os"
+	"io/ioutil"
+	"path/filepath"
 )
 
 var _ = Describe("doc command test", func() {
@@ -42,10 +45,17 @@ var _ = Describe("doc command test", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 
-			rootCmd.SetArgs([]string{"doc", "/tmp"})
-			_, err := rootCmd.ExecuteC()
+			tmpdir, err := ioutil.TempDir("", "test-gen-cmd-tree")
+			Expect(err).To(BeNil())
+			defer os.RemoveAll(tmpdir)
+
+			rootCmd.SetArgs([]string{"doc", tmpdir})
+			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 			Expect(buf.String()).To(Equal(""))
+
+			_, err = os.Stat(filepath.Join(tmpdir, "jcli_doc.md"))
+			Expect(err).To(BeNil())
 		})
 	})
 })
