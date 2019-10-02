@@ -177,7 +177,6 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 	response = &http.Response{
 		StatusCode: 200,
-
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
