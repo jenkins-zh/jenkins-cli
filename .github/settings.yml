@@ -31,6 +31,9 @@ labels:
     color: c5def5
   - name: documentation
     color: 5ce05e
+  - name: Hacktoberfest
+    description: More details from https://hacktoberfest.digitalocean.com/
+    color: 5ce05e
   - name: test
     color: c2c2fc
   - name: chore

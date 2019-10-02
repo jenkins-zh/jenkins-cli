@@ -132,5 +132,34 @@ var _ = Describe("job search command", func() {
 }
 `))
 		})
+
+		It("should success, output format is name", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/search/suggest?query=&max=10", nil)
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions": [{"name": "fake"},{"name": "fake1"}]}`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			rootCmd.SetArgs([]string{"job", "search", "--all", "-o", "name"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(`fake
+fake1
+`))
+		})
 	})
 })

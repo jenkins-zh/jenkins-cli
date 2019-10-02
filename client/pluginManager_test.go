@@ -17,6 +17,7 @@ var _ = Describe("PluginManager test", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 		pluginMgr    PluginManager
+		updateMgr    UpdateCenterManager
 	)
 
 	BeforeEach(func() {
@@ -25,6 +26,9 @@ var _ = Describe("PluginManager test", func() {
 		pluginMgr = PluginManager{}
 		pluginMgr.RoundTripper = roundTripper
 		pluginMgr.URL = "http://localhost"
+		updateMgr = UpdateCenterManager{}
+		updateMgr.RoundTripper = roundTripper
+		updateMgr.URL = "http://localhost"
 	})
 
 	AfterEach(func() {
@@ -65,6 +69,16 @@ var _ = Describe("PluginManager test", func() {
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Data)).To(Equal(1))
 			Expect(pluginList.Data[0].Name).To(Equal("fake"))
+		})
+
+		It("many plugins in the list", func() {
+			PrepareForManyAvaiablePlugin(roundTripper, pluginMgr.URL)
+
+			pluginList, err := pluginMgr.GetAvailablePlugins()
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Data)).To(Equal(6))
+			Expect(pluginList.Data[0].Name).To(Equal("fake-ocean"))
 		})
 
 		It("response with 500", func() {
@@ -160,6 +174,49 @@ var _ = Describe("PluginManager test", func() {
 			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
 
 			pluginMgr.Upload(tmpfile.Name())
+		})
+	})
+
+	Context("UpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForRequestUpdateCenter(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
+		})
+	})
+
+	Context("NullUpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForNoAvailablePlugins(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
+		})
+	})
+
+	Context("ManyInstalledPlugins", func() {
+		It("normal case, should success", func() {
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL)
+
+			pluginList, err := pluginMgr.GetPlugins()
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Plugins)).To(Equal(4))
+			Expect(pluginList.Plugins[0].ShortName).To(Equal("fake-ocean"))
+		})
+	})
+
+	Context("500UpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForRequest500UpdateCenter(roundTripper, pluginMgr.URL)
+
+			_, err := updateMgr.GetSite()
+			Expect(err).To(HaveOccurred())
 		})
 	})
 })
