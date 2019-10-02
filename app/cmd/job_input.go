@@ -16,6 +16,9 @@ import (
 // JobInputOption is the job delete option
 type JobInputOption struct {
 	BatchOption
+
+	Action string
+
 	RoundTripper http.RoundTripper
 	Stdio terminal.Stdio
 }
@@ -24,6 +27,7 @@ var jobInputOption JobInputOption
 
 func init() {
 	jobCmd.AddCommand(jobInputCmd)
+	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "", "The action wether you want to process or abort.")
 }
 
 var jobInputCmd = &cobra.Command{
@@ -88,13 +92,15 @@ var jobInputCmd = &cobra.Command{
 			render := &survey.Renderer{}
 			render.WithStdio(jobInputOption.Stdio)
 
-			action := ""
-			prompt := &survey.Input{
-				Renderer: *render,
-				Message: fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
+			// allow users make their choice through cli arguments
+			action := jobInputOption.Action
+			if action == "" {
+				prompt := &survey.Input{
+					Renderer: *render,
+					Message: fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
+				}
+				survey.AskOne(prompt, &action)
 			}
-			survey.AskOne(prompt, &action)
-			fmt.Println("=====sdfs=dfs=dfs=f", action, "sdfsf")
 
 			if action == "process" {
 				err = jclient.JobInputSubmit(jobName, inputAction.ID, buildID, false, params)

@@ -33,7 +33,15 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 // PrepareForSubmitInput only for test
 func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/%d/input/%s/abort", jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/abort", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
+	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
+}
+
+// PrepareForSubmitProcessInput only for test
+func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
+	request *http.Request, response *http.Response) {
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
 	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
