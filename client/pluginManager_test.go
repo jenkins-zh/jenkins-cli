@@ -140,6 +140,23 @@ var _ = Describe("PluginManager test", func() {
 			err := pluginMgr.InstallPlugin([]string{pluginName})
 			Expect(err).To(BeNil())
 		})
+
+		It("with 400", func() {
+			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).NotTo(BeNil())
+		})
+
+		It("with 400, error message", func() {
+			response := PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
+			response.Header = map[string][]string{
+				"X-Error": []string{"X-Error"},
+			}
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).To(Equal(fmt.Errorf("X-Error")))
+		})
 	})
 
 	Context("UninstallPlugin", func() {

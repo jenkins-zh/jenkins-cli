@@ -403,10 +403,16 @@ func PrepareForRequest500UpdateCenter(roundTripper *mhttp.MockRoundTripper, root
 
 // PrepareForInstallPlugin only for test
 func PrepareForInstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName, user, passwd string) {
+	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName, user, passwd)
+}
+
+// PrepareForInstallPluginWithCode only for test
+func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
+	statusCode int, rootURL, pluginName, user, passwd string) (response *http.Response) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/install?plugin.%s=", rootURL, pluginName), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
-	response := &http.Response{
-		StatusCode: 200,
+	response = &http.Response{
+		StatusCode: statusCode,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}

@@ -8,7 +8,7 @@ import (
 var _ = Describe("collect test", func() {
 	Context("MaxAndMin", func() {
 		It("normal case, should success", func() {
-			data := []float64{0.1, 0.2, 0.3, 0.4}
+			data := []float64{0.2, 0.3, 0.1, 0.4}
 			max, min := MaxAndMin(data)
 			Expect(max).To(Equal(0.4))
 			Expect(min).To(Equal(0.1))
