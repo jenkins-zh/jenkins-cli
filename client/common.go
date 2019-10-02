@@ -165,6 +165,26 @@ func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
 	return
 }
 
+// RequestWithResponse make a common request
+func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string]string, payload io.Reader) (
+	response *http.Response, err error) {
+	var (
+		req      *http.Request
+	)
+
+	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
+		return
+	}
+	j.AuthHandle(req)
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	client := j.GetClient()
+	return client.Do(req)
+}
+
 // Request make a common request
 func (j *JenkinsCore) Request(method, api string, headers map[string]string, payload io.Reader) (
 	statusCode int, data []byte, err error) {
