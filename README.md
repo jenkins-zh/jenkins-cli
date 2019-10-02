@@ -60,3 +60,7 @@ Read [this document](doc/README.md) to know more details about how to use `jcli`
 
 If you're interested in this project. Please go through the
 [contribution guide](CONTRIBUTING.md). Any contributions are welcome.
+
+# Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)

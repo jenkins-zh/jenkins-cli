@@ -58,3 +58,7 @@ sudo mv jcli /usr/local/bin/
 # 贡献
 
 如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](CONTRIBUTING.md)。我们欢迎任何形式的贡献。
+
+# 点赞数趋势图
+
+[![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
