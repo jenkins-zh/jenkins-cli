@@ -297,6 +297,47 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	return
 }
 
+// GetJobInputActions returns the all pending actions
+func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []JobInputItem, err error) {
+	path := parseJobPath(jobName)
+	err = q.RequestWithData("GET", fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, 200, &actions)
+	return
+}
+
+// JenkinsInputParametersRequest represents the parameters for the Jenkins input request
+type JenkinsInputParametersRequest struct {
+	Parameter []ParameterDefinition `json:"parameter"`
+}
+
+// JobInputSubmit submit the pending input request
+func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort bool, params map[string]string) (err error) {
+	jobPath := parseJobPath(jobName)
+	var api string
+	if abort {
+		api = fmt.Sprintf("%s/%d/input/%s/abort", jobPath, buildID, inputID)
+	} else {
+		api = fmt.Sprintf("%s/%d/input/%s/proceed", jobPath, buildID, inputID)
+	}
+
+	request := JenkinsInputParametersRequest{
+		Parameter: make([]ParameterDefinition, 0),
+	}
+
+	for k, v := range params {
+		request.Parameter = append(request.Parameter, ParameterDefinition{
+			Name:  k,
+			Value: v,
+		})
+	}
+
+	paramData, _ := json.Marshal(request)
+
+	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+
+	return
+}
+
 // parseJobPath leads with slash
 func parseJobPath(jobName string) (path string) {
 	jobItems := strings.Split(jobName, " ")
@@ -404,4 +445,15 @@ type JobCategoryItem struct {
 	DisplayName string
 	Order       int
 	Class       string
+}
+
+// JobInputItem represents a job input action
+type JobInputItem struct {
+	ID                  string
+	AbortURL            string
+	Message             string
+	ProceedText         string
+	ProceedURL          string
+	RedirectApprovalURL string
+	Inputs []ParameterDefinition
 }

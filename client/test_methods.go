@@ -12,8 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
-
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
@@ -509,7 +507,7 @@ func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userNam
 // PrepareCommonPost only for test
 func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) {
 	request.Header.Add("CrumbRequestField", "Crumb")
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	// request.Header.Add(util.ContentType, util.ApplicationForm)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
