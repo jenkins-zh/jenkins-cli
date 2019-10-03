@@ -3,16 +3,19 @@ package client
 import (
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
+	"fmt"
 	"net/http"
 	"strings"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PluginAPI represetns a plugin API
 type PluginAPI struct {
 	dependencyMap map[string]string
+
+	RoundTripper http.RoundTripper
 }
 
 // PluginDependency represents a plugin dependency
@@ -62,42 +65,23 @@ type PluginInstallationInfo struct {
 }
 
 // ShowTrend show the trend of plugins
-func (d *PluginAPI) ShowTrend(name string) {
-	if plugin, err := d.getPlugin(name); err == nil {
-		data := []float64{}
-		installations := plugin.Stats.Installations
-		offset, count := 0, 10
-		if len(installations) > count {
-			offset = len(installations) - count
-		}
-		for _, installation := range installations[offset:] {
-			data = append(data, float64(installation.Total))
-		}
-
-		min, max := 0.0, 0.0
-		for _, item := range data {
-			if item < min {
-				min = item
-			} else if item > max {
-				max = item
-			}
-		}
-
-		unit := (max - min) / 100
-		for _, num := range data {
-			total := (int)(num / unit)
-			if total == 0 {
-				total = 1
-			}
-			arr := make([]int, total)
-			for range arr {
-				fmt.Print("*")
-			}
-			fmt.Println("", num)
-		}
-	} else {
-		log.Fatal(err)
+func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
+	var plugin *PluginInfo
+	if plugin, err = d.getPlugin(name); err != nil {
+		return
 	}
+
+	data := []float64{}
+	installations := plugin.Stats.Installations
+	offset, count := 0, 10
+	if len(installations) > count {
+		offset = len(installations) - count
+	}
+	for _, installation := range installations[offset:] {
+		data = append(data, float64(installation.Total))
+	}
+	trend = util.PrintCollectTrend(data)
+	return
 }
 
 // DownloadPlugins will download those plugins from update center
@@ -135,11 +119,16 @@ func (d *PluginAPI) download(url string, name string) {
 
 func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
-	cli.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
+	if d.RoundTripper == nil {
+		cli.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	} else {
+		cli.Transport = d.RoundTripper
 	}
+
 	resp, err := cli.Get("https://plugins.jenkins.io/api/plugin/" + name)
 	if err != nil {
 		return plugin, err
