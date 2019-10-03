@@ -505,10 +505,10 @@ func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userNam
 }
 
 // PrepareCommonPost only for test
-func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) {
+func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
+	response *http.Response) {
 	request.Header.Add("CrumbRequestField", "Crumb")
-	// request.Header.Add(util.ContentType, util.ApplicationForm)
-	response := &http.Response{
+	response = &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
 		Request:    request,
@@ -524,4 +524,5 @@ func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripp
 		request.SetBasicAuth(user, passwd)
 		requestCrumb.SetBasicAuth(user, passwd)
 	}
+	return
 }
