@@ -67,4 +67,36 @@ var _ = Describe("user test", func() {
 			Expect(err).To(BeNil())
 		})
 	})
+
+	Context("Create", func() {
+		It("should success", func() {
+			targetUserName := "fakeName"
+			userClient.UserName = username
+			userClient.Token = password
+
+			PrepareCreateUser(roundTripper, userClient.URL, username, password, targetUserName)
+
+			result, err := userClient.Create(targetUserName)
+			Expect(err).To(BeNil())
+			Expect(result).NotTo(BeNil())
+			Expect(result.Username).To(Equal(targetUserName))
+			Expect(result.Password1).To(Equal(result.Password2))
+			Expect(result.Password1).NotTo(Equal(""))
+		})
+	})
+
+	Context("CreateToken", func() {
+		It("should success, given token name", func() {
+			newTokenName := "fakeName"
+			userClient.UserName = username
+			userClient.Token = password
+
+			PrepareCreateToken(roundTripper, userClient.URL, username, password, newTokenName)
+
+			token, err := userClient.CreateToken(newTokenName)
+			Expect(err).To(BeNil())
+			Expect(token).NotTo(BeNil())
+			Expect(token.Status).To(Equal("ok"))
+		})
+	})
 })
