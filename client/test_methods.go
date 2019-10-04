@@ -482,24 +482,6 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	return
 }
 
-// PrepareForEditUserDesc only for test
-func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userName, description, user, passwd string) {
-	formData := url.Values{}
-	formData.Add("description", description)
-	payload := strings.NewReader(formData.Encode())
-
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
-	return
-}
-
-// PrepareForDeleteUser only for test
-func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
-	return
-}
-
 // PrepareCommonPost only for test
 func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
 	response *http.Response) {
