@@ -26,6 +26,7 @@ type JenkinsCore struct {
 	Debug        bool
 	Output       io.Writer
 	RoundTripper http.RoundTripper
+	Language     string
 }
 
 // JenkinsCrumb crumb for Jenkins
@@ -172,9 +173,11 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		req      *http.Request
 		response *http.Response
 	)
-
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
+	}
+	if j.Language != "" {
+		req.Header.Set("Accept-Language", j.Language)
 	}
 	j.AuthHandle(req)
 
