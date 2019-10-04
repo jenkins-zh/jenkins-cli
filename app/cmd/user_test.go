@@ -57,5 +57,25 @@ var _ = Describe("user command", func() {
 
 			Expect(buf.String()).To(Equal("{\n  \"absoluteUrl\": \"\",\n  \"Description\": \"\",\n  \"fullname\": \"admin\",\n  \"ID\": \"\"\n}\n"))
 		})
+
+		It("with status code 500", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			response := client.PrepareGetUser(roundTripper, "http://localhost:8080/jenkins",
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
+			response.StatusCode = 500
+
+			rootCmd.SetArgs([]string{"user"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal("unexpected status code: 500\n"))
+		})
 	})
 })
