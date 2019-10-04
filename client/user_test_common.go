@@ -30,10 +30,11 @@ func PrepareGetUser(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd 
 
 // PrepareCreateUser only for test
 func PrepareCreateUser(roundTripper *mhttp.MockRoundTripper, rootURL,
-	user, passwd, targetUserName string) {
+	user, passwd, targetUserName string) (response *http.Response) {
 	payload, _ := genSimpleUserAsPayload(targetUserName)
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/createAccountByAdmin", rootURL), payload)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	return
 }
 
 // PrepareCreateToken only for test
@@ -63,8 +64,9 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 }
 
 // PrepareForDeleteUser only for test
-func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) {
+func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) (
+	response *http.Response) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
