@@ -74,9 +74,9 @@ func (o *JobArtifactOption) Output(obj interface{}) (data []byte, err error) {
 		buf := new(bytes.Buffer)
 
 		table := util.CreateTable(buf)
-		table.AddRow("name", "path", "size")
+		table.AddRow("id", "name", "path", "size")
 		for _, artifact := range artifacts {
-			table.AddRow(artifact.Name, artifact.Path, fmt.Sprintf("%d", artifact.Size))
+			table.AddRow(artifact.ID, artifact.Name, artifact.Path, fmt.Sprintf("%d", artifact.Size))
 		}
 		table.Render()
 		err = nil

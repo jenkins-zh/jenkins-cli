@@ -72,8 +72,8 @@ var _ = Describe("job artifact command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`name  path  size
-a.log a.log 0
+			Expect(buf.String()).To(Equal(`id name  path  size
+n1 a.log a.log 0
 `))
 		})
 
@@ -93,8 +93,8 @@ a.log a.log 0
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`name  path  size
-a.log a.log 0
+			Expect(buf.String()).To(Equal(`id name  path  size
+n1 a.log a.log 0
 `))
 		})
 
