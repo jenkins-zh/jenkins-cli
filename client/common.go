@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // JenkinsCore core informations of Jenkins
@@ -43,18 +43,8 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-		if j.Proxy != "" {
-			if proxyURL, err := url.Parse(j.Proxy); err == nil {
-				tr.Proxy = http.ProxyURL(proxyURL)
-			} else {
-				log.Fatal(err)
-			}
-
-			if j.ProxyAuth != "" {
-				basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
-				tr.ProxyConnectHeader = http.Header{}
-				tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
-			}
+		if err := util.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
+			log.Fatal(err)
 		}
 		roundTripper = tr
 	}
