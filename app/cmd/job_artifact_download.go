@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"net/http"
+	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -13,6 +14,8 @@ import (
 // JobArtifactDownloadOption is the options of job artifact download command
 type JobArtifactDownloadOption struct {
 	ID string
+	ShowProgress bool
+	DownloadDir string
 
 	Jenkins *JenkinsServer
 	RoundTripper http.RoundTripper
@@ -23,6 +26,8 @@ var jobArtifactDownloadOption JobArtifactDownloadOption
 func init() {
 	jobArtifactCmd.AddCommand(jobArtifactDownloadCmd)
 	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.ID, "id", "i", "", "ID of the job artifact")
+	jobArtifactDownloadCmd.Flags().BoolVarP(&jobArtifactDownloadOption.ShowProgress, "progress", "", true, "Whether show the progress")
+	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.DownloadDir, "download-dir", "", "", "The directory which artifact will be downloaded")
 }
 
 var jobArtifactDownloadCmd = &cobra.Command{
@@ -60,7 +65,7 @@ var jobArtifactDownloadCmd = &cobra.Command{
 					continue
 				}
 
-				err = jobArtifactDownloadOption.download(artifact.URL, artifact.Name)
+				err = jobArtifactDownloadOption.download(artifact.URL, filepath.Join(jobArtifactDownloadOption.DownloadDir, artifact.Name))
 				if err != nil {
 					cmd.PrintErrln(err)
 				}
@@ -75,12 +80,12 @@ func (j *JobArtifactDownloadOption) download(url, fileName string) (err error) {
 	downloader := util.HTTPDownloader{
 		RoundTripper:   j.RoundTripper,
 		TargetFilePath: fileName,
-		URL:            fmt.Sprintf("%s/%s", j.Jenkins.URL, url),
+		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, url),
 		UserName: j.Jenkins.UserName,
 		Password: j.Jenkins.Token,
 		Proxy: j.Jenkins.Proxy,
 		ProxyAuth: j.Jenkins.ProxyAuth,
-		ShowProgress:   true,
+		ShowProgress:   j.ShowProgress,
 	}
 	err = downloader.DownloadFile()
 	return
