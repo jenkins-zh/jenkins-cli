@@ -39,6 +39,22 @@ var _ = Describe("http test", func() {
 		ctrl.Finish()
 	})
 
+	Context("SetProxy", func() {
+		It("basic test", func(){
+			proxy, proxyAuth := "http://localhost", "admin:admin"
+
+			tr := &http.Transport{}
+			err := SetProxy(proxy, proxyAuth, tr)
+			Expect(err).To(BeNil())
+			Expect(tr.ProxyConnectHeader.Get("Proxy-Authorization")).To(Equal("Basic YWRtaW46YWRtaW4="))
+		})
+
+		It("empty proxy", func(){
+			err := SetProxy("", "", nil)
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("DownloadFile", func() {
 		It("no progress indication", func() {
 			request, _ := http.NewRequest("GET", "", nil)

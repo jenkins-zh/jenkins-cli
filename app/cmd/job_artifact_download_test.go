@@ -59,6 +59,21 @@ var _ = Describe("job artifact download command", func() {
 			Expect(buf.String()).To(Equal("help"))
 		})
 
+		It("invalid build id", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+
+			rootCmd.SetArgs([]string{"job", "artifact", "download", jobName, "fakeid"})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("strconv.Atoi: parsing \"fakeid\": invalid syntax\n"))
+		})
+
 		It("should success", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
