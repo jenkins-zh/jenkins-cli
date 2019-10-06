@@ -13,7 +13,12 @@ import (
 func PrepareGetArtifacts(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd,
 	jobName string, buildID int) (response *http.Response) {
 	path := parseJobPath(jobName)
-	api := fmt.Sprintf("%s/%d/wfapi/artifacts", path, buildID)
+	var api string
+	if buildID <= 0 {
+		api = fmt.Sprintf("%s/lastBuild/wfapi/artifacts", path)
+	} else {
+		api = fmt.Sprintf("%s/%d/wfapi/artifacts", path, buildID)
+	}
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, api), nil)
 	response = &http.Response{
 		StatusCode: 200,

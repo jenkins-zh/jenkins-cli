@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"bytes"
 	"strconv"
 	"net/http"
-	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -71,14 +71,16 @@ var jobArtifactCmd = &cobra.Command{
 func (o *JobArtifactOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		artifacts := obj.([]client.Artifact)
-		table := util.CreateTable(os.Stdout)
+		buf := new(bytes.Buffer)
+
+		table := util.CreateTable(buf)
 		table.AddRow("name", "path", "size")
 		for _, artifact := range artifacts {
 			table.AddRow(artifact.Name, artifact.Path, fmt.Sprintf("%d", artifact.Size))
 		}
 		table.Render()
 		err = nil
-		data = []byte{}
+		data = buf.Bytes()
 	}
 	return
 }
