@@ -26,20 +26,21 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
-	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println("Jenkins CLI (jcli) manage your Jenkins")
-
-		current := getCurrentJenkinsFromOptionsOrDie()
-		if current != nil {
-			fmt.Println("Current Jenkins is:", current.Name)
-		} else {
-			fmt.Println("Cannot found the configuration")
-		}
-
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
 		if rootOptions.Version {
-			fmt.Printf("Version: %s\n", app.GetVersion())
-			fmt.Printf("Commit: %s\n", app.GetCommit())
+			cmd.Printf("Version: %s\n", app.GetVersion())
+			cmd.Printf("Commit: %s\n", app.GetCommit())
 		}
+		if rootOptions.Jenkins != "" {
+			current := getCurrentJenkinsFromOptionsOrDie()
+			if current != nil {
+				cmd.Println("Current Jenkins is:", current.Name)
+			} else {
+				cmd.Println("Cannot found the configuration")
+			}
+		}
+
 	},
 }
 
@@ -62,6 +63,9 @@ func init() {
 }
 
 func initConfig() {
+	if rootOptions.Version && rootCmd.Flags().NFlag() == 1 {
+		return
+	}
 	if rootOptions.ConfigFile == "" {
 		if err := loadDefaultConfig(); err != nil {
 			configLoadErrorHandle(err)
