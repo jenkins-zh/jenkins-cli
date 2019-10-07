@@ -158,9 +158,23 @@ func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]
 
 // ErrorHandle handles the error cases
 func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
-	err = fmt.Errorf("unexpected status code: %d", statusCode)
+	if statusCode > 400 && statusCode < 500 {
+		err = j.PermissionError(statusCode)
+	} else {
+		err = fmt.Errorf("unexpected status code: %d", statusCode)
+	}
 	if j.Debug {
 		ioutil.WriteFile("debug.html", data, 0664)
+	}
+	return
+}
+
+// PermissionError handles the no permission
+func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
+	if statusCode == 404 {
+		err = fmt.Errorf("Not found resources")
+	} else {
+		err = fmt.Errorf("The current user no permission")
 	}
 	return
 }
@@ -169,7 +183,7 @@ func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
 func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string]string, payload io.Reader) (
 	response *http.Response, err error) {
 	var (
-		req      *http.Request
+		req *http.Request
 	)
 
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
