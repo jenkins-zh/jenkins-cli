@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"encoding/base64"
+	"net/url"
 	"net/http"
 	"os"
 	"strconv"
@@ -28,8 +30,32 @@ type HTTPDownloader struct {
 	UserName string
 	Password string
 
+	Proxy string
+	ProxyAuth string
+
 	Debug        bool
 	RoundTripper http.RoundTripper
+}
+
+// SetProxy set the proxy for a http
+func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
+	if proxy == "" {
+		return
+	}
+
+	var proxyURL *url.URL
+	if proxyURL, err = url.Parse(proxy); err != nil {
+		return
+	}
+	
+	tr.Proxy = http.ProxyURL(proxyURL)
+
+	if proxyAuth != "" {
+		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(proxyAuth))
+		tr.ProxyConnectHeader = http.Header{}
+		tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
+	}
+	return
 }
 
 // DownloadFile download a file with the progress
@@ -48,8 +74,12 @@ func (h *HTTPDownloader) DownloadFile() error {
 	if h.RoundTripper != nil {
 		tr = h.RoundTripper
 	} else {
-		tr = &http.Transport{
+		trp := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		tr = trp
+		if err = SetProxy(h.Proxy, h.ProxyAuth, trp); err != nil {
+			return err
 		}
 	}
 	client := &http.Client{Transport: tr}
