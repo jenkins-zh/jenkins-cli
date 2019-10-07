@@ -139,5 +139,40 @@ var _ = Describe("common test", func() {
 			_, err := jenkinsCore.GetCrumb()
 			Expect(err).To(HaveOccurred())
 		})
+
+		It("with 404 error from server", func() {
+			err := jenkinsCore.ErrorHandle(404, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("Not found resources"))
+		})
+
+		It("with 403 error from server", func() {
+			err := jenkinsCore.ErrorHandle(403, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("The current user no permission"))
+		})
+
+		It("with CrumbHandle error from server", func() {
+			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
+			responseCrumb := &http.Response{
+				StatusCode: 500,
+				Proto:      "HTTP/1.1",
+				Request:    requestCrumb,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			err := jenkinsCore.CrumbHandle(requestCrumb)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("unexpected status code: 500"))
+		})
+
+		It("test GetClient", func() {
+			jenkinsCore.RoundTripper = nil
+			jenkinsCore.Proxy = "kljasdsll"
+			jenkinsCore.ProxyAuth = "kljaslkdjkslad"
+			jclient := jenkinsCore.GetClient()
+			Expect(jclient).NotTo(BeNil())
+		})
 	})
 })

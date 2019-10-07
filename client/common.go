@@ -158,7 +158,7 @@ func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]
 
 // ErrorHandle handles the error cases
 func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
-	if statusCode > 400 && statusCode < 500 {
+	if statusCode >= 400 && statusCode < 500 {
 		err = j.PermissionError(statusCode)
 	} else {
 		err = fmt.Errorf("unexpected status code: %d", statusCode)
