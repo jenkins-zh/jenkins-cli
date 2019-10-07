@@ -12,6 +12,9 @@ var _ = Describe("user test", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 		userClient  UserClient
+
+		username string
+		password string
 	)
 
 	BeforeEach(func() {
@@ -20,10 +23,27 @@ var _ = Describe("user test", func() {
 		userClient = UserClient{}
 		userClient.RoundTripper = roundTripper
 		userClient.URL = "http://localhost"
+
+		username = "admin"
+		password = "token"
 	})
 
 	AfterEach(func() {
 		ctrl.Finish()
+	})
+
+	Context("Get", func() {
+		It("should success", func() {
+			userClient.UserName = username
+			userClient.Token = password
+
+			PrepareGetUser(roundTripper, userClient.URL, username, password)
+
+			user, err := userClient.Get()
+			Expect(err).To(BeNil())
+			Expect(user).NotTo(BeNil())
+			Expect(user.FullName).To(Equal(username))
+		})
 	})
 
 	Context("EditDesc", func() {
@@ -45,6 +65,38 @@ var _ = Describe("user test", func() {
 
 			err := userClient.Delete(userName)
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("Create", func() {
+		It("should success", func() {
+			targetUserName := "fakeName"
+			userClient.UserName = username
+			userClient.Token = password
+
+			PrepareCreateUser(roundTripper, userClient.URL, username, password, targetUserName)
+
+			result, err := userClient.Create(targetUserName)
+			Expect(err).To(BeNil())
+			Expect(result).NotTo(BeNil())
+			Expect(result.Username).To(Equal(targetUserName))
+			Expect(result.Password1).To(Equal(result.Password2))
+			Expect(result.Password1).NotTo(Equal(""))
+		})
+	})
+
+	Context("CreateToken", func() {
+		It("should success, given token name", func() {
+			newTokenName := "fakeName"
+			userClient.UserName = username
+			userClient.Token = password
+
+			PrepareCreateToken(roundTripper, userClient.URL, username, password, newTokenName)
+
+			token, err := userClient.CreateToken(newTokenName)
+			Expect(err).To(BeNil())
+			Expect(token).NotTo(BeNil())
+			Expect(token.Status).To(Equal("ok"))
 		})
 	})
 })

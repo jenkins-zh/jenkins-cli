@@ -161,10 +161,12 @@ var _ = Describe("common test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			jenkinsCore.Language = "zh-CN"
+			Language = "zh-CN"
 			statusCode, data, err := jenkinsCore.Request("GET", "/view/all/itemCategories?depth=3", nil, nil)
+			Language = ""
 			Expect(err).To(BeNil())
 			Expect(statusCode).To(Equal(200))
+			fmt.Println("lan:=========", string(data))
 			Expect(string(data)).To(Equal(`number name                       type
 0      构建一个自由风格的软件项目 Standalone Projects
 1      构建一个maven项目          Standalone Projects
@@ -175,6 +177,41 @@ var _ = Describe("common test", func() {
 2      GitHub 组织                Nested Projects
 3      多分支流水线               Nested Projects
 `))
+		})
+
+		It("with 404 error from server", func() {
+			err := jenkinsCore.ErrorHandle(404, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("Not found resources"))
+		})
+
+		It("with 403 error from server", func() {
+			err := jenkinsCore.ErrorHandle(403, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("The current user no permission"))
+		})
+
+		It("with CrumbHandle error from server", func() {
+			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
+			responseCrumb := &http.Response{
+				StatusCode: 500,
+				Proto:      "HTTP/1.1",
+				Request:    requestCrumb,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			err := jenkinsCore.CrumbHandle(requestCrumb)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("unexpected status code: 500"))
+		})
+
+		It("test GetClient", func() {
+			jenkinsCore.RoundTripper = nil
+			jenkinsCore.Proxy = "kljasdsll"
+			jenkinsCore.ProxyAuth = "kljaslkdjkslad"
+			jclient := jenkinsCore.GetClient()
+			Expect(jclient).NotTo(BeNil())
 		})
 	})
 })
