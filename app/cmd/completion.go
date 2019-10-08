@@ -18,7 +18,7 @@ var completionCmd = &cobra.Command{
 	## or, if running Bash 4.1+
 	brew install bash-completion@2
 	## you may need add the completion to your completion directory
-	kubectl completion bash > $(brew --prefix)/etc/bash_completion.d/kubectl
+	jcli completion > $(brew --prefix)/etc/bash_completion.d/jcli
 	## If you get trouble, please visit https://github.com/jenkins-zh/jenkins-cli/issues/83.`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		rootCmd.GenBashCompletion(cmd.OutOrStdout())
