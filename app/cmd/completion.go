@@ -11,11 +11,15 @@ func init() {
 var completionCmd = &cobra.Command{
 	Use:   "completion",
 	Short: "Genereate bash completion scripts",
-	Long:  `To load completion run:
-	jcli completion >> ~.bash_completion
-
-If you get trouble, please visit https://github.com/jenkins-zh/jenkins-cli/issues/83.
-`,
+	Long:  `Genereate bash completion scripts`,
+	Example: `# Installing bash completion on macOS using homebrew
+	## If running Bash 3.2 included with macOS
+	brew install bash-completion
+	## or, if running Bash 4.1+
+	brew install bash-completion@2
+	## you may need add the completion to your completion directory
+	jcli completion > $(brew --prefix)/etc/bash_completion.d/jcli
+	## If you get trouble, please visit https://github.com/jenkins-zh/jenkins-cli/issues/83.`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		rootCmd.GenBashCompletion(cmd.OutOrStdout())
 	},
