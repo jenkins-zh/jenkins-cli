@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PrepareForEmptyAvaiablePluginList only for test
@@ -449,7 +450,9 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 
 // PrepareForUpdatePipelineJob only for test
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
+	formData := url.Values{"script": {""}}
+	payload := strings.NewReader(formData.Encode())
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), payload)
 	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
@@ -478,6 +481,7 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
@@ -492,7 +496,7 @@ func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripp
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+		RoundTrip(request).Return(response, nil)
 
 	// common crumb request
 	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)

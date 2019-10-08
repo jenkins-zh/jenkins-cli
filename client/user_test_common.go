@@ -8,6 +8,7 @@ import (
 	"strings"
 	"net/url"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PrepareGetUser only for test
@@ -45,6 +46,7 @@ func PrepareCreateToken(roundTripper *mhttp.MockRoundTripper, rootURL,
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", rootURL, user), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	response.Body = ioutil.NopCloser(bytes.NewBufferString(`
 	{"status":"ok"}

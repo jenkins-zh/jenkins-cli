@@ -177,6 +177,29 @@ var _ = Describe("job test", func() {
 		})
 	})
 
+	Context("BuildWithParams", func() {
+		It("no params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithNoParams(roundTripper, jobClient.URL, jobName, "", "");
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{})
+			Expect(err).To(BeNil())
+		})
+
+		It("with params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "");
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+				Name: "name",
+				Value: "valsue",
+			}})
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("StopJob", func() {
 		It("stop a job build without a folder", func() {
 			jobName := "fakeJob"
