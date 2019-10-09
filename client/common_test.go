@@ -166,7 +166,6 @@ var _ = Describe("common test", func() {
 			Language = ""
 			Expect(err).To(BeNil())
 			Expect(statusCode).To(Equal(200))
-			fmt.Println("lan:=========", string(data))
 			Expect(string(data)).To(Equal(`number name                       type
 0      构建一个自由风格的软件项目 Standalone Projects
 1      构建一个maven项目          Standalone Projects

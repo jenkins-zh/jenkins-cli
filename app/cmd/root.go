@@ -19,7 +19,6 @@ type RootOptions struct {
 	Jenkins    string
 	Version    bool
 	Debug      bool
-	Language   string
 }
 
 var rootCmd = &cobra.Command{
@@ -62,7 +61,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.Language, "language", "l", "", "Set HTTP Header Accept Language")
 }
 
 func initConfig() {
@@ -78,8 +76,9 @@ func initConfig() {
 			configLoadErrorHandle(err)
 		}
 	}
-	if rootOptions.Language != "" {
-		client.Language = rootOptions.Language
+	config = getConfig()
+	if config != nil && config.Language != "" {
+		client.Language = config.Language
 	}
 }
 
