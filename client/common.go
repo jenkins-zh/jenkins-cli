@@ -202,7 +202,7 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
 	}
-	if Language != "" {
+	if Language != "" && Language != "en" {
 		req.Header.Set("Accept-Language", Language)
 	}
 	j.AuthHandle(req)
