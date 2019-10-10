@@ -32,8 +32,9 @@ func PrepareGetUser(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd 
 // PrepareCreateUser only for test
 func PrepareCreateUser(roundTripper *mhttp.MockRoundTripper, rootURL,
 	user, passwd, targetUserName string) (response *http.Response) {
-	payload, _ := genSimpleUserAsPayload(targetUserName)
+	payload, _ := genSimpleUserAsPayload(targetUserName, "fakePass")
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/createAccountByAdmin", rootURL), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }

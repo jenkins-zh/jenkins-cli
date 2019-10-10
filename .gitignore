@@ -17,3 +17,5 @@ release/
 *.xml
 
 mock
+
+.idea

@@ -76,7 +76,7 @@ var _ = Describe("user test", func() {
 
 			PrepareCreateUser(roundTripper, userClient.URL, username, password, targetUserName)
 
-			result, err := userClient.Create(targetUserName)
+			result, err := userClient.Create(targetUserName, "fakePass")
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
 			Expect(result.Username).To(Equal(targetUserName))

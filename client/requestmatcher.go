@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ type RequestMatcher struct {
 
 type matchOptions struct {
 	withQuery bool
+	withBody bool
 }
 
 // NewRequestMatcher create a request matcher will match request method and request path
@@ -33,23 +35,45 @@ func (request *RequestMatcher) WithQuery() *RequestMatcher {
 	return request
 }
 
+// WithBody returns a matcher with body
+func (request *RequestMatcher) WithBody() *RequestMatcher {
+	request.matchOptions.withBody = true
+	return request
+}
+
 // Matches returns a matcher with given function
 func (request *RequestMatcher) Matches(x interface{}) bool {
 	target := x.(*http.Request)
 
-	if request.verbose {
+	match := request.request.Method == target.Method && (request.request.URL.Path == target.URL.Path ||
+		request.request.URL.Path == target.URL.Opaque)
+
+	if request.verbose && !match {
 		fmt.Printf("%s=?%s , %s=?%s, %s=?%s \n", request.request.Method, target.Method, request.request.URL.Path, target.URL.Path,
 			request.request.URL.Opaque, target.URL.Opaque)
 	}
 
-	match := request.request.Method == target.Method && (request.request.URL.Path == target.URL.Path ||
-		request.request.URL.Path == target.URL.Opaque) //gitlab sdk did not set request path correctly
-
 	if request.matchOptions.withQuery {
-		if request.verbose {
-			fmt.Printf("%s=?%s  \n", request.request.URL.RawQuery, target.URL.RawQuery)
-		}
 		match = match && (request.request.URL.RawQuery == target.URL.RawQuery)
+		if request.verbose && !match {
+			fmt.Printf("query: %s=?%s  \n", request.request.URL.RawQuery, target.URL.RawQuery)
+		}
+	}
+
+	if request.matchOptions.withBody {
+		if request.request.Body != target.Body {
+			if request.request.Body == nil || target.Body == nil {
+				match = false
+			} else {
+				reqBody, _ := ioutil.ReadAll(request.request.Body)
+				targetBody, _ := ioutil.ReadAll(target.Body)
+
+				match = match && (string(reqBody) == string(targetBody))
+				if request.verbose && !match {
+					fmt.Printf("request body: %s, target body: %s \n", string(reqBody), string(targetBody))
+				}
+			}
+		}
 	}
 
 	return match

@@ -496,7 +496,7 @@ func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripp
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewVerboseRequestMatcher(request).WithBody().WithQuery()).Return(response, nil)
 
 	// common crumb request
 	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)

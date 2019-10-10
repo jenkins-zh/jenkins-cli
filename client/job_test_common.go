@@ -44,7 +44,7 @@ func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPat
 // PrepareForSubmitProcessInput only for test
 func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
 	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
 	return
 }
@@ -64,7 +64,7 @@ func PrepareForBuildWithNoParams(roundTripper *mhttp.MockRoundTripper, rootURL, 
 // PrepareForBuildWithParams only for test
 func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, passwd string) (
 	request *http.Request, response *http.Response) {
-	formData := url.Values{"json": {`{"parameter": {"name":"name","value":"value"}}`}}
+	formData := url.Values{"json": {`{"parameter": {"Description":"","name":"name","Type":"","value":"value","DefaultParameterValue":{"Description":"","Value":null}}}`}}
 	payload := strings.NewReader(formData.Encode())
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
