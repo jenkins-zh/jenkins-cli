@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 )
@@ -48,33 +49,38 @@ func (request *RequestMatcher) Matches(x interface{}) bool {
 	match := request.request.Method == target.Method && (request.request.URL.Path == target.URL.Path ||
 		request.request.URL.Path == target.URL.Opaque)
 
-	if request.verbose && !match {
+	if request.matchOptions.withQuery && !match {
+		match = (request.request.URL.RawQuery == target.URL.RawQuery)
+	}
+
+	reqBody, _ := getStrFromReader(request.request.Body)
+	targetBody, _ := getStrFromReader(target.Body)
+	if request.matchOptions.withBody && !match {
+		match = (reqBody == targetBody)
+	}
+
+	if !match {
 		fmt.Printf("%s=?%s , %s=?%s, %s=?%s \n", request.request.Method, target.Method, request.request.URL.Path, target.URL.Path,
 			request.request.URL.Opaque, target.URL.Opaque)
-	}
-
-	if request.matchOptions.withQuery {
-		match = match && (request.request.URL.RawQuery == target.URL.RawQuery)
-		if request.verbose && !match {
-			fmt.Printf("query: %s=?%s  \n", request.request.URL.RawQuery, target.URL.RawQuery)
-		}
-	}
-
-	if request.matchOptions.withBody && request.request.Body != target.Body {
-		if request.request.Body == nil || target.Body == nil {
-			match = false
-		} else {
-			reqBody, _ := ioutil.ReadAll(request.request.Body)
-			targetBody, _ := ioutil.ReadAll(target.Body)
-
-			match = match && (string(reqBody) == string(targetBody))
-			if request.verbose && !match {
-				fmt.Printf("request body: %s, target body: %s \n", string(reqBody), string(targetBody))
-			}
+		if request.matchOptions.withQuery {
+			fmt.Printf("query: %s=?%s \n", request.request.URL.RawQuery, target.URL.RawQuery)
+		} else if request.matchOptions.withBody {
+			fmt.Printf("request body: %s, target body: %s \n", reqBody, targetBody)
 		}
 	}
 
 	return match
+}
+
+func getStrFromReader(reader io.ReadCloser) (text string, err error) {
+	if reader == nil {
+		return
+	}
+
+	if data, err := ioutil.ReadAll(reader); err == nil {
+		text = string(data)
+	}
+	return
 }
 
 // String returns the text of current object
