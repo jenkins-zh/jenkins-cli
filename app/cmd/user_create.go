@@ -29,8 +29,8 @@ var userCreateCmd = &cobra.Command{
 		}
 
 		username := args[0]
-		password := ""
 
+		var password string
 		if len(args) >= 2 {
 			password = args[1]
 		}

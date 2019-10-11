@@ -16,7 +16,7 @@ type RequestMatcher struct {
 
 type matchOptions struct {
 	withQuery bool
-	withBody bool
+	withBody  bool
 }
 
 // NewRequestMatcher create a request matcher will match request method and request path
@@ -60,18 +60,16 @@ func (request *RequestMatcher) Matches(x interface{}) bool {
 		}
 	}
 
-	if request.matchOptions.withBody {
-		if request.request.Body != target.Body {
-			if request.request.Body == nil || target.Body == nil {
-				match = false
-			} else {
-				reqBody, _ := ioutil.ReadAll(request.request.Body)
-				targetBody, _ := ioutil.ReadAll(target.Body)
+	if request.matchOptions.withBody && request.request.Body != target.Body {
+		if request.request.Body == nil || target.Body == nil {
+			match = false
+		} else {
+			reqBody, _ := ioutil.ReadAll(request.request.Body)
+			targetBody, _ := ioutil.ReadAll(target.Body)
 
-				match = match && (string(reqBody) == string(targetBody))
-				if request.verbose && !match {
-					fmt.Printf("request body: %s, target body: %s \n", string(reqBody), string(targetBody))
-				}
+			match = match && (string(reqBody) == string(targetBody))
+			if request.verbose && !match {
+				fmt.Printf("request body: %s, target body: %s \n", string(reqBody), string(targetBody))
 			}
 		}
 	}
