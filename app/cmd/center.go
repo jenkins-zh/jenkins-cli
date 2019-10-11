@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -27,15 +26,15 @@ var centerCmd = &cobra.Command{
 	Use:   "center",
 	Short: "Manage your update center",
 	Long:  `Manage your update center`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		printJenkinsStatus(jenkins, centerOption.RoundTripper)
+		printJenkinsStatus(jenkins, cmd, centerOption.RoundTripper)
 
-		printUpdateCenter(jenkins, centerOption.RoundTripper)
+		printUpdateCenter(jenkins, cmd, centerOption.RoundTripper)
 	},
 }
 
-func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) (
+func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) (
 	status *client.UpdateCenter, err error) {
 	jclient := &client.UpdateCenterManager{
 		JenkinsCore: client.JenkinsCore{
@@ -60,13 +59,13 @@ func printUpdateCenter(jenkins *JenkinsServer, roundTripper http.RoundTripper) (
 		if centerOption.CeneterStatus != centerStatus {
 			centerOption.CeneterStatus = centerStatus
 
-			fmt.Printf("%s", centerStatus)
+			cmd.Printf("%s", centerStatus)
 		}
 	}
 	return
 }
 
-func printJenkinsStatus(jenkins *JenkinsServer, roundTripper http.RoundTripper) {
+func printJenkinsStatus(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) {
 	jclient := &client.JenkinsStatusClient{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: roundTripper,
@@ -79,8 +78,8 @@ func printJenkinsStatus(jenkins *JenkinsServer, roundTripper http.RoundTripper) 
 	jclient.ProxyAuth = jenkins.ProxyAuth
 
 	if status, err := jclient.Get(); err == nil {
-		fmt.Println("Jenkins Version:", status.Version)
+		cmd.Println("Jenkins Version:", status.Version)
 	} else {
-		log.Fatal(err)
+		cmd.PrintErrln(err)
 	}
 }

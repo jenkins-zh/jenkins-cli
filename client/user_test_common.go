@@ -35,7 +35,7 @@ func PrepareCreateUser(roundTripper *mhttp.MockRoundTripper, rootURL,
 	payload, _ := genSimpleUserAsPayload(targetUserName, "fakePass")
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/createAccountByAdmin", rootURL), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -48,10 +48,7 @@ func PrepareCreateToken(roundTripper *mhttp.MockRoundTripper, rootURL,
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", rootURL, user), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
-	response.Body = ioutil.NopCloser(bytes.NewBufferString(`
-	{"status":"ok"}
-	`))
+	response = PrepareCommonPost(request, `{"status":"ok"}`, roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -62,7 +59,7 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -70,6 +67,6 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) (
 	response *http.Response) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
-	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }

@@ -282,7 +282,7 @@ func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 		StatusCode: 200,
 		Request:    requestCrumb,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
-		{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+		{"CrumbRequestField":"CrumbRequestField","Crumb":"Crumb"}
 		`)),
 	}
 	roundTripper.EXPECT().
@@ -453,7 +453,7 @@ func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	formData := url.Values{"script": {""}}
 	payload := strings.NewReader(formData.Encode())
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), payload)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -482,18 +482,18 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
 // PrepareCommonPost only for test
-func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
+func PrepareCommonPost(request *http.Request, responseBody string, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
 	response *http.Response) {
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(NewVerboseRequestMatcher(request).WithBody().WithQuery()).Return(response, nil)

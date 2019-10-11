@@ -259,9 +259,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	}
 
 	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
-		if statusCode == 200 || statusCode == 302 {
-			fmt.Println("delete successfully")
-		} else {
+		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if q.Debug {
 				ioutil.WriteFile("debug.html", data, 0664)

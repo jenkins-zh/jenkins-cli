@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 )
 
 // RequestMatcher to match the http request
@@ -49,14 +50,18 @@ func (request *RequestMatcher) Matches(x interface{}) bool {
 	match := request.request.Method == target.Method && (request.request.URL.Path == target.URL.Path ||
 		request.request.URL.Path == target.URL.Opaque)
 
+	if !match {
+		match = reflect.DeepEqual(request.request.Header, target.Header)
+	}
+
 	if request.matchOptions.withQuery && !match {
-		match = (request.request.URL.RawQuery == target.URL.RawQuery)
+		match = request.request.URL.RawQuery == target.URL.RawQuery
 	}
 
 	reqBody, _ := getStrFromReader(request.request.Body)
 	targetBody, _ := getStrFromReader(target.Body)
 	if request.matchOptions.withBody && !match {
-		match = (reqBody == targetBody)
+		match = reqBody == targetBody
 	}
 
 	if !match {

@@ -37,7 +37,7 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
 	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/abort?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -45,7 +45,7 @@ func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPat
 func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
 	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
@@ -56,7 +56,7 @@ func PrepareForBuildWithNoParams(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	payload := strings.NewReader(formData.Encode())
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	response.StatusCode = 201
 	return
 }
@@ -68,7 +68,7 @@ func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jo
 	payload := strings.NewReader(formData.Encode())
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	response.StatusCode = 201
 	return
 }
