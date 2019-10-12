@@ -1,3 +1,5 @@
+[简体中文](https://github.com/jenkins-zh/jenkins-cli/blob/master/README-zh.md)
+
 # Jenkins CLI
 
 [![Go Report Card](https://goreportcard.com/badge/jenkins-zh/jenkins-cli)](https://goreportcard.com/report/jenkins-zh/jenkins-cli)
