@@ -1,20 +1,19 @@
 package cmd
 
 import (
-	"io/ioutil"
-	"os"
-	"fmt"
 	"bytes"
+	"fmt"
+	"github.com/spf13/cobra"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/client"
 )
 
 var _ = Describe("job artifact download command", func() {

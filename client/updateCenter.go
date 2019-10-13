@@ -131,7 +131,7 @@ func (u *UpdateCenterManager) Upgrade() (err error) {
 }
 
 // DownloadJenkins download Jenkins
-func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err error) {
+func (u *UpdateCenterManager) DownloadJenkins(lts, showProgress bool, output string) (err error) {
 	var url string
 	if lts {
 		url = "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
@@ -143,7 +143,7 @@ func (u *UpdateCenterManager) DownloadJenkins(lts bool, output string) (err erro
 		RoundTripper:   u.RoundTripper,
 		TargetFilePath: output,
 		URL:            url,
-		ShowProgress:   true,
+		ShowProgress:   showProgress,
 	}
 	err = downloader.DownloadFile()
 	return

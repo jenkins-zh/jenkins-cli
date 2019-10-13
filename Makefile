@@ -37,6 +37,10 @@ release: clean build-all
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
+	rm coverage.out
+	rm app/cmd/test-app.xml
+	rm app/test-app.xml
+	rm util/test-utils.xml
 
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
