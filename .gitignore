@@ -17,3 +17,9 @@ release/
 *.xml
 
 mock
+
+# goland
+.idea
+
+# test files
+app/cmd/test.yaml
