@@ -19,7 +19,7 @@ func init() {
 }
 
 var userCreateCmd = &cobra.Command{
-	Use:   "create <username>",
+	Use:   "create <username> [password]",
 	Short: "Create a user for your Jenkins",
 	Long:  `Create a user for your Jenkins`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -30,6 +30,11 @@ var userCreateCmd = &cobra.Command{
 
 		username := args[0]
 
+		var password string
+		if len(args) >= 2 {
+			password = args[1]
+		}
+
 		jclient := &client.UserClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: userCreateOption.RoundTripper,
@@ -38,7 +43,7 @@ var userCreateCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if user, err := jclient.Create(username); err == nil {
+		if user, err := jclient.Create(username, password); err == nil {
 			cmd.Println("create user success. Password is:", user.Password1)
 		} else {
 			cmd.PrintErrln(err)

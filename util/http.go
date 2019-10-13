@@ -60,9 +60,9 @@ func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
 
 // DownloadFile download a file with the progress
 func (h *HTTPDownloader) DownloadFile() error {
-	filepath, url, showProgress := h.TargetFilePath, h.URL, h.ShowProgress
+	filepath, downloadURL, showProgress := h.TargetFilePath, h.URL, h.ShowProgress
 	// Get the data
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", downloadURL, nil)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,6 @@ func (h *HTTPDownloader) DownloadFile() error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
 		if h.Debug {
@@ -117,7 +116,10 @@ func (h *HTTPDownloader) DownloadFile() error {
 	defer out.Close()
 
 	writer.Writer = out
-	writer.Init()
+
+	if showProgress {
+		writer.Init()
+	}
 
 	// Write the body to file
 	_, err = io.Copy(writer, resp.Body)
@@ -168,5 +170,8 @@ func (i *ProgressIndicator) Read(p []byte) (n int, err error) {
 
 func (i *ProgressIndicator) setBar(n int) {
 	i.count += float64(n)
-	i.bar.Set((int)(i.count * 100 / i.Total))
+
+	if i.bar != nil {
+		i.bar.Set((int)(i.count * 100 / i.Total))
+	}
 }
