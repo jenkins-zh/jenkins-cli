@@ -86,7 +86,6 @@ func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
 		// cannot get the crumb could be a normal situation
 		j.CrumbRequestField = c.CrumbRequestField
 		j.Crumb = c.Crumb
-		fmt.Println("crum key:", j.CrumbRequestField, "; value:", j.Crumb, "; request:", request)
 		request.Header.Add(j.CrumbRequestField, j.Crumb)
 	} else {
 		return err
@@ -104,7 +103,6 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 
 	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
 		if statusCode == 200 {
-			fmt.Println("====", string(data))
 			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
@@ -202,7 +200,6 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
 	}
-	fmt.Println("common request:", req)
 	if err = j.AuthHandle(req); err != nil {
 		return
 	}

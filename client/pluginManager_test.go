@@ -190,7 +190,8 @@ var _ = Describe("PluginManager test", func() {
 
 			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
 
-			pluginMgr.Upload(tmpfile.Name())
+			err = pluginMgr.Upload(tmpfile.Name())
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 

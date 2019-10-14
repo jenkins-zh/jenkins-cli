@@ -59,6 +59,7 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }

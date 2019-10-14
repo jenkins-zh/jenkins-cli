@@ -2,15 +2,16 @@ package client
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 // RequestMatcher to match the http request
 type RequestMatcher struct {
 	request *http.Request
+	target *http.Request
 	verbose bool
 
 	matchOptions matchOptions
@@ -46,49 +47,58 @@ func (request *RequestMatcher) WithBody() *RequestMatcher {
 // Matches returns a matcher with given function
 func (request *RequestMatcher) Matches(x interface{}) bool {
 	target := x.(*http.Request)
+	request.target = target
 
 	match := request.request.Method == target.Method && (request.request.URL.Path == target.URL.Path ||
 		request.request.URL.Path == target.URL.Opaque)
 
-	if !match {
-		match = reflect.DeepEqual(request.request.Header, target.Header)
+	if match {
+		if len(request.request.Header) == len(target.Header) {
+			for k, v := range request.request.Header {
+				if k == "Content-Type" { // it's hard to compare file upload cases
+					continue
+				}
+				if tv, ok := target.Header[k]; !ok || !reflect.DeepEqual(v, tv) {
+					match = false
+					break
+				}
+			}
+		} else {
+			match = false
+		}
 	}
 
-	if request.matchOptions.withQuery && !match {
+	if request.matchOptions.withQuery && match {
 		match = request.request.URL.RawQuery == target.URL.RawQuery
 	}
 
-	reqBody, _ := getStrFromReader(request.request.Body)
-	targetBody, _ := getStrFromReader(target.Body)
-	if request.matchOptions.withBody && !match {
+	if request.matchOptions.withBody && match {
+		reqBody, _ := getStrFromReader(request.request)
+		targetBody, _ := getStrFromReader(target)
 		match = reqBody == targetBody
-	}
-
-	if !match {
-		fmt.Printf("%s=?%s , %s=?%s, %s=?%s \n", request.request.Method, target.Method, request.request.URL.Path, target.URL.Path,
-			request.request.URL.Opaque, target.URL.Opaque)
-		if request.matchOptions.withQuery {
-			fmt.Printf("query: %s=?%s \n", request.request.URL.RawQuery, target.URL.RawQuery)
-		} else if request.matchOptions.withBody {
-			fmt.Printf("request body: %s, target body: %s \n", reqBody, targetBody)
-		}
 	}
 
 	return match
 }
 
-func getStrFromReader(reader io.ReadCloser) (text string, err error) {
+func getStrFromReader(request *http.Request) (text string, err error) {
+	reader := request.Body
 	if reader == nil {
 		return
 	}
 
 	if data, err := ioutil.ReadAll(reader); err == nil {
 		text = string(data)
+
+		// it could be read twice
+		payload := strings.NewReader(text)
+		request.Body = ioutil.NopCloser(payload)
 	}
 	return
 }
 
 // String returns the text of current object
-func (*RequestMatcher) String() string {
-	return "request matcher"
+func (request *RequestMatcher) String() string {
+	target := request.target
+	return fmt.Sprintf("%v", target)
 }
