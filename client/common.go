@@ -169,6 +169,23 @@ func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
 	return
 }
 
+// RequestWithResponseHeader make a common request
+func (j *JenkinsCore) RequestWithResponseHeader(method, api string, headers map[string]string, payload io.Reader, obj interface{}) (
+	response *http.Response, err error){
+	response, err = j.RequestWithResponse(method, api, headers, payload)
+	if err != nil {
+		return
+	}
+
+	var data []byte
+	if response.StatusCode == 200 {
+		if data, err = ioutil.ReadAll(response.Body); err == nil {
+			err = json.Unmarshal(data, obj)
+		}
+	}
+	return
+}
+
 // RequestWithResponse make a common request
 func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string]string, payload io.Reader) (
 	response *http.Response, err error) {
@@ -179,7 +196,9 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
 	}
-	j.AuthHandle(req)
+	if err = j.AuthHandle(req); err != nil {
+		return
+	}
 
 	for k, v := range headers {
 		req.Header.Add(k, v)
