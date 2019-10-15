@@ -12,6 +12,7 @@ import (
 type CenterDownloadOption struct {
 	LTS    bool
 	Output string
+	ShowProgress bool
 
 	RoundTripper http.RoundTripper
 }
@@ -21,6 +22,7 @@ var centerDownloadOption CenterDownloadOption
 func init() {
 	centerCmd.AddCommand(centerDownloadCmd)
 	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.LTS, "lts", "", true, "If you want to download Jenkins as LTS")
+	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.ShowProgress, "progress", "", true, "If you want to show the download progress")
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Output, "output", "o", "jenkins.war", "The file of output")
 }
 
@@ -35,7 +37,8 @@ var centerDownloadCmd = &cobra.Command{
 			},
 		}
 
-		if err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.Output); err != nil {
+		if err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.ShowProgress,
+			centerDownloadOption.Output); err != nil {
 			log.Fatal(err)
 		}
 	},

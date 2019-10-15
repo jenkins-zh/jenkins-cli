@@ -48,48 +48,21 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 // BuildWithParams build a job which has params
 func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
 	path := parseJobPath(jobName)
-	api := fmt.Sprintf("%s/%s/build", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
+	api := fmt.Sprintf("%s/build", path)
 
 	var paramJSON []byte
-
 	if len(parameters) == 1 {
 		paramJSON, err = json.Marshal(parameters[0])
 	} else {
 		paramJSON, err = json.Marshal(parameters)
 	}
 
-	formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
-	payload := strings.NewReader(formData.Encode())
-	req, err = http.NewRequest("POST", api, payload)
 	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-	req.Header.Add(util.ContentType, util.ApplicationForm)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 201 { // Jenkins will send redirect by this api
-			fmt.Println("build successfully")
-		} else {
-			fmt.Println("Status code", code)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	} else {
-		log.Fatal(err)
+		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
+		payload := strings.NewReader(formData.Encode())
+	
+		_, err = q.RequestWithoutData("POST", api,
+			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
 	}
 	return
 }
@@ -152,7 +125,8 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)
+	// _, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -285,9 +259,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	}
 
 	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
-		if statusCode == 200 || statusCode == 302 {
-			fmt.Println("delete successfully")
-		} else {
+		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if q.Debug {
 				ioutil.WriteFile("debug.html", data, 0664)

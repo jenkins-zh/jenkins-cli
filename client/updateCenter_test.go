@@ -49,7 +49,7 @@ var _ = Describe("update center test", func() {
 			}
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
-			err := manager.DownloadJenkins(false, donwloadFile)
+			err := manager.DownloadJenkins(false, false, donwloadFile)
 			Expect(err).To(BeNil())
 
 			_, err = os.Stat(donwloadFile)

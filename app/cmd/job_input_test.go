@@ -2,17 +2,16 @@ package cmd
 
 import (
 	"bytes"
-	"io/ioutil"
-	"os"
 	"fmt"
-
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	// "github.com/AlecAivazis/survey/v2/core"
 	// "github.com/AlecAivazis/survey/v2/terminal"
 )
@@ -85,7 +84,7 @@ var _ = Describe("job input command", func() {
 			// c, err := expect.NewConsole(expect.WithStdout(w))
 			// Expect(err).To(BeNil())
 			// jobInputOption.Stdio = terminal.Stdio{
-			// 	In:c.Tty(), 
+			// 	In:c.Tty(),
 			// 	Out:c.Tty(),
 			// 	Err:c.Tty(),
 			// }

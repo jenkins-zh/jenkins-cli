@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"os"
 
@@ -10,7 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
@@ -63,7 +63,7 @@ var _ = Describe("user create command", func() {
 			targetUserName := "fakename"
 			client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
 
-			rootCmd.SetArgs([]string{"user", "create", targetUserName})
+			rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -83,7 +83,7 @@ var _ = Describe("user create command", func() {
 			response := client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
 			response.StatusCode = 500
 
-			rootCmd.SetArgs([]string{"user", "create", targetUserName})
+			rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
