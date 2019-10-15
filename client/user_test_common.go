@@ -68,6 +68,7 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) (
 	response *http.Response) {
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
