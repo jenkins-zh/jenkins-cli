@@ -53,19 +53,7 @@ func (request *RequestMatcher) Matches(x interface{}) bool {
 		request.request.URL.Path == target.URL.Opaque)
 
 	if match {
-		if len(request.request.Header) == len(target.Header) {
-			for k, v := range request.request.Header {
-				if k == "Content-Type" { // it's hard to compare file upload cases
-					continue
-				}
-				if tv, ok := target.Header[k]; !ok || !reflect.DeepEqual(v, tv) {
-					match = false
-					break
-				}
-			}
-		} else {
-			match = false
-		}
+		match = matchHeader(request.request.Header, request.target.Header)
 	}
 
 	if request.matchOptions.withQuery && match {
@@ -79,6 +67,22 @@ func (request *RequestMatcher) Matches(x interface{}) bool {
 	}
 
 	return match
+}
+
+func matchHeader(left, right http.Header) bool {
+	if len(left) != len(right) {
+		return false
+	}
+
+	for k, v := range left {
+		if k == "Content-Type" { // it's hard to compare file upload cases
+			continue
+		}
+		if tv, ok := right[k]; !ok || !reflect.DeepEqual(v, tv) {
+			return false
+		}
+	}
+	return true
 }
 
 func getStrFromReader(request *http.Request) (text string, err error) {
