@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"io/ioutil"
 	"os"
 
 	"github.com/golang/mock/gomock"
@@ -52,43 +54,43 @@ var _ = Describe("user create command", func() {
 			Expect(buf.String()).To(Equal("help"))
 		})
 
-		//It("should success", func() {
-		//	data, err := generateSampleConfig()
-		//	Expect(err).To(BeNil())
-		//	err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-		//	Expect(err).To(BeNil())
-		//
-		//	targetUserName := "fakename"
-		//	client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
-		//
-		//	rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
-		//
-		//	buf := new(bytes.Buffer)
-		//	rootCmd.SetOutput(buf)
-		//	_, err = rootCmd.ExecuteC()
-		//	Expect(err).To(BeNil())
-		//
-		//	Expect(buf.String()).NotTo(Equal(""))
-		//})
+		It("should success", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
 
-		//It("with status code 500", func() {
-		//	data, err := generateSampleConfig()
-		//	Expect(err).To(BeNil())
-		//	err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-		//	Expect(err).To(BeNil())
-		//
-		//	targetUserName := "fakename"
-		//	response := client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
-		//	response.StatusCode = 500
-		//
-		//	rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
-		//
-		//	buf := new(bytes.Buffer)
-		//	rootCmd.SetOutput(buf)
-		//	_, err = rootCmd.ExecuteC()
-		//	Expect(err).To(BeNil())
-		//
-		//	Expect(buf.String()).To(Equal("unexpected status code: 500\n"))
-		//})
+			targetUserName := "fakename"
+			client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
+
+			rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).NotTo(Equal(""))
+		})
+
+		It("with status code 500", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			targetUserName := "fakename"
+			response := client.PrepareCreateUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", targetUserName)
+			response.StatusCode = 500
+
+			rootCmd.SetArgs([]string{"user", "create", targetUserName, "fakePass"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal("unexpected status code: 500\n"))
+		})
 	})
 })

@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
@@ -18,9 +20,9 @@ var _ = Describe("job input command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		//jenkinsRoot string
-		//username string
-		//token string
+		jenkinsRoot string
+		username string
+		token string
 	)
 
 	BeforeEach(func() {
@@ -31,9 +33,9 @@ var _ = Describe("job input command", func() {
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
-		//jenkinsRoot = "http://localhost:8080/jenkins"
-		//username = "admin"
-		//token = "111e3a2f0231198855dceaff96f20540a9"
+		jenkinsRoot = "http://localhost:8080/jenkins"
+		username = "admin"
+		token = "111e3a2f0231198855dceaff96f20540a9"
 	})
 
 	AfterEach(func() {
@@ -64,66 +66,66 @@ var _ = Describe("job input command", func() {
 			Expect(buf.String()).To(Equal("help"))
 		})
 
-		//It("should success, abort without inputs", func() {
-		//	data, err := generateSampleConfig()
-		//	Expect(err).To(BeNil())
-		//	err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-		//	Expect(err).To(BeNil())
-		//
-		//	jobName := "test"
-		//	buildID := 1
-		//
-		//	client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
-		//	client.PrepareForSubmitInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
-		//
-		//	// no idea how to let it works, just leave this here
-		//	// _, w, err := os.Pipe()
-		//
-		//	// c, err := expect.NewConsole(expect.WithStdout(w))
-		//	// Expect(err).To(BeNil())
-		//	// jobInputOption.Stdio = terminal.Stdio{
-		//	// 	In:c.Tty(),
-		//	// 	Out:c.Tty(),
-		//	// 	Err:c.Tty(),
-		//	// }
-		//	// defer c.Close()
-		//
-		//	// go func() {
-		//	// 	c.ExpectString("Are you going to process or abort this input: message?")
-		//	// 	c.SendLine("abort\n")
-		//	// 	c.ExpectEOF()
-		//	// }()
-		//
-		//	rootCmd.SetArgs([]string{"job", "input", jobName, "1", "--action", "abort"})
-		//
-		//	buf := new(bytes.Buffer)
-		//	rootCmd.SetOutput(buf)
-		//	_, err = rootCmd.ExecuteC()
-		//	Expect(err).To(BeNil())
-		//
-		//	Expect(buf.String()).To(Equal(""))
-		//})
+		It("should success, abort without inputs", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
 
-		//It("should success, process without inputs", func() {
-		//	data, err := generateSampleConfig()
-		//	Expect(err).To(BeNil())
-		//	err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-		//	Expect(err).To(BeNil())
-		//
-		//	jobName := "test"
-		//	buildID := 1
-		//
-		//	client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
-		//	client.PrepareForSubmitProcessInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
-		//
-		//	rootCmd.SetArgs([]string{"job", "input", jobName, "1", "--action", "process"})
-		//
-		//	buf := new(bytes.Buffer)
-		//	rootCmd.SetOutput(buf)
-		//	_, err = rootCmd.ExecuteC()
-		//	Expect(err).To(BeNil())
-		//
-		//	Expect(buf.String()).To(Equal(""))
-		//})
+			jobName := "test"
+			buildID := 1
+
+			client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
+			client.PrepareForSubmitInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
+
+			// no idea how to let it works, just leave this here
+			// _, w, err := os.Pipe()
+
+			// c, err := expect.NewConsole(expect.WithStdout(w))
+			// Expect(err).To(BeNil())
+			// jobInputOption.Stdio = terminal.Stdio{
+			// 	In:c.Tty(),
+			// 	Out:c.Tty(),
+			// 	Err:c.Tty(),
+			// }
+			// defer c.Close()
+
+			// go func() {
+			// 	c.ExpectString("Are you going to process or abort this input: message?")
+			// 	c.SendLine("abort\n")
+			// 	c.ExpectEOF()
+			// }()
+
+			rootCmd.SetArgs([]string{"job", "input", jobName, "1", "--action", "abort"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("should success, process without inputs", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			jobName := "test"
+			buildID := 1
+
+			client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
+			client.PrepareForSubmitProcessInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
+
+			rootCmd.SetArgs([]string{"job", "input", jobName, "1", "--action", "process"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
 	})
 })
