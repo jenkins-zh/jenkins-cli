@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -22,7 +23,7 @@ var _ = Describe("job type command", func() {
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
-		centerUpgradeOption.RoundTripper = roundTripper
+		jobTypeOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
@@ -36,6 +37,36 @@ var _ = Describe("job type command", func() {
 	})
 
 	Context("basic cases", func() {
+		It("GetCategories", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"_class":"jenkins.model.item_category.Categories","categories":[{"description":"description","id":"standalone-projects","items":[{"displayName":"Freestyle project","iconFilePathPattern":"static/da605e5f/images/:size/freestyleproject.png","description":"description","iconClassName":"icon-freestyle-project","class":"hudson.model.FreeStyleProject","order":1}],"minToShow":1,"name":"Nested Projects","order":1}]}`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			jclient := &client.JobClient{
+				JenkinsCore: client.JenkinsCore{
+					RoundTripper: jobTypeOption.RoundTripper,
+				},
+			}
+			getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+
+			typeMap, types, err := GetCategories(jclient)
+			Expect(err).To(BeNil())
+			Expect(len(typeMap)).To(Equal(1))
+			Expect(len(types)).To(Equal(1))
+		})
+
 		It("should success, empty list", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())

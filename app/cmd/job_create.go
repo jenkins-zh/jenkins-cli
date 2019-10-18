@@ -66,33 +66,23 @@ func (j *JobCreateOption) getCreateMode(jclient *client.JobClient) (mode string,
 		return
 	}
 
-	types := make(map[string]string)
-	var categories []client.JobCategory
-	if categories, err = jclient.GetJobTypeCategories(); err == nil {
-		for _, category := range categories {
-			for _, item := range category.Items {
-				types[item.DisplayName] = item.Class
-			}
-		}
-	} else {
+	var types []string
+	var typeMap map[string]string
+	typeMap, types, err = GetCategories(jclient)
+	if err != nil {
 		return
-	}
-
-	typesArray := make([]string, 0)
-	for tp := range types {
-		typesArray = append(typesArray, tp)
 	}
 
 	var jobType string
 	prompt := &survey.Select{
 		Message: "Choose a job type:",
-		Options: typesArray,
+		Options: types,
 		Default: jobType,
 	}
 	if err = survey.AskOne(prompt, &jobType); err != nil {
 		return
 	}
 
-	mode = types[jobType]
+	mode = typeMap[jobType]
 	return
 }
