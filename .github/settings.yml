@@ -38,6 +38,9 @@ labels:
     color: c2c2fc
   - name: chore
     color: c2c2fc
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
   - name: no-changelog
     color: c2c2fc
 branches:
