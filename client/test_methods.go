@@ -458,31 +458,19 @@ func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 }
 
 // PrepareForCreatePipelineJob only for test
-func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, jobType, user, passwd string) {
-	type playLoad struct {
-		Name string `json:"name"`
-		Mode string `json:"mode"`
-		From string
-	}
-
-	playLoadObj := &playLoad{
-		Name: jobName,
-		Mode: jobType,
-		From: "",
-	}
-
-	playLoadData, _ := json.Marshal(playLoadObj)
-
+func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, jobPayload CreateJobPayload) {
+	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
 		"json": {string(playLoadData)},
-		"name": {jobName},
-		"mode": {jobType},
+		"name": {jobPayload.Name},
+		"mode": {jobPayload.Mode},
+		"from": {jobPayload.From},
 	}
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
 
