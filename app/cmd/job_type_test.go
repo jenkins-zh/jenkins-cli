@@ -37,7 +37,7 @@ var _ = Describe("job type command", func() {
 	})
 
 	Context("basic cases", func() {
-		FIt("GetCategories", func() {
+		It("GetCategories", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
@@ -54,6 +54,7 @@ var _ = Describe("job type command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
+			initConfig()
 			jclient := &client.JobClient{
 				JenkinsCore: client.JenkinsCore{
 					RoundTripper: jobTypeOption.RoundTripper,
