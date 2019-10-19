@@ -37,7 +37,7 @@ var _ = Describe("job type command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("GetCategories", func() {
+		FIt("GetCategories", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
