@@ -23,12 +23,8 @@ var queueCancelCmd = &cobra.Command{
 	Use:   "cancel <id>",
 	Short: "Cancel the queue of your Jenkins",
 	Long:  `Cancel the queue of your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cmd.Help()
-			return
-		}
-
 		var (
 			queueID int
 			err     error

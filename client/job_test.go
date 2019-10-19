@@ -290,9 +290,28 @@ var _ = Describe("job test", func() {
 	})
 
 	Context("Create", func() {
-		It("simple case, should success", func() {
-			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "jobName", "jobType", "", "")
-			err := jobClient.Create("jobName", "jobType")
+		var (
+			jobPayload CreateJobPayload
+		)
+
+		BeforeEach(func() {
+			jobPayload = CreateJobPayload{
+				Name: "jobName",
+				Mode: "jobType",
+			}
+		})
+
+		It("create a normal job, should success", func() {
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
+			Expect(err).To(BeNil())
+		})
+
+		It("create a job by copy mode", func() {
+			jobPayload.From = "another-one"
+			jobPayload.Mode = "copy"
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
 			Expect(err).To(BeNil())
 		})
 	})

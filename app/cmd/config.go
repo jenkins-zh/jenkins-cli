@@ -99,7 +99,6 @@ func getConfig() *Config {
 }
 
 func getJenkinsNames() []string {
-	config := getConfig()
 	names := make([]string, 0)
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
@@ -108,8 +107,6 @@ func getJenkinsNames() []string {
 }
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
-	config := getConfig()
-
 	if config != nil {
 		current := config.Current
 		jenkinsServer = findJenkinsByName(current)

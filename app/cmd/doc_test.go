@@ -1,13 +1,12 @@
 package cmd
 
 import (
+	"bytes"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-	"bytes"
-	"os"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -27,21 +26,7 @@ var _ = Describe("doc command test", func() {
 	})
 
 	Context("basic test", func() {
-		It("lack of arguments", func() {
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-
-			docCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-
-			rootCmd.SetArgs([]string{"doc"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("help"))
-		})
-
-		It("should success", func(){
+		It("should success", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 

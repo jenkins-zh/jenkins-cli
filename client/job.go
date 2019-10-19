@@ -215,31 +215,27 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	return
 }
 
+// CreateJobPayload the payload for creating a job
+type CreateJobPayload struct {
+	Name string `json:"name"`
+	Mode string `json:"mode"`
+	From string `json:"from"`
+}
+
 // Create can create a job
-func (q *JobClient) Create(jobName string, jobType string) (err error) {
-	type playLoad struct {
-		Name string `json:"name"`
-		Mode string `json:"mode"`
-		From string
-	}
-
-	playLoadObj := &playLoad{
-		Name: jobName,
-		Mode: jobType,
-		From: "",
-	}
-
-	playLoadData, _ := json.Marshal(playLoadObj)
-
+func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
+	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
 		"json": {string(playLoadData)},
-		"name": {jobName},
-		"mode": {jobType},
+		"name": {jobPayload.Name},
+		"mode": {jobPayload.Mode},
+		"from": {jobPayload.From},
 	}
 	payload := strings.NewReader(formData.Encode())
 
 	var code int
-	code, err = q.RequestWithoutData("POST", "/view/all/createItem", map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	code, err = q.RequestWithoutData("POST", "/view/all/createItem",
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
 	}

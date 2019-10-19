@@ -13,12 +13,8 @@ var pluginDownloadCmd = &cobra.Command{
 	Use:   "download <keyword>",
 	Short: "Download the plugins",
 	Long:  `Download the plugins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		jclient := &client.PluginAPI{}
 		jclient.DownloadPlugins(args)
 	},

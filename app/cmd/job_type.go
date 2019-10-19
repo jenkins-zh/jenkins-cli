@@ -32,7 +32,7 @@ var jobTypeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
-				RoundTripper: centerUpgradeOption.RoundTripper,
+				RoundTripper: jobTypeOption.RoundTripper,
 			},
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
@@ -50,6 +50,28 @@ var jobTypeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 	},
+}
+
+// GetCategories returns the categories of current Jenkins
+func GetCategories(jclient *client.JobClient) (
+	typeMap map[string]string, types []string, err error) {
+	typeMap = make(map[string]string)
+	var categories []client.JobCategory
+	if categories, err = jclient.GetJobTypeCategories(); err == nil {
+		for _, category := range categories {
+			for _, item := range category.Items {
+				typeMap[item.DisplayName] = item.Class
+			}
+		}
+
+		types = make([]string, len(typeMap))
+		i := 0
+		for tp := range typeMap {
+			types[i] = tp
+			i++
+		}
+	}
+	return
 }
 
 // Output renders data into a table
