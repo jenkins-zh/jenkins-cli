@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -13,11 +13,11 @@ import (
 
 // JobArtifactDownloadOption is the options of job artifact download command
 type JobArtifactDownloadOption struct {
-	ID string
+	ID           string
 	ShowProgress bool
-	DownloadDir string
+	DownloadDir  string
 
-	Jenkins *JenkinsServer
+	Jenkins      *JenkinsServer
 	RoundTripper http.RoundTripper
 }
 
@@ -34,13 +34,9 @@ var jobArtifactDownloadCmd = &cobra.Command{
 	Use:   "download <jobName> [buildID]",
 	Short: "Download the artifact of target job",
 	Long:  `Download the artifact of target job`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		argLen := len(args)
-		if argLen == 0 {
-			cmd.Help()
-			return
-		}
-
 		var err error
 		jobName := args[0]
 		buildID := -1
@@ -81,10 +77,10 @@ func (j *JobArtifactDownloadOption) download(url, fileName string) (err error) {
 		RoundTripper:   j.RoundTripper,
 		TargetFilePath: fileName,
 		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, url),
-		UserName: j.Jenkins.UserName,
-		Password: j.Jenkins.Token,
-		Proxy: j.Jenkins.Proxy,
-		ProxyAuth: j.Jenkins.ProxyAuth,
+		UserName:       j.Jenkins.UserName,
+		Password:       j.Jenkins.Token,
+		Proxy:          j.Jenkins.Proxy,
+		ProxyAuth:      j.Jenkins.ProxyAuth,
 		ShowProgress:   j.ShowProgress,
 	}
 	err = downloader.DownloadFile()

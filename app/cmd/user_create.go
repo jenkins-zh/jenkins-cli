@@ -22,12 +22,8 @@ var userCreateCmd = &cobra.Command{
 	Use:   "create <username> [password]",
 	Short: "Create a user for your Jenkins",
 	Long:  `Create a user for your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		username := args[0]
 
 		var password string

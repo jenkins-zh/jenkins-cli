@@ -32,12 +32,8 @@ var jobLogCmd = &cobra.Command{
 	Use:   "log <jobName>",
 	Short: "Print the job of your Jenkins",
 	Long:  `Print the job of your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		name := args[0]
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}

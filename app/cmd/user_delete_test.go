@@ -7,11 +7,9 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
 var _ = Describe("user delete command", func() {
@@ -38,20 +36,6 @@ var _ = Describe("user delete command", func() {
 		BeforeEach(func() {
 			roundTripper = mhttp.NewMockRoundTripper(ctrl)
 			userDeleteOption.RoundTripper = roundTripper
-		})
-
-		It("lack of arguments", func() {
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-
-			userDeleteCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-
-			rootCmd.SetArgs([]string{"user", "delete"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("help"))
 		})
 
 		It("should success", func() {
