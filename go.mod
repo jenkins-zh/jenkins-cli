@@ -16,5 +16,5 @@ require (
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/lint v0.0.0-20190909230951-414d861bb4ac // indirect
 	golang.org/x/tools v0.0.0-20190911230505-6bfd74cf029c // indirect
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.4
 )
