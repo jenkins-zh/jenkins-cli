@@ -171,7 +171,7 @@ func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
 
 // RequestWithResponseHeader make a common request
 func (j *JenkinsCore) RequestWithResponseHeader(method, api string, headers map[string]string, payload io.Reader, obj interface{}) (
-	response *http.Response, err error){
+	response *http.Response, err error) {
 	response, err = j.RequestWithResponse(method, api, headers, payload)
 	if err != nil {
 		return

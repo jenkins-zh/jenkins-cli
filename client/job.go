@@ -60,7 +60,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	if err == nil {
 		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
 		payload := strings.NewReader(formData.Encode())
-	
+
 		_, err = q.RequestWithoutData("POST", api,
 			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
 	}
@@ -126,7 +126,6 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
 	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)
-	// _, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -423,5 +422,5 @@ type JobInputItem struct {
 	ProceedText         string
 	ProceedURL          string
 	RedirectApprovalURL string
-	Inputs []ParameterDefinition
+	Inputs              []ParameterDefinition
 }

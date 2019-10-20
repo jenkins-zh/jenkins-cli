@@ -26,12 +26,8 @@ var jobHistoryCmd = &cobra.Command{
 	Use:   "history <jobName>",
 	Short: "Print the history of job in your Jenkins",
 	Long:  `Print the history of job in your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		jobName := args[0]
 
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
