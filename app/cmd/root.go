@@ -76,10 +76,8 @@ func initConfig() {
 			configLoadErrorHandle(err)
 		}
 	}
-	config = getConfig()
-	if config != nil && config.Language != "" {
-		client.Language = config.Language
-	}
+	// set Header Accept-Language
+	setLanguae()
 }
 
 func configLoadErrorHandle(err error) {
@@ -168,4 +166,11 @@ func execute(command string, writer io.Writer) (err error) {
 	cmd.Stdout = writer
 	err = cmd.Run()
 	return
+}
+
+func setLanguae() {
+	config = getConfig()
+	if config != nil {
+		client.Language = config.Language
+	}
 }
