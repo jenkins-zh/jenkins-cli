@@ -14,7 +14,7 @@ import (
 
 var _ = Describe("restart command", func() {
 	var (
-		ctrl *gomock.Controller
+		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 	)
 

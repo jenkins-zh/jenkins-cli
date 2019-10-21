@@ -19,7 +19,7 @@ var _ = Describe("job delete command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		err error
+		err          error
 	)
 
 	BeforeEach(func() {

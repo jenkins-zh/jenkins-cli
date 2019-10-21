@@ -38,7 +38,7 @@ var _ = Describe("job create command", func() {
 	Context("basic cases", func() {
 		var (
 			jobPayload client.CreateJobPayload
-			err error
+			err        error
 		)
 
 		BeforeEach(func() {

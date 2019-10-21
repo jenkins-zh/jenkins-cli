@@ -12,7 +12,7 @@ import (
 
 var _ = Describe("job type command", func() {
 	var (
-		ctrl         *gomock.Controller
+		ctrl *gomock.Controller
 	)
 
 	BeforeEach(func() {

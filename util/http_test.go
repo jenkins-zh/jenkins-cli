@@ -40,7 +40,7 @@ var _ = Describe("http test", func() {
 	})
 
 	Context("SetProxy", func() {
-		It("basic test", func(){
+		It("basic test", func() {
 			proxy, proxyAuth := "http://localhost", "admin:admin"
 
 			tr := &http.Transport{}
@@ -49,7 +49,7 @@ var _ = Describe("http test", func() {
 			Expect(tr.ProxyConnectHeader.Get("Proxy-Authorization")).To(Equal("Basic YWRtaW46YWRtaW4="))
 		})
 
-		It("empty proxy", func(){
+		It("empty proxy", func() {
 			err := SetProxy("", "", nil)
 			Expect(err).To(BeNil())
 		})

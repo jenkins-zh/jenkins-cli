@@ -1,26 +1,26 @@
 package cmd
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
-	"fmt"
-	"bytes"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
 
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
 var _ = Describe("job artifact command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		buildID int
-		jobName string
+		buildID      int
+		jobName      string
 	)
 
 	BeforeEach(func() {

@@ -181,7 +181,7 @@ var _ = Describe("job test", func() {
 		It("no params", func() {
 			jobName := "fake"
 
-			PrepareForBuildWithNoParams(roundTripper, jobClient.URL, jobName, "", "");
+			PrepareForBuildWithNoParams(roundTripper, jobClient.URL, jobName, "", "")
 
 			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{})
 			Expect(err).To(BeNil())
@@ -190,10 +190,10 @@ var _ = Describe("job test", func() {
 		It("with params", func() {
 			jobName := "fake"
 
-			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "");
+			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
 
 			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
-				Name: "name",
+				Name:  "name",
 				Value: "value",
 			}})
 			Expect(err).To(BeNil())
