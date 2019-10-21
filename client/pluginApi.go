@@ -3,12 +3,12 @@ package client
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
 	"log"
-	"fmt"
 	"net/http"
 	"strings"
-	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PluginAPI represetns a plugin API

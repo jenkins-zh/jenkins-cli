@@ -1,16 +1,16 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-	"encoding/json"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"github.com/AlecAivazis/survey/v2/terminal"
 )
 
 // JobInputOption is the job delete option
@@ -20,7 +20,7 @@ type JobInputOption struct {
 	Action string
 
 	RoundTripper http.RoundTripper
-	Stdio terminal.Stdio
+	Stdio        terminal.Stdio
 }
 
 var jobInputOption JobInputOption
@@ -75,7 +75,7 @@ var jobInputCmd = &cobra.Command{
 					HideDefault:   true,
 					AppendDefault: true,
 				}
-		
+
 				if err = survey.AskOne(prompt, &content); err != nil {
 					log.Fatal(err)
 				}
@@ -97,7 +97,7 @@ var jobInputCmd = &cobra.Command{
 			if action == "" {
 				prompt := &survey.Input{
 					Renderer: *render,
-					Message: fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
+					Message:  fmt.Sprintf("Are you going to process or abort this input: %s?", inputAction.Message),
 				}
 				survey.AskOne(prompt, &action)
 			}

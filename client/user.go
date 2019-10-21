@@ -77,7 +77,7 @@ func genSimpleUserAsPayload(username, password string) (payload io.Reader, user 
 func (q *UserClient) Create(username, password string) (user *UserForCreate, err error) {
 	var (
 		payload io.Reader
-		code int
+		code    int
 	)
 
 	if password == "" {

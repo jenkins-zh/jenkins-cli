@@ -74,7 +74,7 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	filteredPlugins []client.InstalledPlugin, err error) {
 	var (
 		pluginName string
-		plugins *client.InstalledPluginList
+		plugins    *client.InstalledPluginList
 	)
 	if p.Filter != nil {
 		for _, f := range p.Filter {

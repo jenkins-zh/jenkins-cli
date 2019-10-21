@@ -6,10 +6,10 @@ import (
 
 // Artifact represents the artifacts from Jenkins build
 type Artifact struct {
-	ID string
+	ID   string
 	Name string
 	Path string
-	URL string
+	URL  string
 	Size int64
 }
 

@@ -9,11 +9,11 @@ import (
 
 const (
 	// AlignLeft align left
-	AlignLeft   = 0
+	AlignLeft = 0
 	// AlignCenter align center
 	AlignCenter = 1
 	// AlignRight align right
-	AlignRight  = 2
+	AlignRight = 2
 )
 
 // Pad give a pad
