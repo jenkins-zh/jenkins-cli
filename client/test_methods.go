@@ -407,6 +407,11 @@ func PrepareForInstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, plug
 	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName, user, passwd)
 }
 
+// PrepareForInstallPluginWithVersion only for test
+func PrepareForInstallPluginWithVersion(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName, version, user, passwd string)  {
+	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName + "@" + version, user, passwd)
+}
+
 // PrepareForInstallPluginWithCode only for test
 func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
 	statusCode int, rootURL, pluginName, user, passwd string) (response *http.Response) {
