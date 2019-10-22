@@ -51,13 +51,12 @@ func (q *UserClient) Delete(username string) (err error) {
 	return
 }
 
-func genSimpleUserAsPayload(username string) (payload io.Reader, user *UserForCreate) {
-	passwd := util.GeneratePassword(8)
+func genSimpleUserAsPayload(username, password string) (payload io.Reader, user *UserForCreate) {
 	user = &UserForCreate{
 		User:      User{FullName: username},
 		Username:  username,
-		Password1: passwd,
-		Password2: passwd,
+		Password1: password,
+		Password2: password,
 		Email:     fmt.Sprintf("%s@%s.com", username, username),
 	}
 
@@ -65,8 +64,8 @@ func genSimpleUserAsPayload(username string) (payload io.Reader, user *UserForCr
 	formData := url.Values{
 		"json":      {string(userData)},
 		"username":  {username},
-		"password1": {passwd},
-		"password2": {passwd},
+		"password1": {password},
+		"password2": {password},
 		"fullname":  {username},
 		"email":     {user.Email},
 	}
@@ -75,13 +74,17 @@ func genSimpleUserAsPayload(username string) (payload io.Reader, user *UserForCr
 }
 
 // Create will create a user in Jenkins
-func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
+func (q *UserClient) Create(username, password string) (user *UserForCreate, err error) {
 	var (
 		payload io.Reader
 		code int
 	)
 
-	payload, user = genSimpleUserAsPayload(username)
+	if password == "" {
+		password = util.GeneratePassword(8)
+	}
+
+	payload, user = genSimpleUserAsPayload(username, password)
 	code, err = q.RequestWithoutData("POST", "/securityRealm/createAccountByAdmin",
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	if code == 302 {

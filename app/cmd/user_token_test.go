@@ -22,6 +22,8 @@ var _ = Describe("user token command", func() {
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
+		roundTripper = mhttp.NewMockRoundTripper(ctrl)
+		userTokenOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
@@ -35,11 +37,6 @@ var _ = Describe("user token command", func() {
 	})
 
 	Context("with http requests", func() {
-		BeforeEach(func() {
-			roundTripper = mhttp.NewMockRoundTripper(ctrl)
-			userTokenOption.RoundTripper = roundTripper
-		})
-
 		It("lack of arguments", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)

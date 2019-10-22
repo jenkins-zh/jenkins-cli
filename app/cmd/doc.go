@@ -25,15 +25,11 @@ url: %s
 )
 
 var docCmd = &cobra.Command{
-	Use:   "doc",
-	Short: "Genereate document",
-	Long:  `Genereate document`,
+	Use:   "doc <output dir>",
+	Short: "Generate document for all jcl commands",
+	Long:  `Generate document for all jcl commands`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		now := time.Now().Format(time.RFC3339)
 		prepender := func(filename string) string {
 			name := filepath.Base(filename)

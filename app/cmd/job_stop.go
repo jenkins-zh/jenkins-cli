@@ -25,15 +25,11 @@ func init() {
 }
 
 var jobStopCmd = &cobra.Command{
-	Use:   "stop <jobName> <buildNumbe>",
+	Use:   "stop <jobName> <buildNumber>",
 	Short: "Stop a job build in your Jenkins",
 	Long:  `Stop a job build in your Jenkins`,
+	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
-			cmd.Help()
-			return
-		}
-
 		var (
 			buildNum int
 			err      error

@@ -34,12 +34,8 @@ var jobBuildCmd = &cobra.Command{
 	Use:   "build <jobName>",
 	Short: "Build the job of your Jenkins",
 	Long:  `Build the job of your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		name := args[0]
 
 		if !jobBuildOption.Batch && !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {

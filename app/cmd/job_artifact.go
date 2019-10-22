@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"bytes"
-	"strconv"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"

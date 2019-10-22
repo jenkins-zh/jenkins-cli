@@ -86,7 +86,7 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 // CrumbHandle handle crum with http request
 func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
 	if c, err := j.GetCrumb(); err == nil && c != nil {
-		// cannot get the crumb could be a noraml situation
+		// cannot get the crumb could be a normal situation
 		j.CrumbRequestField = c.CrumbRequestField
 		j.Crumb = c.Crumb
 		request.Header.Add(j.CrumbRequestField, j.Crumb)
@@ -106,7 +106,7 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 
 	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
 		if statusCode == 200 {
-			json.Unmarshal(data, &crumbIssuer)
+			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
 		} else {
@@ -127,7 +127,7 @@ func (j *JenkinsCore) RequestWithData(method, api string, headers map[string]str
 
 	if statusCode, data, err = j.Request(method, api, headers, payload); err == nil {
 		if statusCode == successCode {
-			json.Unmarshal(data, obj)
+			err = json.Unmarshal(data, obj)
 		} else {
 			err = j.ErrorHandle(statusCode, data)
 		}
@@ -172,6 +172,23 @@ func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
 	return
 }
 
+// RequestWithResponseHeader make a common request
+func (j *JenkinsCore) RequestWithResponseHeader(method, api string, headers map[string]string, payload io.Reader, obj interface{}) (
+	response *http.Response, err error) {
+	response, err = j.RequestWithResponse(method, api, headers, payload)
+	if err != nil {
+		return
+	}
+
+	var data []byte
+	if response.StatusCode == 200 {
+		if data, err = ioutil.ReadAll(response.Body); err == nil {
+			err = json.Unmarshal(data, obj)
+		}
+	}
+	return
+}
+
 // RequestWithResponse make a common request
 func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string]string, payload io.Reader) (
 	response *http.Response, err error) {
@@ -182,7 +199,9 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
 	}
-	j.AuthHandle(req)
+	if err = j.AuthHandle(req); err != nil {
+		return
+	}
 
 	for k, v := range headers {
 		req.Header.Add(k, v)
@@ -205,7 +224,9 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 	if Language != "" {
 		req.Header.Set("Accept-Language", Language)
 	}
-	j.AuthHandle(req)
+	if err = j.AuthHandle(req); err != nil {
+		return
+	}
 
 	for k, v := range headers {
 		req.Header.Add(k, v)

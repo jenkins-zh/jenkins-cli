@@ -91,6 +91,8 @@ func configLoadErrorHandle(err error) {
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
+
+
 	if jenkinsOpt == "" {
 		jenkinsServer = getCurrentJenkins()
 	} else {

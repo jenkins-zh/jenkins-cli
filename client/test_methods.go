@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PrepareForEmptyAvaiablePluginList only for test
@@ -281,7 +282,7 @@ func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 		StatusCode: 200,
 		Request:    requestCrumb,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
-		{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+		{"CrumbRequestField":"CrumbRequestField","Crumb":"Crumb"}
 		`)),
 	}
 	roundTripper.EXPECT().
@@ -449,50 +450,41 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 
 // PrepareForUpdatePipelineJob only for test
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	formData := url.Values{"script": {""}}
+	payload := strings.NewReader(formData.Encode())
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), payload)
+	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
 
 // PrepareForCreatePipelineJob only for test
-func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, jobType, user, passwd string) {
-	type playLoad struct {
-		Name string `json:"name"`
-		Mode string `json:"mode"`
-		From string
-	}
-
-	playLoadObj := &playLoad{
-		Name: jobName,
-		Mode: jobType,
-		From: "",
-	}
-
-	playLoadData, _ := json.Marshal(playLoadObj)
-
+func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, jobPayload CreateJobPayload) {
+	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
 		"json": {string(playLoadData)},
-		"name": {jobName},
-		"mode": {jobType},
+		"name": {jobPayload.Name},
+		"mode": {jobPayload.Mode},
+		"from": {jobPayload.From},
 	}
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
-	PrepareCommonPost(request, roundTripper, user, passwd, rootURL)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
 
 // PrepareCommonPost only for test
-func PrepareCommonPost(request *http.Request, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
+func PrepareCommonPost(request *http.Request, responseBody string, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
 	response *http.Response) {
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+		RoundTrip(NewVerboseRequestMatcher(request).WithBody().WithQuery()).Return(response, nil)
 
 	// common crumb request
 	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)

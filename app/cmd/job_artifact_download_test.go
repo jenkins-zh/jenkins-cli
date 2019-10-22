@@ -1,28 +1,26 @@
 package cmd
 
 import (
-	"io/ioutil"
-	"os"
-	"fmt"
 	"bytes"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/client"
 )
 
 var _ = Describe("job artifact download command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		buildID int
-		jobName string
+		buildID      int
+		jobName      string
 	)
 
 	BeforeEach(func() {
@@ -45,20 +43,6 @@ var _ = Describe("job artifact download command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("lack of arguments", func() {
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-
-			jobArtifactCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-
-			rootCmd.SetArgs([]string{"job", "artifact", "download"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("help"))
-		})
-
 		It("invalid build id", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())

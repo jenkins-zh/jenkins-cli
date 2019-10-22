@@ -17,7 +17,9 @@ categories:
   - title: 📝 Documentation updates
     label: documentation
   - title: 👻 Maintenance
-    label: chore
+    labels:
+      - chore
+      - dependencies
   - title: 🚦 Tests
     labels: 
       - test

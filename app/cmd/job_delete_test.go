@@ -19,6 +19,7 @@ var _ = Describe("job delete command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		err error
 	)
 
 	BeforeEach(func() {
@@ -32,12 +33,16 @@ var _ = Describe("job delete command", func() {
 
 	AfterEach(func() {
 		rootCmd.SetArgs([]string{})
-		os.Remove(rootOptions.ConfigFile)
+		err = os.Remove(rootOptions.ConfigFile)
 		rootOptions.ConfigFile = ""
 		ctrl.Finish()
 	})
 
 	Context("basic cases", func() {
+		It("should not error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should success, with batch mode", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
