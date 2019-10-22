@@ -52,7 +52,8 @@ sudo mv jcli /usr/local/bin/
 
 这里还有一些其他的包管理器：
 
-* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装。
+* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
+* [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
 
 # 入门
 
