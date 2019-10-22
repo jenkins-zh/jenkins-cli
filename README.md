@@ -53,7 +53,8 @@ You can find the latest version by [click here](https://github.com/jenkins-zh/je
 
 Here're other package managers:
 
-* [GoFish](https://gofi.sh/) users can use `gofish install jcli`.
+* [GoFish](https://gofi.sh/) users can use `gofish install jcli`
+* [Scoop](https://scoop.sh/) users can use `scoop install jcli`
 
 # Get started
 
