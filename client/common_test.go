@@ -163,7 +163,7 @@ var _ = Describe("common test", func() {
 
 			SetLanguage("zh-CN")
 			statusCode, data, err := jenkinsCore.Request("GET", "/view/all/itemCategories?depth=3", nil, nil)
-			language = ""
+			SetLanguage("")
 			Expect(err).To(BeNil())
 			Expect(statusCode).To(Equal(200))
 			Expect(string(data)).To(Equal(`number name                       type
