@@ -85,8 +85,7 @@ func printCfg(data []byte) {
 
 func generateSampleConfig() ([]byte, error) {
 	sampleConfig := Config{
-		Current:  "yourServer",
-		Language: "",
+		Current: "yourServer",
 		JenkinsServers: []JenkinsServer{
 			{
 				Name:     "yourServer",

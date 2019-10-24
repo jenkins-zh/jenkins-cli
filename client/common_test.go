@@ -161,7 +161,7 @@ var _ = Describe("common test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			language = "zh-CN"
+			SetLanguage("zh-CN")
 			statusCode, data, err := jenkinsCore.Request("GET", "/view/all/itemCategories?depth=3", nil, nil)
 			language = ""
 			Expect(err).To(BeNil())
