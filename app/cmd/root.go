@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jenkins-zh/jenkins-cli/client"
+
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
 )
@@ -75,6 +77,11 @@ func initConfig() {
 			configLoadErrorHandle(err)
 		}
 	}
+	// set Header Accept-Language
+	config = getConfig()
+	if config != nil {
+		client.SetLanguage(config.Language)
+	}
 }
 
 func configLoadErrorHandle(err error) {
@@ -88,7 +95,6 @@ func configLoadErrorHandle(err error) {
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
-
 
 	if jenkinsOpt == "" {
 		jenkinsServer = getCurrentJenkins()

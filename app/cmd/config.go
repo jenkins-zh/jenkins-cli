@@ -67,6 +67,7 @@ type PluginSuite struct {
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
+	Language       string          `yaml:"language"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
 	PreHooks       []CommndHook    `yaml:"preHooks"`
 	PostHooks      []CommndHook    `yaml:"postHooks"`

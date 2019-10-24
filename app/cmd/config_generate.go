@@ -79,6 +79,7 @@ var configGenerateCmd = &cobra.Command{
 
 func printCfg(data []byte) {
 	fmt.Print(string(data))
+	fmt.Println("# Language context is accept-language for HTTP header, It contains zh-CN/zh-TW/en/en-US/ja and so on")
 	fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
