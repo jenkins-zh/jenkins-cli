@@ -2,8 +2,9 @@
 
 # Jenkins CLI
 
-[![Go Report Card](https://goreportcard.com/badge/jenkins-zh/jenkins-cli)](https://goreportcard.com/report/jenkins-zh/jenkins-cli)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status)](https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli)
+[![Go Report Card][go-report-card-badge]][go-report-card-url]
+[![Quality Gate Status][sonar-badge]][sonar-link]
+[![GoDoc][godoc-badge]][godoc-url]
 ![Sonar Coverage](https://img.shields.io/sonar/coverage/jenkins-zh_jenkins-cli?server=https%3A%2F%2Fsonarcloud.io)
 [![Travis](https://img.shields.io/travis/jenkins-zh/jenkins-cli.svg?logo=travis&label=build&logoColor=white)](https://travis-ci.org/jenkins-zh/jenkins-cli)
 [![Contributors](https://img.shields.io/github/contributors/jenkins-zh/jenkins-cli.svg)](https://github.com/jenkins-zh/jenkins-cli/graphs/contributors)
@@ -51,7 +52,8 @@ sudo mv jcli /usr/local/bin/
 
 这里还有一些其他的包管理器：
 
-* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装。
+* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
+* [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
 
 # 入门
 
@@ -61,6 +63,16 @@ sudo mv jcli /usr/local/bin/
 
 如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](CONTRIBUTING.md)。我们欢迎任何形式的贡献。
 
+感谢 JetBrains 为我们提供了开源许可证。  
+[![goland.svg](goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+
 # 点赞数趋势图
 
 [![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
+
+[go-report-card-url]: https://goreportcard.com/report/jenkins-zh/jenkins-cli
+[go-report-card-badge]: https://goreportcard.com/badge/jenkins-zh/jenkins-cli
+[sonar-badge]: https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status
+[sonar-link]: https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli
+[godoc-url]: https://godoc.org/github.com/jenkins-zh/jenkins-cli
+[godoc-badge]: http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square

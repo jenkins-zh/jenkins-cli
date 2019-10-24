@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jenkins-zh/jenkins-cli/client"
+
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
 )
@@ -74,6 +76,11 @@ func initConfig() {
 		if err := loadConfig(rootOptions.ConfigFile); err != nil {
 			configLoadErrorHandle(err)
 		}
+	}
+	// set Header Accept-Language
+	config = getConfig()
+	if config != nil {
+		client.SetLanguage(config.Language)
 	}
 }
 

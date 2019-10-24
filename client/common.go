@@ -14,6 +14,14 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// language is for global Accept Language
+var language string
+
+// SetLanguage set the language
+func SetLanguage(lan string) {
+	language = lan
+}
+
 // JenkinsCore core informations of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
@@ -215,9 +223,11 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		req      *http.Request
 		response *http.Response
 	)
-
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
+	}
+	if language != "" {
+		req.Header.Set("Accept-Language", language)
 	}
 	if err = j.AuthHandle(req); err != nil {
 		return
