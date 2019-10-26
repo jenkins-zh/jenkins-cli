@@ -126,18 +126,18 @@ func getPluginsInstallQuery(names []string) string {
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
 	api := fmt.Sprintf("/pluginManager/install?%s", getPluginsInstallQuery(names))
-	_, err = p.RequestWithoutData("POST", api, nil, nil, 200)
 
-	// TODO needs to consider the following cases
-	// code == 400 {
-	// 	if errMsg, ok := response.Header["X-Error"]; ok {
-	// 		for _, msg := range errMsg {
-	// 			fmt.Println(msg)
-	// 		}
-	// 	} else {
-	// 		fmt.Println("Cannot found plugins", names)
-	// 	}
-	// }
+	var response *http.Response
+	response, err = p.RequestWithResponse("POST", api, nil, nil)
+	if response.StatusCode == 400 {
+		if errMsg, ok := response.Header["X-Error"]; ok {
+			for _, msg := range errMsg {
+				err = fmt.Errorf(msg)
+			}
+		} else {
+			err = fmt.Errorf("Cannot found plugins %v", names)
+		}
+	}
 	return
 }
 

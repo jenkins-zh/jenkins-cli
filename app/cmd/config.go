@@ -67,6 +67,7 @@ type PluginSuite struct {
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
+	Language       string          `yaml:"language"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
 	PreHooks       []CommndHook    `yaml:"preHooks"`
 	PostHooks      []CommndHook    `yaml:"postHooks"`
@@ -99,7 +100,6 @@ func getConfig() *Config {
 }
 
 func getJenkinsNames() []string {
-	config := getConfig()
 	names := make([]string, 0)
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
@@ -108,8 +108,6 @@ func getJenkinsNames() []string {
 }
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
-	config := getConfig()
-
 	if config != nil {
 		current := config.Current
 		jenkinsServer = findJenkinsByName(current)

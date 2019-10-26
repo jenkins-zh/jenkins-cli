@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -11,6 +11,8 @@ import (
 // UserDeleteOption is user delete cmd option
 type UserDeleteOption struct {
 	BatchOption
+
+	RoundTripper http.RoundTripper
 }
 
 var userDeleteOption UserDeleteOption
@@ -21,33 +23,27 @@ func init() {
 }
 
 var userDeleteCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "delete <username>",
 	Short: "Delete a user for your Jenkins",
 	Long:  `Delete a user for your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		username := args[0]
 
 		if !userDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete user %s ?", username)) {
 			return
 		}
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.UserClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.UserClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: userDeleteOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err := jclient.Delete(username); err == nil {
-			fmt.Printf("delete user success.\n")
-		} else {
-			log.Fatal(err)
+		if err := jclient.Delete(username); err != nil {
+			cmd.PrintErrln(err)
 		}
 	},
 }

@@ -177,6 +177,29 @@ var _ = Describe("job test", func() {
 		})
 	})
 
+	Context("BuildWithParams", func() {
+		It("no params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithNoParams(roundTripper, jobClient.URL, jobName, "", "");
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{})
+			Expect(err).To(BeNil())
+		})
+
+		It("with params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "");
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+				Name: "name",
+				Value: "value",
+			}})
+			Expect(err).To(BeNil())
+		})
+	})
+
 	Context("StopJob", func() {
 		It("stop a job build without a folder", func() {
 			jobName := "fakeJob"
@@ -267,9 +290,28 @@ var _ = Describe("job test", func() {
 	})
 
 	Context("Create", func() {
-		It("simple case, should success", func() {
-			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "jobName", "jobType", "", "")
-			err := jobClient.Create("jobName", "jobType")
+		var (
+			jobPayload CreateJobPayload
+		)
+
+		BeforeEach(func() {
+			jobPayload = CreateJobPayload{
+				Name: "jobName",
+				Mode: "jobType",
+			}
+		})
+
+		It("create a normal job, should success", func() {
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
+			Expect(err).To(BeNil())
+		})
+
+		It("create a job by copy mode", func() {
+			jobPayload.From = "another-one"
+			jobPayload.Mode = "copy"
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -302,6 +344,24 @@ var _ = Describe("job test", func() {
 				RoundTrip(requestCrumb).Return(responseCrumb, nil)
 
 			err := jobClient.Delete(jobName)
+			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("GetJobInputActions", func() {
+		It("simple case, should success", func() {
+			PrepareForGetJobInputActions(roundTripper, jobClient.URL, "", "", "jobName", 1)
+			actions, err := jobClient.GetJobInputActions("jobName", 1)
+			Expect(err).To(BeNil())
+			Expect(len(actions)).To(Equal(1))
+			Expect(actions[0].Message).To(Equal("message"))
+		})
+	})
+
+	Context("JobInputSubmit", func() {
+		It("simple case, should success", func() {
+			PrepareForSubmitInput(roundTripper, jobClient.URL, "/job/jobName", "", "")
+			err := jobClient.JobInputSubmit("jobName", "Eff7d5dba32b4da32d9a67a519434d3f", 1, true, nil)
 			Expect(err).To(BeNil())
 		})
 	})

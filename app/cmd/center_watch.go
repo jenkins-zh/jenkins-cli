@@ -35,10 +35,10 @@ var centerWatchCmd = &cobra.Command{
 	Long:  `Watch your update center status`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		printJenkinsStatus(jenkins, centerWatchOption.RoundTripper)
+		printJenkinsStatus(jenkins, cmd, centerWatchOption.RoundTripper)
 
 		for ; centerWatchOption.Count >= 0; centerWatchOption.Count-- {
-			if status, err := printUpdateCenter(jenkins, centerOption.RoundTripper); err != nil {
+			if status, err := printUpdateCenter(jenkins, cmd, centerOption.RoundTripper); err != nil {
 				cmd.PrintErr(err)
 				break
 			} else if (centerWatchOption.UtilNeedRestart && status.RestartRequiredForCompletion) ||

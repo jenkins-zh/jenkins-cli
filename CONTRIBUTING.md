@@ -56,3 +56,8 @@ Quality is the heart of a project. So please make sure your Pull Request could p
 
 The [newbie](https://github.com/jenkins-zh/jenkins-cli/issues?q=is%3Aissue+is%3Aopen+label%3Anewbie) issues
 are the good start.
+
+## Git Backup
+
+We use [git-backup-actions](https://github.com/jenkins-zh/git-backup-actions/) to backup this repo into 
+[gitee](https://gitee.com/jenkins-zh/jenkins-cli).

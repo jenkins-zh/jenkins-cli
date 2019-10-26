@@ -48,48 +48,21 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 // BuildWithParams build a job which has params
 func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
 	path := parseJobPath(jobName)
-	api := fmt.Sprintf("%s/%s/build", q.URL, path)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
+	api := fmt.Sprintf("%s/build", path)
 
 	var paramJSON []byte
-
 	if len(parameters) == 1 {
 		paramJSON, err = json.Marshal(parameters[0])
 	} else {
 		paramJSON, err = json.Marshal(parameters)
 	}
 
-	formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
-	payload := strings.NewReader(formData.Encode())
-	req, err = http.NewRequest("POST", api, payload)
 	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-	req.Header.Add(util.ContentType, util.ApplicationForm)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 201 { // Jenkins will send redirect by this api
-			fmt.Println("build successfully")
-		} else {
-			fmt.Println("Status code", code)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
-		}
-	} else {
-		log.Fatal(err)
+		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
+		payload := strings.NewReader(formData.Encode())
+	
+		_, err = q.RequestWithoutData("POST", api,
+			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
 	}
 	return
 }
@@ -152,7 +125,8 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)
+	// _, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -241,31 +215,27 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	return
 }
 
+// CreateJobPayload the payload for creating a job
+type CreateJobPayload struct {
+	Name string `json:"name"`
+	Mode string `json:"mode"`
+	From string `json:"from"`
+}
+
 // Create can create a job
-func (q *JobClient) Create(jobName string, jobType string) (err error) {
-	type playLoad struct {
-		Name string `json:"name"`
-		Mode string `json:"mode"`
-		From string
-	}
-
-	playLoadObj := &playLoad{
-		Name: jobName,
-		Mode: jobType,
-		From: "",
-	}
-
-	playLoadData, _ := json.Marshal(playLoadObj)
-
+func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
+	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
 		"json": {string(playLoadData)},
-		"name": {jobName},
-		"mode": {jobType},
+		"name": {jobPayload.Name},
+		"mode": {jobPayload.Mode},
+		"from": {jobPayload.From},
 	}
 	payload := strings.NewReader(formData.Encode())
 
 	var code int
-	code, err = q.RequestWithoutData("POST", "/view/all/createItem", map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	code, err = q.RequestWithoutData("POST", "/view/all/createItem",
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
 	}
@@ -285,15 +255,54 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	}
 
 	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
-		if statusCode == 200 || statusCode == 302 {
-			fmt.Println("delete successfully")
-		} else {
+		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if q.Debug {
 				ioutil.WriteFile("debug.html", data, 0664)
 			}
 		}
 	}
+	return
+}
+
+// GetJobInputActions returns the all pending actions
+func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []JobInputItem, err error) {
+	path := parseJobPath(jobName)
+	err = q.RequestWithData("GET", fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, 200, &actions)
+	return
+}
+
+// JenkinsInputParametersRequest represents the parameters for the Jenkins input request
+type JenkinsInputParametersRequest struct {
+	Parameter []ParameterDefinition `json:"parameter"`
+}
+
+// JobInputSubmit submit the pending input request
+func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort bool, params map[string]string) (err error) {
+	jobPath := parseJobPath(jobName)
+	var api string
+	if abort {
+		api = fmt.Sprintf("%s/%d/input/%s/abort", jobPath, buildID, inputID)
+	} else {
+		api = fmt.Sprintf("%s/%d/input/%s/proceed", jobPath, buildID, inputID)
+	}
+
+	request := JenkinsInputParametersRequest{
+		Parameter: make([]ParameterDefinition, 0),
+	}
+
+	for k, v := range params {
+		request.Parameter = append(request.Parameter, ParameterDefinition{
+			Name:  k,
+			Value: v,
+		})
+	}
+
+	paramData, _ := json.Marshal(request)
+
+	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+
 	return
 }
 
@@ -404,4 +413,15 @@ type JobCategoryItem struct {
 	DisplayName string
 	Order       int
 	Class       string
+}
+
+// JobInputItem represents a job input action
+type JobInputItem struct {
+	ID                  string
+	AbortURL            string
+	Message             string
+	ProceedText         string
+	ProceedURL          string
+	RedirectApprovalURL string
+	Inputs []ParameterDefinition
 }

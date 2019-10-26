@@ -30,12 +30,8 @@ var pluginSearchCmd = &cobra.Command{
 	Use:   "search <keyword>",
 	Short: "Print the plugins of your Jenkins",
 	Long:  `Print the plugins of your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		keyword := args[0]
 
 		jclient := &client.PluginManager{

@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -10,6 +9,7 @@ import (
 
 // UserCreateOption is user create cmd option
 type UserCreateOption struct {
+	RoundTripper http.RoundTripper
 }
 
 var userCreateOption UserCreateOption
@@ -19,29 +19,30 @@ func init() {
 }
 
 var userCreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   "create <username> [password]",
 	Short: "Create a user for your Jenkins",
 	Long:  `Create a user for your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		username := args[0]
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.UserClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		var password string
+		if len(args) >= 2 {
+			password = args[1]
+		}
 
-		if user, err := jclient.Create(username); err == nil {
-			fmt.Printf("create user success. Password is: %s\n", user.Password1)
+		jclient := &client.UserClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: userCreateOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+
+		if user, err := jclient.Create(username, password); err == nil {
+			cmd.Println("create user success. Password is:", user.Password1)
 		} else {
-			log.Fatal(err)
+			cmd.PrintErrln(err)
 		}
 	},
 }
