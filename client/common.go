@@ -9,8 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"time"
-
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -58,7 +56,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		}
 		roundTripper = tr
 	}
-	client = &http.Client{Transport: roundTripper, Timeout: time.Duration(5 * time.Second)}
+	client = &http.Client{Transport: roundTripper}
 	return
 }
 

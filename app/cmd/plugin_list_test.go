@@ -115,7 +115,8 @@ func pluginsJSON() string {
     "RequiredCoreVesion": "",
     "MinimumJavaVersion": "",
     "SupportDynamicLoad": "",
-    "BackVersion": ""
+    "BackVersion": "",
+    "Dependencies": null
   }
 ]`
 }

@@ -186,7 +186,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 
 func formatTable(table *util.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
-	if installed.Enabled {
+	if installed.Active {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
 			fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
 	} else {

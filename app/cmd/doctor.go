@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 // DoctorOption is the doctor cmd option
 type DoctorOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var doctorOption DoctorOption
@@ -76,7 +79,7 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 func checkCurrentPlugins(jclient *client.PluginManager) {
 	fmt.Println("Begining checking the current jenkinsServer's plugins status: ")
 	getCurrentJenkinsAndClient(&jclient.JenkinsCore)
-	if plugins, err := jclient.GetPlugins(); err == nil {
+	if plugins, err := jclient.GetPlugins(2); err == nil {
 		cyclePlugins(plugins)
 		// for _, plugin := range plugins.Plugins {
 		// 	fmt.Printf("  Checking the plugin %s: \n", plugin.ShortName)
@@ -126,6 +129,8 @@ func checkCurrentPlugins(jclient *client.PluginManager) {
 		// 		fmt.Println("    The Plugin no dependencies")
 		// 	}
 		// }
+	} else {
+		fmt.Println("  No plugins have updated...")
 	}
 }
 
