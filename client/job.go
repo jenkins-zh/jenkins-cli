@@ -123,6 +123,8 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	path := parseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/update", path)
 
+	log.Println("update pipeline, request url is", api, "; script is", script)
+
 	formData := url.Values{"script": {script}}
 	payload := strings.NewReader(formData.Encode())
 	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)

@@ -69,7 +69,11 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 
 	var job *client.Pipeline
 	if job, err = jClient.GetPipeline(name); err == nil {
-		script, err = modifyScript(job.Script)
+		content := ""
+		if job != nil {
+			content = job.Script
+		}
+		script, err = modifyScript(content)
 	}
 	return
 }
