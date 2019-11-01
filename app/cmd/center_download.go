@@ -10,8 +10,8 @@ import (
 
 // CenterDownloadOption as the options of download command
 type CenterDownloadOption struct {
-	LTS    bool
-	Output string
+	LTS          bool
+	Output       string
 	ShowProgress bool
 
 	RoundTripper http.RoundTripper

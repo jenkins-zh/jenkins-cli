@@ -9,11 +9,11 @@ import (
 )
 
 //PrepareGetStatus only for test
-func PrepareGetStatus(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string)  {
+func PrepareGetStatus(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/api/json", rootURL), nil)
 	response := &http.Response{
 		StatusCode: 200,
-		Header: http.Header{},
+		Header:     http.Header{},
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"nodeName":"master"}`)),
 	}

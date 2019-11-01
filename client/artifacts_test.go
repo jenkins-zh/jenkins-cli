@@ -9,8 +9,8 @@ import (
 
 var _ = Describe("artifacts test", func() {
 	var (
-		ctrl         *gomock.Controller
-		roundTripper *mhttp.MockRoundTripper
+		ctrl           *gomock.Controller
+		roundTripper   *mhttp.MockRoundTripper
 		artifactClient ArtifactClient
 
 		username string

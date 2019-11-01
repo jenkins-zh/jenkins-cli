@@ -11,7 +11,7 @@ var _ = Describe("status test", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		statusClient  JenkinsStatusClient
+		statusClient JenkinsStatusClient
 
 		username string
 		password string

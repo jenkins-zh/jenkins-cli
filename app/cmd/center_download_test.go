@@ -18,7 +18,7 @@ var _ = Describe("center download command", func() {
 		roundTripper   *mhttp.MockRoundTripper
 		targetFilePath string
 
-		ltsResponseBody   string
+		ltsResponseBody    string
 		weeklyResponseBody string
 
 		err error
@@ -66,7 +66,6 @@ var _ = Describe("center download command", func() {
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(ltsResponseBody))
 		}, 1)
-
 
 		It("download the weekly Jenkins", func() {
 			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
