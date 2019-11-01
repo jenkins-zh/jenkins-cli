@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -69,6 +70,7 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 
 	var job *client.Pipeline
 	if job, err = jClient.GetPipeline(name); err == nil {
+		fmt.Println(job)
 		content := ""
 		if job != nil {
 			content = job.Script
@@ -82,7 +84,7 @@ func modifyScript(script string) (content string, err error) {
 	prompt := &survey.Editor{
 		Message:       "Edit your pipeline script",
 		FileName:      "*.sh",
-		Default:       content,
+		Default:       script,
 		HideDefault:   true,
 		AppendDefault: true,
 	}

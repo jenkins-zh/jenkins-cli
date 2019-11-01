@@ -120,14 +120,13 @@ func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 
 // UpdatePipeline updates the pipeline script
 func (q *JobClient) UpdatePipeline(name, script string) (err error) {
+	formData := url.Values{}
+	formData.Add("script", script)
+
 	path := parseJobPath(name)
-	api := fmt.Sprintf("%s/restFul/update", path)
+	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
 
-	log.Println("update pipeline, request url is", api, "; script is", script)
-
-	formData := url.Values{"script": {script}}
-	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
 	return
 }
 

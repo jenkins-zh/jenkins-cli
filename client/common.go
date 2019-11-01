@@ -237,8 +237,6 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		req.Header.Add(k, v)
 	}
 
-	log.Printf("request %#v\n", req)
-
 	client := j.GetClient()
 	if response, err = client.Do(req); err == nil {
 		statusCode = response.StatusCode
