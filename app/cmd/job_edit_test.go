@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/golang/mock/gomock"
@@ -10,8 +11,6 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	// "github.com/AlecAivazis/survey/v2/core"
-	// "github.com/AlecAivazis/survey/v2/terminal"
 )
 
 var _ = Describe("job edit command", func() {
@@ -21,6 +20,8 @@ var _ = Describe("job edit command", func() {
 		jenkinsRoot  string
 		username     string
 		token        string
+
+		script string
 	)
 
 	BeforeEach(func() {
@@ -34,6 +35,8 @@ var _ = Describe("job edit command", func() {
 		jenkinsRoot = "http://localhost:8080/jenkins"
 		username = "admin"
 		token = "111e3a2f0231198855dceaff96f20540a9"
+
+		script = "sample"
 	})
 
 	AfterEach(func() {
@@ -51,9 +54,9 @@ var _ = Describe("job edit command", func() {
 			Expect(err).To(BeNil())
 
 			jobName := "test"
-			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, "sample", username, token)
+			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, script, username, token)
 
-			rootCmd.SetArgs([]string{"job", "edit", jobName, "--script", "sample"})
+			rootCmd.SetArgs([]string{"job", "edit", jobName, "--script", script})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -72,12 +75,41 @@ var _ = Describe("job edit command", func() {
 			tempFile, err := ioutil.TempFile("", "example")
 			Expect(err).To(BeNil())
 			defer os.Remove(tempFile.Name())
-			err = ioutil.WriteFile(tempFile.Name(), []byte("sample"), 0644)
+			err = ioutil.WriteFile(tempFile.Name(), []byte(script), 0644)
+
+			jobName := "test"
+			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, script, username, token)
+
+			rootCmd.SetArgs([]string{"job", "edit", jobName, "--filename", tempFile.Name(), "--script", ""})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("edit with url param", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
 
 			jobName := "test"
 			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, "sample", username, token)
 
-			rootCmd.SetArgs([]string{"job", "edit", jobName, "--filename", tempFile.Name(), "--script", ""})
+			remoteJenkinsfileURL := "http://test"
+			remoteJenkinsfileReq, _ := http.NewRequest("GET", remoteJenkinsfileURL, nil)
+			remoteJenkinsfileResponse := &http.Response{
+				StatusCode: 200,
+				Request:    remoteJenkinsfileReq,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(script)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(remoteJenkinsfileReq).Return(remoteJenkinsfileResponse, nil)
+
+			rootCmd.SetArgs([]string{"job", "edit", jobName, "--filename", "", "--script", "", "--url", remoteJenkinsfileURL})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)

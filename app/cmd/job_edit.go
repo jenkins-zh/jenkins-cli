@@ -70,7 +70,7 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 		return
 	}
 
-	if script, err = j.getPipelineFromURL(); script != "" || err != nil {
+	if script, err = j.getPipelineFromURL(jClient); script != "" || err != nil {
 		return
 	}
 
@@ -110,14 +110,15 @@ func (j *JobEditOption) getPipelineFromFile() (script string, err error) {
 	return
 }
 
-func (j *JobEditOption) getPipelineFromURL() (script string, err error) {
+func (j *JobEditOption) getPipelineFromURL(jClient *client.JobClient) (script string, err error) {
 	if j.URL == "" {
 		return
 	}
 
 	var resp *http.Response
 	var body []byte
-	if resp, err = http.Get(j.URL); err == nil {
+	httpClient := jClient.JenkinsCore.GetClient()
+	if resp, err = httpClient.Get(j.URL); err == nil {
 		if body, err = ioutil.ReadAll(resp.Body); err == nil {
 			script = string(body)
 		}
