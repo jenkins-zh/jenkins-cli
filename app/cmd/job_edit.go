@@ -97,10 +97,8 @@ func (j *JobEditOption) getPipelineFromFile() (script string, err error) {
 	}
 
 	var data []byte
-	if data, err = ioutil.ReadFile(j.Filename); err != nil {
-		return
+	if data, err = ioutil.ReadFile(j.Filename); err == nil {
+		script = string(data)
 	}
-
-	script = string(data)
 	return
 }
