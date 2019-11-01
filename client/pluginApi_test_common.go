@@ -16,7 +16,7 @@ func PrepareShowTrend(roundTripper *mhttp.MockRoundTripper, keyword string) {
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
 		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
 		{"stats": {"installations":[{"total":1512},{"total":3472},{"total":4385},{"total":3981}]}}
 		`)),
 	}

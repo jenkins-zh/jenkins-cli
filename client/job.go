@@ -60,7 +60,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	if err == nil {
 		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
 		payload := strings.NewReader(formData.Encode())
-	
+
 		_, err = q.RequestWithoutData("POST", api,
 			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
 	}
@@ -120,13 +120,13 @@ func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 
 // UpdatePipeline updates the pipeline script
 func (q *JobClient) UpdatePipeline(name, script string) (err error) {
-	path := parseJobPath(name)
-	api := fmt.Sprintf("%s/restFul/update", path)
+	formData := url.Values{}
+	formData.Add("script", script)
 
-	formData := url.Values{"script": {script}}
-	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", api, nil, payload, 200)
-	// _, err = q.RequestWithoutData("POST", api, map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	path := parseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
+
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
 	return
 }
 
@@ -423,5 +423,5 @@ type JobInputItem struct {
 	ProceedText         string
 	ProceedURL          string
 	RedirectApprovalURL string
-	Inputs []ParameterDefinition
+	Inputs              []ParameterDefinition
 }

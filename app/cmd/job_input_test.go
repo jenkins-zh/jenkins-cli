@@ -20,9 +20,9 @@ var _ = Describe("job input command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		jenkinsRoot string
-		username string
-		token string
+		jenkinsRoot  string
+		username     string
+		token        string
 	)
 
 	BeforeEach(func() {
@@ -46,7 +46,7 @@ var _ = Describe("job input command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("no params, will error",func(){
+		It("no params, will error", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
@@ -76,7 +76,7 @@ var _ = Describe("job input command", func() {
 			buildID := 1
 
 			client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
-			client.PrepareForSubmitInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
+			client.PrepareForSubmitInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName), username, token)
 
 			// no idea how to let it works, just leave this here
 			// _, w, err := os.Pipe()
@@ -116,7 +116,7 @@ var _ = Describe("job input command", func() {
 			buildID := 1
 
 			client.PrepareForGetJobInputActions(roundTripper, jenkinsRoot, username, token, jobName, buildID)
-			client.PrepareForSubmitProcessInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName) , username, token)
+			client.PrepareForSubmitProcessInput(roundTripper, jenkinsRoot, fmt.Sprintf("/job/%s", jobName), username, token)
 
 			rootCmd.SetArgs([]string{"job", "input", jobName, "1", "--action", "process"})
 

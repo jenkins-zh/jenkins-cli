@@ -1,14 +1,14 @@
 package client
 
 import (
-	"fmt"
 	"bytes"
-	"net/http"
-	"io/ioutil"
-	"strings"
-	"net/url"
+	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 // PrepareGetUser only for test

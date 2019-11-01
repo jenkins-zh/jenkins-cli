@@ -1,10 +1,10 @@
 package client
 
 import (
-	"fmt"
 	"bytes"
-	"net/http"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )

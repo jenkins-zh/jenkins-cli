@@ -2,12 +2,12 @@ package util
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
-	"encoding/base64"
-	"net/url"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -18,7 +18,7 @@ const (
 	// ContentType is for the http header of content type
 	ContentType = "Content-Type"
 	// ApplicationForm is for the form submit
-	ApplicationForm     = "application/x-www-form-urlencoded"
+	ApplicationForm = "application/x-www-form-urlencoded"
 )
 
 // HTTPDownloader is the downloader for http request
@@ -30,7 +30,7 @@ type HTTPDownloader struct {
 	UserName string
 	Password string
 
-	Proxy string
+	Proxy     string
 	ProxyAuth string
 
 	Debug        bool
@@ -47,7 +47,7 @@ func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
 	if proxyURL, err = url.Parse(proxy); err != nil {
 		return
 	}
-	
+
 	tr.Proxy = http.ProxyURL(proxyURL)
 
 	if proxyAuth != "" {
