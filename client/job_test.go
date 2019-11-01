@@ -283,7 +283,7 @@ var _ = Describe("job test", func() {
 
 	Context("UpdatePipeline", func() {
 		It("simple case, should success", func() {
-			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "")
+			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "", "")
 			err := jobClient.UpdatePipeline("test", "")
 			Expect(err).To(BeNil())
 		})

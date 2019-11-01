@@ -449,10 +449,11 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 }
 
 // PrepareForUpdatePipelineJob only for test
-func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	formData := url.Values{"script": {""}}
+func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, script, user, password string) {
+	formData := url.Values{}
+	formData.Add("script", script)
 	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update?%s", rootURL, formData.Encode()), nil)
-	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
 
