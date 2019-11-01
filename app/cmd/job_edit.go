@@ -13,6 +13,7 @@ import (
 type JobEditOption struct {
 	Filename string
 	Script   string
+	URL      string
 
 	RoundTripper http.RoundTripper
 }
@@ -21,6 +22,8 @@ var jobEditOption JobEditOption
 
 func init() {
 	jobCmd.AddCommand(jobEditCmd)
+	jobEditCmd.Flags().StringVarP(&jobEditOption.URL, "url", "", "",
+		"URL of the Jenkinsfile to files to use to replace pipeline")
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Filename, "filename", "f", "",
 		"Filename to files to use to replace pipeline")
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Script, "script", "s", "",
@@ -67,6 +70,10 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 		return
 	}
 
+	if script, err = j.getPipelineFromURL(); script != "" || err != nil {
+		return
+	}
+
 	var job *client.Pipeline
 	if job, err = jClient.GetPipeline(name); err == nil {
 		content := ""
@@ -99,6 +106,21 @@ func (j *JobEditOption) getPipelineFromFile() (script string, err error) {
 	var data []byte
 	if data, err = ioutil.ReadFile(j.Filename); err == nil {
 		script = string(data)
+	}
+	return
+}
+
+func (j *JobEditOption) getPipelineFromURL() (script string, err error) {
+	if j.URL == "" {
+		return
+	}
+
+	var resp *http.Response
+	var body []byte
+	if resp, err = http.Get(j.URL); err == nil {
+		if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			script = string(body)
+		}
 	}
 	return
 }
