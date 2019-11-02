@@ -65,7 +65,7 @@ var _ = Describe("center download command", func() {
 			content, readErr := ioutil.ReadFile(targetFilePath)
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(ltsResponseBody))
-		}, 1)
+		})
 
 		It("download the weekly Jenkins", func() {
 			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
@@ -87,6 +87,17 @@ var _ = Describe("center download command", func() {
 			content, readErr := ioutil.ReadFile(targetFilePath)
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(weeklyResponseBody))
-		}, 1)
+		})
+
+		It("no mirror found", func() {
+			buf := new(bytes.Buffer)
+			//rootCmd.SetOutput(buf)
+			rootCmd.SetOut(buf)
+
+			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("cannot found Jenkins mirror by: fake\n"))
+		})
 	})
 })

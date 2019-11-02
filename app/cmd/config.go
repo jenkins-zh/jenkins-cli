@@ -64,6 +64,12 @@ type PluginSuite struct {
 	Description string   `yaml:"description"`
 }
 
+// JenkinsMirror represents the mirror of Jenkins
+type JenkinsMirror struct {
+	Name string
+	URL  string
+}
+
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
@@ -72,6 +78,7 @@ type Config struct {
 	PreHooks       []CommndHook    `yaml:"preHooks"`
 	PostHooks      []CommndHook    `yaml:"postHooks"`
 	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
+	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {
@@ -152,6 +159,19 @@ func loadConfig(path string) (err error) {
 	var content []byte
 	if content, err = ioutil.ReadFile(path); err == nil {
 		err = yaml.Unmarshal([]byte(content), &config)
+	}
+	return
+}
+
+func getMirrors() (mirrors []JenkinsMirror) {
+	mirrors = config.Mirrors
+	if len(mirrors) == 0 {
+		mirrors = []JenkinsMirror{
+			{
+				Name: "default",
+				URL:  "http://mirrors.jenkins.io/",
+			},
+		}
 	}
 	return
 }

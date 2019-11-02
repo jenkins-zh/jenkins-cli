@@ -94,6 +94,24 @@ func generateSampleConfig() ([]byte, error) {
 				Token:    "111e3a2f0231198855dceaff96f20540a9",
 			},
 		},
+		Mirrors: []JenkinsMirror{
+			{
+				Name: "default",
+				URL:  "http://mirrors.jenkins.io/",
+			},
+			{
+				Name: "tsinghua",
+				URL:  "https://mirrors.tuna.tsinghua.edu.cn/jenkins/",
+			},
+			{
+				Name: "huawei",
+				URL:  "https://mirrors.huaweicloud.com/jenkins/",
+			},
+			{
+				Name: "tencent",
+				URL:  "https://mirrors.cloud.tencent.com/jenkins/",
+			},
+		},
 	}
 	return yaml.Marshal(&sampleConfig)
 }

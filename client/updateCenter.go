@@ -5,12 +5,15 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // UpdateCenterManager manages the UpdateCenter
 type UpdateCenterManager struct {
+	MirrorSite string
+
 	JenkinsCore
 }
 
@@ -134,9 +137,9 @@ func (u *UpdateCenterManager) Upgrade() (err error) {
 func (u *UpdateCenterManager) DownloadJenkins(lts, showProgress bool, output string) (err error) {
 	var url string
 	if lts {
-		url = "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
+		url = fmt.Sprintf("%s/war-stable/latest/jenkins.war", strings.TrimRight(u.MirrorSite, "/"))
 	} else {
-		url = "http://mirrors.jenkins.io/war/latest/jenkins.war"
+		url = fmt.Sprintf("%s/war/latest/jenkins.war", strings.TrimRight(u.MirrorSite, "/"))
 	}
 
 	downloader := util.HTTPDownloader{
