@@ -30,6 +30,9 @@ var _ = Describe("center download command", func() {
 		centerDownloadOption.RoundTripper = roundTripper
 		targetFilePath = "jenkins.war"
 
+		rootOptions.Jenkins = ""
+		rootOptions.ConfigFile = "test.yaml"
+
 		ltsResponseBody = "lts"
 		weeklyResponseBody = "weekly"
 	})
@@ -41,6 +44,13 @@ var _ = Describe("center download command", func() {
 	})
 
 	Context("basic cases", func() {
+		BeforeEach(func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+		})
+
 		It("should not error", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -91,7 +101,6 @@ var _ = Describe("center download command", func() {
 
 		It("no mirror found", func() {
 			buf := new(bytes.Buffer)
-			//rootCmd.SetOutput(buf)
 			rootCmd.SetOut(buf)
 
 			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})

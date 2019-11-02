@@ -27,12 +27,12 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Manage the config of jcli",
 	Long:    `Manage the config of jcli`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {
-			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+			cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 		} else {
-			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+			cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 		}
 	},
 	Example: `  jcli config generate
@@ -163,6 +163,7 @@ func loadConfig(path string) (err error) {
 	return
 }
 
+// getMirrors returns the mirror list, one official mirror should be returned if user don't give it
 func getMirrors() (mirrors []JenkinsMirror) {
 	mirrors = config.Mirrors
 	if len(mirrors) == 0 {

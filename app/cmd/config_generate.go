@@ -83,8 +83,8 @@ func printCfg(data []byte) {
 	fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
-func generateSampleConfig() ([]byte, error) {
-	sampleConfig := Config{
+func getSampleConfig() (sampleConfig Config) {
+	sampleConfig = Config{
 		Current: "yourServer",
 		JenkinsServers: []JenkinsServer{
 			{
@@ -113,5 +113,10 @@ func generateSampleConfig() ([]byte, error) {
 			},
 		},
 	}
+	return
+}
+
+func generateSampleConfig() ([]byte, error) {
+	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
 }
