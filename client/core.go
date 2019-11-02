@@ -1,5 +1,14 @@
 package client
 
+import "go.uber.org/zap"
+
+var logger *zap.Logger
+
+// SetLogger set a global logger
+func SetLogger(zapLogger *zap.Logger) {
+	logger = zapLogger
+}
+
 // CoreClient hold the client of Jenkins core
 type CoreClient struct {
 	JenkinsCore

@@ -15,7 +15,6 @@ require (
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
 	github.com/spf13/cobra v0.0.5
-	golang.org/x/lint v0.0.0-20190909230951-414d861bb4ac // indirect
-	golang.org/x/tools v0.0.0-20190911230505-6bfd74cf029c // indirect
+	go.uber.org/zap v1.12.0
 	gopkg.in/yaml.v2 v2.2.4
 )

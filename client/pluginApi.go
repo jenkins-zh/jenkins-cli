@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,6 +15,11 @@ import (
 // PluginAPI represetns a plugin API
 type PluginAPI struct {
 	dependencyMap map[string]string
+
+	SkipDependency bool
+	SkipOptional   bool
+	UseMirror      bool
+	MirrorURL      string
 
 	RoundTripper http.RoundTripper
 }
@@ -87,22 +93,36 @@ func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
 // DownloadPlugins will download those plugins from update center
 func (d *PluginAPI) DownloadPlugins(names []string) {
 	d.dependencyMap = make(map[string]string)
-	fmt.Println("Start to collect plugin dependencies...")
+	logger.Info("start to collect plugin dependencies...")
 	plugins := make([]PluginInfo, 0)
 	for _, name := range names {
+		logger.Debug("start to collect dependency", zap.String("plugin", name))
 		plugins = append(plugins, d.collectDependencies(strings.ToLower(name))...)
 	}
 
-	fmt.Printf("Ready to download plugins, total: %d.\n", len(plugins))
+	logger.Info("ready to download plugins", zap.Int("total", len(plugins)))
 	for i, plugin := range plugins {
-		fmt.Printf("Start to download plugin %s, version: %s, number: %d\n",
-			plugin.Name, plugin.Version, i)
+		logger.Info("start to download plugin",
+			zap.String("name", plugin.Name),
+			zap.String("version", plugin.Version),
+			zap.Int("number", i))
 
 		d.download(plugin.URL, plugin.Name)
 	}
 }
 
+func (d *PluginAPI) getMirrorURL(url string) (mirror string) {
+	mirror = url
+	if d.UseMirror && d.MirrorURL != "" {
+		logger.Debug("replace with mirror", zap.String("original", url))
+		mirror = strings.Replace(url, "http://updates.jenkins-ci.org/download/", d.MirrorURL, -1)
+	}
+	return
+}
+
 func (d *PluginAPI) download(url string, name string) {
+	url = d.getMirrorURL(url)
+	logger.Info("prepare to download", zap.String("name", name), zap.String("url", url))
 	if resp, err := http.Get(url); err != nil {
 		fmt.Println(err)
 	} else {
@@ -129,7 +149,10 @@ func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 		cli.Transport = d.RoundTripper
 	}
 
-	resp, err := cli.Get("https://plugins.jenkins.io/api/plugin/" + name)
+	pluginAPI := fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", name)
+	logger.Debug("fetch data from plugin API", zap.String("url", pluginAPI))
+
+	resp, err := cli.Get(pluginAPI)
 	if err != nil {
 		return plugin, err
 	}
@@ -154,9 +177,12 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 
 	plugins = make([]PluginInfo, 0)
 	plugins = append(plugins, *plugin)
+	if d.SkipDependency {
+		return
+	}
 
 	for _, dependency := range plugin.Dependencies {
-		if dependency.Optional {
+		if !d.SkipOptional && dependency.Optional {
 			continue
 		}
 		if _, ok := d.dependencyMap[dependency.Name]; !ok {

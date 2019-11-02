@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"os"
@@ -175,6 +176,22 @@ func getMirrors() (mirrors []JenkinsMirror) {
 		}
 	}
 	return
+}
+
+func getMirror(name string) string {
+	mirrors := getMirrors()
+
+	for _, mirror := range mirrors {
+		if mirror.Name == name {
+			logger.Debug("find mirror", zap.String("name", name), zap.String("url", mirror.URL))
+			return mirror.URL
+		}
+	}
+	return ""
+}
+
+func getDefaultMirror() string {
+	return getMirror("default")
 }
 
 func saveConfig() (err error) {
