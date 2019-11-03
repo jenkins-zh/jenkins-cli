@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
@@ -78,28 +77,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")
-}
-
-func initLogger() {
-	rawJSON := []byte(fmt.Sprintf(`{
-	  "level": "%s",
-	  "encoding": "json",
-	  "outputPaths": ["stdout", "/tmp/logs"],
-	  "errorOutputPaths": ["stderr"],
-	  "encoderConfig": {
-	    "messageKey": "message",
-	    "levelKey": "level",
-	    "levelEncoder": "lowercase"
-	  }
-	}`, rootOptions.LoggerLevel))
-	var cfg zap.Config
-	var err error
-	if err = json.Unmarshal(rawJSON, &cfg); err != nil {
-		panic(err)
-	}
-	if logger, err = cfg.Build(); err != nil {
-		panic(err)
-	}
 }
 
 func initConfig() {
