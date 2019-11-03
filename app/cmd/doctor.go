@@ -25,19 +25,20 @@ func init() {
 
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
-	Short: "Print the doctor of your Jenkins",
-	Long:  `Print the doctor of your Jenkins`,
+	Short: "Check your Jenkins config list status and current Jenkins config plugins",
+	Long:  `Check your Jenkins config list status and current Jenkins config plugins`,
 	Run: func(_ *cobra.Command, _ []string) {
 		jenkinsNames := getJenkinsNames()
 		checkDuplicateName(jenkinsNames)
 		jenkinsServers := getConfig().JenkinsServers
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
-				RoundTripper: pluginSearchOption.RoundTripper,
+				RoundTripper: doctorOption.RoundTripper,
 			},
 		}
 		checkJenkinsServersStatus(jenkinsServers, jclient)
 		checkCurrentPlugins(jclient)
+		fmt.Println("Checked is done.")
 	},
 }
 
@@ -59,7 +60,7 @@ func checkDuplicateName(jenkinsNames []string) {
 }
 
 func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) {
-	fmt.Println("Begining checking jenkinsServer status form the configuration files: ")
+	fmt.Println("Begining checking JenkinsServer status form the configuration files: ")
 	for i := range jenkinsServers {
 		jenkinsServer := jenkinsServers[i]
 		jclient.URL = jenkinsServer.URL
@@ -77,58 +78,10 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 }
 
 func checkCurrentPlugins(jclient *client.PluginManager) {
-	fmt.Println("Begining checking the current jenkinsServer's plugins status: ")
+	fmt.Println("Begining checking the current JenkinsServer's plugins status: ")
 	getCurrentJenkinsAndClient(&jclient.JenkinsCore)
 	if plugins, err := jclient.GetPlugins(2); err == nil {
 		cyclePlugins(plugins)
-		// for _, plugin := range plugins.Plugins {
-		// 	fmt.Printf("  Checking the plugin %s: \n", plugin.ShortName)
-		// 	dependencies := plugin.Dependencies
-		// 	if len(dependencies) != 0 {
-		// 		for _, dependence := range dependencies {
-		// 			fmt.Printf("    Checking the dependence plugin %s: ", dependence.ShortName)
-		// 			hasInstalled := false
-		// 			needUpdate := false
-		// 			for _, checkPlugin := range plugins.Plugins {
-		// 				checkPluginVersion := strings.Split(checkPlugin.Version, ".")
-		// 				dependenceVersion := strings.Split(dependence.Version, ".")
-		// 				if checkPlugin.ShortName == dependence.ShortName {
-		// 					hasInstalled = true
-		// 					// fmt.Println("checkPlugin= ", checkPlugin.Version, ",dependenceVersion=", dependence.Version)
-		// 					for i := range dependenceVersion {
-		// 						if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-		// 							checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
-		// 							dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
-		// 							if checkPluginVersionInt == dependenceVersionInt {
-		// 								if i+1 == len(dependenceVersion) {
-		// 									fmt.Println("***true***")
-		// 									break
-		// 								} else {
-		// 									continue
-		// 								}
-		// 							} else if checkPluginVersionInt > dependenceVersionInt {
-		// 								fmt.Println("***true***")
-		// 								break
-		// 							} else {
-		// 								needUpdate = true
-		// 								fmt.Printf("The dependence %s need upgrade the version to %s\n", dependence.ShortName, dependence.Version)
-		// 								break
-		// 							}
-		// 						}
-		// 					}
-		// 				}
-		// 				if needUpdate {
-		// 					break
-		// 				}
-		// 			}
-		// 			if !hasInstalled {
-		// 				fmt.Printf("The dependence %s no install, please install it the version %s at least\n", dependence.ShortName)
-		// 			}
-		// 		}
-		// 	} else {
-		// 		fmt.Println("    The Plugin no dependencies")
-		// 	}
-		// }
 	} else {
 		fmt.Println("  No plugins have updated...")
 	}
@@ -140,46 +93,6 @@ func cyclePlugins(plugins *client.InstalledPluginList) {
 		dependencies := plugin.Dependencies
 		if len(dependencies) != 0 {
 			cycleDependencies(dependencies, plugins)
-			// for _, dependence := range dependencies {
-			// 	fmt.Printf("    Checking the dependence plugin %s: ", dependence.ShortName)
-			// 	hasInstalled := false
-			// 	needUpdate := false
-			// 	for _, checkPlugin := range plugins.Plugins {
-			// 		checkPluginVersion := strings.Split(checkPlugin.Version, ".")
-			// 		dependenceVersion := strings.Split(dependence.Version, ".")
-			// 		if checkPlugin.ShortName == dependence.ShortName {
-			// 			hasInstalled = true
-			// 			// fmt.Println("checkPlugin= ", checkPlugin.Version, ",dependenceVersion=", dependence.Version)
-			// 			for i := range dependenceVersion {
-			// 				if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-			// 					checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
-			// 					dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
-			// 					if checkPluginVersionInt == dependenceVersionInt {
-			// 						if i+1 == len(dependenceVersion) {
-			// 							fmt.Println("***true***")
-			// 							break
-			// 						} else {
-			// 							continue
-			// 						}
-			// 					} else if checkPluginVersionInt > dependenceVersionInt {
-			// 						fmt.Println("***true***")
-			// 						break
-			// 					} else {
-			// 						needUpdate = true
-			// 						fmt.Printf("The dependence %s need upgrade the version to %s\n", dependence.ShortName, dependence.Version)
-			// 						break
-			// 					}
-			// 				}
-			// 			}
-			// 		}
-			// 		if needUpdate {
-			// 			break
-			// 		}
-			// 	}
-			// 	if !hasInstalled {
-			// 		fmt.Printf("The dependence %s no install, please install it the version %s at least\n", dependence.ShortName)
-			// 	}
-			// }
 		} else {
 			fmt.Println("    The Plugin no dependencies")
 		}
@@ -192,41 +105,6 @@ func cycleDependencies(dependencies []client.Dependence, plugins *client.Install
 		hasInstalled := false
 		needUpdate := false
 		cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate)
-		// for _, checkPlugin := range plugins.Plugins {
-		// 	checkPluginVersion := strings.Split(checkPlugin.Version, ".")
-		// 	dependenceVersion := strings.Split(dependence.Version, ".")
-		// 	if checkPlugin.ShortName == dependence.ShortName {
-		// 		hasInstalled = true
-		// 		// fmt.Println("checkPlugin= ", checkPlugin.Version, ",dependenceVersion=", dependence.Version)
-		// 		for i := range dependenceVersion {
-		// 			if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-		// 				checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
-		// 				dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
-		// 				if checkPluginVersionInt == dependenceVersionInt {
-		// 					if i+1 == len(dependenceVersion) {
-		// 						fmt.Println("***true***")
-		// 						break
-		// 					} else {
-		// 						continue
-		// 					}
-		// 				} else if checkPluginVersionInt > dependenceVersionInt {
-		// 					fmt.Println("***true***")
-		// 					break
-		// 				} else {
-		// 					needUpdate = true
-		// 					fmt.Printf("The dependence %s need upgrade the version to %s\n", dependence.ShortName, dependence.Version)
-		// 					break
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	if needUpdate {
-		// 		break
-		// 	}
-		// }
-		// if !hasInstalled {
-		// 	fmt.Printf("    The dependence %s no install, please install it the version %s at least\n", dependence.ShortName, dependence.Version)
-		// }
 	}
 }
 
@@ -236,29 +114,7 @@ func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.De
 		dependenceVersion := strings.Split(dependence.Version, ".")
 		if checkPlugin.ShortName == dependence.ShortName {
 			hasInstalled = true
-			// fmt.Println("checkPlugin= ", checkPlugin.Version, ",dependenceVersion=", dependence.Version)
 			matchPlugin(dependenceVersion, checkPluginVersion, needUpdate, dependence)
-			// for i := range dependenceVersion {
-			// 	if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-			// 		checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
-			// 		dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
-			// 		if checkPluginVersionInt == dependenceVersionInt {
-			// 			if i+1 == len(dependenceVersion) {
-			// 				fmt.Println("***true***")
-			// 				break
-			// 			} else {
-			// 				continue
-			// 			}
-			// 		} else if checkPluginVersionInt > dependenceVersionInt {
-			// 			fmt.Println("***true***")
-			// 			break
-			// 		} else {
-			// 			needUpdate = true
-			// 			fmt.Printf("The dependence %s need upgrade the version to %s\n", dependence.ShortName, dependence.Version)
-			// 			break
-			// 		}
-			// 	}
-			// }
 		}
 		if needUpdate {
 			break
