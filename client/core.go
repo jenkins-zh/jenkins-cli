@@ -1,12 +1,24 @@
 package client
 
-import "go.uber.org/zap"
+import (
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"go.uber.org/zap"
+)
 
 var logger *zap.Logger
 
 // SetLogger set a global logger
 func SetLogger(zapLogger *zap.Logger) {
 	logger = zapLogger
+}
+
+func init() {
+	if logger == nil {
+		var err error
+		if logger, err = util.InitLogger("warn"); err != nil {
+			panic(err)
+		}
+	}
 }
 
 // CoreClient hold the client of Jenkins core

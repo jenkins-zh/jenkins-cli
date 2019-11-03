@@ -12,13 +12,14 @@ import (
 	"strings"
 )
 
-// PluginAPI represetns a plugin API
+// PluginAPI represents a plugin API
 type PluginAPI struct {
 	dependencyMap map[string]string
 
 	SkipDependency bool
 	SkipOptional   bool
 	UseMirror      bool
+	ShowProgress   bool
 	MirrorURL      string
 
 	RoundTripper http.RoundTripper
@@ -101,13 +102,17 @@ func (d *PluginAPI) DownloadPlugins(names []string) {
 	}
 
 	logger.Info("ready to download plugins", zap.Int("total", len(plugins)))
+	var err error
 	for i, plugin := range plugins {
 		logger.Info("start to download plugin",
 			zap.String("name", plugin.Name),
 			zap.String("version", plugin.Version),
+			zap.String("url", plugin.URL),
 			zap.Int("number", i))
 
-		d.download(plugin.URL, plugin.Name)
+		if err = d.download(plugin.URL, plugin.Name); err != nil {
+			logger.Error("download plugin error", zap.String("name", plugin.Name), zap.Error(err))
+		}
 	}
 }
 
@@ -120,21 +125,18 @@ func (d *PluginAPI) getMirrorURL(url string) (mirror string) {
 	return
 }
 
-func (d *PluginAPI) download(url string, name string) {
+func (d *PluginAPI) download(url string, name string) (err error) {
 	url = d.getMirrorURL(url)
 	logger.Info("prepare to download", zap.String("name", name), zap.String("url", url))
-	if resp, err := http.Get(url); err != nil {
-		fmt.Println(err)
-	} else {
-		defer resp.Body.Close()
-		if body, err := ioutil.ReadAll(resp.Body); err != nil {
-			fmt.Println(err)
-		} else {
-			if err = ioutil.WriteFile(fmt.Sprintf("%s.hpi", name), body, 0644); err != nil {
-				fmt.Println(err)
-			}
-		}
+
+	downloader := util.HTTPDownloader{
+		RoundTripper:   d.RoundTripper,
+		TargetFilePath: fmt.Sprintf("%s.hpi", name),
+		URL:            url,
+		ShowProgress:   d.ShowProgress,
 	}
+	err = downloader.DownloadFile()
+	return
 }
 
 func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
@@ -182,7 +184,7 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 	}
 
 	for _, dependency := range plugin.Dependencies {
-		if !d.SkipOptional && dependency.Optional {
+		if d.SkipOptional && dependency.Optional {
 			continue
 		}
 		if _, ok := d.dependencyMap[dependency.Name]; !ok {

@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"log"
 	"os"
@@ -35,9 +36,12 @@ var rootCmd = &cobra.Command{
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		initLogger()
-
-		client.SetLogger(logger)
+		var err error
+		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
+			cmd.PrintErrln(err)
+		} else {
+			client.SetLogger(logger)
+		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
