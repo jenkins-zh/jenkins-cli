@@ -100,11 +100,22 @@ func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 		if name == "" {
 			continue
 		}
-		if strings.Contains(name, "@") {
-			p.installPluginWithVersion(name)
-			continue
+		if !strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
 		}
-		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+	}
+	return strings.Join(pluginNames, "&")
+}
+
+func (p *PluginManager) getVersionalPlugins(names []string) string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if strings.Contains(name, "@") {
+			if err := p.installPluginWithVersion(name); err != nil {
+				fmt.Println(err)
+			}
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s,", name))
+		}
 	}
 	return strings.Join(pluginNames, "&")
 }
@@ -112,6 +123,8 @@ func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
 	api := fmt.Sprintf("/pluginManager/install?%s", p.getPluginsInstallQuery(names))
+	versionalPlugins := p.getVersionalPlugins(names)
+	fmt.Println(versionalPlugins)
 
 	var response *http.Response
 	response, err = p.RequestWithResponse("POST", api, nil, nil)
@@ -132,18 +145,19 @@ func (p *PluginManager) installPluginWithVersion(name string) (err error) {
 	pluginAPI := PluginAPI{}
 	pluginName := "%s.hpi"
 	pluginVersion := strings.Split(name, "@")
+
+	defer os.Remove(fmt.Sprintf(pluginName, name))
 	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
 		pluginVersion[0], pluginVersion[1], pluginVersion[0])
 
-	pluginAPI.download(url, name)
-
-	err = p.Upload(fmt.Sprintf(pluginName, name))
-	if err != nil {
+	if err := pluginAPI.download(url, name); err != nil {
 		return err
 	}
 
-	err = os.Remove(fmt.Sprintf(pluginName, name))
-	return err
+	if err = p.Upload(fmt.Sprintf(pluginName, name)); err != nil {
+		return err
+	}
+	return nil
 }
 
 // UninstallPlugin uninstall a plugin by name
