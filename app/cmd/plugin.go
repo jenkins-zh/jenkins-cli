@@ -22,7 +22,4 @@ var pluginCmd = &cobra.Command{
 	Example: `  jcli plugin list
   jcli plugin search github
   jcli plugin check`,
-	Run: func(cmd *cobra.Command, _ []string) {
-		cmd.Help()
-	},
 }
