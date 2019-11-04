@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -47,10 +49,9 @@ var centerDownloadCmd = &cobra.Command{
 			},
 		}
 
-		if err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.ShowProgress,
-			centerDownloadOption.Output); err != nil {
-			cmd.PrintErrln(err)
-		}
+		err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.ShowProgress,
+			centerDownloadOption.Output)
+		helper.CheckErr(cmd, err)
 	},
 }
 

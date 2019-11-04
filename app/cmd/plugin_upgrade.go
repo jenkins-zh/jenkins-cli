@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -51,13 +53,10 @@ var pluginUpgradeCmd = &cobra.Command{
 			targetPlugins = args
 		}
 
-		if err != nil {
-			cmd.PrintErrln(err)
-		} else {
-			if err = jclient.InstallPlugin(targetPlugins); err != nil {
-				cmd.PrintErrln(err)
-			}
+		if err == nil {
+			err = jclient.InstallPlugin(targetPlugins)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

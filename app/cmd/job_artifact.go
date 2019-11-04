@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -54,16 +56,15 @@ var jobArtifactCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if artifacts, err := jclient.List(jobName, buildID); err == nil {
+		artifacts, err := jclient.List(jobName, buildID)
+		if err == nil {
 			var data []byte
-			if data, err = jobArtifactOption.Output(artifacts); err == nil {
+			data, err = jobArtifactOption.Output(artifacts)
+			if err == nil {
 				cmd.Print(string(data))
-			} else {
-				cmd.PrintErrln(err)
 			}
-		} else {
-			cmd.PrintErrln(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

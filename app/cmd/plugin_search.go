@@ -3,9 +3,10 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -41,19 +42,16 @@ var pluginSearchCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if plugins, err := jclient.GetAvailablePlugins(); err == nil {
+		plugins, err := jclient.GetAvailablePlugins()
+		if err == nil {
 			result := searchPlugins(plugins, keyword)
 			resultData := matchPluginsData(result, jclient)
-			if data, err := pluginSearchOption.Output(resultData); err == nil {
-				if len(data) > 0 {
-					cmd.Print(string(data))
-				}
-			} else {
-				log.Fatal(err)
+			data, err := pluginSearchOption.Output(resultData)
+			if err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 
