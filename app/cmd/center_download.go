@@ -35,8 +35,7 @@ var centerDownloadCmd = &cobra.Command{
 	Short: "Download Jenkins",
 	Long:  `Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/`,
 	Run: func(cmd *cobra.Command, _ []string) {
-		config := getConfig()
-		mirrorSite := centerDownloadOption.getMirrorSite(config)
+		mirrorSite := getMirror(centerDownloadOption.Mirror)
 		if mirrorSite == "" {
 			cmd.PrintErrln("cannot found Jenkins mirror by:", centerDownloadOption.Mirror)
 			return
@@ -53,15 +52,4 @@ var centerDownloadCmd = &cobra.Command{
 			centerDownloadOption.Output)
 		helper.CheckErr(cmd, err)
 	},
-}
-
-func (c *CenterDownloadOption) getMirrorSite(config *Config) (site string) {
-	mirrors := getMirrors()
-	for _, mirror := range mirrors {
-		if mirror.Name == c.Mirror {
-			site = mirror.URL
-			return
-		}
-	}
-	return
 }
