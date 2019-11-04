@@ -237,4 +237,15 @@ var _ = Describe("PluginManager test", func() {
 			Expect(err).To(HaveOccurred())
 		})
 	})
+
+	Context("CheckUpdate", func() {
+		It("normal case, should success", func() {
+			PrepareCheckUpdate(roundTripper, pluginMgr.URL, "", "")
+
+			err := pluginMgr.CheckUpdate(func(_ *http.Response) {
+				// do nothing
+			})
+			Expect(err).To(BeNil())
+		})
+	})
 })

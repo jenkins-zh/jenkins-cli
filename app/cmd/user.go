@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -34,14 +35,13 @@ var userCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if status, err := jclient.Get(); err == nil {
-			if data, err := userOption.Output(status); err == nil {
+		status, err := jclient.Get()
+		if err == nil {
+			data, err := userOption.Output(status)
+			if err == nil {
 				cmd.Println(string(data))
-			} else {
-				cmd.PrintErrln(err)
 			}
-		} else {
-			cmd.PrintErrln(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }

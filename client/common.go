@@ -181,16 +181,14 @@ func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
 func (j *JenkinsCore) RequestWithResponseHeader(method, api string, headers map[string]string, payload io.Reader, obj interface{}) (
 	response *http.Response, err error) {
 	response, err = j.RequestWithResponse(method, api, headers, payload)
-	if err != nil {
-		return
-	}
 
-	var data []byte
-	if response.StatusCode == 200 {
+	if err == nil && obj != nil && response.StatusCode == 200 {
+		var data []byte
 		if data, err = ioutil.ReadAll(response.Body); err == nil {
 			err = json.Unmarshal(data, obj)
 		}
 	}
+
 	return
 }
 

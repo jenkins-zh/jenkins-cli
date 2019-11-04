@@ -68,3 +68,10 @@ func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) {
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
 }
+
+// PrepareCheckUpdate only for test
+func PrepareCheckUpdate(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
+	api := fmt.Sprintf("%s/pluginManager/checkUpdatesServer", rootURL)
+	request, _ := http.NewRequest("POST", api, nil)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+}
