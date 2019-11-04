@@ -57,12 +57,6 @@ var _ = Describe("doctor command", func() {
 	Context("test mode", func() {
 		It("test JenkinsServers no dependecies", func() {
 			config.JenkinsServers[2].Name = "a"
-
-			//data, err := yaml.Marshal(&config)
-			//Expect(err).To(BeNil())
-			//err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			//Expect(err).To(BeNil())
-
 			names := getJenkinsNames()
 			var outString string
 			outString += "Begining checking the name in the configuration file is duplicated：\n"
@@ -107,12 +101,6 @@ var _ = Describe("doctor command", func() {
 		})
 
 		It("test JenkinsServers status", func() {
-
-			//data, err := yaml.Marshal(&config)
-			//Expect(err).To(BeNil())
-			//err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			//Expect(err).To(BeNil())
-
 			names := getJenkinsNames()
 			var outString string
 			outString += "Begining checking the name in the configuration file is duplicated：\n"
@@ -124,11 +112,7 @@ var _ = Describe("doctor command", func() {
 					}
 				}
 			}
-			if duplicateName == "" {
-				outString += "  Checked it sure. no duplicated config Name\n"
-			} else {
-				outString += "  Duplicate names: " + duplicateName + "\n"
-			}
+			outString += "  Checked it sure. no duplicated config Name\n"
 			outString += "Begining checking JenkinsServer status form the configuration files: \n"
 			jenkinsServers := config.JenkinsServers
 			for k := range jenkinsServers {
