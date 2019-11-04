@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"net/http"
 	"strconv"
 	"strings"
@@ -27,23 +30,28 @@ var doctorCmd = &cobra.Command{
 	Use:   "doctor",
 	Short: "Check your Jenkins config list status and current Jenkins config plugins",
 	Long:  `Check your Jenkins config list status and current Jenkins config plugins`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		jenkinsNames := getJenkinsNames()
-		checkDuplicateName(jenkinsNames)
+		outString := ""
+		err := checkDuplicateName(jenkinsNames)
+		outString += err.Error()
 		jenkinsServers := getConfig().JenkinsServers
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: doctorOption.RoundTripper,
 			},
 		}
-		checkJenkinsServersStatus(jenkinsServers, jclient)
-		checkCurrentPlugins(jclient)
-		fmt.Println("Checked is done.")
+		err = checkJenkinsServersStatus(jenkinsServers, jclient)
+		outString += err.Error()
+		err = checkCurrentPlugins(jclient)
+		outString += err.Error()
+		outString += "Checked is done."
+		cmd.Print(outString)
 	},
 }
 
-func checkDuplicateName(jenkinsNames []string) {
-	fmt.Println("Begining checking the name in the configuration file is duplicated：")
+func checkDuplicateName(jenkinsNames []string) (err error){
+	outString := "Begining checking the name in the configuration file is duplicated：\n"
 	var duplicateName = ""
 	for i := range jenkinsNames {
 		for j := range jenkinsNames {
@@ -53,14 +61,16 @@ func checkDuplicateName(jenkinsNames []string) {
 		}
 	}
 	if duplicateName == "" {
-		fmt.Println("  Checked it sure. no duplicated config Name")
+		outString += "  Checked it sure. no duplicated config Name\n"
 	} else {
-		fmt.Printf("  Duplicate names: %s\n", duplicateName)
+		outString += "  Duplicate names: " + duplicateName + "\n"
 	}
+	err = errors.New(outString)
+	return
 }
 
-func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) {
-	fmt.Println("Begining checking JenkinsServer status form the configuration files: ")
+func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) (err error){
+	outString := "Begining checking JenkinsServer status form the configuration files: \n"
 	for i := range jenkinsServers {
 		jenkinsServer := jenkinsServers[i]
 		jclient.URL = jenkinsServer.URL
@@ -68,67 +78,91 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 		jclient.Token = jenkinsServer.Token
 		jclient.Proxy = jenkinsServer.Proxy
 		jclient.ProxyAuth = jenkinsServer.ProxyAuth
-		fmt.Printf("  checking the No.%d - %s status: ", i, jenkinsServer.Name)
+		outString += "  checking the No." + strconv.Itoa(i) + "- " + jenkinsServer.Name + " status: "
 		if _, err := jclient.GetPlugins(); err == nil {
-			fmt.Println("***available***")
+			outString += "***available***\n"
 		} else {
-			fmt.Println("***unavailable***", err)
+			outString += "***unavailable***" + err.Error() + "\n"
 		}
 	}
+	err = errors.New(outString)
+	return
 }
 
-func checkCurrentPlugins(jclient *client.PluginManager) {
-	fmt.Println("Begining checking the current JenkinsServer's plugins status: ")
+func checkCurrentPlugins(jclient *client.PluginManager) (err error){
+	outString := "Begining checking the current JenkinsServer's plugins status: \n"
 	getCurrentJenkinsAndClient(&jclient.JenkinsCore)
 	if plugins, err := jclient.GetPlugins(2); err == nil {
-		cyclePlugins(plugins)
+		if err = cyclePlugins(plugins); err == nil {
+			outString += err.Error()
+		}
 	} else {
-		fmt.Println("  No plugins have updated...")
+	outString += "  No plugins have lost dependencies...\n"
 	}
+	err = errors.New(outString)
+	return
 }
 
-func cyclePlugins(plugins *client.InstalledPluginList) {
+func cyclePlugins(plugins *client.InstalledPluginList) (err error){
+	outString := ""
 	for _, plugin := range plugins.Plugins {
-		fmt.Printf("  Checking the plugin %s: \n", plugin.ShortName)
+		outString += "  Checking the plugin " + plugin.ShortName + ": \n"
 		dependencies := plugin.Dependencies
 		if len(dependencies) != 0 {
-			cycleDependencies(dependencies, plugins)
+			if err = cycleDependencies(dependencies, plugins); err == nil {
+				outString += err.Error()
+			}
 		} else {
-			fmt.Println("    The Plugin no dependencies")
+			outString += "    The Plugin no dependencies"
 		}
 	}
+	err = errors.New(outString)
+	return
 }
 
-func cycleDependencies(dependencies []client.Dependence, plugins *client.InstalledPluginList) {
+func cycleDependencies(dependencies []client.Dependence, plugins *client.InstalledPluginList) (err error){
+	outString := ""
 	for _, dependence := range dependencies {
-		fmt.Printf("    Checking the dependence plugin %s: ", dependence.ShortName)
+		outString += "    Checking the dependence plugin " + dependence.ShortName + ": "
 		hasInstalled := false
 		needUpdate := false
-		cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate)
+		if err = cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate); err == nil {
+			outString += err.Error()
+		}
+
 	}
+	err = errors.New(outString)
+	return
 }
 
-func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.Dependence, hasInstalled bool, needUpdate bool) {
+func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.Dependence, hasInstalled bool, needUpdate bool) (err error){
+	outString := ""
 	for _, checkPlugin := range plugins.Plugins {
 		checkPluginVersion := strings.Split(checkPlugin.Version, ".")
 		dependenceVersion := strings.Split(dependence.Version, ".")
 		if checkPlugin.ShortName == dependence.ShortName {
 			hasInstalled = true
-			matchPlugin(dependenceVersion, checkPluginVersion, needUpdate, dependence)
+			if _, err = matchPlugin(dependenceVersion, checkPluginVersion, needUpdate, dependence);err == nil {
+				outString += err.Error()
+			}
+
 		}
 		if needUpdate {
 			break
 		}
 	}
 	if !hasInstalled {
-		fmt.Printf("    The dependence %s no install, please install it the version %s at least\n", dependence.ShortName, dependence.Version)
+		outString += "    The dependence " + dependence.ShortName + " no install, please install it the version " + dependence.Version + " at least\n"
 	}
+	err = errors.New(outString)
+	return
 }
 
-func matchPlugin(dependenceVersion []string, checkPluginVersion []string, needUpdate bool, dependence client.Dependence) (isPass bool) {
+func matchPlugin(dependenceVersion []string, checkPluginVersion []string, needUpdate bool, dependence client.Dependence) (isPass bool, err error) {
+	outString := ""
 	for i := range dependenceVersion {
 		if strings.Contains(dependenceVersion[i], "-") && strings.Contains(checkPluginVersion[i], "-") {
-			isPass = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), needUpdate, dependence)
+			isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), needUpdate, dependence)
 			if isPass {
 				break
 			}
@@ -138,22 +172,45 @@ func matchPlugin(dependenceVersion []string, checkPluginVersion []string, needUp
 			if checkPluginVersionInt == dependenceVersionInt {
 				if i+1 == len(dependenceVersion) {
 					isPass = true
-					fmt.Println("***true***")
+					outString += "***true***\n"
 					break
 				} else {
 					continue
 				}
 			} else if checkPluginVersionInt > dependenceVersionInt {
 				isPass = true
-				fmt.Println("***true***")
+				outString += "***true***\n"
 				break
 			} else {
 				isPass = true
 				needUpdate = true
-				fmt.Printf("The dependence %s need upgrade the version to %s\n", dependence.ShortName, dependence.Version)
+				outString += "The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
 				break
 			}
 		}
+	}
+	err = errors.New(outString)
+	return
+}
+
+// Output renders data into a table
+func (o *DoctorOption) Output(obj interface{}) (data []byte, err error) {
+	if data, err = o.OutputOption.Output(obj); err != nil {
+		buf := new(bytes.Buffer)
+
+
+		jobCategories := obj.([]client.JobCategory)
+		table := util.CreateTable(buf)
+		table.AddRow("number", "name", "type")
+		for _, jobCategory := range jobCategories {
+			for i, item := range jobCategory.Items {
+				table.AddRow(fmt.Sprintf("%d", i), item.DisplayName,
+					jobCategory.Name)
+			}
+		}
+		table.Render()
+		err = nil
+		data = buf.Bytes()
 	}
 	return
 }
