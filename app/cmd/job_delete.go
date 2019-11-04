@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -41,8 +42,7 @@ var jobDeleteCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err := jclient.Delete(jobName); err != nil {
-			log.Fatal(err)
-		}
+		err := jclient.Delete(jobName)
+		helper.CheckErr(cmd, err)
 	},
 }

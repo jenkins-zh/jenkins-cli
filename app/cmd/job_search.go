@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -51,16 +52,15 @@ var jobSearchCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if status, err := jclient.Search(keyword, jobSearchOption.Max); err == nil {
+		status, err := jclient.Search(keyword, jobSearchOption.Max)
+		if err == nil {
 			var data []byte
-			if data, err = jobSearchOption.Output(status); err == nil {
+			data, err = jobSearchOption.Output(status)
+			if err == nil {
 				cmd.Println(string(data))
-			} else {
-				log.Fatal(err)
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

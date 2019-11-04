@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -55,20 +57,21 @@ var jobArtifactDownloadCmd = &cobra.Command{
 		}
 		jobArtifactDownloadOption.Jenkins = getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if artifacts, err := jclient.List(jobName, buildID); err == nil {
+		artifacts, err := jclient.List(jobName, buildID)
+		if err == nil {
 			for _, artifact := range artifacts {
 				if jobArtifactDownloadOption.ID != "" && jobArtifactDownloadOption.ID != artifact.ID {
 					continue
 				}
 
-				err = jobArtifactDownloadOption.download(artifact.URL, filepath.Join(jobArtifactDownloadOption.DownloadDir, artifact.Name))
+				downloadPath := filepath.Join(jobArtifactDownloadOption.DownloadDir, artifact.Name)
+				err = jobArtifactDownloadOption.download(artifact.URL, downloadPath)
 				if err != nil {
-					cmd.PrintErrln(err)
+					break
 				}
 			}
-		} else {
-			cmd.PrintErrln(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

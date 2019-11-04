@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -77,9 +79,9 @@ func printJenkinsStatus(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
 
-	if status, err := jclient.Get(); err == nil {
+	status, err := jclient.Get()
+	if err == nil {
 		cmd.Println("Jenkins Version:", status.Version)
-	} else {
-		cmd.PrintErrln(err)
 	}
+	helper.CheckErr(cmd, err)
 }

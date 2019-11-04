@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -32,8 +34,7 @@ var pluginUninstallCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err := jclient.UninstallPlugin(pluginName); err != nil {
-			cmd.PrintErr(err)
-		}
+		err := jclient.UninstallPlugin(pluginName)
+		helper.CheckErr(cmd, err)
 	},
 }

@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -42,8 +44,7 @@ var queueCancelCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err = jclient.Cancel(queueID); err != nil {
-			cmd.PrintErrln(err)
-		}
+		err = jclient.Cancel(queueID)
+		helper.CheckErr(cmd, err)
 	},
 }

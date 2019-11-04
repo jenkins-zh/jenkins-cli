@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -47,14 +49,10 @@ var jobEditCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if content, err = jobEditOption.getPipeline(jclient, name); err != nil {
-			cmd.PrintErrln(err)
-			return
+		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
+			err = jclient.UpdatePipeline(name, content)
 		}
-
-		if err = jclient.UpdatePipeline(name, content); err != nil {
-			cmd.Println("update failed", err)
-		}
+		helper.CheckErr(cmd, err)
 	},
 }
 
