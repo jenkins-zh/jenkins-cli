@@ -123,6 +123,15 @@ var _ = Describe("PluginManager test", func() {
 			_, err := pluginMgr.GetPlugins()
 			Expect(err).To(HaveOccurred())
 		})
+
+		It("response with 500", func() {
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL,2)
+
+			pluginList, err := pluginMgr.GetPlugins(2)
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Plugins[0].Dependencies)).To(Equal(1))
+		})
 	})
 
 	Context("InstallPlugin", func() {
