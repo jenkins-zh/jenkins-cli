@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -42,15 +44,14 @@ var userTokenCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		tokenName := userTokenOption.Name
-		if status, err := jclient.CreateToken(tokenName); err == nil {
+		status, err := jclient.CreateToken(tokenName)
+		if err == nil {
 			var data []byte
-			if data, err = userOption.Output(status); err == nil {
+			data, err = userOption.Output(status)
+			if err == nil {
 				cmd.Println(string(data))
-			} else {
-				cmd.PrintErrln(err)
 			}
-		} else {
-			cmd.PrintErrln(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }

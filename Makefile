@@ -52,8 +52,9 @@ verify:
 	go vet ./...
 	golint -set_exit_status ./...
 
-test: verify
+test: verify fmt
 	mkdir -p bin
+	go vet ./...
 	go test ./... -v -coverprofile coverage.out
 
 dep:
@@ -63,3 +64,8 @@ dep:
 	go get github.com/spf13/viper
 	go get gopkg.in/yaml.v2
 	go get github.com/Pallinder/go-randomdata
+
+fmt:
+	go fmt ./util/...
+	go fmt ./client/...
+	go fmt ./app/...

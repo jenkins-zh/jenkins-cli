@@ -18,7 +18,7 @@ var _ = Describe("center download command", func() {
 		roundTripper   *mhttp.MockRoundTripper
 		targetFilePath string
 
-		ltsResponseBody   string
+		ltsResponseBody    string
 		weeklyResponseBody string
 
 		err error
@@ -29,6 +29,9 @@ var _ = Describe("center download command", func() {
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
 		centerDownloadOption.RoundTripper = roundTripper
 		targetFilePath = "jenkins.war"
+
+		rootOptions.Jenkins = ""
+		rootOptions.ConfigFile = "test.yaml"
 
 		ltsResponseBody = "lts"
 		weeklyResponseBody = "weekly"
@@ -41,6 +44,13 @@ var _ = Describe("center download command", func() {
 	})
 
 	Context("basic cases", func() {
+		BeforeEach(func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+		})
+
 		It("should not error", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -65,8 +75,7 @@ var _ = Describe("center download command", func() {
 			content, readErr := ioutil.ReadFile(targetFilePath)
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(ltsResponseBody))
-		}, 1)
-
+		})
 
 		It("download the weekly Jenkins", func() {
 			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
@@ -88,6 +97,16 @@ var _ = Describe("center download command", func() {
 			content, readErr := ioutil.ReadFile(targetFilePath)
 			Expect(readErr).To(BeNil())
 			Expect(string(content)).To(Equal(weeklyResponseBody))
-		}, 1)
+		})
+
+		It("no mirror found", func() {
+			buf := new(bytes.Buffer)
+			rootCmd.SetOut(buf)
+
+			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("cannot found Jenkins mirror by: fake\n"))
+		})
 	})
 })

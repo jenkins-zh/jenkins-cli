@@ -3,8 +3,9 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -37,18 +38,15 @@ var jobTypeCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if status, err := jclient.GetJobTypeCategories(); err == nil {
+		status, err := jclient.GetJobTypeCategories()
+		if err == nil {
 			var data []byte
-			if data, err = jobTypeOption.Output(status); err == nil {
-				if len(data) > 0 {
-					cmd.Print(string(data))
-				}
-			} else {
-				log.Fatal(err)
+			data, err = jobTypeOption.Output(status)
+			if err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

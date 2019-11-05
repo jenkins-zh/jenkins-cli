@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -78,26 +77,15 @@ type Dependence struct {
 	Version   string
 }
 
-// CheckUpdate fetch the lastest plugins from update center site
-func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
-	api := fmt.Sprintf("%s/pluginManager/checkUpdatesServer", p.URL)
-	req, err := http.NewRequest("POST", api, nil)
+// CheckUpdate fetch the latest plugins from update center site
+func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
+	api := "/pluginManager/checkUpdatesServer"
+	var response *http.Response
+	response, err = p.RequestWithResponseHeader("POST", api, nil, nil, nil)
 	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		log.Fatal(err)
-	}
-
-	if err = p.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := p.GetClient()
-	if response, err := client.Do(req); err == nil {
 		p.handleCheck(handle)(response)
-	} else {
-		log.Fatal(err)
 	}
+	return
 }
 
 // GetAvailablePlugins get the aviable plugins from Jenkins

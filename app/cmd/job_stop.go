@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -51,8 +52,7 @@ var jobStopCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err := jclient.StopJob(jobName, buildNum); err != nil {
-			log.Fatal(err)
-		}
+		err = jclient.StopJob(jobName, buildNum)
+		helper.CheckErr(cmd, err)
 	},
 }

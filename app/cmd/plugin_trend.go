@@ -3,6 +3,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -22,19 +24,17 @@ var pluginTrendCmd = &cobra.Command{
 	Use:   "trend <pluginName>",
 	Short: "Show the trend of the plugin",
 	Long:  `Show the trend of the plugin`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		pluginName := args[0]
 
 		jclient := &client.PluginAPI{
 			RoundTripper: pluginTreadOption.RoundTripper,
 		}
-		if tread, err := jclient.ShowTrend(pluginName); err == nil {
+		tread, err := jclient.ShowTrend(pluginName)
+		if err == nil {
 			cmd.Print(tread)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }

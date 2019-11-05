@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"os"
@@ -12,7 +13,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
-var _ = Describe("job create command", func() {
+var _ = Describe("plugin download command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
@@ -21,11 +22,10 @@ var _ = Describe("job create command", func() {
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
+		pluginDownloadOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
-
-		jobCreateOption.RoundTripper = roundTripper
 	})
 
 	AfterEach(func() {
@@ -36,40 +36,29 @@ var _ = Describe("job create command", func() {
 	})
 
 	Context("basic cases", func() {
-		var (
-			jobPayload client.CreateJobPayload
-			err        error
-		)
-
-		BeforeEach(func() {
-			jobPayload = client.CreateJobPayload{
-				Name: "jobName",
-				Mode: "jobType",
-			}
-
+		It("should success", func() {
+			var err error
 			var data []byte
 			data, err = generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
-		})
 
-		It("create a job by the normal way", func() {
-			client.PrepareForCreatePipelineJob(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", jobPayload)
+			client.PrepareOnePluginWithOptionalDep(roundTripper, "fake")
+			client.PrepareDownloadPlugin(roundTripper)
 
-			rootCmd.SetArgs([]string{"job", "create", jobPayload.Name, "--type", jobPayload.Mode})
+			rootCmd.SetArgs([]string{"plugin", "download", "fake", "--show-progress=false", "--use-mirror=false"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOut(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-		})
+			Expect(buf.String()).To(Equal(""))
 
-		It("create a job by copy way", func() {
-			jobPayload.From = "another-one"
-			jobPayload.Mode = "copy"
-			client.PrepareForCreatePipelineJob(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", jobPayload)
-
-			rootCmd.SetArgs([]string{"job", "create", jobPayload.Name, "--copy", jobPayload.From})
-			_, err = rootCmd.ExecuteC()
+			_, err = os.Stat("fake.hpi")
 			Expect(err).To(BeNil())
+
+			defer os.Remove("fake.hpi")
 		})
 	})
 })

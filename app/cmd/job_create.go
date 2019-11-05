@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -54,9 +56,8 @@ var jobCreateCmd = &cobra.Command{
 		if jobCreateOption.Copy != "" {
 			payload.Mode = "copy"
 		}
-		if err := jclient.Create(payload); err != nil {
-			cmd.PrintErrln(err)
-		}
+		err = jclient.Create(payload)
+		helper.CheckErr(cmd, err)
 	},
 }
 

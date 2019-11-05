@@ -18,9 +18,8 @@ func init() {
 
 var jobCmd = &cobra.Command{
 	Use:   "job",
-	Short: "Print the job of your Jenkins",
-	Long:  `Print the job of your Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
-		cmd.Help()
-	},
+	Short: "Manage the job of your Jenkins",
+	Long: `Manage the job of your Jenkins
+Editing the pipeline job needs to install a plugin which is pipeline-restful-api
+https://plugins.jenkins.io/pipeline-restful-api`,
 }

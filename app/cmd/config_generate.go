@@ -83,8 +83,8 @@ func printCfg(data []byte) {
 	fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
-func generateSampleConfig() ([]byte, error) {
-	sampleConfig := Config{
+func getSampleConfig() (sampleConfig Config) {
+	sampleConfig = Config{
 		Current: "yourServer",
 		JenkinsServers: []JenkinsServer{
 			{
@@ -94,6 +94,29 @@ func generateSampleConfig() ([]byte, error) {
 				Token:    "111e3a2f0231198855dceaff96f20540a9",
 			},
 		},
+		Mirrors: []JenkinsMirror{
+			{
+				Name: "default",
+				URL:  "http://mirrors.jenkins.io/",
+			},
+			{
+				Name: "tsinghua",
+				URL:  "https://mirrors.tuna.tsinghua.edu.cn/jenkins/",
+			},
+			{
+				Name: "huawei",
+				URL:  "https://mirrors.huaweicloud.com/jenkins/",
+			},
+			{
+				Name: "tencent",
+				URL:  "https://mirrors.cloud.tencent.com/jenkins/",
+			},
+		},
 	}
+	return
+}
+
+func generateSampleConfig() ([]byte, error) {
+	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
 }

@@ -22,9 +22,9 @@ type FormatOutput interface {
 
 const (
 	// JSONOutputFormat is the format of json
-	JSONOutputFormat  string = "json"
+	JSONOutputFormat string = "json"
 	// YAMLOutputFormat is the format of yaml
-	YAMLOutputFormat  string = "yaml"
+	YAMLOutputFormat string = "yaml"
 	// TableOutputFormat is the format of table
 	TableOutputFormat string = "table"
 )

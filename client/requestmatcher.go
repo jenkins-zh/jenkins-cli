@@ -11,7 +11,7 @@ import (
 // RequestMatcher to match the http request
 type RequestMatcher struct {
 	request *http.Request
-	target *http.Request
+	target  *http.Request
 	verbose bool
 
 	matchOptions matchOptions

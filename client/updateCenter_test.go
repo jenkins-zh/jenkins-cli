@@ -38,6 +38,7 @@ var _ = Describe("update center test", func() {
 	Context("DownloadJenkins", func() {
 		It("should success with basic cases", func() {
 			manager.RoundTripper = roundTripper
+			manager.MirrorSite = "http://mirrors.jenkins.io/"
 
 			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
 			response := &http.Response{

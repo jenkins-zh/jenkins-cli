@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -35,15 +36,14 @@ var queueListCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if status, err := jclient.Get(); err == nil {
+		status, err := jclient.Get()
+		if err == nil {
 			var data []byte
-			if data, err = Format(status, queueListOption.Format); err == nil {
+			data, err = Format(status, queueListOption.Format)
+			if err == nil {
 				cmd.Printf("%s\n", string(data))
-			} else {
-				log.Fatal(err)
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }

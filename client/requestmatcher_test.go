@@ -9,7 +9,7 @@ import (
 var _ = Describe("user test", func() {
 	Context("matchHeader", func() {
 		var (
-			left http.Header
+			left  http.Header
 			right http.Header
 		)
 

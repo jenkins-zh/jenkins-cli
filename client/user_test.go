@@ -11,7 +11,7 @@ var _ = Describe("user test", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		userClient  UserClient
+		userClient   UserClient
 
 		username string
 		password string

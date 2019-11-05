@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,12 +28,12 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   "Manage the config of jcli",
 	Long:    `Manage the config of jcli`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {
-			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+			cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 		} else {
-			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+			cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 		}
 	},
 	Example: `  jcli config generate
@@ -64,6 +65,12 @@ type PluginSuite struct {
 	Description string   `yaml:"description"`
 }
 
+// JenkinsMirror represents the mirror of Jenkins
+type JenkinsMirror struct {
+	Name string
+	URL  string
+}
+
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
@@ -72,6 +79,7 @@ type Config struct {
 	PreHooks       []CommndHook    `yaml:"preHooks"`
 	PostHooks      []CommndHook    `yaml:"postHooks"`
 	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
+	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {
@@ -154,6 +162,36 @@ func loadConfig(path string) (err error) {
 		err = yaml.Unmarshal([]byte(content), &config)
 	}
 	return
+}
+
+// getMirrors returns the mirror list, one official mirror should be returned if user don't give it
+func getMirrors() (mirrors []JenkinsMirror) {
+	mirrors = config.Mirrors
+	if len(mirrors) == 0 {
+		mirrors = []JenkinsMirror{
+			{
+				Name: "default",
+				URL:  "http://mirrors.jenkins.io/",
+			},
+		}
+	}
+	return
+}
+
+func getMirror(name string) string {
+	mirrors := getMirrors()
+
+	for _, mirror := range mirrors {
+		if mirror.Name == name {
+			logger.Debug("find mirror", zap.String("name", name), zap.String("url", mirror.URL))
+			return mirror.URL
+		}
+	}
+	return ""
+}
+
+func getDefaultMirror() string {
+	return getMirror("default")
 }
 
 func saveConfig() (err error) {

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"log"
 	"os"
@@ -12,7 +13,10 @@ import (
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
+
+var logger *zap.Logger
 
 // RootOptions is a global option for whole cli
 type RootOptions struct {
@@ -20,6 +24,8 @@ type RootOptions struct {
 	Jenkins    string
 	Version    bool
 	Debug      bool
+
+	LoggerLevel string
 }
 
 var rootCmd = &cobra.Command{
@@ -28,6 +34,14 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		var err error
+		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
+			cmd.PrintErrln(err)
+		} else {
+			client.SetLogger(logger)
+		}
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
 		if rootOptions.Version {
@@ -49,7 +63,6 @@ var rootCmd = &cobra.Command{
 // Execute will exectue the command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 }
@@ -62,6 +75,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
+		"Logger level which could be: debug, info, warn, error")
 }
 
 func initConfig() {
@@ -128,7 +143,7 @@ func getCmdPath(cmd *cobra.Command) string {
 func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error) {
 	config := getConfig()
 	if config == nil {
-		err = fmt.Errorf("Cannot find config file")
+		err = fmt.Errorf("cannot find config file")
 		return
 	}
 
