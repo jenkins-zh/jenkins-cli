@@ -131,38 +131,18 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 }
 
 // GetHistory returns the build history of a job
-func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
+func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
-		builds = job.Builds
+		buildList := job.Builds // only contains basic info
 
-		for i, build := range builds {
-			api := fmt.Sprintf("%sapi/json", build.URL)
-			var (
-				req      *http.Request
-				response *http.Response
-			)
-
-			req, err = http.NewRequest("GET", api, nil)
-			if err == nil {
-				q.AuthHandle(req)
-			} else {
-				return
+		var build *JobBuild
+		for _, buildItem := range buildList {
+			build, err = q.GetBuild(name, buildItem.Number)
+			if err != nil {
+				break
 			}
-			client := q.GetClient()
-			if response, err = client.Do(req); err == nil {
-				code := response.StatusCode
-				var data []byte
-				data, err = ioutil.ReadAll(response.Body)
-				if code == 200 {
-					err = json.Unmarshal(data, &build)
-					builds[i] = build
-				} else {
-					log.Fatal(string(data))
-				}
-			} else {
-				log.Fatal(err)
-			}
+			builds = append(builds, build)
 		}
 	}
 	return

@@ -28,12 +28,8 @@ var jobParamCmd = &cobra.Command{
 	Use:   "param <jobName>",
 	Short: "Get param of the job of your Jenkins",
 	Long:  `Get param of the job of your Jenkins`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		name := args[0]
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JobClient{}
