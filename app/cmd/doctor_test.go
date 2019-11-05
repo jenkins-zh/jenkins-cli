@@ -59,7 +59,7 @@ var _ = Describe("doctor command", func() {
 			config.JenkinsServers[2].Name = "a"
 			names := getJenkinsNames()
 			var outString string
-			outString += "Begining checking the name in the configuration file is duplicated：\n"
+			outString += "Beginning to check the names are duplicated which in the configuration file：\n"
 			duplicateName := ""
 			for i := range names {
 				for j := range names {
@@ -68,12 +68,10 @@ var _ = Describe("doctor command", func() {
 					}
 				}
 			}
-			if duplicateName == "" {
-				outString += "  Checked it sure. no duplicated config Name\n"
-			} else {
+			if duplicateName != "" {
 				outString += "  Duplicate names: " + duplicateName + "\n"
 			}
-			outString += "Begining checking JenkinsServer status form the configuration files: \n"
+			outString += "Begining to checking JenkinsServer status form the configuration files: \n"
 			jenkinsServers := config.JenkinsServers
 			for k := range jenkinsServers {
 				if k == 1 {
@@ -87,7 +85,7 @@ var _ = Describe("doctor command", func() {
 				}
 			}
 			current := getCurrentJenkins()
-			outString += "Begining checking the current JenkinsServer's plugins status: \n"
+			outString += "Begining to checking the current JenkinsServer's plugins status: \n"
 			request, _ := client.PrepareFor500InstalledPluginList(roundTripper, current.URL,2)
 			request.SetBasicAuth(current.UserName, current.Token)
 			outString += "  No plugins have lost dependencies...\n"
@@ -103,7 +101,7 @@ var _ = Describe("doctor command", func() {
 		It("test JenkinsServers status", func() {
 			names := getJenkinsNames()
 			var outString string
-			outString += "Begining checking the name in the configuration file is duplicated：\n"
+			outString += "Beginning to check the names are duplicated which in the configuration file：\n"
 			duplicateName := ""
 			for i := range names {
 				for j := range names {
@@ -112,8 +110,7 @@ var _ = Describe("doctor command", func() {
 					}
 				}
 			}
-			outString += "  Checked it sure. no duplicated config Name\n"
-			outString += "Begining checking JenkinsServer status form the configuration files: \n"
+			outString += "Begining to checking JenkinsServer status form the configuration files: \n"
 			jenkinsServers := config.JenkinsServers
 			for k := range jenkinsServers {
 				if k == 1 {
@@ -127,7 +124,7 @@ var _ = Describe("doctor command", func() {
 				}
 			}
 			current := getCurrentJenkins()
-			outString += "Begining checking the current JenkinsServer's plugins status: \n"
+			outString += "Begining to checking the current JenkinsServer's plugins status: \n"
 			request, _ := client.PrepareForManyInstalledPlugins(roundTripper, current.URL,2)
 			request.SetBasicAuth(current.UserName, current.Token)
 			outString += "  Checking the plugin fake-ocean: \n"
@@ -145,7 +142,6 @@ var _ = Describe("doctor command", func() {
 			rootCmd.SetOutput(buf)
 			_, err := rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-
 			Expect(buf.String()).To(Equal(outString))
 		})
 	})

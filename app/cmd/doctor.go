@@ -30,7 +30,7 @@ var doctorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkinsNames := getJenkinsNames()
 		outString := ""
-		err := checkDuplicateName(jenkinsNames)
+		err := checkNameDuplicate(jenkinsNames)
 		outString += err.Error()
 		jenkinsServers := getConfig().JenkinsServers
 		jclient := &client.PluginManager{
@@ -47,27 +47,25 @@ var doctorCmd = &cobra.Command{
 	},
 }
 
-func checkDuplicateName(jenkinsNames []string) (err error){
-	outString := "Begining checking the name in the configuration file is duplicated：\n"
-	var duplicateName = ""
+func checkNameDuplicate(jenkinsNames []string) (err error){
+	outString := "Beginning to check the names are duplicated which in the configuration file：\n"
+	var duplicateNames = ""
 	for i := range jenkinsNames {
 		for j := range jenkinsNames {
-			if i != j && jenkinsNames[i] == jenkinsNames[j] && !strings.Contains(duplicateName, jenkinsNames[i]) {
-				duplicateName += jenkinsNames[i] + " "
+			if i != j && jenkinsNames[i] == jenkinsNames[j] && !strings.Contains(duplicateNames, jenkinsNames[i]) {
+				duplicateNames += jenkinsNames[i] + " "
 			}
 		}
 	}
-	if duplicateName == "" {
-		outString += "  Checked it sure. no duplicated config Name\n"
-	} else {
-		outString += "  Duplicate names: " + duplicateName + "\n"
+	if duplicateNames != "" {
+		outString += "  Duplicate names: " + duplicateNames + "\n"
 	}
 	err = errors.New(outString)
 	return
 }
 
 func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) (err error){
-	outString := "Begining checking JenkinsServer status form the configuration files: \n"
+	outString := "Begining to checking JenkinsServer status form the configuration files: \n"
 	for i := range jenkinsServers {
 		jenkinsServer := jenkinsServers[i]
 		jclient.URL = jenkinsServer.URL
@@ -87,7 +85,7 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 }
 
 func checkCurrentPlugins(jclient *client.PluginManager) (err error){
-	outString := "Begining checking the current JenkinsServer's plugins status: \n"
+	outString := "Begining to checking the current JenkinsServer's plugins status: \n"
 	getCurrentJenkinsAndClient(&jclient.JenkinsCore)
 	if plugins, err := jclient.GetPlugins(2); err == nil {
 		if err = cyclePlugins(plugins); err != nil {
@@ -100,6 +98,7 @@ func checkCurrentPlugins(jclient *client.PluginManager) (err error){
 	return
 }
 
+// cyclePlugins is check all installed plugins
 func cyclePlugins(plugins *client.InstalledPluginList) (err error){
 	outString := ""
 	for _, plugin := range plugins.Plugins {
@@ -126,7 +125,6 @@ func cycleDependencies(dependencies []client.Dependence, plugins *client.Install
 		if err = cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate); err != nil {
 			outString += err.Error()
 		}
-
 	}
 	err = errors.New(outString)
 	return

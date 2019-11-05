@@ -124,7 +124,7 @@ var _ = Describe("PluginManager test", func() {
 			Expect(err).To(HaveOccurred())
 		})
 
-		It("response with 500", func() {
+		It("test with parameter", func() {
 			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL,2)
 
 			pluginList, err := pluginMgr.GetPlugins(2)
