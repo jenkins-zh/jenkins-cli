@@ -69,6 +69,8 @@ type InstalledPlugin struct {
 	BackVersion        string
 }
 
+var debugLogFile = "debug.html"
+
 // CheckUpdate fetch the latest plugins from update center site
 func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 	api := "/pluginManager/checkUpdatesServer"
@@ -92,20 +94,37 @@ func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error
 	return
 }
 
-func getPluginsInstallQuery(names []string) string {
+func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 	pluginNames := make([]string, 0)
 	for _, name := range names {
 		if name == "" {
 			continue
 		}
-		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		if !strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		}
+	}
+	return strings.Join(pluginNames, "&")
+}
+
+func (p *PluginManager) getVersionalPlugins(names []string) string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if strings.Contains(name, "@") {
+			if err := p.installPluginWithVersion(name); err != nil {
+				fmt.Println(err)
+			}
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s,", name))
+		}
 	}
 	return strings.Join(pluginNames, "&")
 }
 
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	api := fmt.Sprintf("/pluginManager/install?%s", getPluginsInstallQuery(names))
+	api := fmt.Sprintf("/pluginManager/install?%s", p.getPluginsInstallQuery(names))
+	versionalPlugins := p.getVersionalPlugins(names)
+	fmt.Println(versionalPlugins)
 
 	var response *http.Response
 	response, err = p.RequestWithResponse("POST", api, nil, nil)
@@ -121,6 +140,26 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 	return
 }
 
+// InstallPluginWithVersion install a plugin by name & version
+func (p *PluginManager) installPluginWithVersion(name string) (err error) {
+	pluginAPI := PluginAPI{}
+	pluginName := "%s.hpi"
+	pluginVersion := strings.Split(name, "@")
+
+	defer os.Remove(fmt.Sprintf(pluginName, name))
+	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
+		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+
+	if err := pluginAPI.download(url, name); err != nil {
+		return err
+	}
+
+	if err = p.Upload(fmt.Sprintf(pluginName, name)); err != nil {
+		return err
+	}
+	return nil
+}
+
 // UninstallPlugin uninstall a plugin by name
 func (p *PluginManager) UninstallPlugin(name string) (err error) {
 	api := fmt.Sprintf("/pluginManager/plugin/%s/doUninstall", name)
@@ -133,7 +172,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
+				ioutil.WriteFile(debugLogFile, data, 0664)
 			}
 		}
 	}
@@ -158,7 +197,7 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
 		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile("debug.html", data, 0664)
+			ioutil.WriteFile(debugLogFile, data, 0664)
 		}
 	}
 	return err

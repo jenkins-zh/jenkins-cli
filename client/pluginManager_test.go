@@ -38,16 +38,16 @@ var _ = Describe("PluginManager test", func() {
 	Context("basic function test", func() {
 		It("get install plugin query string", func() {
 			names := make([]string, 0)
-			Expect(getPluginsInstallQuery(names)).To(Equal(""))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal(""))
 
 			names = append(names, "abc")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
 
 			names = append(names, "def")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 
 			names = append(names, "")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 		})
 	})
 
@@ -141,10 +141,24 @@ var _ = Describe("PluginManager test", func() {
 			Expect(err).To(BeNil())
 		})
 
+		It("normal case with version, should success", func() {
+			PrepareForInstallPluginWithVersion(roundTripper, pluginMgr.URL, pluginName, "1.0", "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + "1.0"})
+			Expect(err).To(BeNil())
+		})
+
 		It("with 400", func() {
 			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
 
 			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).NotTo(BeNil())
+		})
+
+		It("with 400 & version", func() {
+			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName + "@" + "1.0", "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + "1.0"})
 			Expect(err).NotTo(BeNil())
 		})
 
