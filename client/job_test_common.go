@@ -13,7 +13,7 @@ import (
 )
 
 // PrepareForGetJobInputActions only for test
-func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd, jobName string, buildID int) (
+func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, jobName string, buildID int) (
 	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/wfapi/pendingInputActions", rootURL, jobName, buildID), nil)
 	response = &http.Response{
@@ -27,48 +27,93 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
 
-	if user != "" && passwd != "" {
-		request.SetBasicAuth(user, passwd)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
 	}
 	return
 }
 
 // PrepareForSubmitInput only for test
-func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
+func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, password string) (
 	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/abort?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
-	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
 
 // PrepareForSubmitProcessInput only for test
-func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, passwd string) (
+func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, password string) (
 	request *http.Request, response *http.Response) {
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
-	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
 
 // PrepareForBuildWithNoParams only for test
-func PrepareForBuildWithNoParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, passwd string) (
+func PrepareForBuildWithNoParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) (
 	request *http.Request, response *http.Response) {
 	formData := url.Values{"json": {`{"parameter": []}`}}
 	payload := strings.NewReader(formData.Encode())
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	response.StatusCode = 201
 	return
 }
 
 // PrepareForBuildWithParams only for test
-func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, passwd string) (
+func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) (
 	request *http.Request, response *http.Response) {
 	formData := url.Values{"json": {`{"parameter": {"Description":"","name":"name","Type":"","value":"value","DefaultParameterValue":{"Description":"","Value":null}}}`}}
 	payload := strings.NewReader(formData.Encode())
 	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
-	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
+	response = PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	response.StatusCode = 201
 	return
+}
+
+// PrepareForGetJob only for test
+func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json", rootURL, jobName), nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body: ioutil.NopCloser(bytes.NewBufferString(fmt.Sprintf(`{
+  "name" : "%s",
+  "builds" : [
+    {
+      "number" : 1,
+      "url" : "http://localhost:8080/job/we/1/"
+    },
+    {
+      "number" : 2,
+      "url" : "http://localhost:8080/job/we/2/"
+    }]
+				}`, jobName))),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
+	}
+}
+
+// PrepareForGetBuild only for test
+func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName string, buildID int, user, password string) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID), nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    request,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"displayName":"fake"}
+				`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
+	}
 }

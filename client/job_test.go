@@ -158,18 +158,7 @@ var _ = Describe("job test", func() {
 		It("basic case with one build", func() {
 			jobName := "fake"
 			buildID := 2
-
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/api/json", jobClient.URL, jobName, buildID), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body: ioutil.NopCloser(bytes.NewBufferString(`
-				{"displayName":"fake"}
-				`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 2, "", "")
 
 			result, err := jobClient.GetBuild(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -363,6 +352,21 @@ var _ = Describe("job test", func() {
 			PrepareForSubmitInput(roundTripper, jobClient.URL, "/job/jobName", "", "")
 			err := jobClient.JobInputSubmit("jobName", "Eff7d5dba32b4da32d9a67a519434d3f", 1, true, nil)
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("GetHistory", func() {
+		It("simple case, should success", func() {
+			jobName := "fakeJob"
+
+			PrepareForGetJob(roundTripper, jobClient.URL, jobName, "", "")
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 1, "", "")
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 2, "", "")
+
+			builds, err := jobClient.GetHistory(jobName)
+			Expect(err).To(BeNil())
+			Expect(builds).NotTo(BeNil())
+			Expect(len(builds)).To(Equal(2))
 		})
 	})
 })

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -42,8 +43,7 @@ var userDeleteCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		if err := jclient.Delete(username); err != nil {
-			cmd.PrintErrln(err)
-		}
+		err := jclient.Delete(username)
+		helper.CheckErr(cmd, err)
 	},
 }
