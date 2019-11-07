@@ -18,6 +18,8 @@ import (
 type PluginManager struct {
 	JenkinsCore
 
+	UseMirror    bool
+	MirrorURL    string
 	ShowProgress bool
 }
 
@@ -163,6 +165,9 @@ func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) 
 func (p *PluginManager) installPluginWithVersion(name string) (err error) {
 	pluginAPI := PluginAPI{
 		RoundTripper: p.RoundTripper,
+		UseMirror:    p.UseMirror,
+		MirrorURL:    p.MirrorURL,
+		ShowProgress: p.ShowProgress,
 	}
 	pluginName := "%s.hpi"
 	pluginVersion := strings.Split(name, "@")
@@ -170,6 +175,8 @@ func (p *PluginManager) installPluginWithVersion(name string) (err error) {
 	defer os.Remove(fmt.Sprintf(pluginName, name))
 	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
 		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+
+	url = pluginAPI.getMirrorURL(url)
 	if err = pluginAPI.download(url, name); err == nil {
 		err = p.Upload(fmt.Sprintf(pluginName, name))
 	}

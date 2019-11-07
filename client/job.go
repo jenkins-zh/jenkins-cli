@@ -101,9 +101,6 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 			jobCategories = result.Categories
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return
@@ -222,7 +219,6 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 func (q *JobClient) Delete(jobName string) (err error) {
 	var (
 		statusCode int
-		data       []byte
 	)
 
 	api := fmt.Sprintf("/job/%s/doDelete", jobName)
@@ -230,12 +226,9 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		util.ContentType: util.ApplicationForm,
 	}
 
-	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
+	if statusCode, _, err = q.Request("POST", api, header, nil); err == nil {
 		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return
