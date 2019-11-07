@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -153,9 +152,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	path := parseJobPath(jobName)
 	var api string
 	if history == -1 {
-		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+		api = fmt.Sprintf("%s%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
 	} else {
-		api = fmt.Sprintf("%s/%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
+		api = fmt.Sprintf("%s%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
 	}
 	var (
 		req      *http.Request
@@ -164,8 +163,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 
 	req, err = http.NewRequest("GET", api, nil)
 	if err == nil {
-		q.AuthHandle(req)
-	} else {
+		err = q.AuthHandle(req)
+	}
+	if err != nil {
 		return
 	}
 
@@ -186,11 +186,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 				jobLog.HasMore = strings.ToLower(response.Header.Get("X-More-Data")) == "true"
 				jobLog.NextStart, _ = strconv.ParseInt(response.Header.Get("X-Text-Size"), 10, 64)
 			}
-		} else {
-			log.Fatal(string(data))
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }

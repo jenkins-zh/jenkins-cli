@@ -154,3 +154,28 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 		request.SetBasicAuth(user, password)
 	}
 }
+
+// PrepareForJobLog only for test
+func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName string, buildID int, user, password string) {
+	var api string
+	if buildID == -1 {
+		api = fmt.Sprintf("%s/job/%s/lastBuild/logText/progressiveText?start=%d", rootURL, jobName, 0)
+	} else {
+		api = fmt.Sprintf("%s/job/%s/%d/logText/progressiveText?start=%d", rootURL, jobName, buildID, 0)
+	}
+	request, _ := http.NewRequest("GET", api, nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Request:    request,
+		Header: map[string][]string{
+			"X-More-Data": []string{"false"},
+			"X-Text-Size": []string{"8"},
+		},
+		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
+	}
+}

@@ -94,7 +94,7 @@ func (h *HTTPDownloader) DownloadFile() error {
 				ioutil.WriteFile("debug-download.html", data, 0664)
 			}
 		}
-		return fmt.Errorf("Invalidate status code: %d", resp.StatusCode)
+		return fmt.Errorf("invalidate status code: %d", resp.StatusCode)
 	}
 
 	writer := &ProgressIndicator{
