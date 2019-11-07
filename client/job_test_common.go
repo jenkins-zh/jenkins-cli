@@ -139,7 +139,13 @@ func PrepareForGetJobWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, j
 
 // PrepareForGetBuild only for test
 func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName string, buildID int, user, password string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID), nil)
+	api := ""
+	if buildID == -1 {
+		api = fmt.Sprintf("%s/job/%s/lastBuild/api/json", rootURL, jobName)
+	} else {
+		api = fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID)
+	}
+	request, _ := http.NewRequest("GET", api, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
