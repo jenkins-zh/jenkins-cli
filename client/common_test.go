@@ -116,7 +116,7 @@ var _ = Describe("common test", func() {
 		})
 
 		It("with crumb setting", func() {
-			RequestCrumb(roundTripper, jenkinsCore.URL)
+			PrepareForGetIssuer(roundTripper, jenkinsCore.URL, "", "")
 
 			crumb, err := jenkinsCore.GetCrumb()
 			Expect(err).To(BeNil())
@@ -126,15 +126,16 @@ var _ = Describe("common test", func() {
 		})
 
 		It("with error from server", func() {
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
-			responseCrumb := &http.Response{
-				StatusCode: 500,
-				Proto:      "HTTP/1.1",
-				Request:    requestCrumb,
-				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			//requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
+			//responseCrumb := &http.Response{
+			//	StatusCode: 500,
+			//	Proto:      "HTTP/1.1",
+			//	Request:    requestCrumb,
+			//	Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			//}
+			//roundTripper.EXPECT().
+			//	RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			PrepareForGetIssuerWith500(roundTripper, jenkinsCore.URL, "", "")
 
 			_, err := jenkinsCore.GetCrumb()
 			Expect(err).To(HaveOccurred())
