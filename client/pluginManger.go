@@ -18,6 +18,8 @@ import (
 type PluginManager struct {
 	JenkinsCore
 
+	UseMirror    bool
+	MirrorURL    string
 	ShowProgress bool
 }
 
@@ -104,45 +106,69 @@ func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
 		}
 	}
-	return strings.Join(pluginNames, "&")
-}
-
-func (p *PluginManager) getVersionalPlugins(names []string) string {
-	pluginNames := make([]string, 0)
-	for _, name := range names {
-		if strings.Contains(name, "@") {
-			if err := p.installPluginWithVersion(name); err != nil {
-				fmt.Println(err)
-			}
-			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s,", name))
-		}
+	if len(pluginNames) == 0 {
+		return ""
 	}
 	return strings.Join(pluginNames, "&")
 }
 
+func (p *PluginManager) getVersionalPlugins(names []string) []string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, name)
+		}
+	}
+	return pluginNames
+}
+
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	api := fmt.Sprintf("/pluginManager/install?%s", p.getPluginsInstallQuery(names))
+	plugins := p.getPluginsInstallQuery(names)
 	versionalPlugins := p.getVersionalPlugins(names)
-	fmt.Println(versionalPlugins)
+	if plugins != "" {
+		err = p.installPluginsWithoutVersion(plugins)
+	}
 
+	if err == nil && len(versionalPlugins) > 0 {
+		err = p.installPluginsWithVersion(versionalPlugins)
+	}
+	return
+}
+
+func (p *PluginManager) installPluginsWithoutVersion(plugins string) (err error) {
+	api := fmt.Sprintf("/pluginManager/install?%s", plugins)
 	var response *http.Response
 	response, err = p.RequestWithResponse("POST", api, nil, nil)
-	if response.StatusCode == 400 {
+	if response != nil && response.StatusCode == 400 {
 		if errMsg, ok := response.Header["X-Error"]; ok {
 			for _, msg := range errMsg {
 				err = fmt.Errorf(msg)
 			}
 		} else {
-			err = fmt.Errorf("Cannot found plugins %v", names)
+			err = fmt.Errorf("cannot found plugins %s", plugins)
 		}
 	}
 	return
 }
 
-// InstallPluginWithVersion install a plugin by name & version
+func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) {
+	for _, plugin := range plugins {
+		if err = p.installPluginWithVersion(plugin); err != nil {
+			break
+		}
+	}
+	return
+}
+
+// installPluginWithVersion install a plugin by name & version
 func (p *PluginManager) installPluginWithVersion(name string) (err error) {
-	pluginAPI := PluginAPI{}
+	pluginAPI := PluginAPI{
+		RoundTripper: p.RoundTripper,
+		UseMirror:    p.UseMirror,
+		MirrorURL:    p.MirrorURL,
+		ShowProgress: p.ShowProgress,
+	}
 	pluginName := "%s.hpi"
 	pluginVersion := strings.Split(name, "@")
 
@@ -150,14 +176,11 @@ func (p *PluginManager) installPluginWithVersion(name string) (err error) {
 	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
 		pluginVersion[0], pluginVersion[1], pluginVersion[0])
 
-	if err := pluginAPI.download(url, name); err != nil {
-		return err
+	url = pluginAPI.getMirrorURL(url)
+	if err = pluginAPI.download(url, name); err == nil {
+		err = p.Upload(fmt.Sprintf(pluginName, name))
 	}
-
-	if err = p.Upload(fmt.Sprintf(pluginName, name)); err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
 // UninstallPlugin uninstall a plugin by name

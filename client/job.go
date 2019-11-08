@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -102,9 +101,6 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 			jobCategories = result.Categories
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return
@@ -153,9 +149,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	path := parseJobPath(jobName)
 	var api string
 	if history == -1 {
-		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+		api = fmt.Sprintf("%s%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
 	} else {
-		api = fmt.Sprintf("%s/%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
+		api = fmt.Sprintf("%s%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
 	}
 	var (
 		req      *http.Request
@@ -164,8 +160,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 
 	req, err = http.NewRequest("GET", api, nil)
 	if err == nil {
-		q.AuthHandle(req)
-	} else {
+		err = q.AuthHandle(req)
+	}
+	if err != nil {
 		return
 	}
 
@@ -186,11 +183,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 				jobLog.HasMore = strings.ToLower(response.Header.Get("X-More-Data")) == "true"
 				jobLog.NextStart, _ = strconv.ParseInt(response.Header.Get("X-Text-Size"), 10, 64)
 			}
-		} else {
-			log.Fatal(string(data))
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
@@ -226,7 +219,6 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 func (q *JobClient) Delete(jobName string) (err error) {
 	var (
 		statusCode int
-		data       []byte
 	)
 
 	api := fmt.Sprintf("/job/%s/doDelete", jobName)
@@ -234,12 +226,9 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		util.ContentType: util.ApplicationForm,
 	}
 
-	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
+	if statusCode, _, err = q.Request("POST", api, header, nil); err == nil {
 		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return

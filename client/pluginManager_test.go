@@ -141,24 +141,30 @@ var _ = Describe("PluginManager test", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("normal case with version, should success", func() {
-			PrepareForInstallPluginWithVersion(roundTripper, pluginMgr.URL, pluginName, "1.0", "", "")
+		It("upload a plugin with a specific version, should success", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			PrepareDownloadPlugin(roundTripper)
+			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
 
-			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + "1.0"})
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
 			Expect(err).To(BeNil())
+		})
+
+		It("upload a not exists plugin", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			response := PrepareDownloadPlugin(roundTripper)
+			response.StatusCode = 400
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
+			Expect(err).NotTo(BeNil())
 		})
 
 		It("with 400", func() {
 			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
 
 			err := pluginMgr.InstallPlugin([]string{pluginName})
-			Expect(err).NotTo(BeNil())
-		})
-
-		It("with 400 & version", func() {
-			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName + "@" + "1.0", "", "")
-
-			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + "1.0"})
 			Expect(err).NotTo(BeNil())
 		})
 

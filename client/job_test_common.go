@@ -74,9 +74,10 @@ func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jo
 }
 
 // PrepareForGetJob only for test
-func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) {
+func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) (
+	response *http.Response) {
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json", rootURL, jobName), nil)
-	response := &http.Response{
+	response = &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
 		Request:    request,
@@ -98,11 +99,53 @@ func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, us
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
+	return
+}
+
+// PrepareForGetJobWithParams only for test
+func PrepareForGetJobWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) {
+	response := PrepareForGetJob(roundTripper, rootURL, jobName, user, password)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(fmt.Sprintf(`{
+  "name" : "%s",
+  "builds" : [
+    {
+      "number" : 1,
+      "url" : "http://localhost:8080/job/we/1/"
+    },
+    {
+      "number" : 2,
+      "url" : "http://localhost:8080/job/we/2/"
+    }],
+  "property" : [
+    {
+      "_class" : "io.alauda.jenkins.devops.sync.WorkflowJobProperty"
+    },
+    {
+      "parameterDefinitions" : [
+        {
+          "defaultParameterValue" : {
+            "name" : "name",
+            "value" : "jake"
+          },
+          "description" : "",
+          "name" : "name",
+          "type" : "StringParameterDefinition"
+        }
+      ]
+    }
+  ]
+}`, jobName)))
 }
 
 // PrepareForGetBuild only for test
 func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName string, buildID int, user, password string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID), nil)
+	api := ""
+	if buildID == -1 {
+		api = fmt.Sprintf("%s/job/%s/lastBuild/api/json", rootURL, jobName)
+	} else {
+		api = fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID)
+	}
+	request, _ := http.NewRequest("GET", api, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
@@ -110,6 +153,31 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
 				{"displayName":"fake"}
 				`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
+	}
+}
+
+// PrepareForJobLog only for test
+func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName string, buildID int, user, password string) {
+	var api string
+	if buildID == -1 {
+		api = fmt.Sprintf("%s/job/%s/lastBuild/logText/progressiveText?start=%d", rootURL, jobName, 0)
+	} else {
+		api = fmt.Sprintf("%s/job/%s/%d/logText/progressiveText?start=%d", rootURL, jobName, buildID, 0)
+	}
+	request, _ := http.NewRequest("GET", api, nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Request:    request,
+		Header: map[string][]string{
+			"X-More-Data": []string{"false"},
+			"X-Text-Size": []string{"8"},
+		},
+		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)

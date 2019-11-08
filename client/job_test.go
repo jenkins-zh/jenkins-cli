@@ -369,4 +369,26 @@ var _ = Describe("job test", func() {
 			Expect(len(builds)).To(Equal(2))
 		})
 	})
+
+	Context("Log", func() {
+		It("with a specific build number", func() {
+			jobName := "fakeJob"
+
+			PrepareForJobLog(roundTripper, jobClient.URL, jobName, 1, "", "")
+
+			log, err := jobClient.Log(jobName, 1, 0)
+			Expect(err).To(BeNil())
+			Expect(log.Text).To(Equal("fake log"))
+		})
+
+		It("get the last job's log", func() {
+			jobName := "fakeJob"
+
+			PrepareForJobLog(roundTripper, jobClient.URL, jobName, -1, "", "")
+
+			log, err := jobClient.Log(jobName, -1, 0)
+			Expect(err).To(BeNil())
+			Expect(log.Text).To(Equal("fake log"))
+		})
+	})
 })

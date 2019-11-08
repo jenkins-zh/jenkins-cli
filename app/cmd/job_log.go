@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"net/http"
 	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -17,6 +16,8 @@ type JobLogOption struct {
 	LogText      string
 	LastBuildID  int
 	LastBuildURL string
+
+	RoundTripper http.RoundTripper
 }
 
 var jobLogOption JobLogOption
@@ -29,35 +30,38 @@ func init() {
 }
 
 var jobLogCmd = &cobra.Command{
-	Use:   "log <jobName>",
-	Short: "Print the job of your Jenkins",
-	Long:  `Print the job of your Jenkins`,
-	Args:  cobra.MinimumNArgs(1),
+	Use:   "log <jobName> [buildID]",
+	Short: "Print the job's log of your Jenkins",
+	Long: `Print the job's log of your Jenkins
+It'll print the log text of the last build if you don't give the build id.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobLogOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		lastBuildID := -1
+		var jobBuild *client.JobBuild
+		var err error
 		for {
-			if build, err := jclient.GetBuild(name, -1); err == nil {
-				jobLogOption.LastBuildID = build.Number
-				jobLogOption.LastBuildURL = build.URL
+			if jobBuild, err = jclient.GetBuild(name, -1); err == nil {
+				jobLogOption.LastBuildID = jobBuild.Number
+				jobLogOption.LastBuildURL = jobBuild.URL
 			}
 			if lastBuildID != jobLogOption.LastBuildID {
 				lastBuildID = jobLogOption.LastBuildID
-				fmt.Println("Current build number:", jobLogOption.LastBuildID)
-				fmt.Println("Current build url:", jobLogOption.LastBuildURL)
+				cmd.Println("Current build number:", jobLogOption.LastBuildID)
+				cmd.Println("Current build url:", jobLogOption.LastBuildURL)
 
-				printLog(jclient, name, jobLogOption.History, 0)
+				err = printLog(jclient, cmd, name, jobLogOption.History, 0)
 			}
 
-			if !jobLogOption.Watch {
+			if err != nil || !jobLogOption.Watch {
 				break
 			}
 
@@ -66,12 +70,13 @@ var jobLogCmd = &cobra.Command{
 	},
 }
 
-func printLog(jclient *client.JobClient, jobName string, history int, start int64) {
-	if status, err := jclient.Log(jobName, history, start); err == nil {
+func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, history int, start int64) (err error) {
+	var jobLog client.JobLog
+	if jobLog, err = jclient.Log(jobName, history, start); err == nil {
 		isNew := false
 
-		if jobLogOption.LogText != status.Text {
-			jobLogOption.LogText = status.Text
+		if jobLogOption.LogText != jobLog.Text {
+			jobLogOption.LogText = jobLog.Text
 			isNew = true
 		} else if history == -1 {
 			if build, err := jclient.GetBuild(jobName, -1); err == nil && jobLogOption.LastBuildID != build.Number {
@@ -82,13 +87,12 @@ func printLog(jclient *client.JobClient, jobName string, history int, start int6
 		}
 
 		if isNew {
-			fmt.Print(status.Text)
+			cmd.Print(jobLog.Text)
 		}
 
-		if status.HasMore {
-			printLog(jclient, jobName, history, status.NextStart)
+		if jobLog.HasMore {
+			err = printLog(jclient, cmd, jobName, history, jobLog.NextStart)
 		}
-	} else {
-		log.Fatal(err)
 	}
+	return
 }
