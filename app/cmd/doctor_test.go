@@ -86,7 +86,7 @@ var _ = Describe("doctor command", func() {
 			}
 			current := getCurrentJenkins()
 			outString += "Begining to checking the current JenkinsServer's plugins status: \n"
-			request, _ := client.PrepareFor500InstalledPluginList(roundTripper, current.URL,2)
+			request, _ := client.PrepareFor500InstalledPluginList(roundTripper, current.URL, 2)
 			request.SetBasicAuth(current.UserName, current.Token)
 			outString += "  No plugins have lost dependencies...\n"
 			outString += "Checked is done.\n"
@@ -125,7 +125,7 @@ var _ = Describe("doctor command", func() {
 			}
 			current := getCurrentJenkins()
 			outString += "Begining to checking the current JenkinsServer's plugins status: \n"
-			request, _ := client.PrepareForManyInstalledPlugins(roundTripper, current.URL,2)
+			request, _ := client.PrepareForManyInstalledPlugins(roundTripper, current.URL, 2)
 			request.SetBasicAuth(current.UserName, current.Token)
 			outString += "  Checking the plugin fake-ocean: \n"
 			outString += "    Checking the dependence plugin fake-ln: \n"

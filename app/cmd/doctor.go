@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -30,25 +29,28 @@ var doctorCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkinsNames := getJenkinsNames()
 		outString := ""
-		err := checkNameDuplicate(jenkinsNames)
-		outString += err.Error()
+		if outputDuplicateNames, err := checkNameDuplicate(jenkinsNames); err == nil {
+			outString += outputDuplicateNames
+		}
 		jenkinsServers := getConfig().JenkinsServers
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: doctorOption.RoundTripper,
 			},
 		}
-		err = checkJenkinsServersStatus(jenkinsServers, jclient)
-		outString += err.Error()
-		err = checkCurrentPlugins(jclient)
-		outString += err.Error()
+		if outputJenkinsStatus, err := checkJenkinsServersStatus(jenkinsServers, jclient); err == nil {
+			outString += outputJenkinsStatus
+		}
+		if outputCurrentPluginStatus, err := checkCurrentPlugins(jclient); err == nil {
+			outString += outputCurrentPluginStatus
+		}
 		outString += "Checked is done.\n"
 		cmd.Print(outString)
 	},
 }
 
-func checkNameDuplicate(jenkinsNames []string) (err error){
-	outString := "Beginning to check the names are duplicated which in the configuration file：\n"
+func checkNameDuplicate(jenkinsNames []string) (outString string, err error) {
+	outString = "Beginning to check the names are duplicated which in the configuration file：\n"
 	var duplicateNames = ""
 	for i := range jenkinsNames {
 		for j := range jenkinsNames {
@@ -60,12 +62,11 @@ func checkNameDuplicate(jenkinsNames []string) (err error){
 	if duplicateNames != "" {
 		outString += "  Duplicate names: " + duplicateNames + "\n"
 	}
-	err = errors.New(outString)
 	return
 }
 
-func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) (err error){
-	outString := "Begining to checking JenkinsServer status form the configuration files: \n"
+func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.PluginManager) (outString string, err error) {
+	outString = "Begining to checking JenkinsServer status form the configuration files: \n"
 	for i := range jenkinsServers {
 		jenkinsServer := jenkinsServers[i]
 		jclient.URL = jenkinsServer.URL
@@ -80,65 +81,61 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 			outString += "***unavailable*** " + err.Error() + "\n"
 		}
 	}
-	err = errors.New(outString)
 	return
 }
 
-func checkCurrentPlugins(jclient *client.PluginManager) (err error){
-	outString := "Begining to checking the current JenkinsServer's plugins status: \n"
+func checkCurrentPlugins(jclient *client.PluginManager) (outString string, err error) {
+	outString = "Begining to checking the current JenkinsServer's plugins status: \n"
 	getCurrentJenkinsAndClient(&jclient.JenkinsCore)
 	if plugins, err := jclient.GetPlugins(2); err == nil {
-		if err = cyclePlugins(plugins); err != nil {
-			outString += err.Error()
+		if outputInstalledPluginsStatus, err := checkAllInstalledPlugins(plugins); err == nil {
+			outString += outputInstalledPluginsStatus
 		}
 	} else {
 		outString += "  No plugins have lost dependencies...\n"
 	}
-	err = errors.New(outString)
 	return
 }
 
-// cyclePlugins is check all installed plugins
-func cyclePlugins(plugins *client.InstalledPluginList) (err error){
-	outString := ""
+// checkAllInstalledPlugins is check all installed plugins
+func checkAllInstalledPlugins(plugins *client.InstalledPluginList) (outString string, err error) {
+	outString = ""
 	for _, plugin := range plugins.Plugins {
 		outString += "  Checking the plugin " + plugin.ShortName + ": \n"
 		dependencies := plugin.Dependencies
 		if len(dependencies) != 0 {
-			if err = cycleDependencies(dependencies, plugins); err != nil {
-				outString += err.Error()
+			if outputDependenciesStatus, err := cycleDependencies(dependencies, plugins); err == nil {
+				outString += outputDependenciesStatus
 			}
 		} else {
 			outString += "    The Plugin no dependencies\n"
 		}
 	}
-	err = errors.New(outString)
 	return
 }
 
-func cycleDependencies(dependencies []client.Dependence, plugins *client.InstalledPluginList) (err error){
-	outString := ""
+func cycleDependencies(dependencies []client.PluginDependency, plugins *client.InstalledPluginList) (outString string, err error) {
+	outString = ""
 	for _, dependence := range dependencies {
 		outString += "    Checking the dependence plugin " + dependence.ShortName + ": "
 		hasInstalled := false
 		needUpdate := false
-		if err = cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate); err != nil {
-			outString += err.Error()
+		if outputMatchPlugins, err := cycleMatchPlugins(plugins, dependence, hasInstalled, needUpdate); err == nil {
+			outString += outputMatchPlugins
 		}
 	}
-	err = errors.New(outString)
 	return
 }
 
-func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.Dependence, hasInstalled bool, needUpdate bool) (err error){
-	outString := ""
+func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.PluginDependency, hasInstalled bool, needUpdate bool) (outString string, err error) {
+	outString = ""
 	for _, checkPlugin := range plugins.Plugins {
 		checkPluginVersion := strings.Split(checkPlugin.Version, ".")
 		dependenceVersion := strings.Split(dependence.Version, ".")
 		if checkPlugin.ShortName == dependence.ShortName {
 			hasInstalled = true
-			if _, err = matchPlugin(dependenceVersion, checkPluginVersion, needUpdate, dependence);err != nil {
-				outString += err.Error()
+			if outputMatchPluginStatus, _, err := matchPlugin(dependenceVersion, checkPluginVersion, dependence); err == nil {
+				outString += outputMatchPluginStatus
 			}
 
 		}
@@ -149,41 +146,43 @@ func cycleMatchPlugins(plugins *client.InstalledPluginList, dependence client.De
 	if !hasInstalled {
 		outString += "\n    The dependence " + dependence.ShortName + " no install, please install it the version " + dependence.Version + " at least\n"
 	}
-	err = errors.New(outString)
 	return
 }
 
-func matchPlugin(dependenceVersion []string, checkPluginVersion []string, needUpdate bool, dependence client.Dependence) (isPass bool, err error) {
-	outString := ""
+func matchPlugin(dependenceVersion []string, checkPluginVersion []string, dependence client.PluginDependency) (outString string, isPass bool, err error) {
+	outString = ""
 	for i := range dependenceVersion {
 		if strings.Contains(dependenceVersion[i], "-") && strings.Contains(checkPluginVersion[i], "-") {
-			isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), needUpdate, dependence)
+			_, isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), dependence)
 			if isPass {
 				break
 			}
 		} else if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-			checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
-			dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
-			if checkPluginVersionInt == dependenceVersionInt {
-				if i+1 == len(dependenceVersion) {
-					isPass = true
-					outString += "***true***\n"
+			if outputJudgmentValue, isPass, err := judgmentvalue(i, dependenceVersion, checkPluginVersion, dependence); err == nil {
+				outString += outputJudgmentValue
+				if isPass {
 					break
-				} else {
-					continue
 				}
-			} else if checkPluginVersionInt > dependenceVersionInt {
-				isPass = true
-				outString += "***true***\n"
-				break
-			} else {
-				isPass = true
-				needUpdate = true
-				outString += "\n      The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
-				break
 			}
 		}
 	}
-	err = errors.New(outString)
+	return
+}
+
+func judgmentvalue(i int, dependenceVersion []string, checkPluginVersion []string, dependence client.PluginDependency) (outString string, isPass bool, err error) {
+	checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
+	dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
+	if checkPluginVersionInt == dependenceVersionInt {
+		if i+1 == len(dependenceVersion) {
+			isPass = true
+			outString += "***true***\n"
+		}
+	} else if checkPluginVersionInt > dependenceVersionInt {
+		isPass = true
+		outString += "***true***\n"
+	} else {
+		isPass = true
+		outString += "\n      The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
+	}
 	return
 }

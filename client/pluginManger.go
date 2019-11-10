@@ -67,14 +67,7 @@ type InstalledPlugin struct {
 	MinimumJavaVersion string
 	SupportDynamicLoad string
 	BackVersion        string
-	Dependencies       []Dependence
-}
-
-// Dependence represent the plugin's package dependence
-type Dependence struct {
-	Optional  bool
-	ShortName string
-	Version   string
+	Dependencies       []PluginDependency
 }
 
 // CheckUpdate fetch the latest plugins from update center site
@@ -97,7 +90,7 @@ func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, 
 // GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins(depth ...int) (pluginList *InstalledPluginList, err error) {
 	if depth != nil {
-		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d",depth), nil, nil, 200, &pluginList)
+		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d", depth[0]), nil, nil, 200, &pluginList)
 	} else {
 		err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	}

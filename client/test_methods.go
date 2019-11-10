@@ -87,7 +87,7 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth ...int) (
 	request *http.Request, response *http.Response) {
 	if depth != nil {
-		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth), nil)
+		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth[0]), nil)
 	} else {
 		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
 	}
