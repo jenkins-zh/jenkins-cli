@@ -93,7 +93,7 @@ var _ = Describe("plugin search command", func() {
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareForNoAvailablePlugins(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.PrepareForManyInstalledPlugins(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForManyInstalledPlugins(roundTripper, "http://localhost:8080/jenkins", 1)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 
@@ -121,7 +121,7 @@ var _ = Describe("plugin search command", func() {
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareForRequest500UpdateCenter(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.PrepareFor500InstalledPluginList(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareFor500InstalledPluginList(roundTripper, "http://localhost:8080/jenkins", 1)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 

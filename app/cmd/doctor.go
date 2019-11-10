@@ -31,6 +31,8 @@ var doctorCmd = &cobra.Command{
 		outString := ""
 		if outputDuplicateNames, err := checkNameDuplicate(jenkinsNames); err == nil {
 			outString += outputDuplicateNames
+		} else {
+			cmd.PrintErr(err)
 		}
 		jenkinsServers := getConfig().JenkinsServers
 		jclient := &client.PluginManager{
@@ -40,9 +42,13 @@ var doctorCmd = &cobra.Command{
 		}
 		if outputJenkinsStatus, err := checkJenkinsServersStatus(jenkinsServers, jclient); err == nil {
 			outString += outputJenkinsStatus
+		} else {
+			cmd.PrintErr(err)
 		}
 		if outputCurrentPluginStatus, err := checkCurrentPlugins(jclient); err == nil {
 			outString += outputCurrentPluginStatus
+		} else {
+			cmd.PrintErr(err)
 		}
 		outString += "Checked is done.\n"
 		cmd.Print(outString)
@@ -75,7 +81,7 @@ func checkJenkinsServersStatus(jenkinsServers []JenkinsServer, jclient *client.P
 		jclient.Proxy = jenkinsServer.Proxy
 		jclient.ProxyAuth = jenkinsServer.ProxyAuth
 		outString += "  checking the No." + strconv.Itoa(i) + " - " + jenkinsServer.Name + " status: "
-		if _, err := jclient.GetPlugins(); err == nil {
+		if _, err := jclient.GetPlugins(1); err == nil {
 			outString += "***available***\n"
 		} else {
 			outString += "***unavailable*** " + err.Error() + "\n"

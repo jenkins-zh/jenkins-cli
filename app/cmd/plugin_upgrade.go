@@ -84,7 +84,7 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 		}
 	}
 
-	if plugins, err = jclient.GetPlugins(); err != nil {
+	if plugins, err = jclient.GetPlugins(1); err != nil {
 		return
 	}
 

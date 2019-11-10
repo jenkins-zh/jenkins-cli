@@ -99,9 +99,9 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("GetPlugins", func() {
 		It("no plugin in the list", func() {
-			PrepareForEmptyInstalledPluginList(roundTripper, pluginMgr.URL)
+			PrepareForEmptyInstalledPluginList(roundTripper, pluginMgr.URL, 1)
 
-			pluginList, err := pluginMgr.GetPlugins()
+			pluginList, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(BeNil())
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Plugins)).To(Equal(0))
@@ -110,7 +110,7 @@ var _ = Describe("PluginManager test", func() {
 		It("one plugin in the list", func() {
 			PrepareForOneInstalledPlugin(roundTripper, pluginMgr.URL)
 
-			pluginList, err := pluginMgr.GetPlugins()
+			pluginList, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(BeNil())
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Plugins)).To(Equal(1))
@@ -118,9 +118,9 @@ var _ = Describe("PluginManager test", func() {
 		})
 
 		It("response with 500", func() {
-			PrepareFor500InstalledPluginList(roundTripper, pluginMgr.URL)
+			PrepareFor500InstalledPluginList(roundTripper, pluginMgr.URL, 1)
 
-			_, err := pluginMgr.GetPlugins()
+			_, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -248,9 +248,9 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("ManyInstalledPlugins", func() {
 		It("normal case, should success", func() {
-			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL)
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL, 1)
 
-			pluginList, err := pluginMgr.GetPlugins()
+			pluginList, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(BeNil())
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Plugins)).To(Equal(4))

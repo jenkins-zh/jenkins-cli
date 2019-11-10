@@ -84,10 +84,10 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 }
 
 // PrepareForEmptyInstalledPluginList only for test
-func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth ...int) (
+func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
-	if depth != nil {
-		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth[0]), nil)
+	if depth > 1 {
+		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth), nil)
 	} else {
 		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
 	}
@@ -106,7 +106,7 @@ func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, ro
 // PrepareForOneInstalledPlugin only for test
 func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
 	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"plugins": [{
 				"shortName": "fake",
@@ -120,12 +120,12 @@ func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 }
 
 // PrepareForManyInstalledPlugins only for test
-func PrepareForManyInstalledPlugins(roundTripper *mhttp.MockRoundTripper, rootURL string, depth ...int) (
+func PrepareForManyInstalledPlugins(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
-	if depth != nil {
-		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth[0])
+	if depth > 1 {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth)
 	} else {
-		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
 	}
 	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"plugins": [
@@ -167,12 +167,12 @@ func PrepareForManyInstalledPlugins(roundTripper *mhttp.MockRoundTripper, rootUR
 }
 
 // PrepareFor500InstalledPluginList only for test
-func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth ...int) (
+func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
-	if depth != nil {
-		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth[0])
+	if depth > 1 {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth)
 	} else {
-		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
 	}
 	response.StatusCode = 500
 	return

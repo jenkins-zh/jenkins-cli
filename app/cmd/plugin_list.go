@@ -73,7 +73,7 @@ var pluginListCmd = &cobra.Command{
 
 		var err error
 		var plugins *client.InstalledPluginList
-		if plugins, err = jclient.GetPlugins(); err == nil {
+		if plugins, err = jclient.GetPlugins(1); err == nil {
 			filteredPlugins := make([]client.InstalledPlugin, 0)
 			for _, plugin := range plugins.Plugins {
 				if filter {

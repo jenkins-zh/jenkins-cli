@@ -75,11 +75,11 @@ var _ = Describe("doctor command", func() {
 			jenkinsServers := config.JenkinsServers
 			for k := range jenkinsServers {
 				if k == 1 {
-					request, _ := client.PrepareFor500InstalledPluginList(roundTripper, jenkinsServers[k].URL)
+					request, _ := client.PrepareFor500InstalledPluginList(roundTripper, jenkinsServers[k].URL, 1)
 					request.SetBasicAuth(jenkinsServers[k].UserName, jenkinsServers[k].Token)
 					outString += "  checking the No." + strconv.Itoa(k) + " - " + jenkinsServers[k].Name + " status: ***unavailable*** unexpected status code: 500\n"
 				} else {
-					request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, jenkinsServers[k].URL)
+					request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, jenkinsServers[k].URL, 1)
 					request.SetBasicAuth(jenkinsServers[k].UserName, jenkinsServers[k].Token)
 					outString += "  checking the No." + strconv.Itoa(k) + " - " + jenkinsServers[k].Name + " status: ***available***\n"
 				}
@@ -114,11 +114,11 @@ var _ = Describe("doctor command", func() {
 			jenkinsServers := config.JenkinsServers
 			for k := range jenkinsServers {
 				if k == 1 {
-					request, _ := client.PrepareFor500InstalledPluginList(roundTripper, jenkinsServers[k].URL)
+					request, _ := client.PrepareFor500InstalledPluginList(roundTripper, jenkinsServers[k].URL, 1)
 					request.SetBasicAuth(jenkinsServers[k].UserName, jenkinsServers[k].Token)
 					outString += "  checking the No." + strconv.Itoa(k) + " - " + jenkinsServers[k].Name + " status: ***unavailable*** unexpected status code: 500\n"
 				} else {
-					request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, jenkinsServers[k].URL)
+					request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, jenkinsServers[k].URL, 1)
 					request.SetBasicAuth(jenkinsServers[k].UserName, jenkinsServers[k].Token)
 					outString += "  checking the No." + strconv.Itoa(k) + " - " + jenkinsServers[k].Name + " status: ***available***\n"
 				}

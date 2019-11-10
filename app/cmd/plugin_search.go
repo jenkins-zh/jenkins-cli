@@ -79,7 +79,7 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
 	noSite := (err != nil || site == nil)
-	installedPlugins, err := pluginJclient.GetPlugins()
+	installedPlugins, err := pluginJclient.GetPlugins(1)
 	noInstalledPlugin := (err != nil || installedPlugins == nil)
 	for _, plugin := range plugins {
 		result = buildData(noSite, site, plugin, result, noInstalledPlugin, installedPlugins)
