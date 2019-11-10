@@ -174,16 +174,17 @@ func matchPlugin(dependenceVersion []string, checkPluginVersion []string, depend
 }
 
 func judgmentvalue(i int, dependenceVersion []string, checkPluginVersion []string, dependence client.PluginDependency) (outString string, isPass bool, err error) {
+	defaultValue := "***true***\n"
 	checkPluginVersionInt, _ := strconv.Atoi(checkPluginVersion[i])
 	dependenceVersionInt, _ := strconv.Atoi(dependenceVersion[i])
 	if checkPluginVersionInt == dependenceVersionInt {
 		if i+1 == len(dependenceVersion) {
 			isPass = true
-			outString += "***true***\n"
+			outString += defaultValue
 		}
 	} else if checkPluginVersionInt > dependenceVersionInt {
 		isPass = true
-		outString += "***true***\n"
+		outString += defaultValue
 	} else {
 		isPass = true
 		outString += "\n      The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
