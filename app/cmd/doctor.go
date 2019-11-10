@@ -154,16 +154,14 @@ func matchPlugin(dependenceVersion []string, checkPluginVersion []string, depend
 	for i := range dependenceVersion {
 		if strings.Contains(dependenceVersion[i], "-") && strings.Contains(checkPluginVersion[i], "-") {
 			_, isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), dependence)
-			if isPass {
-				break
-			}
 		} else if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
-			if outputJudgmentValue, isPass, err := judgmentvalue(i, dependenceVersion, checkPluginVersion, dependence); err == nil {
+			if outputJudgmentValue, hasPass, err := judgmentvalue(i, dependenceVersion, checkPluginVersion, dependence); err == nil {
 				outString += outputJudgmentValue
-				if isPass {
-					break
-				}
+				isPass = hasPass
 			}
+		}
+		if isPass {
+			break
 		}
 	}
 	return
