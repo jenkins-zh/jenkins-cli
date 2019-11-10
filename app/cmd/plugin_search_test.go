@@ -101,11 +101,10 @@ var _ = Describe("plugin search command", func() {
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-
 			Expect(buf.String()).To(Equal(`number name       installed version installedVersion title
 0      fake-ocean true              1.18.111         fake-ocean
 1      fake-ln    true              1.18.1           fake-ln
-2      fake-is    true              1.18.111         fake-is
+2      fake-is    true              1.18.111-2.0     fake-is
 3      fake-oa    false                              fake-oa
 4      fake-open  false                              fake-open
 5      fake       true              1.0              fake

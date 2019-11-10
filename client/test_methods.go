@@ -143,11 +143,11 @@ func PrepareForManyInstalledPlugins(roundTripper *mhttp.MockRoundTripper, rootUR
 					"hasUpdate": true,
 					"enable": true,
 					"active": true,
-                    "dependencies":[{"optional":true,"shortName":"fake-is","version":"1.17"}]
+                    "dependencies":[{"optional":true,"shortName":"fake-is","version":"1.17.121-2.0"}]
 				},
 				{
 					"shortName": "fake-is",
-					"version": "1.18.111",
+					"version": "1.18.111-2.0",
 					"hasUpdate": true,
 					"enable": true,
 					"active": true,

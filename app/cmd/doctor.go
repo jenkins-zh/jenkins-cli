@@ -153,7 +153,13 @@ func matchPlugin(dependenceVersion []string, checkPluginVersion []string, depend
 	outString = ""
 	for i := range dependenceVersion {
 		if strings.Contains(dependenceVersion[i], "-") && strings.Contains(checkPluginVersion[i], "-") {
-			_, isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), dependence)
+			dependenciesVersion := strings.Split(dependenceVersion[i], "-")
+			checkPluginsVersion := strings.Split(checkPluginVersion[i], "-")
+			if outputCycleMatchSplitValues, hasPass, err := cycleMatchSplitValues(dependenciesVersion, checkPluginsVersion, dependence); err == nil {
+				outString += outputCycleMatchSplitValues
+				isPass = hasPass
+			}
+			//_, isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), dependence)
 		} else if len(checkPluginVersion) >= i+1 && len(dependenceVersion) >= i+1 {
 			if outputJudgmentValue, hasPass, err := judgmentvalue(i, dependenceVersion, checkPluginVersion, dependence); err == nil {
 				outString += outputJudgmentValue
@@ -181,6 +187,21 @@ func judgmentvalue(i int, dependenceVersion []string, checkPluginVersion []strin
 	} else {
 		isPass = true
 		outString += "\n      The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
+	}
+	return
+}
+
+func cycleMatchSplitValues(dependenciesVersion []string, checkPluginsVersion []string, dependence client.PluginDependency) (outString string, isPass bool, err error) {
+	for i := range checkPluginsVersion {
+		checkPluginVersion := strings.Split(checkPluginsVersion[i], ".")
+		dependenceVersion := strings.Split(dependenciesVersion[i], ".")
+		_, isPass, _ = matchPlugin(strings.Split(dependenceVersion[i], "-"), strings.Split(checkPluginVersion[i], "-"), dependence)
+		if isPass {
+			outString += "***true***\n"
+			break
+		} else if len(checkPluginsVersion)-1 == i {
+			outString += "\n      The dependence " + dependence.ShortName + " need upgrade the version to " + dependence.Version + "\n"
+		}
 	}
 	return
 }
