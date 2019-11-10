@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
-	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -16,10 +16,11 @@ var configListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all Jenkins config items",
 	Long:  `List all Jenkins config items`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 
-		table := util.CreateTable(os.Stdout)
+		buf := new(bytes.Buffer)
+		table := util.CreateTable(buf)
 		table.AddRow("number", "name", "url", "description")
 		for i, jenkins := range getConfig().JenkinsServers {
 			name := jenkins.Name
@@ -27,11 +28,11 @@ var configListCmd = &cobra.Command{
 				name = fmt.Sprintf("*%s", name)
 			}
 			if len(jenkins.Description) > 15 {
-				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description[0:15])
-			} else {
-				table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description)
+				jenkins.Description = jenkins.Description[0:15]
 			}
+			table.AddRow(fmt.Sprintf("%d", i), name, jenkins.URL, jenkins.Description)
 		}
 		table.Render()
+		cmd.Print(string(buf.Bytes()))
 	},
 }

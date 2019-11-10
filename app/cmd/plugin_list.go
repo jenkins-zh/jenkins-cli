@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"net/http"
 	"strings"
 
@@ -71,7 +71,9 @@ var pluginListCmd = &cobra.Command{
 			}
 		}
 
-		if plugins, err := jclient.GetPlugins(); err == nil {
+		var err error
+		var plugins *client.InstalledPluginList
+		if plugins, err = jclient.GetPlugins(); err == nil {
 			filteredPlugins := make([]client.InstalledPlugin, 0)
 			for _, plugin := range plugins.Plugins {
 				if filter {
@@ -99,16 +101,12 @@ var pluginListCmd = &cobra.Command{
 				}
 			}
 
-			if data, err := pluginListOption.Output(filteredPlugins); err == nil {
-				if len(data) > 0 {
-					cmd.Print(string(data))
-				}
-			} else {
-				log.Fatal(err)
+			var data []byte
+			if data, err = pluginListOption.Output(filteredPlugins); err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 

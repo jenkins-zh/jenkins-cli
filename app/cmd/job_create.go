@@ -42,21 +42,18 @@ var jobCreateCmd = &cobra.Command{
 
 		var createMode string
 		var err error
-		if createMode, err = jobCreateOption.getCreateMode(jclient); err != nil {
-			cmd.PrintErrln(err)
-			return
-		}
+		if createMode, err = jobCreateOption.getCreateMode(jclient); err == nil {
+			payload := client.CreateJobPayload{
+				Name: jobName,
+				Mode: createMode,
+				From: jobCreateOption.Copy,
+			}
 
-		payload := client.CreateJobPayload{
-			Name: jobName,
-			Mode: createMode,
-			From: jobCreateOption.Copy,
+			if jobCreateOption.Copy != "" {
+				payload.Mode = "copy"
+			}
+			err = jclient.Create(payload)
 		}
-
-		if jobCreateOption.Copy != "" {
-			payload.Mode = "copy"
-		}
-		err = jclient.Create(payload)
 		helper.CheckErr(cmd, err)
 	},
 }

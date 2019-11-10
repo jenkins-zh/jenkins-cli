@@ -156,18 +156,13 @@ func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 	pluginAPI := fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", name)
 	logger.Debug("fetch data from plugin API", zap.String("url", pluginAPI))
 
-	resp, err := cli.Get(pluginAPI)
-	if err != nil {
-		return plugin, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-
-	plugin = &PluginInfo{}
-	err = json.Unmarshal(body, plugin)
-	if err != nil {
-		log.Println("error when unmarshal:", string(body))
+	var resp *http.Response
+	if resp, err = cli.Get(pluginAPI); err == nil {
+		var body []byte
+		if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			plugin = &PluginInfo{}
+			err = json.Unmarshal(body, plugin)
+		}
 	}
 	return
 }

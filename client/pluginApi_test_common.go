@@ -56,17 +56,17 @@ func PrepareOnePluginWithOptionalDep(roundTripper *mhttp.MockRoundTripper, plugi
 }
 
 // PrepareDownloadPlugin only for test
-func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) {
+func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) (response *http.Response) {
 	request, _ := http.NewRequest("GET",
 		"http://updates.jenkins-ci.org/download/plugins/hugo/0.1.8/hugo.hpi", nil)
-	response := &http.Response{
+	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
+	return
 }
 
 // PrepareCheckUpdate only for test

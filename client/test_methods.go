@@ -201,7 +201,7 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)
+	requestCrumb, responseCrumb = PrepareForGetIssuer(roundTripper, rootURL, "", "")
 	return
 }
 
@@ -219,7 +219,7 @@ func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pl
 		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)
+	requestCrumb, responseCrumb = PrepareForGetIssuer(roundTripper, rootURL, "", "")
 	return
 }
 
@@ -243,11 +243,10 @@ func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+	PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
 	}
 }
 
@@ -288,22 +287,6 @@ func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
 	}
-}
-
-// RequestCrumb only for the test case
-func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	requestCrumb *http.Request, responseCrumb *http.Response) {
-	requestCrumb, _ = http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, "/crumbIssuer/api/json"), nil)
-	responseCrumb = &http.Response{
-		StatusCode: 200,
-		Request:    requestCrumb,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`
-		{"CrumbRequestField":"CrumbRequestField","Crumb":"Crumb"}
-		`)),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(requestCrumb).Return(responseCrumb, nil)
-	return
 }
 
 // PrepareForRequestUpdateCenter only for the test case
@@ -423,6 +406,11 @@ func PrepareForInstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, plug
 	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName, user, passwd)
 }
 
+// PrepareForInstallPluginWithVersion only for test
+func PrepareForInstallPluginWithVersion(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName, version, user, passwd string) {
+	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName+"@"+version, user, passwd)
+}
+
 // PrepareForInstallPluginWithCode only for test
 func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
 	statusCode int, rootURL, pluginName, user, passwd string) (response *http.Response) {
@@ -437,7 +425,7 @@ func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
 		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+	requestCrumb, _ := PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
@@ -503,11 +491,9 @@ func PrepareCommonPost(request *http.Request, responseBody string, roundTripper 
 		RoundTrip(NewVerboseRequestMatcher(request).WithBody().WithQuery()).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
-
+	PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
 	}
 	return
 }

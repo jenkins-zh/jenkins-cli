@@ -2,55 +2,79 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
+// PluginInstallOption is the option for plugin install
+type PluginInstallOption struct {
+	UseMirror    bool
+	ShowProgress bool
+
+	RoundTripper http.RoundTripper
+}
+
+var pluginInstallOption PluginInstallOption
+
 func init() {
 	pluginCmd.AddCommand(pluginInstallCmd)
+	pluginInstallCmd.Flags().BoolVarP(&pluginInstallOption.UseMirror, "use-mirror", "", true,
+		"If you want to download plugin from a mirror site")
+	pluginInstallCmd.Flags().BoolVarP(&pluginInstallOption.ShowProgress, "show-progress", "", true,
+		"If you want to show the progress of download a plugin")
 	pluginInstallCmd.Flags().StringVarP(&pluginOpt.Suite, "suite", "", "", "Suite of plugins")
 }
 
 var pluginInstallCmd = &cobra.Command{
 	Use:   "install [pluginName]",
 	Short: "Install the plugins",
-	Long:  `Install the plugins`,
-	Run: func(_ *cobra.Command, args []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.PluginManager{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+	Long: `Install the plugins
+Allow you to install a plugin with or without the version`,
+	Example: `jcli plugin install localization-zh-cn
+jcli plugin install localization-zh-cn@1.0.9
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		jclient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginInstallOption.RoundTripper,
+			},
+			ShowProgress: pluginInstallOption.ShowProgress,
+			UseMirror:    pluginInstallOption.UseMirror,
+			MirrorURL:    getDefaultMirror(),
+		}
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+
 		plugins := make([]string, len(args))
 		plugins = append(plugins, args...)
 
+		var err error
 		if pluginOpt.Suite != "" {
 			if suite := findSuiteByName(pluginOpt.Suite); suite != nil {
 				plugins = append(plugins, suite.Plugins...)
 			} else {
-				log.Fatal("Cannot found suite", pluginOpt.Suite)
+				err = fmt.Errorf("cannot found suite %s", pluginOpt.Suite)
 			}
 		}
 
-		if len(plugins) == 0 {
+		if err == nil && len(plugins) == 0 {
 			for {
 				var keyword string
 				prompt := &survey.Input{Message: "Please input the keyword to search your plugin!"}
-				if err := survey.AskOne(prompt, &keyword); err != nil {
-					log.Fatal(err)
+				if err = survey.AskOne(prompt, &keyword); err != nil {
+					break
 				}
 
-				if availablePlugins, err := jclient.GetAvailablePlugins(); err == nil {
+				var availablePlugins *client.AvailablePluginList
+				if availablePlugins, err = jclient.GetAvailablePlugins(); err == nil {
 					matchedPlugins := searchPlugins(availablePlugins, keyword)
-					optinalPlugins := convertToArray(matchedPlugins)
+					optionalPlugins := convertToArray(matchedPlugins)
 
-					if len(optinalPlugins) == 0 {
-						fmt.Println("Cannot find any plugins by your keyword, or they already installed.")
+					if len(optionalPlugins) == 0 {
+						cmd.Println("Cannot find any plugins by your keyword, or they already installed.")
 						continue
 					}
 
@@ -59,26 +83,28 @@ var pluginInstallCmd = &cobra.Command{
 						Options: convertToArray(matchedPlugins),
 					}
 					selectedPlugins := []string{}
-					survey.AskOne(prompt, &selectedPlugins)
+					if err = survey.AskOne(prompt, &selectedPlugins); err != nil {
+						break
+					}
 					plugins = append(plugins, selectedPlugins...)
-
-					break
-				} else {
-					log.Fatal(err)
 				}
+				break
 			}
 
-			fmt.Println("Going to install", plugins)
+			cmd.Println("Going to install", plugins)
 		}
 
-		jclient.InstallPlugin(plugins)
+		if err == nil {
+			err = jclient.InstallPlugin(plugins)
+		}
+		helper.CheckErr(cmd, err)
 	},
 }
 
-func convertToArray(aviablePlugins []client.AvailablePlugin) (plugins []string) {
+func convertToArray(availablePlugins []client.AvailablePlugin) (plugins []string) {
 	plugins = make([]string, 0)
 
-	for _, plugin := range aviablePlugins {
+	for _, plugin := range availablePlugins {
 		if plugin.Installed {
 			continue
 		}

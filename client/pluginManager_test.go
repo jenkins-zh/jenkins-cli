@@ -38,16 +38,16 @@ var _ = Describe("PluginManager test", func() {
 	Context("basic function test", func() {
 		It("get install plugin query string", func() {
 			names := make([]string, 0)
-			Expect(getPluginsInstallQuery(names)).To(Equal(""))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal(""))
 
 			names = append(names, "abc")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
 
 			names = append(names, "def")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 
 			names = append(names, "")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 		})
 	})
 
@@ -148,6 +148,26 @@ var _ = Describe("PluginManager test", func() {
 
 			err := pluginMgr.InstallPlugin([]string{pluginName})
 			Expect(err).To(BeNil())
+		})
+
+		It("upload a plugin with a specific version, should success", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			PrepareDownloadPlugin(roundTripper)
+			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
+			Expect(err).To(BeNil())
+		})
+
+		It("upload a not exists plugin", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			response := PrepareDownloadPlugin(roundTripper)
+			response.StatusCode = 400
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
+			Expect(err).NotTo(BeNil())
 		})
 
 		It("with 400", func() {

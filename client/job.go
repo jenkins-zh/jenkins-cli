@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -102,9 +101,6 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 			jobCategories = result.Categories
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return
@@ -131,38 +127,18 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 }
 
 // GetHistory returns the build history of a job
-func (q *JobClient) GetHistory(name string) (builds []JobBuild, err error) {
+func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 	var job *Job
 	if job, err = q.GetJob(name); err == nil {
-		builds = job.Builds
+		buildList := job.Builds // only contains basic info
 
-		for i, build := range builds {
-			api := fmt.Sprintf("%sapi/json", build.URL)
-			var (
-				req      *http.Request
-				response *http.Response
-			)
-
-			req, err = http.NewRequest("GET", api, nil)
-			if err == nil {
-				q.AuthHandle(req)
-			} else {
-				return
+		var build *JobBuild
+		for _, buildItem := range buildList {
+			build, err = q.GetBuild(name, buildItem.Number)
+			if err != nil {
+				break
 			}
-			client := q.GetClient()
-			if response, err = client.Do(req); err == nil {
-				code := response.StatusCode
-				var data []byte
-				data, err = ioutil.ReadAll(response.Body)
-				if code == 200 {
-					err = json.Unmarshal(data, &build)
-					builds[i] = build
-				} else {
-					log.Fatal(string(data))
-				}
-			} else {
-				log.Fatal(err)
-			}
+			builds = append(builds, build)
 		}
 	}
 	return
@@ -173,9 +149,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 	path := parseJobPath(jobName)
 	var api string
 	if history == -1 {
-		api = fmt.Sprintf("%s/%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
+		api = fmt.Sprintf("%s%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
 	} else {
-		api = fmt.Sprintf("%s/%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
+		api = fmt.Sprintf("%s%s/%d/logText/progressiveText?start=%d", q.URL, path, history, start)
 	}
 	var (
 		req      *http.Request
@@ -184,8 +160,9 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 
 	req, err = http.NewRequest("GET", api, nil)
 	if err == nil {
-		q.AuthHandle(req)
-	} else {
+		err = q.AuthHandle(req)
+	}
+	if err != nil {
 		return
 	}
 
@@ -206,11 +183,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 				jobLog.HasMore = strings.ToLower(response.Header.Get("X-More-Data")) == "true"
 				jobLog.NextStart, _ = strconv.ParseInt(response.Header.Get("X-Text-Size"), 10, 64)
 			}
-		} else {
-			log.Fatal(string(data))
 		}
-	} else {
-		log.Fatal(err)
 	}
 	return
 }
@@ -246,7 +219,6 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 func (q *JobClient) Delete(jobName string) (err error) {
 	var (
 		statusCode int
-		data       []byte
 	)
 
 	api := fmt.Sprintf("/job/%s/doDelete", jobName)
@@ -254,12 +226,9 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		util.ContentType: util.ApplicationForm,
 	}
 
-	if statusCode, data, err = q.Request("POST", api, header, nil); err == nil {
+	if statusCode, _, err = q.Request("POST", api, header, nil); err == nil {
 		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
-			if q.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
-			}
 		}
 	}
 	return

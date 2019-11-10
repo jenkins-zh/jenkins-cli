@@ -18,6 +18,8 @@ import (
 type PluginManager struct {
 	JenkinsCore
 
+	UseMirror    bool
+	MirrorURL    string
 	ShowProgress bool
 }
 
@@ -70,6 +72,8 @@ type InstalledPlugin struct {
 	Dependencies       []PluginDependency
 }
 
+var debugLogFile = "debug.html"
+
 // CheckUpdate fetch the latest plugins from update center site
 func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 	api := "/pluginManager/checkUpdatesServer"
@@ -97,31 +101,89 @@ func (p *PluginManager) GetPlugins(depth ...int) (pluginList *InstalledPluginLis
 	return
 }
 
-func getPluginsInstallQuery(names []string) string {
+func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 	pluginNames := make([]string, 0)
 	for _, name := range names {
 		if name == "" {
 			continue
 		}
-		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		if !strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		}
+	}
+	if len(pluginNames) == 0 {
+		return ""
 	}
 	return strings.Join(pluginNames, "&")
 }
 
+func (p *PluginManager) getVersionalPlugins(names []string) []string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, name)
+		}
+	}
+	return pluginNames
+}
+
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	api := fmt.Sprintf("/pluginManager/install?%s", getPluginsInstallQuery(names))
+	plugins := p.getPluginsInstallQuery(names)
+	versionalPlugins := p.getVersionalPlugins(names)
+	if plugins != "" {
+		err = p.installPluginsWithoutVersion(plugins)
+	}
 
+	if err == nil && len(versionalPlugins) > 0 {
+		err = p.installPluginsWithVersion(versionalPlugins)
+	}
+	return
+}
+
+func (p *PluginManager) installPluginsWithoutVersion(plugins string) (err error) {
+	api := fmt.Sprintf("/pluginManager/install?%s", plugins)
 	var response *http.Response
 	response, err = p.RequestWithResponse("POST", api, nil, nil)
-	if response.StatusCode == 400 {
+	if response != nil && response.StatusCode == 400 {
 		if errMsg, ok := response.Header["X-Error"]; ok {
 			for _, msg := range errMsg {
 				err = fmt.Errorf(msg)
 			}
 		} else {
-			err = fmt.Errorf("Cannot found plugins %v", names)
+			err = fmt.Errorf("cannot found plugins %s", plugins)
 		}
+	}
+	return
+}
+
+func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) {
+	for _, plugin := range plugins {
+		if err = p.installPluginWithVersion(plugin); err != nil {
+			break
+		}
+	}
+	return
+}
+
+// installPluginWithVersion install a plugin by name & version
+func (p *PluginManager) installPluginWithVersion(name string) (err error) {
+	pluginAPI := PluginAPI{
+		RoundTripper: p.RoundTripper,
+		UseMirror:    p.UseMirror,
+		MirrorURL:    p.MirrorURL,
+		ShowProgress: p.ShowProgress,
+	}
+	pluginName := "%s.hpi"
+	pluginVersion := strings.Split(name, "@")
+
+	defer os.Remove(fmt.Sprintf(pluginName, name))
+	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
+		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+
+	url = pluginAPI.getMirrorURL(url)
+	if err = pluginAPI.download(url, name); err == nil {
+		err = p.Upload(fmt.Sprintf(pluginName, name))
 	}
 	return
 }
@@ -138,7 +200,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
+				ioutil.WriteFile(debugLogFile, data, 0664)
 			}
 		}
 	}
@@ -163,7 +225,7 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
 		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile("debug.html", data, 0664)
+			ioutil.WriteFile(debugLogFile, data, 0664)
 		}
 	}
 	return err

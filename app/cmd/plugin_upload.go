@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -117,6 +118,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			defer os.Remove(pluginUploadOption.pluginFilePath)
 		}
 
-		jclient.Upload(pluginUploadOption.pluginFilePath)
+		err := jclient.Upload(pluginUploadOption.pluginFilePath)
+		helper.CheckErr(cmd, err)
 	},
 }
