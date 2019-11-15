@@ -4,12 +4,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"go.uber.org/zap"
 )
 
 // PluginAPI represents a plugin API
@@ -27,11 +28,12 @@ type PluginAPI struct {
 
 // PluginDependency represents a plugin dependency
 type PluginDependency struct {
-	Name     string `json:"name"`
-	Implied  bool   `json:"implied"`
-	Optional bool   `json:"optional"`
-	Title    string `json:"title"`
-	Version  string `json:"version"`
+	Name      string `json:"name"`
+	Implied   bool   `json:"implied"`
+	Optional  bool   `json:"optional"`
+	Title     string `json:"title"`
+	Version   string `json:"version"`
+	ShortName string `json:"shortName"`
 }
 
 // PluginInfo hold the info of a plugin

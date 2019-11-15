@@ -42,7 +42,7 @@ var _ = Describe("plugin list command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, "http://localhost:8080/jenkins")
+			request, _ := client.PrepareForEmptyInstalledPluginList(roundTripper, "http://localhost:8080/jenkins", 1)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "list"})
@@ -115,7 +115,8 @@ func pluginsJSON() string {
     "RequiredCoreVesion": "",
     "MinimumJavaVersion": "",
     "SupportDynamicLoad": "",
-    "BackVersion": ""
+    "BackVersion": "",
+    "Dependencies": null
   }
 ]`
 }

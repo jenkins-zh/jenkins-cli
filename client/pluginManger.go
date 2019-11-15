@@ -69,6 +69,7 @@ type InstalledPlugin struct {
 	MinimumJavaVersion string
 	SupportDynamicLoad string
 	BackVersion        string
+	Dependencies       []PluginDependency
 }
 
 var debugLogFile = "debug.html"
@@ -91,8 +92,12 @@ func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, 
 }
 
 // GetPlugins get installed plugins
-func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, err error) {
+	if depth > 1 {
+		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
+	} else {
+		err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+	}
 	return
 }
 
