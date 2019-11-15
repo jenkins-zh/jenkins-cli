@@ -15,6 +15,6 @@ require (
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
 	github.com/spf13/cobra v0.0.5
-	go.uber.org/zap v1.12.0
+	go.uber.org/zap v1.13.0
 	gopkg.in/yaml.v2 v2.2.5
 )
