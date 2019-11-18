@@ -14,17 +14,14 @@ func CheckErr(cmd *cobra.Command, err error) {
 	case err == nil:
 		return
 	default:
-		switch err := err.(type) {
-		default: // for any other error type
-			msg, ok := StandardErrorMessage(err)
-			if !ok {
-				msg = err.Error()
-				if !strings.HasPrefix(msg, "error: ") {
-					msg = fmt.Sprintf("error: %s", msg)
-				}
+		msg, ok := StandardErrorMessage(err)
+		if !ok {
+			msg = err.Error()
+			if !strings.HasPrefix(msg, "error: ") {
+				msg = fmt.Sprintf("error: %s", msg)
 			}
-			cmd.PrintErr(msg)
 		}
+		cmd.PrintErr(msg)
 	}
 }
 
