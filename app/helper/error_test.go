@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"bytes"
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -8,7 +9,7 @@ import (
 	"os"
 )
 
-var _ = Describe("error helper", func() {
+var _ = Describe("error helper for StandardErrorMessage", func() {
 	var (
 		err error
 		msg string
@@ -71,6 +72,47 @@ var _ = Describe("error helper", func() {
 
 		It("fake host", func() {
 			Expect(msg).To(Equal("error: create fake-path: unknow"))
+		})
+	})
+})
+
+// MemoryPrinter only for test
+type MemoryPrinter struct {
+	Buffer *bytes.Buffer
+}
+
+// PrintErr print the error into memory
+func (p *MemoryPrinter) PrintErr(i ...interface{}) {
+	p.Buffer.WriteString(fmt.Sprintf("%v", i))
+}
+
+var _ = Describe("CheckErr", func() {
+	var (
+		printer *MemoryPrinter
+		err     error
+	)
+
+	BeforeEach(func() {
+		printer = &MemoryPrinter{
+			Buffer: new(bytes.Buffer),
+		}
+	})
+
+	JustBeforeEach(func() {
+		CheckErr(printer, err)
+	})
+
+	It("error is nil", func() {
+		Expect(printer.Buffer.String()).To(Equal(""))
+	})
+
+	Context("error from fmt", func() {
+		BeforeEach(func() {
+			err = fmt.Errorf("fake error")
+		})
+
+		It("fake error", func() {
+			Expect(printer.Buffer.String()).To(Equal("[error: fake error]"))
 		})
 	})
 })

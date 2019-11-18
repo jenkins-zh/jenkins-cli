@@ -2,14 +2,18 @@ package helper
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"net/url"
 	"os"
 	"strings"
 )
 
+// Printer for print the info
+type Printer interface {
+	PrintErr(i ...interface{})
+}
+
 // CheckErr print a friendly error message
-func CheckErr(cmd *cobra.Command, err error) {
+func CheckErr(printer Printer, err error) {
 	switch {
 	case err == nil:
 		return
@@ -21,7 +25,7 @@ func CheckErr(cmd *cobra.Command, err error) {
 				msg = fmt.Sprintf("error: %s", msg)
 			}
 		}
-		cmd.PrintErr(msg)
+		printer.PrintErr(msg)
 	}
 }
 
