@@ -75,7 +75,7 @@ var _ = Describe("plugin uninstall command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("unexpected status code: 500\n"))
+			Expect(buf.String()).To(Equal("error: unexpected status code: 500"))
 		})
 	})
 })

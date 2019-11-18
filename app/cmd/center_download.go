@@ -11,8 +11,9 @@ import (
 
 // CenterDownloadOption as the options of download command
 type CenterDownloadOption struct {
-	LTS    bool
-	Mirror string
+	LTS     bool
+	Mirror  string
+	Version string
 
 	Output       string
 	ShowProgress bool
@@ -25,6 +26,8 @@ var centerDownloadOption CenterDownloadOption
 func init() {
 	centerCmd.AddCommand(centerDownloadCmd)
 	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.LTS, "lts", "", true, "If you want to download Jenkins as LTS")
+	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Version, "war-version", "", "",
+		"Version of the Jenkins which you want to download")
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Mirror, "mirror", "m", "default", "The mirror site of Jenkins")
 	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.ShowProgress, "progress", "p", true, "If you want to show the download progress")
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Output, "output", "o", "jenkins.war", "The file of output")
@@ -41,15 +44,18 @@ var centerDownloadCmd = &cobra.Command{
 			return
 		}
 
-		jclient := &client.UpdateCenterManager{
+		jClient := &client.UpdateCenterManager{
 			MirrorSite: mirrorSite,
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: centerDownloadOption.RoundTripper,
 			},
+			LTS:          centerDownloadOption.LTS,
+			Version:      centerDownloadOption.Version,
+			Output:       centerDownloadOption.Output,
+			ShowProgress: centerDownloadOption.ShowProgress,
 		}
 
-		err := jclient.DownloadJenkins(centerDownloadOption.LTS, centerDownloadOption.ShowProgress,
-			centerDownloadOption.Output)
+		err := jClient.DownloadJenkins()
 		helper.CheckErr(cmd, err)
 	},
 }

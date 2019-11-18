@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
-
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 // ConfigOptions is the config cmd option
@@ -145,12 +144,14 @@ func findSuiteByName(name string) (suite *PluginSuite) {
 }
 
 func loadDefaultConfig() (err error) {
-	userHome := userHomeDir()
-	configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
-	if _, err = os.Stat(configPath); err == nil {
-		err = loadConfig(configPath)
+	var userHome string
+	userHome, err = homedir.Dir()
+	if err == nil {
+		configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+		if _, err = os.Stat(configPath); err == nil {
+			err = loadConfig(configPath)
+		}
 	}
-
 	return
 }
 
@@ -202,20 +203,4 @@ func saveConfig() (err error) {
 		err = ioutil.WriteFile(configOptions.ConfigFileLocation, data, 0644)
 	}
 	return
-}
-
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	} else if runtime.GOOS == "linux" {
-		home := os.Getenv("XDG_CONFIG_HOME")
-		if home != "" {
-			return home
-		}
-	}
-	return os.Getenv("HOME")
 }

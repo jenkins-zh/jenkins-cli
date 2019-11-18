@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/atotto/clipboard"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/atotto/clipboard"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -29,23 +30,27 @@ var configGenerateCmd = &cobra.Command{
 	Aliases: []string{"gen"},
 	Short:   "Generate a sample config file for you",
 	Long:    `Generate a sample config file for you`,
-	Run: func(_ *cobra.Command, _ []string) {
-		if data, err := generateSampleConfig(); err == nil {
+	Run: func(cmd *cobra.Command, _ []string) {
+		data, err := generateSampleConfig()
+		if err == nil {
 			configPath := configOptions.ConfigFileLocation
 
 			if configPath == "" { // config file isn't exists
-				userHome := userHomeDir()
-				configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+				userHome, homeErr := homedir.Dir()
+				if homeErr == nil {
+					configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+				}
+				helper.CheckErr(cmd, homeErr)
 			}
 
-			_, err := os.Stat(configPath)
+			_, err = os.Stat(configPath)
 			if err != nil && os.IsNotExist(err) {
 				confirm := false
 				prompt := &survey.Confirm{
 					Message: "Cannot found your config file, do you want to edit it?",
 				}
-				survey.AskOne(prompt, &confirm)
-				if confirm {
+				err = survey.AskOne(prompt, &confirm)
+				if err == nil && confirm {
 					prompt := &survey.Editor{
 						Message:       "Edit your config file",
 						FileName:      "*.yaml",
@@ -55,32 +60,29 @@ var configGenerateCmd = &cobra.Command{
 					}
 
 					var configContext string
-					if err = survey.AskOne(prompt, &configContext); err != nil {
-						log.Fatal(err)
-					} else {
-						if err = ioutil.WriteFile(configPath, []byte(configContext), 0644); err != nil {
-							log.Fatal(err)
-						}
+					if err = survey.AskOne(prompt, &configContext); err == nil {
+						err = ioutil.WriteFile(configPath, []byte(configContext), 0644)
 					}
 					return
 				}
 			}
 
-			printCfg(data)
+			if err == nil {
+				printCfg(cmd, data)
 
-			if configGenerateOption.Copy {
-				clipboard.WriteAll(string(data))
+				if configGenerateOption.Copy {
+					err = clipboard.WriteAll(string(data))
+				}
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 
-func printCfg(data []byte) {
-	fmt.Print(string(data))
-	fmt.Println("# Language context is accept-language for HTTP header, It contains zh-CN/zh-TW/en/en-US/ja and so on")
-	fmt.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
+func printCfg(cmd *cobra.Command, data []byte) {
+	cmd.Print(string(data))
+	cmd.Println("# Language context is accept-language for HTTP header, It contains zh-CN/zh-TW/en/en-US/ja and so on")
+	cmd.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
 func getSampleConfig() (sampleConfig Config) {

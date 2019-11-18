@@ -12,9 +12,15 @@ import (
 
 // UpdateCenterManager manages the UpdateCenter
 type UpdateCenterManager struct {
+	JenkinsCore
+
 	MirrorSite string
 
-	JenkinsCore
+	LTS     bool
+	Version string
+	Output  string
+
+	ShowProgress bool
 }
 
 // UpdateCenter represents the update center of Jenkins
@@ -134,21 +140,32 @@ func (u *UpdateCenterManager) Upgrade() (err error) {
 }
 
 // DownloadJenkins download Jenkins
-func (u *UpdateCenterManager) DownloadJenkins(lts, showProgress bool, output string) (err error) {
-	var url string
-	if lts {
-		url = fmt.Sprintf("%s/war-stable/latest/jenkins.war", strings.TrimRight(u.MirrorSite, "/"))
-	} else {
-		url = fmt.Sprintf("%s/war/latest/jenkins.war", strings.TrimRight(u.MirrorSite, "/"))
-	}
+func (u *UpdateCenterManager) DownloadJenkins() (err error) {
+	showProgress, output := u.ShowProgress, u.Output
+	warURL := u.GetJenkinsWarURL()
 
 	downloader := util.HTTPDownloader{
 		RoundTripper:   u.RoundTripper,
 		TargetFilePath: output,
-		URL:            url,
+		URL:            warURL,
 		ShowProgress:   showProgress,
 	}
 	err = downloader.DownloadFile()
+	return
+}
+
+// GetJenkinsWarURL returns a URL of Jenkins war file
+func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
+	version := u.Version
+	if version == "" {
+		version = "latest"
+	}
+
+	if u.LTS {
+		warURL = fmt.Sprintf("%s/war-stable/%s/jenkins.war", strings.TrimRight(u.MirrorSite, "/"), version)
+	} else {
+		warURL = fmt.Sprintf("%s/war/%s/jenkins.war", strings.TrimRight(u.MirrorSite, "/"), version)
+	}
 	return
 }
 

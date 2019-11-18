@@ -3,14 +3,13 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 var _ = Describe("update center test", func() {
@@ -39,6 +38,9 @@ var _ = Describe("update center test", func() {
 		It("should success with basic cases", func() {
 			manager.RoundTripper = roundTripper
 			manager.MirrorSite = "http://mirrors.jenkins.io/"
+			manager.LTS = false
+			manager.ShowProgress = false
+			manager.Output = donwloadFile
 
 			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
 			response := &http.Response{
@@ -50,7 +52,7 @@ var _ = Describe("update center test", func() {
 			}
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
-			err := manager.DownloadJenkins(false, false, donwloadFile)
+			err := manager.DownloadJenkins()
 			Expect(err).To(BeNil())
 
 			_, err = os.Stat(donwloadFile)
@@ -223,5 +225,83 @@ var _ = Describe("update center test", func() {
 			Expect(plugins.UpdatePlugins[0].Name).To(Equal("blueocean-commons"))
 		})
 	})
+})
 
+var _ = Describe("GetJenkinsWarURL", func() {
+	var (
+		mgr    *UpdateCenterManager
+		warURL string
+	)
+
+	BeforeEach(func() {
+		mgr = &UpdateCenterManager{}
+	})
+
+	JustBeforeEach(func() {
+		warURL = mgr.GetJenkinsWarURL()
+	})
+
+	It("default behaviour", func() {
+		Expect(warURL).To(Equal("/war/latest/jenkins.war"))
+	})
+
+	Context("with lts", func() {
+		BeforeEach(func() {
+			mgr.LTS = true
+		})
+
+		It("with lts", func() {
+			Expect(warURL).To(Equal("/war-stable/latest/jenkins.war"))
+		})
+
+		Context("with specific version", func() {
+			BeforeEach(func() {
+				mgr.Version = "fake"
+			})
+
+			It("with lts", func() {
+				Expect(warURL).To(Equal("/war-stable/fake/jenkins.war"))
+			})
+		})
+
+		Context("with mirror site", func() {
+			BeforeEach(func() {
+				mgr.MirrorSite = "http://baidu.com"
+			})
+
+			It("with mirror site", func() {
+				Expect(warURL).To(Equal("http://baidu.com/war-stable/latest/jenkins.war"))
+			})
+		})
+	})
+
+	Context("with weekly", func() {
+		BeforeEach(func() {
+			mgr.LTS = false
+		})
+
+		It("with weekly", func() {
+			Expect(warURL).To(Equal("/war/latest/jenkins.war"))
+		})
+
+		Context("with specific version", func() {
+			BeforeEach(func() {
+				mgr.Version = "fake"
+			})
+
+			It("with lts", func() {
+				Expect(warURL).To(Equal("/war/fake/jenkins.war"))
+			})
+		})
+
+		Context("with mirror site", func() {
+			BeforeEach(func() {
+				mgr.MirrorSite = "http://baidu.com"
+			})
+
+			It("with mirror site", func() {
+				Expect(warURL).To(Equal("http://baidu.com/war/latest/jenkins.war"))
+			})
+		})
+	})
 })
