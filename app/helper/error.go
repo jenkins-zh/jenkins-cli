@@ -28,8 +28,7 @@ func CheckErr(cmd *cobra.Command, err error) {
 	}
 }
 
-// This method is generic to the command in use and may be used by non-Kubectl
-// commands.
+// StandardErrorMessage is generic to the command in use
 func StandardErrorMessage(err error) (string, bool) {
 	switch t := err.(type) {
 	case *url.Error:
