@@ -26,8 +26,11 @@ func CheckErr(cmd *cobra.Command, err error) {
 }
 
 // StandardErrorMessage is generic to the command in use
-func StandardErrorMessage(err error) (string, bool) {
+func StandardErrorMessage(err error) (msg string, ok bool) {
+	ok = true
 	switch t := err.(type) {
+	case url.InvalidHostError:
+		msg = t.Error()
 	case *url.Error:
 		switch {
 		case strings.Contains(t.Err.Error(), "connection refused"):
@@ -35,11 +38,14 @@ func StandardErrorMessage(err error) (string, bool) {
 			if server, err := url.Parse(t.URL); err == nil {
 				host = server.Host
 			}
-			return fmt.Sprintf("The connection to the server %s was refused - did you specify the right host or port?", host), true
+			msg = fmt.Sprintf("The connection to the server %s was refused - did you specify the right host or port?", host)
+		default:
+			msg = fmt.Sprintf("Unable to connect to the server: %v", t.Err)
 		}
-		return fmt.Sprintf("Unable to connect to the server: %v", t.Err), true
 	case *os.PathError:
-		return fmt.Sprintf("error: %s %s: %s", t.Op, t.Path, t.Err), true
+		msg = fmt.Sprintf("error: %s %s: %s", t.Op, t.Path, t.Err)
+	default:
+		ok = false
 	}
-	return "", false
+	return
 }

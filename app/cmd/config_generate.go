@@ -1,20 +1,18 @@
 package cmd
 
 import (
-	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/atotto/clipboard"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
-	"github.com/mitchellh/go-homedir"
-	"io/ioutil"
-	"os"
-
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os"
 )
 
 // ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
+	InteractiveOption
 	Copy bool
 }
 
@@ -22,6 +20,7 @@ var configGenerateOption ConfigGenerateOption
 
 func init() {
 	configCmd.AddCommand(configGenerateCmd)
+	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Interactive, "interactive", "i", true, "Interactive mode")
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false, "Copy the output into clipboard")
 }
 
@@ -33,50 +32,53 @@ var configGenerateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		data, err := generateSampleConfig()
 		if err == nil {
-			configPath := configOptions.ConfigFileLocation
-
-			if configPath == "" { // config file isn't exists
-				userHome, homeErr := homedir.Dir()
-				if homeErr == nil {
-					configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
-				}
-				helper.CheckErr(cmd, homeErr)
-			}
-
-			_, err = os.Stat(configPath)
-			if err != nil && os.IsNotExist(err) {
-				confirm := false
-				prompt := &survey.Confirm{
-					Message: "Cannot found your config file, do you want to edit it?",
-				}
-				err = survey.AskOne(prompt, &confirm)
-				if err == nil && confirm {
-					prompt := &survey.Editor{
-						Message:       "Edit your config file",
-						FileName:      "*.yaml",
-						Default:       string(data),
-						HideDefault:   true,
-						AppendDefault: true,
-					}
-
-					var configContext string
-					if err = survey.AskOne(prompt, &configContext); err == nil {
-						err = ioutil.WriteFile(configPath, []byte(configContext), 0644)
-					}
-					return
-				}
-			}
-
-			if err == nil {
+			if configGenerateOption.Interactive {
+				err = InteractiveWithConfig(cmd, data)
+			} else {
 				printCfg(cmd, data)
+			}
 
-				if configGenerateOption.Copy {
-					err = clipboard.WriteAll(string(data))
-				}
+			if configGenerateOption.Copy {
+				err = clipboard.WriteAll(string(data))
 			}
 		}
 		helper.CheckErr(cmd, err)
 	},
+}
+
+// InteractiveWithConfig be friendly for a newer
+func InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
+	configPath := configOptions.ConfigFileLocation
+
+	if configPath == "" { // config file isn't exists
+		if configPath, err = GetConfigFromHome(); err != nil {
+			return
+		}
+	}
+
+	_, err = os.Stat(configPath)
+	if err != nil && os.IsNotExist(err) {
+		confirm := false
+		prompt := &survey.Confirm{
+			Message: "Cannot found your config file, do you want to edit it?",
+		}
+		err = survey.AskOne(prompt, &confirm)
+		if err == nil && confirm {
+			prompt := &survey.Editor{
+				Message:       "Edit your config file",
+				FileName:      "*.yaml",
+				Default:       string(data),
+				HideDefault:   true,
+				AppendDefault: true,
+			}
+
+			var configContext string
+			if err = survey.AskOne(prompt, &configContext); err == nil {
+				err = ioutil.WriteFile(configPath, []byte(configContext), 0644)
+			}
+		}
+	}
+	return
 }
 
 func printCfg(cmd *cobra.Command, data []byte) {
