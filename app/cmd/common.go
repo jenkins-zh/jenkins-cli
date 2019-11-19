@@ -13,6 +13,8 @@ import (
 // OutputOption represent the format of output
 type OutputOption struct {
 	Format string
+
+	WithoutHeaders bool
 }
 
 // FormatOutput is the interface of format output
@@ -43,18 +45,9 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 
 // SetFlag set flag of output format
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output, supported formats: table, json, yaml")
-}
-
-// Format format the object into byte array
-func Format(obj interface{}, format string) (data []byte, err error) {
-	if format == JSONOutputFormat {
-		return json.MarshalIndent(obj, "", "  ")
-	} else if format == YAMLOutputFormat {
-		return yaml.Marshal(obj)
-	}
-
-	return nil, fmt.Errorf("not support format %s", format)
+	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat, "Format the output, supported formats: table, json, yaml")
+	cmd.Flags().BoolVarP(&o.WithoutHeaders, "no-headers", "", false,
+		`When using the default output format, don't print headers (default print headers)`)
 }
 
 // BatchOption represent the options for a batch operation

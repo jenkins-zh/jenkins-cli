@@ -20,7 +20,7 @@ type ArtifactClient struct {
 
 // List get the list of artifacts from a build
 func (q *ArtifactClient) List(jobName string, buildID int) (artifacts []Artifact, err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	var api string
 	if buildID < 1 {
 		api = fmt.Sprintf("%s/lastBuild/wfapi/artifacts", path)

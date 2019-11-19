@@ -25,14 +25,14 @@ func (q *JobClient) Search(keyword string, max int) (status *SearchResult, err e
 
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	_, err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
 	return
 }
 
 // GetBuild get build information of a job
 func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	var api string
 	if id == -1 {
 		api = fmt.Sprintf("%s/lastBuild/api/json", path)
@@ -46,7 +46,7 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 
 // BuildWithParams build a job which has params
 func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefinition) (err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/build", path)
 
 	var paramJSON []byte
@@ -68,7 +68,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 
 // StopJob stops a job build
 func (q *JobClient) StopJob(jobName string, num int) (err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/%d/stop", path, num)
 
 	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
@@ -77,7 +77,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 
 // GetJob returns the job info
 func (q *JobClient) GetJob(name string) (job *Job, err error) {
-	path := parseJobPath(name)
+	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/api/json", path)
 
 	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
@@ -108,7 +108,7 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 
 // GetPipeline return the pipeline object
 func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
-	path := parseJobPath(name)
+	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul", path)
 	err = q.RequestWithData("GET", api, nil, nil, 200, &pipeline)
 	return
@@ -119,7 +119,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	formData := url.Values{}
 	formData.Add("script", script)
 
-	path := parseJobPath(name)
+	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
 
 	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
@@ -146,7 +146,7 @@ func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 
 // Log get the log of a job
 func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog, err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	var api string
 	if history == -1 {
 		api = fmt.Sprintf("%s%s/lastBuild/logText/progressiveText?start=%d", q.URL, path, start)
@@ -236,7 +236,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 
 // GetJobInputActions returns the all pending actions
 func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []JobInputItem, err error) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	err = q.RequestWithData("GET", fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, 200, &actions)
 	return
 }
@@ -248,7 +248,7 @@ type JenkinsInputParametersRequest struct {
 
 // JobInputSubmit submit the pending input request
 func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort bool, params map[string]string) (err error) {
-	jobPath := parseJobPath(jobName)
+	jobPath := ParseJobPath(jobName)
 	var api string
 	if abort {
 		api = fmt.Sprintf("%s/%d/input/%s/abort", jobPath, buildID, inputID)
@@ -275,8 +275,8 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 	return
 }
 
-// parseJobPath leads with slash
-func parseJobPath(jobName string) (path string) {
+// ParseJobPath leads with slash
+func ParseJobPath(jobName string) (path string) {
 	jobItems := strings.Split(jobName, " ")
 	path = ""
 	for _, item := range jobItems {

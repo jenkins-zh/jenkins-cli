@@ -34,6 +34,7 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
+	BashCompletionFunction: jcli_bash_completion_func,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
@@ -77,6 +78,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")
+	rootCmd.SetOut(os.Stdout)
 }
 
 func initConfig() {
@@ -187,3 +189,34 @@ func execute(command string, writer io.Writer) (err error) {
 	err = cmd.Run()
 	return
 }
+
+const (
+	jcli_bash_completion_func = `__plugin_name_parse_get()
+{
+    local jcli_output out
+    if jcli_output=$(jcli plugin list --filter hasUpdate --no-headers --filter name="$1" 2>/dev/null); then
+        out=($(echo "${jcli_output}" | awk '{print $2}'))
+        COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
+    fi
+}
+
+__jcli_get_plugin_name()
+{
+    __plugin_name_parse_get
+    if [[ $? -eq 0 ]]; then
+        return 0
+    fi
+}
+
+__jcli_custom_func() {
+    case ${last_command} in
+        jcli_plugin_upgrade)
+            __jcli_get_plugin_name
+            return
+            ;;
+        *)
+            ;;
+    esac
+}
+`
+)

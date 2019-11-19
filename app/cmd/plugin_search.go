@@ -24,7 +24,7 @@ var pluginSearchOption PluginSearchOption
 
 func init() {
 	pluginCmd.AddCommand(pluginSearchCmd)
-	pluginSearchCmd.PersistentFlags().StringVarP(&pluginSearchOption.Format, "output", "o", TableOutputFormat, "Format the output")
+	pluginSearchOption.SetFlag(pluginSearchCmd)
 }
 
 var pluginSearchCmd = &cobra.Command{
@@ -168,8 +168,8 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 		buf := new(bytes.Buffer)
 
 		if len(pluginList) != 0 {
-			table := util.CreateTable(buf)
-			table.AddRow("number", "name", "installed", "version", "installedVersion", "title")
+			table := util.CreateTableWithHeader(buf, pluginSearchOption.WithoutHeaders)
+			table.AddHeader("number", "name", "installed", "version", "installedVersion", "title")
 
 			for i, plugin := range pluginList {
 				formatTable(&table, i, plugin)

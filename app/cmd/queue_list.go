@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -20,7 +23,7 @@ var queueListOption QueueListOption
 
 func init() {
 	queueCmd.AddCommand(queueListCmd)
-	queueListCmd.Flags().StringVarP(&queueListOption.Format, "output", "o", "json", "Format the output")
+	queueListOption.SetFlag(queueListCmd)
 }
 
 var queueListCmd = &cobra.Command{
@@ -36,14 +39,32 @@ var queueListCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		status, err := jclient.Get()
-		if err == nil {
+		var err error
+		var jobQueue *client.JobQueue
+		if jobQueue, err = jclient.Get(); err == nil {
 			var data []byte
-			data, err = Format(status, queueListOption.Format)
-			if err == nil {
-				cmd.Printf("%s\n", string(data))
+			if data, err = queueListOption.Output(jobQueue); err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
 		}
 		helper.CheckErr(cmd, err)
 	},
+}
+
+// Output render data into byte array as a table format
+func (o *QueueListOption) Output(obj interface{}) (data []byte, err error) {
+	if data, err = o.OutputOption.Output(obj); err != nil && o.Format == TableOutputFormat {
+		buf := new(bytes.Buffer)
+
+		jobQueue := obj.(*client.JobQueue)
+		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
+		table.AddHeader("number", "id", "why", "url")
+		for i, item := range jobQueue.Items {
+			table.AddRow(fmt.Sprintf("%d", i), fmt.Sprintf("%d", item.ID), item.Why, item.URL)
+		}
+		table.Render()
+		err = nil
+		data = buf.Bytes()
+	}
+	return
 }
