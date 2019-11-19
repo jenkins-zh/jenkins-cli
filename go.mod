@@ -17,5 +17,5 @@ require (
 	github.com/onsi/gomega v1.7.1
 	github.com/spf13/cobra v0.0.5
 	go.uber.org/zap v1.13.0
-	gopkg.in/yaml.v2 v2.2.5
+	gopkg.in/yaml.v2 v2.2.6
 )
