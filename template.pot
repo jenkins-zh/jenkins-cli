@@ -1,9 +1,0 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the Kubernetes package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
-#: pkg/kubectl/cmd/create_service.go:254
-msgid "jcli is a tool which could help you with your multiple Jenkins"
-msgstr ""

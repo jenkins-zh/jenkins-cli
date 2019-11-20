@@ -44,8 +44,13 @@ var rootCmd = &cobra.Command{
 		} else {
 			client.SetLogger(logger)
 		}
+
+		i18n.LoadTranslations("jcli", func() string {
+			return "zh_CN"
+		})
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Println(i18n.T("sdssd"))
 		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
 		if rootOptions.Version {
 			cmd.Printf("Version: %s\n", app.GetVersion())

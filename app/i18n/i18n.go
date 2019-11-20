@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"k8s.io/kubectl/pkg/generated"
-
 	"github.com/chai2010/gettext-go/gettext"
 )
 
@@ -78,8 +76,10 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 
 	langStr := findLanguage(root, getLanguageFn)
 	translationFiles := []string{
-		fmt.Sprintf("%s/%s/LC_MESSAGES/k8s.po", root, langStr),
-		fmt.Sprintf("%s/%s/LC_MESSAGES/k8s.mo", root, langStr),
+		//fmt.Sprintf("zh_CN.po", root, langStr),
+		//fmt.Sprintf("zh_CN.mo", root, langStr),
+		"zh_CN/LC_MESSAGES/k8s.mo",
+		"zh_CN/LC_MESSAGES/k8s.po",
 	}
 
 	//klog.V(3).Infof("Setting language to %s", langStr)
@@ -89,12 +89,12 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 
 	// Make sure to check the error on Close.
 	for _, file := range translationFiles {
-		filename := "translations/" + file
+		filename := file
 		f, err := w.Create(file)
 		if err != nil {
 			return err
 		}
-		data, err := generated.Asset(filename)
+		data, err := Asset(filename)
 		if err != nil {
 			return err
 		}
