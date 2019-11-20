@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// ConfigListOption option for config list command
 type ConfigListOption struct {
 	OutputOption
 }
