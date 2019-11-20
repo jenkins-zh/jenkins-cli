@@ -7,6 +7,8 @@ require (
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/atotto/clipboard v0.1.2
+	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
+	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/mock v1.3.1
 	github.com/gosuri/uilive v0.0.3 // indirect
@@ -17,4 +19,5 @@ require (
 	github.com/spf13/cobra v0.0.5
 	go.uber.org/zap v1.12.0
 	gopkg.in/yaml.v2 v2.2.4
+	k8s.io/kubectl v0.0.0-20191115222826-fbc5d36fee2d
 )

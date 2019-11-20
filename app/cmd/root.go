@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -34,6 +36,7 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
+	Example: i18n.T("sdssd"),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
