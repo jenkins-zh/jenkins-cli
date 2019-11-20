@@ -221,7 +221,8 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		statusCode int
 	)
 
-	api := fmt.Sprintf("/job/%s/doDelete", jobName)
+	jobName = ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/doDelete", jobName)
 	header := map[string]string{
 		util.ContentType: util.ApplicationForm,
 	}
