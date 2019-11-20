@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -34,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
-	BashCompletionFunction: jcli_bash_completion_func,
+	BashCompletionFunction: jcliBashCompletionFunc,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
@@ -191,7 +192,7 @@ func execute(command string, writer io.Writer) (err error) {
 }
 
 const (
-	jcli_bash_completion_func = `__plugin_name_parse_get()
+	jcliBashCompletionFunc = `__plugin_name_parse_get()
 {
     local jcli_output out
     if jcli_output=$(jcli plugin list --filter hasUpdate --no-headers --filter name="$1" 2>/dev/null); then
