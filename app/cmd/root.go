@@ -230,8 +230,8 @@ __job_name_parse_get()
 {
     local jcli_output out
     if jcli_output=$(jcli job search -o path "$cur" 2>/dev/null); then
-        out=($(echo "${jcli_output}" | awk '{print $1}'))
-        COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
+        out=($(echo "${jcli_output}"))
+        COMPREPLY=( ${out} )
     fi
 }
 
