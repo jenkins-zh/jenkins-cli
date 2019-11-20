@@ -226,14 +226,35 @@ __jcli_get_config_name()
     fi
 }
 
+__job_name_parse_get()
+{
+    local jcli_output out
+    if jcli_output=$(jcli job search -o path "$cur" 2>/dev/null); then
+        out=($(echo "${jcli_output}" | awk '{print $1}'))
+        COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
+    fi
+}
+
+__jcli_get_job_name()
+{
+    __job_name_parse_get
+    if [[ $? -eq 0 ]]; then
+        return 0
+    fi
+}
+
 __jcli_custom_func() {
     case ${last_command} in
-        jcli_plugin_upgrade)
+        jcli_plugin_upgrade | jcli_plugin_uninstall)
             __jcli_get_plugin_name
             return
             ;;
         jcli_open)
             __jcli_get_config_name
+            return
+            ;;
+        jcli_job_build | jcli_job_stop | jcli_job_log | jcli_job_delete | jcli_job_history | jcli_job_artifact | jcli_job_input)
+            __jcli_get_job_name
             return
             ;;
         *)
