@@ -209,10 +209,31 @@ __jcli_get_plugin_name()
     fi
 }
 
+__config_name_parse_get()
+{
+    local jcli_output out
+    if jcli_output=$(jcli config list --no-headers 2>/dev/null); then
+        out=($(echo "${jcli_output}" | awk '{print $2}'))
+        COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
+    fi
+}
+
+__jcli_get_config_name()
+{
+    __config_name_parse_get
+    if [[ $? -eq 0 ]]; then
+        return 0
+    fi
+}
+
 __jcli_custom_func() {
     case ${last_command} in
         jcli_plugin_upgrade)
             __jcli_get_plugin_name
+            return
+            ;;
+        jcli_open)
+            __jcli_get_config_name
             return
             ;;
         *)
