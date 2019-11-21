@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"go.uber.org/zap"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -26,8 +28,8 @@ func init() {
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   "Manage the config of jcli",
-	Long:    `Manage the config of jcli`,
+	Short:   i18n.T("Manage the config of jcli"),
+	Long:    i18n.T("Manage the config of jcli"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {

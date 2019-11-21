@@ -78,8 +78,8 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 	translationFiles := []string{
 		//fmt.Sprintf("zh_CN.po", root, langStr),
 		//fmt.Sprintf("zh_CN.mo", root, langStr),
-		"zh_CN/LC_MESSAGES/k8s.mo",
-		"zh_CN/LC_MESSAGES/k8s.po",
+		"jcli/zh_CN/LC_MESSAGES/jcli.mo",
+		"jcli/zh_CN/LC_MESSAGES/jcli.po",
 	}
 
 	//klog.V(3).Infof("Setting language to %s", langStr)
@@ -105,8 +105,9 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 	if err := w.Close(); err != nil {
 		return err
 	}
-	gettext.BindTextdomain("k8s", root+".zip", buf.Bytes())
-	gettext.Textdomain("k8s")
+	gettext.BindTextdomain("jcli", root+".zip", buf.Bytes())
+	//gettext.BindTextdomain("jcli", "app/i18n/", buf.Bytes())
+	gettext.Textdomain("jcli")
 	gettext.SetLocale(langStr)
 	return nil
 }

@@ -32,11 +32,10 @@ type RootOptions struct {
 
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
-	Short: "jcli is a tool which could help you with your multiple Jenkins",
+	Short: i18n.T("jcli is a tool which could help you with your multiple Jenkins"),
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
-	Example: i18n.T("sdssd"),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var err error
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
@@ -45,13 +44,12 @@ var rootCmd = &cobra.Command{
 			client.SetLogger(logger)
 		}
 
-		i18n.LoadTranslations("jcli", func() string {
-			return "zh_CN"
-		})
+		//err = i18n.LoadTranslations("jcli", func() string {
+		//	return "zh_CN"
+		//})
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println(i18n.T("sdssd"))
-		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
+		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 		if rootOptions.Version {
 			cmd.Printf("Version: %s\n", app.GetVersion())
 			cmd.Printf("Commit: %s\n", app.GetCommit())

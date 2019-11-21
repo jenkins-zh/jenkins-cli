@@ -48,6 +48,10 @@ copy: darwin
 tools:
 	go get -u golang.org/x/lint/golint
 
+i18n-tools:
+	go get github.com/gosexy/gettext/go-xgettext
+	go get github.com/go-bindata/go-bindata/...
+
 verify:
 	go vet ./...
 	golint -set_exit_status ./...
@@ -70,5 +74,9 @@ fmt:
 	go fmt ./client/...
 	go fmt ./app/...
 
+JCLI_FILES="app/cmd/*.go"
 gettext:
-	go-xgettext -k=i18n.T "app/cmd/root.go" > app/i18n/template.pot
+	go-xgettext -k=i18n.T "${JCLI_FILES}" > app/i18n/template.pot
+
+data:
+	cd app/i18n/ && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
