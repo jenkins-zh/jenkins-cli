@@ -47,7 +47,7 @@ var _ = Describe("queue list command", func() {
 
 			client.PrepareGetQueue(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"queue", "list"})
+			rootCmd.SetArgs([]string{"queue", "list", "-o", "json"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -70,7 +70,26 @@ var _ = Describe("queue list command", func() {
       "Actions": []
     }
   ]
-}
+}`))
+		})
+
+		It("output with table format", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			client.PrepareGetQueue(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"queue", "list", "-o", "table"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(`number id why                    url
+0      62 等待下一个可用的执行器 queue/item/62/
 `))
 		})
 	})

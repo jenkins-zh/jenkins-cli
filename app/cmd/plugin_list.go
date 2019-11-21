@@ -34,7 +34,8 @@ var pluginListCmd = &cobra.Command{
 	Short: "Print all the plugins which are installed",
 	Long:  `Print all the plugins which are installed`,
 	Example: `  jcli plugin list --filter name=github
-  jcli plugin list --filter hasUpdate`,
+  jcli plugin list --filter hasUpdate
+  jcli plugin list --no-headers`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
@@ -112,12 +113,12 @@ var pluginListCmd = &cobra.Command{
 
 // Output render data into byte array as a table format
 func (o *PluginListOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil {
+	if data, err = o.OutputOption.Output(obj); err != nil && o.Format == TableOutputFormat {
 		buf := new(bytes.Buffer)
 
 		pluginList := obj.([]client.InstalledPlugin)
-		table := util.CreateTable(buf)
-		table.AddRow("number", "name", "version", "update")
+		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
+		table.AddHeader("number", "name", "version", "update")
 		for i, plugin := range pluginList {
 			table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version, fmt.Sprintf("%v", plugin.HasUpdate))
 		}

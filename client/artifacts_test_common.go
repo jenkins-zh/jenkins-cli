@@ -12,7 +12,7 @@ import (
 // PrepareGetArtifacts only for test
 func PrepareGetArtifacts(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd,
 	jobName string, buildID int) (response *http.Response) {
-	path := parseJobPath(jobName)
+	path := ParseJobPath(jobName)
 	var api string
 	if buildID <= 0 {
 		api = fmt.Sprintf("%s/lastBuild/wfapi/artifacts", path)

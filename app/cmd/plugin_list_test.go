@@ -76,6 +76,26 @@ var _ = Describe("plugin list command", func() {
 `))
 		})
 
+		It("one plugin in the list without headers", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--no-headers"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(`0 fake 1.0 true
+`))
+		})
+
 		It("one plugin output with json format", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
@@ -93,6 +113,44 @@ var _ = Describe("plugin list command", func() {
 			Expect(err).To(BeNil())
 
 			Expect(buf.String()).To(Equal(pluginsJSON()))
+		})
+
+		It("one plugin output with yaml format", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "yaml", "--filter", "hasUpdate", "--filter", "name=fake", "--filter", "enable", "--filter", "active"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(pluginYaml()))
+		})
+
+		It("one plugin output with not support format", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "fake"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal("error: not support format fake"))
 		})
 	})
 })
@@ -119,4 +177,26 @@ func pluginsJSON() string {
     "Dependencies": null
   }
 ]`
+}
+
+func pluginYaml() string {
+	return `- plugin:
+    active: true
+    enabled: false
+    bundled: false
+    downgradable: false
+    deleted: false
+  enable: true
+  shortname: fake
+  longname: ""
+  version: "1.0"
+  url: ""
+  hasupdate: true
+  pinned: false
+  requiredcorevesion: ""
+  minimumjavaversion: ""
+  supportdynamicload: ""
+  backversion: ""
+  dependencies: []
+`
 }

@@ -27,9 +27,10 @@ func init() {
 }
 
 var pluginUpgradeCmd = &cobra.Command{
-	Use:   "upgrade [plugin name]",
-	Short: "Upgrade the specific plugin",
-	Long:  `Upgrade the specific plugin`,
+	Use:     "upgrade [plugin name]",
+	Short:   "Upgrade the specific plugin",
+	Long:    `Upgrade the specific plugin`,
+	Example: `jcli plugin upgrade [tab][tab]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{

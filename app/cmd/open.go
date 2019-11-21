@@ -22,29 +22,37 @@ var openOption OpenOption
 
 func init() {
 	rootCmd.AddCommand(openCmd)
-	openCmd.PersistentFlags().StringVarP(&openOption.Name, "name", "n", "", "Open a specific Jenkins by name")
-	openCmd.PersistentFlags().BoolVarP(&openOption.Config, "config", "c", false, "Open the configuration page of Jenkins")
+	openCmd.Flags().StringVarP(&openOption.Name, "name", "n", "", "Open a specific Jenkins by name")
+	openCmd.Flags().BoolVarP(&openOption.Config, "config", "c", false, "Open the configuration page of Jenkins")
 	openOption.SetFlag(openCmd)
 }
 
 var openCmd = &cobra.Command{
-	Use:   "open",
-	Short: "Open your Jenkins with a browse",
-	Long:  `Open your Jenkins with a browse`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Use:     "open [config name]",
+	Short:   "Open your Jenkins with a browse",
+	Long:    `Open your Jenkins with a browse`,
+	Example: `jcli open -n <config name>`,
+	Run: func(_ *cobra.Command, args []string) {
 		var jenkins *JenkinsServer
 
-		if openOption.Name == "" && openOption.Interactive {
+		var configName string
+		if len(args) > 0 {
+			configName = args[0]
+		} else if openOption.Name != "" {
+			configName = openOption.Name
+		}
+
+		if configName == "" && openOption.Interactive {
 			jenkinsNames := getJenkinsNames()
 			prompt := &survey.Select{
 				Message: "Choose a Jenkins that you want to open:",
 				Options: jenkinsNames,
 			}
-			survey.AskOne(prompt, &(openOption.Name))
+			survey.AskOne(prompt, &(configName))
 		}
 
-		if openOption.Name != "" {
-			jenkins = findJenkinsByName(openOption.Name)
+		if configName != "" {
+			jenkins = findJenkinsByName(configName)
 		} else {
 			jenkins = getCurrentJenkins()
 		}
@@ -56,7 +64,7 @@ var openCmd = &cobra.Command{
 			}
 			open(url)
 		} else {
-			log.Fatalf("No URL found with Jenkins %s", openOption.Name)
+			log.Fatalf("No URL found with Jenkins %s", configName)
 		}
 	},
 }

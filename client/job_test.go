@@ -392,3 +392,48 @@ var _ = Describe("job test", func() {
 		})
 	})
 })
+
+var _ = Describe("test function ParseJobPath", func() {
+	var (
+		path    string
+		jobName string
+	)
+
+	JustBeforeEach(func() {
+		path = ParseJobPath(jobName)
+	})
+
+	It("job name is empty", func() {
+		Expect(path).To(BeEmpty())
+	})
+
+	Context("job name is not empty", func() {
+		BeforeEach(func() {
+			jobName = "abc"
+		})
+
+		It("job name separate with whitespaces", func() {
+			Expect(path).To(Equal(fmt.Sprintf("/job/%s", jobName)))
+		})
+
+		Context("multi level of job name", func() {
+			BeforeEach(func() {
+				jobName = "abc def"
+			})
+
+			It("should success", func() {
+				Expect(path).To(Equal("/job/abc/job/def"))
+			})
+		})
+	})
+
+	Context("job name with URL path", func() {
+		BeforeEach(func() {
+			jobName = "/job/abc/job/def"
+		})
+
+		It("should success", func() {
+			Expect(path).To(Equal(jobName))
+		})
+	})
+})
