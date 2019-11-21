@@ -150,7 +150,7 @@ var _ = Describe("plugin list command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("not support format fake\n"))
+			Expect(buf.String()).To(Equal("error: not support format fake"))
 		})
 	})
 })
