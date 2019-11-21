@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strconv"
 
@@ -29,8 +30,8 @@ func init() {
 
 var jobArtifactCmd = &cobra.Command{
 	Use:   "artifact <jobName> [buildID]",
-	Short: "Print the artifact list of target job",
-	Long:  `Print the artifact list of target job`,
+	Short: i18n.T("Print the artifact list of target job"),
+	Long:  i18n.T("Print the artifact list of target job"),
 	Run: func(cmd *cobra.Command, args []string) {
 		argLen := len(args)
 		if argLen == 0 {

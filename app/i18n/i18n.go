@@ -15,13 +15,7 @@ var knownTranslations = map[string][]string{
 	"jcli": {
 		"default",
 		"en_US",
-		"fr_FR",
 		"zh_CN",
-		"ja_JP",
-		"zh_TW",
-		"it_IT",
-		"de_DE",
-		"ko_KR",
 	},
 	// only used for unit tests.
 	"test": {
@@ -76,9 +70,7 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 
 	langStr := findLanguage(root, getLanguageFn)
 	translationFiles := []string{
-		//fmt.Sprintf("zh_CN.po", root, langStr),
-		//fmt.Sprintf("zh_CN.mo", root, langStr),
-		"jcli/zh_CN/LC_MESSAGES/jcli.mo",
+		//"jcli/zh_CN/LC_MESSAGES/jcli.mo",
 		"jcli/zh_CN/LC_MESSAGES/jcli.po",
 	}
 
@@ -106,16 +98,26 @@ func LoadTranslations(root string, getLanguageFn func() string) error {
 		return err
 	}
 	gettext.BindTextdomain("jcli", root+".zip", buf.Bytes())
-	//gettext.BindTextdomain("jcli", "app/i18n/", buf.Bytes())
 	gettext.Textdomain("jcli")
 	gettext.SetLocale(langStr)
 	return nil
 }
 
+var i18nLoaded = false
+
 // T translates a string, possibly substituting arguments into it along
 // the way. If len(args) is > 0, args1 is assumed to be the plural value
 // and plural translation is used.
 func T(defaultValue string, args ...int) string {
+	if !i18nLoaded {
+		i18nLoaded = true
+		if err := LoadTranslations("jcli", func() string {
+			return "zh_CN"
+		}); err != nil {
+			fmt.Println(err)
+		}
+	}
+
 	if len(args) == 0 {
 		return gettext.PGettext("", defaultValue)
 	}

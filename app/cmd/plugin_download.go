@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 	"net/http"
@@ -21,19 +22,19 @@ var pluginDownloadOption PluginDownloadOption
 func init() {
 	pluginCmd.AddCommand(pluginDownloadCmd)
 	pluginDownloadCmd.Flags().BoolVarP(&pluginDownloadOption.SkipDependency, "skip-dependency", "", false,
-		"If you want to skip download dependency of plugin")
+		i18n.T("If you want to skip download dependency of plugin"))
 	pluginDownloadCmd.Flags().BoolVarP(&pluginDownloadOption.SkipOptional, "skip-optional", "", true,
-		"If you want to skip download optional dependency of plugin")
+		i18n.T("If you want to skip download optional dependency of plugin"))
 	pluginDownloadCmd.Flags().BoolVarP(&pluginDownloadOption.UseMirror, "use-mirror", "", true,
-		"If you want to download plugin from a mirror site")
+		i18n.T("If you want to download plugin from a mirror site"))
 	pluginDownloadCmd.Flags().BoolVarP(&pluginDownloadOption.ShowProgress, "show-progress", "", true,
-		"If you want to show the progress of download a plugin")
+		i18n.T("If you want to show the progress of download a plugin"))
 }
 
 var pluginDownloadCmd = &cobra.Command{
 	Use:   "download <keyword>",
-	Short: "Download the plugins",
-	Long:  `Download the plugins which contain the target plugin and its dependencies`,
+	Short: i18n.T("Download the plugins"),
+	Long:  i18n.T(`Download the plugins which contain the target plugin and its dependencies`),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		jClient := &client.PluginAPI{

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
@@ -28,8 +29,8 @@ func init() {
 
 var pluginUpgradeCmd = &cobra.Command{
 	Use:   "upgrade [plugin name]",
-	Short: "Upgrade the specific plugin",
-	Long:  `Upgrade the specific plugin`,
+	Short: i18n.T("Upgrade the specific plugin"),
+	Long:  i18n.T("Upgrade the specific plugin"),
 	Run: func(cmd *cobra.Command, args []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{

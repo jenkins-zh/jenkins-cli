@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"path"
@@ -26,8 +27,8 @@ url: %s
 
 var docCmd = &cobra.Command{
 	Use:   "doc <output dir>",
-	Short: "Generate document for all jcl commands",
-	Long:  `Generate document for all jcl commands`,
+	Short: i18n.T("Generate document for all jcl commands"),
+	Long:  i18n.T("Generate document for all jcl commands"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		now := time.Now().Format(time.RFC3339)

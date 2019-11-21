@@ -43,10 +43,6 @@ var rootCmd = &cobra.Command{
 		} else {
 			client.SetLogger(logger)
 		}
-
-		//err = i18n.LoadTranslations("jcli", func() string {
-		//	return "zh_CN"
-		//})
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
@@ -77,9 +73,12 @@ var rootOptions RootOptions
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "", "An alternative config file")
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
-	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "",
+		i18n.T("An alternative config file"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
+		i18n.T("Select a Jenkins server for this time"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false,
+		i18n.T("Print the version of Jenkins CLI"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")

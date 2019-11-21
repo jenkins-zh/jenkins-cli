@@ -21,5 +21,4 @@ require (
 	github.com/spf13/cobra v0.0.5
 	go.uber.org/zap v1.12.0
 	gopkg.in/yaml.v2 v2.2.4
-	k8s.io/kubectl v0.0.0-20191115222826-fbc5d36fee2d
 )
