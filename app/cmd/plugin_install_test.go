@@ -78,7 +78,7 @@ var _ = Describe("plugin install command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("cannot found suite fake\n"))
+			Expect(buf.String()).To(Equal("error: cannot found suite fake"))
 		})
 	})
 
