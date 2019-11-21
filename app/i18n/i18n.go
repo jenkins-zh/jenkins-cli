@@ -111,9 +111,7 @@ var i18nLoaded = false
 func T(defaultValue string, args ...int) string {
 	if !i18nLoaded {
 		i18nLoaded = true
-		if err := LoadTranslations("jcli", func() string {
-			return "zh_CN"
-		}); err != nil {
+		if err := LoadTranslations("jcli", nil); err != nil {
 			fmt.Println(err)
 		}
 	}
