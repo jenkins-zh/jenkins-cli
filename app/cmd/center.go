@@ -30,11 +30,12 @@ var centerCmd = &cobra.Command{
 	Use:   "center",
 	Short: i18n.T("Manage your update center"),
 	Long:  i18n.T("Manage your update center"),
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins, cmd, centerOption.RoundTripper)
 
-		printUpdateCenter(jenkins, cmd, centerOption.RoundTripper)
+		_, err = printUpdateCenter(jenkins, cmd, centerOption.RoundTripper)
+		return
 	},
 }
 
