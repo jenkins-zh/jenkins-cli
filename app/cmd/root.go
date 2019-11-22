@@ -249,7 +249,7 @@ __jcli_custom_func() {
             __jcli_get_plugin_name
             return
             ;;
-        jcli_open)
+        jcli_open | jcli_config_select | jcli_config_remove)
             __jcli_get_config_name
             return
             ;;
