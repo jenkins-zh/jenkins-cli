@@ -30,6 +30,10 @@ msgstr "指定另外一个配置文件"
 msgid "List all Jenkins config items"
 msgstr "列出所有的 Jenkins 配置项"
 
+#: app/cmd/doc.go:30 app/cmd/doc.go:31
+msgid   "Generate document for all jcl commands"
+msgstr  "为所有的 jcli 命令生成文档"
+
 #: app/cmd/root.go:37
 msgid "jcli is a tool which could help you with your multiple Jenkins"
 msgstr "jcli 是帮助你管理多个 Jenkins 的工具"

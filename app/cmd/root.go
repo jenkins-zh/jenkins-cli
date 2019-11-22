@@ -26,6 +26,7 @@ type RootOptions struct {
 	Jenkins    string
 	Version    bool
 	Debug      bool
+	ChangeLog  bool
 
 	LoggerLevel string
 }
@@ -49,6 +50,13 @@ var rootCmd = &cobra.Command{
 			cmd.Printf("Version: %s\n", app.GetVersion())
 			cmd.Printf("Commit: %s\n", app.GetCommit())
 		}
+		if rootOptions.ChangeLog {
+			if changelog, err := app.GetChangeLog(); err == nil {
+				cmd.Printf("ChangeLog: \n%s\n", changelog)
+			} else {
+				cmd.Println(err)
+			}
+		}
 		if rootOptions.Jenkins != "" {
 			current := getCurrentJenkinsFromOptionsOrDie()
 			if current != nil {
@@ -57,7 +65,6 @@ var rootCmd = &cobra.Command{
 				cmd.Println("Cannot found the configuration")
 			}
 		}
-
 	},
 }
 
@@ -76,11 +83,13 @@ func init() {
 		i18n.T("An alternative config file"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
 		i18n.T("Select a Jenkins server for this time"))
-	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false,
-		i18n.T("Print the version of Jenkins CLI"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")
+	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
+		i18n.T("Print the version of Jenkins CLI"))
+	rootCmd.Flags().BoolVarP(&rootOptions.ChangeLog, "changelog", "", false,
+		i18n.T("Print the changelog of Jenkins CLI"))
 	rootCmd.SetOut(os.Stdout)
 }
 
