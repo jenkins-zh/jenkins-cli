@@ -47,7 +47,7 @@ copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
 tools: i18n-tools
-# 	go get -u golang.org/x/lint/golintgo-bindata
+	go get -u golang.org/x/lint/golint
 
 i18n-tools:
 	go get github.com/gosexy/gettext/go-xgettext
