@@ -36,13 +36,11 @@ var rootCmd = &cobra.Command{
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		var err error
-		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
-			cmd.PrintErrln(err)
-		} else {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
 			client.SetLogger(logger)
 		}
+		return
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
