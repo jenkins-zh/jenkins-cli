@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
@@ -31,8 +32,8 @@ func init() {
 
 var pluginListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Print all the plugins which are installed",
-	Long:  `Print all the plugins which are installed`,
+	Short: i18n.T("Print all the plugins which are installed"),
+	Long:  i18n.T("Print all the plugins which are installed"),
 	Example: `  jcli plugin list --filter name=github
   jcli plugin list --filter hasUpdate
   jcli plugin list --no-headers`,

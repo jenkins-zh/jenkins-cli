@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -26,13 +28,14 @@ func init() {
 
 var centerCmd = &cobra.Command{
 	Use:   "center",
-	Short: "Manage your update center",
-	Long:  `Manage your update center`,
-	Run: func(cmd *cobra.Command, _ []string) {
+	Short: i18n.T("Manage your update center"),
+	Long:  i18n.T("Manage your update center"),
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins, cmd, centerOption.RoundTripper)
 
-		printUpdateCenter(jenkins, cmd, centerOption.RoundTripper)
+		_, err = printUpdateCenter(jenkins, cmd, centerOption.RoundTripper)
+		return
 	},
 }
 

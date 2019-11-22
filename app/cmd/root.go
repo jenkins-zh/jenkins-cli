@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -31,21 +32,19 @@ type RootOptions struct {
 
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
-	Short: "jcli is a tool which could help you with your multiple Jenkins",
+	Short: i18n.T("jcli is a tool which could help you with your multiple Jenkins"),
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
 				  Manage your Jenkins and your pipelines
 				  More information could found at https://jenkins-zh.cn`,
-	BashCompletionFunction: jcliBashCompletionFunc,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		var err error
-		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err != nil {
-			cmd.PrintErrln(err)
-		} else {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
 			client.SetLogger(logger)
 		}
+		return
 	},
+	BashCompletionFunction: jcliBashCompletionFunc,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("Jenkins CLI (jcli) manage your Jenkins")
+		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 		if rootOptions.Version {
 			cmd.Printf("Version: %s\n", app.GetVersion())
 			cmd.Printf("Commit: %s\n", app.GetCommit())
@@ -58,7 +57,6 @@ var rootCmd = &cobra.Command{
 				cmd.Println("Cannot found the configuration")
 			}
 		}
-
 	},
 }
 
@@ -73,12 +71,15 @@ var rootOptions RootOptions
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "", "An alternative config file")
-	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "", "Select a Jenkins server for this time")
-	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Version, "version", "v", false, "Print the version of Jenkins CLI")
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "",
+		i18n.T("An alternative config file"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
+		i18n.T("Select a Jenkins server for this time"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")
+	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
+		i18n.T("Print the version of Jenkins CLI"))
 	rootCmd.SetOut(os.Stdout)
 }
 

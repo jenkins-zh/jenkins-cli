@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
@@ -29,8 +30,8 @@ func init() {
 
 var pluginSearchCmd = &cobra.Command{
 	Use:   "search <keyword>",
-	Short: "Print the plugins of your Jenkins",
-	Long:  `Print the plugins of your Jenkins`,
+	Short: i18n.T("Print the plugins of your Jenkins"),
+	Long:  i18n.T("Print the plugins of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		keyword := args[0]

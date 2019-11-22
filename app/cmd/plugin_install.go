@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -23,15 +24,15 @@ var pluginInstallOption PluginInstallOption
 func init() {
 	pluginCmd.AddCommand(pluginInstallCmd)
 	pluginInstallCmd.Flags().BoolVarP(&pluginInstallOption.UseMirror, "use-mirror", "", true,
-		"If you want to download plugin from a mirror site")
+		i18n.T("If you want to download plugin from a mirror site"))
 	pluginInstallCmd.Flags().BoolVarP(&pluginInstallOption.ShowProgress, "show-progress", "", true,
-		"If you want to show the progress of download a plugin")
+		i18n.T("If you want to show the progress of download a plugin"))
 	pluginInstallCmd.Flags().StringVarP(&pluginOpt.Suite, "suite", "", "", "Suite of plugins")
 }
 
 var pluginInstallCmd = &cobra.Command{
 	Use:   "install [pluginName]",
-	Short: "Install the plugins",
+	Short: i18n.T("Install the plugins"),
 	Long: `Install the plugins
 Allow you to install a plugin with or without the version`,
 	Example: `jcli plugin install localization-zh-cn

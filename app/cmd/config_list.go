@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -24,8 +25,8 @@ func init() {
 
 var configListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all Jenkins config items",
-	Long:  `List all Jenkins config items`,
+	Short: i18n.T("List all Jenkins config items"),
+	Long:  i18n.T("List all Jenkins config items"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 

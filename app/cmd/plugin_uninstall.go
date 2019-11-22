@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -22,8 +23,8 @@ func init() {
 
 var pluginUninstallCmd = &cobra.Command{
 	Use:   "uninstall [pluginName]",
-	Short: "Uninstall the plugins",
-	Long:  `Uninstall the plugins`,
+	Short: i18n.T("Uninstall the plugins"),
+	Long:  i18n.T("Uninstall the plugins"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		pluginName := args[0]

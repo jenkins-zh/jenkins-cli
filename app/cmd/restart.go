@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -25,8 +26,8 @@ func init() {
 
 var restartCmd = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart your Jenkins",
-	Long:  `Restart your Jenkins`,
+	Short: i18n.T("Restart your Jenkins"),
+	Long:  i18n.T("Restart your Jenkins"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		if !restartOption.Batch {

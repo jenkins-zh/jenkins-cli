@@ -2,13 +2,17 @@ package cmd
 
 import (
 	"fmt"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
+	"io/ioutil"
+	"log"
+	"os"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
-	"os"
 )
 
 // ConfigOptions is the config cmd option
@@ -25,8 +29,8 @@ func init() {
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   "Manage the config of jcli",
-	Long:    `Manage the config of jcli`,
+	Short:   i18n.T("Manage the config of jcli"),
+	Long:    i18n.T("Manage the config of jcli"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {

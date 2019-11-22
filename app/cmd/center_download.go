@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -25,18 +26,22 @@ var centerDownloadOption CenterDownloadOption
 
 func init() {
 	centerCmd.AddCommand(centerDownloadCmd)
-	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.LTS, "lts", "", true, "If you want to download Jenkins as LTS")
+	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.LTS, "lts", "", true,
+		i18n.T("If you want to download Jenkins as LTS"))
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Version, "war-version", "", "",
-		"Version of the Jenkins which you want to download")
-	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Mirror, "mirror", "m", "default", "The mirror site of Jenkins")
-	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.ShowProgress, "progress", "p", true, "If you want to show the download progress")
-	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Output, "output", "o", "jenkins.war", "The file of output")
+		i18n.T("Version of the Jenkins which you want to download"))
+	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Mirror, "mirror", "m", "default",
+		i18n.T("The mirror site of Jenkins"))
+	centerDownloadCmd.Flags().BoolVarP(&centerDownloadOption.ShowProgress, "progress", "p", true,
+		i18n.T("If you want to show the download progress"))
+	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Output, "output", "o", "jenkins.war",
+		i18n.T("The file of output"))
 }
 
 var centerDownloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: "Download Jenkins",
-	Long:  `Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/`,
+	Short: i18n.T("Download Jenkins"),
+	Long:  i18n.T(`Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/`),
 	Run: func(cmd *cobra.Command, _ []string) {
 		mirrorSite := getMirror(centerDownloadOption.Mirror)
 		if mirrorSite == "" {
