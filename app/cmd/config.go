@@ -2,15 +2,16 @@ package cmd
 
 import (
 	"fmt"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"go.uber.org/zap"
-
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -147,12 +148,14 @@ func findSuiteByName(name string) (suite *PluginSuite) {
 }
 
 func loadDefaultConfig() (err error) {
-	userHome := userHomeDir()
-	configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
-	if _, err = os.Stat(configPath); err == nil {
-		err = loadConfig(configPath)
+	var userHome string
+	userHome, err = homedir.Dir()
+	if err == nil {
+		configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+		if _, err = os.Stat(configPath); err == nil {
+			err = loadConfig(configPath)
+		}
 	}
-
 	return
 }
 
@@ -206,18 +209,11 @@ func saveConfig() (err error) {
 	return
 }
 
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	} else if runtime.GOOS == "linux" {
-		home := os.Getenv("XDG_CONFIG_HOME")
-		if home != "" {
-			return home
-		}
+// GetConfigFromHome returns the config file path from user home dir
+func GetConfigFromHome() (configPath string, homeErr error) {
+	userHome, homeErr := homedir.Dir()
+	if homeErr == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
 	}
-	return os.Getenv("HOME")
+	return
 }

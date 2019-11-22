@@ -93,7 +93,7 @@ var _ = Describe("plugin search command", func() {
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareForNoAvailablePlugins(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.PrepareForManyInstalledPlugins(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareForManyInstalledPlugins(roundTripper, "http://localhost:8080/jenkins", 1)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 
@@ -101,11 +101,10 @@ var _ = Describe("plugin search command", func() {
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-
 			Expect(buf.String()).To(Equal(`number name       installed version installedVersion title
 0      fake-ocean true              1.18.111         fake-ocean
 1      fake-ln    true              1.18.1           fake-ln
-2      fake-is    true              1.18.111         fake-is
+2      fake-is    true              1.18.131-2.0     fake-is
 3      fake-oa    false                              fake-oa
 4      fake-open  false                              fake-open
 5      fake       true              1.0              fake
@@ -122,7 +121,7 @@ var _ = Describe("plugin search command", func() {
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request, _ = client.PrepareForRequest500UpdateCenter(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request, _ = client.PrepareFor500InstalledPluginList(roundTripper, "http://localhost:8080/jenkins")
+			request, _ = client.PrepareFor500InstalledPluginList(roundTripper, "http://localhost:8080/jenkins", 1)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			rootCmd.SetArgs([]string{"plugin", "search", "fake"})
 

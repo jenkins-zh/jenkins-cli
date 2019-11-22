@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -28,9 +29,10 @@ func init() {
 }
 
 var pluginUpgradeCmd = &cobra.Command{
-	Use:   "upgrade [plugin name]",
-	Short: i18n.T("Upgrade the specific plugin"),
-	Long:  i18n.T("Upgrade the specific plugin"),
+	Use:     "upgrade [plugin name]",
+	Short:   i18n.T("Upgrade the specific plugin"),
+	Long:    i18n.T("Upgrade the specific plugin"),
+	Example: `jcli plugin upgrade [tab][tab]`,
 	Run: func(cmd *cobra.Command, args []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
@@ -85,7 +87,7 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 		}
 	}
 
-	if plugins, err = jclient.GetPlugins(); err != nil {
+	if plugins, err = jclient.GetPlugins(1); err != nil {
 		return
 	}
 

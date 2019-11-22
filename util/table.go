@@ -13,6 +13,8 @@ type Table struct {
 	ColumnWidths []int
 	ColumnAlign  []int
 	Separator    string
+
+	WithHeader bool
 }
 
 // CreateTable init a table object
@@ -23,6 +25,13 @@ func CreateTable(out io.Writer) Table {
 	}
 }
 
+// CreateTableWithHeader init a table object
+func CreateTableWithHeader(out io.Writer, withoutHeader bool) (table Table) {
+	table = CreateTable(out)
+	table.WithHeader = !withoutHeader
+	return
+}
+
 // Clear removes all rows while preserving the layout
 func (t *Table) Clear() {
 	t.Rows = [][]string{}
@@ -31,6 +40,14 @@ func (t *Table) Clear() {
 // AddRow adds a new row to the table
 func (t *Table) AddRow(col ...string) {
 	t.Rows = append(t.Rows, col)
+}
+
+// AddHeader adds a header to the table
+func (t *Table) AddHeader(col ...string) {
+	if !t.WithHeader {
+		return
+	}
+	t.AddRow(col...)
 }
 
 // Render render the table into byte array

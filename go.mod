@@ -16,9 +16,10 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
 	github.com/spf13/cobra v0.0.5
-	go.uber.org/zap v1.12.0
-	gopkg.in/yaml.v2 v2.2.4
+	go.uber.org/zap v1.13.0
+	gopkg.in/yaml.v2 v2.2.5
 )

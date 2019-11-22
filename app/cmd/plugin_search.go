@@ -25,7 +25,7 @@ var pluginSearchOption PluginSearchOption
 
 func init() {
 	pluginCmd.AddCommand(pluginSearchCmd)
-	pluginSearchCmd.PersistentFlags().StringVarP(&pluginSearchOption.Format, "output", "o", TableOutputFormat, "Format the output")
+	pluginSearchOption.SetFlag(pluginSearchCmd)
 }
 
 var pluginSearchCmd = &cobra.Command{
@@ -80,7 +80,7 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
 	noSite := (err != nil || site == nil)
-	installedPlugins, err := pluginJclient.GetPlugins()
+	installedPlugins, err := pluginJclient.GetPlugins(1)
 	noInstalledPlugin := (err != nil || installedPlugins == nil)
 	for _, plugin := range plugins {
 		result = buildData(noSite, site, plugin, result, noInstalledPlugin, installedPlugins)
@@ -169,8 +169,8 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 		buf := new(bytes.Buffer)
 
 		if len(pluginList) != 0 {
-			table := util.CreateTable(buf)
-			table.AddRow("number", "name", "installed", "version", "installedVersion", "title")
+			table := util.CreateTableWithHeader(buf, pluginSearchOption.WithoutHeaders)
+			table.AddHeader("number", "name", "installed", "version", "installedVersion", "title")
 
 			for i, plugin := range pluginList {
 				formatTable(&table, i, plugin)
@@ -185,7 +185,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 
 func formatTable(table *util.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
-	if installed != (client.InstalledPlugin{}) {
+	if installed.Active {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,
 			fmt.Sprintf("%t", true), plugin.Version, installed.Version, plugin.Title)
 	} else {
