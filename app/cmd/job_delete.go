@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -26,8 +27,8 @@ func init() {
 
 var jobDeleteCmd = &cobra.Command{
 	Use:   "delete <jobName>",
-	Short: "Delete a job in your Jenkins",
-	Long:  `Delete a job in your Jenkins`,
+	Short: i18n.T("Delete a job in your Jenkins"),
+	Long:  i18n.T("Delete a job in your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		jobName := args[0]

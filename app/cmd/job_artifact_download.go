@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -27,15 +28,18 @@ var jobArtifactDownloadOption JobArtifactDownloadOption
 
 func init() {
 	jobArtifactCmd.AddCommand(jobArtifactDownloadCmd)
-	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.ID, "id", "i", "", "ID of the job artifact")
-	jobArtifactDownloadCmd.Flags().BoolVarP(&jobArtifactDownloadOption.ShowProgress, "progress", "", true, "Whether show the progress")
-	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.DownloadDir, "download-dir", "", "", "The directory which artifact will be downloaded")
+	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.ID, "id", "i", "",
+		i18n.T("ID of the job artifact"))
+	jobArtifactDownloadCmd.Flags().BoolVarP(&jobArtifactDownloadOption.ShowProgress, "progress", "", true,
+		i18n.T("Whether show the progress"))
+	jobArtifactDownloadCmd.Flags().StringVarP(&jobArtifactDownloadOption.DownloadDir, "download-dir", "", "",
+		i18n.T("The directory which artifact will be downloaded"))
 }
 
 var jobArtifactDownloadCmd = &cobra.Command{
 	Use:   "download <jobName> [buildID]",
-	Short: "Download the artifact of target job",
-	Long:  `Download the artifact of target job`,
+	Short: i18n.T("Download the artifact of target job"),
+	Long:  i18n.T(`Download the artifact of target job`),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		argLen := len(args)

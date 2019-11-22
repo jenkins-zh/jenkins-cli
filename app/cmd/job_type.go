@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -28,8 +29,8 @@ func init() {
 
 var jobTypeCmd = &cobra.Command{
 	Use:   "type",
-	Short: "Print the types of job which in your Jenkins",
-	Long:  `Print the types of job which in your Jenkins`,
+	Short: i18n.T("Print the types of job which in your Jenkins"),
+	Long:  i18n.T("Print the types of job which in your Jenkins"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{

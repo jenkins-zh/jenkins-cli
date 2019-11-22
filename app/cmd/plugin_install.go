@@ -33,8 +33,8 @@ func init() {
 var pluginInstallCmd = &cobra.Command{
 	Use:   "install [pluginName]",
 	Short: i18n.T("Install the plugins"),
-	Long: `Install the plugins
-Allow you to install a plugin with or without the version`,
+	Long: i18n.T(`Install the plugins
+Allow you to install a plugin with or without the version`),
 	Example: `jcli plugin install localization-zh-cn
 jcli plugin install localization-zh-cn@1.0.9
 `,

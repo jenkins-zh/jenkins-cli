@@ -2,13 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
-
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
+	"net/http"
+	"strconv"
 )
 
 // JobStopOption is the job stop option
@@ -26,18 +24,16 @@ func init() {
 }
 
 var jobStopCmd = &cobra.Command{
-	Use:   "stop <jobName> <buildNumber>",
-	Short: "Stop a job build in your Jenkins",
-	Long:  `Stop a job build in your Jenkins`,
-	Args:  cobra.MinimumNArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			buildNum int
-			err      error
-		)
-		if buildNum, err = strconv.Atoi(args[1]); err != nil {
-			cmd.PrintErrln(err)
-			return
+	Use:   "stop <jobName> [buildNumber]",
+	Short: i18n.T("Stop a job build in your Jenkins"),
+	Long:  i18n.T("Stop a job build in your Jenkins"),
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		buildNum := -1
+		if len(args) > 1 {
+			if buildNum, err = strconv.Atoi(args[1]); err != nil {
+				return
+			}
 		}
 
 		jobName := args[0]
@@ -52,7 +48,6 @@ var jobStopCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		err = jclient.StopJob(jobName, buildNum)
-		helper.CheckErr(cmd, err)
+		return jclient.StopJob(jobName, buildNum)
 	},
 }

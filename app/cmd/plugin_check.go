@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"net/http"
 
@@ -23,8 +24,8 @@ func init() {
 
 var pluginCheckCmd = &cobra.Command{
 	Use:   "check",
-	Short: "Check update center server",
-	Long:  `Check update center server`,
+	Short: i18n.T("Check update center server"),
+	Long:  i18n.T(`Check update center server`),
 	Run: func(cmd *cobra.Command, _ []string) {
 		jClient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{

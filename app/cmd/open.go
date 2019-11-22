@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
 	"os/exec"
 	"runtime"
@@ -22,15 +23,17 @@ var openOption OpenOption
 
 func init() {
 	rootCmd.AddCommand(openCmd)
-	openCmd.Flags().StringVarP(&openOption.Name, "name", "n", "", "Open a specific Jenkins by name")
-	openCmd.Flags().BoolVarP(&openOption.Config, "config", "c", false, "Open the configuration page of Jenkins")
+	openCmd.Flags().StringVarP(&openOption.Name, "name", "n", "",
+		i18n.T("Open a specific Jenkins by name"))
+	openCmd.Flags().BoolVarP(&openOption.Config, "config", "c", false,
+		i18n.T("Open the configuration page of Jenkins"))
 	openOption.SetFlag(openCmd)
 }
 
 var openCmd = &cobra.Command{
 	Use:     "open [config name]",
-	Short:   "Open your Jenkins with a browse",
-	Long:    `Open your Jenkins with a browse`,
+	Short:   i18n.T("Open your Jenkins with a browse"),
+	Long:    i18n.T(`Open your Jenkins with a browse`),
 	Example: `jcli open -n <config name>`,
 	Run: func(_ *cobra.Command, args []string) {
 		var jenkins *JenkinsServer

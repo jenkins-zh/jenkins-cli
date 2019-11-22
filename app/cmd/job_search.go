@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
@@ -24,16 +25,18 @@ var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
-	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Max, "max", "", 10, "The number of limitation to print")
-	jobSearchCmd.Flags().BoolVarP(&jobSearchOption.PrintAll, "all", "", false, "Print all items if there's no keyword")
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Max, "max", "", 10,
+		i18n.T("The number of limitation to print"))
+	jobSearchCmd.Flags().BoolVarP(&jobSearchOption.PrintAll, "all", "", false,
+		i18n.T("Print all items if there's no keyword"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "json",
-		`Formats of the output which contain name, path`)
+		i18n.T(`Formats of the output which contain name, path`))
 }
 
 var jobSearchCmd = &cobra.Command{
 	Use:   "search [keyword]",
-	Short: "Print the job of your Jenkins",
-	Long:  `Print the job of your Jenkins`,
+	Short: i18n.T("Print the job of your Jenkins"),
+	Long:  i18n.T(`Print the job of your Jenkins`),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !jobSearchOption.PrintAll && len(args) == 0 {
 			cmd.Help()
