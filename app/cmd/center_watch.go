@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -23,9 +24,9 @@ var centerWatchOption CenterWatchOption
 func init() {
 	centerCmd.AddCommand(centerWatchCmd)
 	centerWatchCmd.Flags().BoolVarP(&centerWatchOption.UtilNeedRestart, "util-need-restart", "", false,
-		"The watch will be continue util Jenkins needs restart")
+		i18n.T("The watch will be continue util Jenkins needs restart"))
 	centerWatchCmd.Flags().BoolVarP(&centerWatchOption.UtilInstallComplete, "util-install-complete", "", false,
-		"The watch will be continue util all Jenkins plugins installation is completed")
+		i18n.T("The watch will be continue util all Jenkins plugins installation is completed"))
 	centerWatchOption.SetFlag(centerWatchCmd)
 }
 

@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
@@ -28,7 +29,7 @@ func init() {
 var centerCmd = &cobra.Command{
 	Use:   "center",
 	Short: i18n.T("Manage your update center"),
-	Long:  `Manage your update center`,
+	Long:  i18n.T("Manage your update center"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins, cmd, centerOption.RoundTripper)

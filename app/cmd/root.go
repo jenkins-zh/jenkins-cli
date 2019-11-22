@@ -26,7 +26,6 @@ type RootOptions struct {
 	Jenkins    string
 	Version    bool
 	Debug      bool
-	ChangeLog  bool
 
 	LoggerLevel string
 }
@@ -81,8 +80,6 @@ func init() {
 		"Logger level which could be: debug, info, warn, error")
 	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
 		i18n.T("Print the version of Jenkins CLI"))
-	rootCmd.Flags().BoolVarP(&rootOptions.ChangeLog, "changelog", "", false,
-		i18n.T("Print the changelog of Jenkins CLI"))
 	rootCmd.SetOut(os.Stdout)
 }
 

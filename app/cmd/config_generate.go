@@ -1,13 +1,15 @@
 package cmd
 
 import (
+	"io/ioutil"
+	"os"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/atotto/clipboard"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 // ConfigGenerateOption is the config generate cmd option
@@ -20,15 +22,17 @@ var configGenerateOption ConfigGenerateOption
 
 func init() {
 	configCmd.AddCommand(configGenerateCmd)
-	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Interactive, "interactive", "i", true, "Interactive mode")
-	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false, "Copy the output into clipboard")
+	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Interactive, "interactive", "i", true,
+		i18n.T("Interactive mode"))
+	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
+		i18n.T("Copy the output into clipboard"))
 }
 
 var configGenerateCmd = &cobra.Command{
 	Use:     "generate",
 	Aliases: []string{"gen"},
-	Short:   "Generate a sample config file for you",
-	Long:    `Generate a sample config file for you`,
+	Short:   i18n.T("Generate a sample config file for you"),
+	Long:    i18n.T("Generate a sample config file for you"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		data, err := generateSampleConfig()
 		if err == nil {

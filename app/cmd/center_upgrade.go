@@ -3,7 +3,7 @@ package cmd
 import (
 	"net/http"
 
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -22,9 +22,9 @@ func init() {
 
 var centerUpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
-	Short: "Upgrade your Jenkins",
-	Long:  `Upgrade your Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
+	Short: i18n.T("Upgrade your Jenkins"),
+	Long:  i18n.T("Upgrade your Jenkins"),
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
 		jclient := &client.UpdateCenterManager{
@@ -38,7 +38,7 @@ var centerUpgradeCmd = &cobra.Command{
 		jclient.Proxy = jenkins.Proxy
 		jclient.ProxyAuth = jenkins.ProxyAuth
 
-		err := jclient.Upgrade()
-		helper.CheckErr(cmd, err)
+		err = jclient.Upgrade()
+		return
 	},
 }

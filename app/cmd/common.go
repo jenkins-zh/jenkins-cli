@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -96,7 +97,8 @@ type InteractiveOption struct {
 
 // SetFlag set the option flag to this cmd
 func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
+	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false,
+		i18n.T("Interactive mode"))
 }
 
 // HookOption is the option whether skip command hook
