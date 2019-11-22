@@ -50,13 +50,6 @@ var rootCmd = &cobra.Command{
 			cmd.Printf("Version: %s\n", app.GetVersion())
 			cmd.Printf("Commit: %s\n", app.GetCommit())
 		}
-		if rootOptions.ChangeLog {
-			if changelog, err := app.GetChangeLog(); err == nil {
-				cmd.Printf("ChangeLog: \n%s\n", changelog)
-			} else {
-				cmd.Println(err)
-			}
-		}
 		if rootOptions.Jenkins != "" {
 			current := getCurrentJenkinsFromOptionsOrDie()
 			if current != nil {
