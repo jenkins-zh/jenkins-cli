@@ -219,6 +219,36 @@ var _ = Describe("job test", func() {
 			err := jobClient.StopJob(jobName, buildID)
 			Expect(err).To(BeNil())
 		})
+
+		It("stop the last job build without a folder", func() {
+			jobName := "fakeJob"
+			buildID := -1
+			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
+			request.Header.Add("CrumbRequestField", "Crumb")
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			responseCrumb := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    requestCrumb,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+				`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+
+			err := jobClient.StopJob(jobName, buildID)
+			Expect(err).To(BeNil())
+		})
 	})
 
 	Context("GetJob", func() {

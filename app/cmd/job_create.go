@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -28,10 +28,10 @@ func init() {
 
 var jobCreateCmd = &cobra.Command{
 	Use:   "create <jobName>",
-	Short: "Create a job in your Jenkins",
-	Long:  `Create a job in your Jenkins`,
+	Short: i18n.T("Create a job in your Jenkins"),
+	Long:  i18n.T(`Create a job in your Jenkins`),
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jobName := args[0]
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
@@ -41,7 +41,6 @@ var jobCreateCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		var createMode string
-		var err error
 		if createMode, err = jobCreateOption.getCreateMode(jclient); err == nil {
 			payload := client.CreateJobPayload{
 				Name: jobName,
@@ -54,7 +53,7 @@ var jobCreateCmd = &cobra.Command{
 			}
 			err = jclient.Create(payload)
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 

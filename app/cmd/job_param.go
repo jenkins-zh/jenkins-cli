@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -29,8 +30,8 @@ func init() {
 
 var jobParamCmd = &cobra.Command{
 	Use:   "param <jobName>",
-	Short: "Get parameters of the job of your Jenkins",
-	Long:  `Get parameters of the job of your Jenkins`,
+	Short: i18n.T("Get parameters of the job of your Jenkins"),
+	Long:  i18n.T("Get parameters of the job of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]

@@ -1,12 +1,11 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -25,22 +24,21 @@ var jobEditOption JobEditOption
 func init() {
 	jobCmd.AddCommand(jobEditCmd)
 	jobEditCmd.Flags().StringVarP(&jobEditOption.URL, "url", "", "",
-		"URL of the Jenkinsfile to files to use to replace pipeline")
+		i18n.T("URL of the Jenkinsfile to files to use to replace pipeline"))
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Filename, "filename", "f", "",
-		"Filename to files to use to replace pipeline")
+		i18n.T("Filename to files to use to replace pipeline"))
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Script, "script", "s", "",
-		"Script to use to replace pipeline. Use script first if you give filename at the meantime.")
+		i18n.T("Script to use to replace pipeline. Use script first if you give filename at the meantime."))
 }
 
 var jobEditCmd = &cobra.Command{
 	Use:   "edit <jobName>",
-	Short: "Edit the job of your Jenkins",
-	Long:  `Edit the job of your Jenkins. We only support to edit the pipeline job.`,
+	Short: i18n.T("Edit the job of your Jenkins"),
+	Long:  i18n.T(`Edit the job of your Jenkins. We only support to edit the pipeline job.`),
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 		var content string
-		var err error
 
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
@@ -52,7 +50,7 @@ var jobEditCmd = &cobra.Command{
 		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
 			err = jclient.UpdatePipeline(name, content)
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 

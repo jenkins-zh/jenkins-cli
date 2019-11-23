@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
 	"net/http"
 	"strconv"
@@ -27,19 +28,16 @@ var jobInputOption JobInputOption
 
 func init() {
 	jobCmd.AddCommand(jobInputCmd)
-	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "", "The action wether you want to process or abort.")
+	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "",
+		i18n.T("The action whether you want to process or abort."))
 }
 
 var jobInputCmd = &cobra.Command{
 	Use:   "input <jobName> [buildID]",
-	Short: "Input a job in your Jenkins",
-	Long:  `Input a job in your Jenkins`,
+	Short: i18n.T("Input a job in your Jenkins"),
+	Long:  i18n.T("Input a job in your Jenkins"),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 1 {
-			cmd.Help()
-			return
-		}
-
 		jobName := args[0]
 		buildID := -1
 

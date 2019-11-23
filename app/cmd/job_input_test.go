@@ -7,7 +7,6 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 
@@ -54,16 +53,12 @@ var _ = Describe("job input command", func() {
 
 			rootCmd.SetArgs([]string{"job", "input"})
 
-			jobInputCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).To(HaveOccurred())
 
-			Expect(buf.String()).To(Equal("help"))
+			Expect(buf.String()).To(ContainSubstring("Error: requires at least 1 arg(s)"))
 		})
 
 		It("should success, abort without inputs", func() {

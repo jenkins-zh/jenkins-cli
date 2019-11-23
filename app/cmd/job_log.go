@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"time"
 
@@ -24,16 +25,19 @@ var jobLogOption JobLogOption
 
 func init() {
 	jobCmd.AddCommand(jobLogCmd)
-	jobLogCmd.Flags().IntVarP(&jobLogOption.History, "history", "s", -1, "Specific build history of log")
-	jobLogCmd.Flags().BoolVarP(&jobLogOption.Watch, "watch", "w", false, "Watch the job logs")
-	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 1, "Interval of watch")
+	jobLogCmd.Flags().IntVarP(&jobLogOption.History, "history", "s", -1,
+		i18n.T("Specific build history of log"))
+	jobLogCmd.Flags().BoolVarP(&jobLogOption.Watch, "watch", "w", false,
+		i18n.T("Watch the job logs"))
+	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 1,
+		i18n.T("Interval of watch"))
 }
 
 var jobLogCmd = &cobra.Command{
 	Use:   "log <jobName> [buildID]",
-	Short: "Print the job's log of your Jenkins",
-	Long: `Print the job's log of your Jenkins
-It'll print the log text of the last build if you don't give the build id.`,
+	Short: i18n.T("Print the job's log of your Jenkins"),
+	Long: i18n.T(`Print the job's log of your Jenkins
+It'll print the log text of the last build if you don't give the build id.`),
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]

@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
 	"net/http"
 
@@ -32,8 +33,8 @@ func init() {
 
 var jobBuildCmd = &cobra.Command{
 	Use:   "build <jobName>",
-	Short: "Build the job of your Jenkins",
-	Long:  `Build the job of your Jenkins`,
+	Short: i18n.T("Build the job of your Jenkins"),
+	Long:  i18n.T("Build the job of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]

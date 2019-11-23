@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -26,10 +26,10 @@ func init() {
 
 var jobHistoryCmd = &cobra.Command{
 	Use:   "history <jobName>",
-	Short: "Print the history of job in your Jenkins",
-	Long:  `Print the history of job in your Jenkins`,
+	Short: i18n.T("Print the history of job in your Jenkins"),
+	Long:  i18n.T(`Print the history of job in your Jenkins`),
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jobName := args[0]
 
 		jClient := &client.JobClient{
@@ -39,7 +39,8 @@ var jobHistoryCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
-		builds, err := jClient.GetHistory(jobName)
+		var builds []*client.JobBuild
+		builds, err = jClient.GetHistory(jobName)
 		if err == nil {
 			var data []byte
 			data, err = jobHistoryOption.Output(builds)
@@ -47,7 +48,7 @@ var jobHistoryCmd = &cobra.Command{
 				cmd.Print(string(data))
 			}
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 

@@ -69,7 +69,13 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 // StopJob stops a job build
 func (q *JobClient) StopJob(jobName string, num int) (err error) {
 	path := ParseJobPath(jobName)
-	api := fmt.Sprintf("%s/%d/stop", path, num)
+
+	var api string
+	if num <= 0 {
+		api = fmt.Sprintf("%s/lastBuild/stop", path)
+	} else {
+		api = fmt.Sprintf("%s/%d/stop", path, num)
+	}
 
 	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
 	return

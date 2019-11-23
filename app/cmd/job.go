@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +19,8 @@ func init() {
 
 var jobCmd = &cobra.Command{
 	Use:   "job",
-	Short: "Manage the job of your Jenkins",
-	Long: `Manage the job of your Jenkins
+	Short: i18n.T("Manage the job of your Jenkins"),
+	Long: i18n.T(`Manage the job of your Jenkins
 Editing the pipeline job needs to install a plugin which is pipeline-restful-api
-https://plugins.jenkins.io/pipeline-restful-api`,
+https://plugins.jenkins.io/pipeline-restful-api`),
 }
