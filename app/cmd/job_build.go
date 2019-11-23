@@ -6,6 +6,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -16,8 +17,9 @@ import (
 type JobBuildOption struct {
 	BatchOption
 
-	Param string
-	Debug bool
+	Param      string
+	ParamArray []string
+	Debug      bool
 
 	RoundTripper http.RoundTripper
 }
@@ -26,16 +28,49 @@ var jobBuildOption JobBuildOption
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
-	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
-	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "", "Params of the job")
-	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Debug, "verbose", "", false, "Output the verbose")
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false,
+		i18n.T("Batch mode, no need to confirm"))
+	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "",
+		i18n.T("Parameters of the job which is JSON format"))
+	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
+		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Debug, "verbose", "", false,
+		i18n.T("Output the verbose"))
 }
 
 var jobBuildCmd = &cobra.Command{
 	Use:   "build <jobName>",
 	Short: i18n.T("Build the job of your Jenkins"),
-	Long:  i18n.T("Build the job of your Jenkins"),
-	Args:  cobra.MinimumNArgs(1),
+	Long: i18n.T(`Build the job of your Jenkins.
+You need to give the parameters if your pipeline has them. Learn more about it from https://jenkins.io/doc/book/pipeline/syntax/#parameters.`),
+	Args: cobra.MinimumNArgs(1),
+	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
+		if jobBuildOption.ParamArray == nil {
+			return
+		}
+
+		paramDefs := make([]client.ParameterDefinition, 0)
+		if jobBuildOption.Param != "" {
+			if err = json.Unmarshal([]byte(jobBuildOption.Param), &paramDefs); err != nil {
+				return
+			}
+		}
+
+		for _, paramEntry := range jobBuildOption.ParamArray {
+			if entryArray := strings.SplitN(paramEntry, "=", 2); len(entryArray) == 2 {
+				paramDefs = append(paramDefs, client.ParameterDefinition{
+					Name:  entryArray[0],
+					Value: entryArray[1],
+				})
+			}
+		}
+
+		var data []byte
+		if data, err = json.Marshal(paramDefs); err == nil {
+			jobBuildOption.Param = string(data)
+		}
+		return
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
