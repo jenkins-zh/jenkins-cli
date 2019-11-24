@@ -19,12 +19,16 @@ type JobBuildOption struct {
 
 	Param      string
 	ParamArray []string
-	Debug      bool
 
 	RoundTripper http.RoundTripper
 }
 
 var jobBuildOption JobBuildOption
+
+// ResetJobBuildOption give it a clean option struct
+func ResetJobBuildOption() {
+	jobBuildOption = JobBuildOption{}
+}
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
@@ -34,8 +38,6 @@ func init() {
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
-	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Debug, "verbose", "", false,
-		i18n.T("Output the verbose"))
 }
 
 var jobBuildCmd = &cobra.Command{
@@ -71,7 +73,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 		}
 		return
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 
 		if !jobBuildOption.Batch && !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
@@ -88,19 +90,15 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
 
+		var job *client.Job
 		if jobBuildOption.Batch {
 			if jobBuildOption.Param != "" {
 				hasParam = true
 
-				if err := json.Unmarshal([]byte(jobBuildOption.Param), &paramDefs); err != nil {
-					log.Fatal(err)
-				}
+				err = json.Unmarshal([]byte(jobBuildOption.Param), &paramDefs)
 			}
-		} else if job, err := jclient.GetJob(name); err == nil {
+		} else if job, err = jclient.GetJob(name); err == nil {
 			proCount := len(job.Property)
-			if jobBuildOption.Debug {
-				fmt.Println("Found properties ", proCount)
-			}
 			if proCount != 0 {
 				for _, pro := range job.Property {
 					if len(pro.ParameterDefinitions) == 0 {
@@ -129,17 +127,15 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 					break
 				}
 			}
-		} else {
-			log.Fatal(err)
 		}
 
-		if hasParam {
-			jclient.BuildWithParams(name, paramDefs)
-		} else {
-			if jobBuildOption.Debug {
-				fmt.Println("Not params found")
+		if err == nil {
+			if hasParam {
+				err = jclient.BuildWithParams(name, paramDefs)
+			} else {
+				err = jclient.Build(name)
 			}
-			jclient.Build(name)
 		}
+		return
 	},
 }

@@ -125,7 +125,7 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 
 func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *JenkinsServer) {
 	if jenkinsServer = getCurrentJenkinsFromOptions(); jenkinsServer == nil {
-		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins) // TODO not accurate
+		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins)
 	}
 	return
 }

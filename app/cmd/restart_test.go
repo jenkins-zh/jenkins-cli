@@ -68,7 +68,7 @@ var _ = Describe("restart command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("The current user no permission\n"))
+			Expect(buf.String()).To(Equal("bad request, code 400\n"))
 		})
 	})
 })
