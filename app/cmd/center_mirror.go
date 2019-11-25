@@ -49,7 +49,6 @@ var centerMirrorCmd = &cobra.Command{
 		if err = jclient.ChangeUpdateCenterSite("default", siteURL); err == nil {
 			err = jclient.SetMirrorCertificate(centerMirrorOption.Enable)
 		}
-
 		return
 	},
 }

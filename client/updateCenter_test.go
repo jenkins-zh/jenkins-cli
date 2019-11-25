@@ -225,6 +225,72 @@ var _ = Describe("update center test", func() {
 			Expect(plugins.UpdatePlugins[0].Name).To(Equal("blueocean-commons"))
 		})
 	})
+
+	Context("SetMirrorCertificate", func() {
+		var (
+			enableMirror bool
+			err          error
+		)
+
+		BeforeEach(func() {
+			manager.URL = "http://localhost"
+			manager.RoundTripper = roundTripper
+		})
+
+		JustBeforeEach(func() {
+			PrepareForSetMirrorCertificate(roundTripper, manager.URL, "", "", enableMirror)
+			err = manager.SetMirrorCertificate(enableMirror)
+		})
+
+		Context("enable mirror site", func() {
+			BeforeEach(func() {
+				enableMirror = true
+			})
+
+			It("should success", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+
+		Context("disable mirror site", func() {
+			BeforeEach(func() {
+				enableMirror = false
+			})
+
+			It("should success", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+	})
+
+	Context("ChangeUpdateCenterSite", func() {
+		var (
+			name      string
+			mirrorURL string
+			err       error
+		)
+
+		BeforeEach(func() {
+			manager.URL = "http://localhost"
+			manager.RoundTripper = roundTripper
+			name = "default"
+		})
+
+		JustBeforeEach(func() {
+			PrepareForChangeUpdateCenterSite(roundTripper, manager.URL, "", "", name, mirrorURL)
+			err = manager.ChangeUpdateCenterSite(name, mirrorURL)
+		})
+
+		Context("enable mirror site", func() {
+			BeforeEach(func() {
+				mirrorURL = "http://fake.com"
+			})
+
+			It("should success", func() {
+				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+	})
 })
 
 var _ = Describe("GetJenkinsWarURL", func() {
