@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -172,5 +173,29 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 // GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
 	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
+	return
+}
+
+// ChangeUpdateCenterSite updates the update center address
+func (u *UpdateCenterManager) ChangeUpdateCenterSite(name, updateCenterURL string) (err error) {
+	formData := url.Values{}
+	formData.Add("site", updateCenterURL)
+	payload := strings.NewReader(formData.Encode())
+
+	api := "/pluginManager/siteConfigure"
+	_, err = u.RequestWithoutData("POST", api,
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	return
+}
+
+// SetMirrorCertificate take the mirror certificate file or not
+func (u *UpdateCenterManager) SetMirrorCertificate(enable bool) (err error) {
+	api := "/update-center-mirror/use"
+	if !enable {
+		api = "/update-center-mirror/remove"
+	}
+
+	_, err = u.RequestWithoutData("POST", api,
+		map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }
