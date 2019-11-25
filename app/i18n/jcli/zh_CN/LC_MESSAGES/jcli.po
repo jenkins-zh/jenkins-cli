@@ -154,6 +154,10 @@ msgstr "你希望下载的 Jenkins 版本"
 msgid   "The address of update center site mirror"
 msgstr  "更新中心的地址"
 
+#: app/cmd/config_add.go:39 app/cmd/config_add.go:40
+msgid   "Add a Jenkins config item"
+msgstr  "增加一项 Jenkins 配置"
+
 #: app/cmd/config_add.go:22
 msgid "Name of the Jenkins"
 msgstr "Jenkins 的名称"
