@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -18,6 +19,7 @@ var _ = Describe("job build command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		jobName      string
 	)
 
 	BeforeEach(func() {
@@ -27,11 +29,13 @@ var _ = Describe("job build command", func() {
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
+		jobName = "fakeJob"
 		jobBuildOption.RoundTripper = roundTripper
 	})
 
 	AfterEach(func() {
 		rootCmd.SetArgs([]string{})
+		ResetJobBuildOption()
 		os.Remove(rootOptions.ConfigFile)
 		rootOptions.ConfigFile = ""
 		ctrl.Finish()
@@ -44,7 +48,6 @@ var _ = Describe("job build command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			jobName := "fakeJob"
 			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/build", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -73,6 +76,27 @@ var _ = Describe("job build command", func() {
 			rootCmd.SetArgs([]string{"job", "build", jobName, "-b", "true"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
+		})
+
+		It("with --param-entry and invalid --param", func() {
+			var err error
+			rootCmd.SetArgs([]string{"job", "build", jobName, "--param", "fake-param", "--param-entry", "key=value"})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("with --param-entry", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			client.PrepareForBuildWithParams(roundTripper, "http://localhost:8080/jenkins", jobName,
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"job", "build", jobName, "--param-entry", "name=value", "-b", "true", "--param", ""})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

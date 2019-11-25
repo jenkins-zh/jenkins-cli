@@ -182,13 +182,13 @@ var _ = Describe("common test", func() {
 		It("with 404 error from server", func() {
 			err := jenkinsCore.ErrorHandle(404, []byte{})
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("Not found resources"))
+			Expect(err.Error()).To(Equal("not found resources"))
 		})
 
 		It("with 403 error from server", func() {
 			err := jenkinsCore.ErrorHandle(403, []byte{})
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("The current user no permission"))
+			Expect(err.Error()).To(Equal("the current user has not permission, code 403"))
 		})
 
 		It("with CrumbHandle error from server", func() {

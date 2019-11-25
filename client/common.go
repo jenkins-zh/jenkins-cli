@@ -169,10 +169,13 @@ func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
 
 // PermissionError handles the no permission
 func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
-	if statusCode == 404 {
-		err = fmt.Errorf("Not found resources")
-	} else {
-		err = fmt.Errorf("The current user no permission")
+	switch statusCode {
+	case 400:
+		err = fmt.Errorf("bad request, code %d", statusCode)
+	case 404:
+		err = fmt.Errorf("not found resources")
+	default:
+		err = fmt.Errorf("the current user has not permission, code %d", statusCode)
 	}
 	return
 }
