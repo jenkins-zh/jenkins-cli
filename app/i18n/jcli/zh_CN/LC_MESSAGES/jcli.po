@@ -30,6 +30,10 @@ msgstr ""
 msgid "Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/"
 msgstr ""
 
+#: app/cmd/center_mirror.go:25
+msgid   "If you want to enable update center server"
+msgstr  "你是否想要启动更新中心"
+
 #: app/cmd/job.go:22
 msgid "Manage the job of your Jenkins"
 msgstr ""
@@ -146,6 +150,14 @@ msgstr "是否跳过后置命令钩子"
 msgid "Version of the Jenkins which you want to download"
 msgstr "你希望下载的 Jenkins 版本"
 
+#: app/cmd/center_mirror.go:27
+msgid   "The address of update center site mirror"
+msgstr  "更新中心的地址"
+
+#: app/cmd/config_add.go:39 app/cmd/config_add.go:40
+msgid   "Add a Jenkins config item"
+msgstr  "增加一项 Jenkins 配置"
+
 #: app/cmd/config_add.go:22
 msgid "Name of the Jenkins"
 msgstr "Jenkins 的名称"
@@ -201,6 +213,14 @@ msgstr ""
 #: app/cmd/plugin_install.go:35
 msgid "Install the plugins"
 msgstr "安装插件"
+
+#: app/cmd/center_download.go:38
+msgid   "The file of output"
+msgstr  "输出的文件路径"
+
+#: app/cmd/center_mirror.go:32 app/cmd/center_mirror.go:33
+msgid   "Set the update center to a mirror address"
+msgstr  "设置更新中心为一个镜像地址"
 
 #: app/cmd/plugin_search.go:33 app/cmd/plugin_search.go:34
 msgid "Print the plugins of your Jenkins"

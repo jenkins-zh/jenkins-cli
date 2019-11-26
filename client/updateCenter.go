@@ -2,9 +2,7 @@ package client
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -107,35 +105,8 @@ func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
 
 // Upgrade the Jenkins core
 func (u *UpdateCenterManager) Upgrade() (err error) {
-	api := fmt.Sprintf("%s/updateCenter/upgrade", u.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		if err = u.AuthHandle(req); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		return
-	}
-
-	client := u.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 {
-			fmt.Println("status code", code)
-		}
-		if err == nil && u.Debug && len(data) > 0 {
-			ioutil.WriteFile("debug.html", data, 0664)
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = u.RequestWithoutData("POST", "/updateCenter/upgrade",
+		nil, nil, 200)
 	return
 }
 
@@ -172,5 +143,29 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 // GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
 	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
+	return
+}
+
+// ChangeUpdateCenterSite updates the update center address
+func (u *UpdateCenterManager) ChangeUpdateCenterSite(name, updateCenterURL string) (err error) {
+	formData := url.Values{}
+	formData.Add("site", updateCenterURL)
+	payload := strings.NewReader(formData.Encode())
+
+	api := "/pluginManager/siteConfigure"
+	_, err = u.RequestWithoutData("POST", api,
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	return
+}
+
+// SetMirrorCertificate take the mirror certificate file or not
+func (u *UpdateCenterManager) SetMirrorCertificate(enable bool) (err error) {
+	api := "/update-center-mirror/use"
+	if !enable {
+		api = "/update-center-mirror/remove"
+	}
+
+	_, err = u.RequestWithoutData("POST", api,
+		map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }

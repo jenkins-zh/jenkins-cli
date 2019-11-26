@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/client"
+	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -16,12 +19,15 @@ var _ = Describe("job create command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		buf          io.Writer
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
 		rootCmd.SetArgs([]string{})
+		buf = new(bytes.Buffer)
+		rootCmd.SetOutput(buf)
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
