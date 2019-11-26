@@ -203,8 +203,14 @@ func saveConfig() (err error) {
 	var data []byte
 	config := getConfig()
 
+	configPath := configOptions.ConfigFileLocation
+	if rootOptions.ConfigFile != "" {
+		configPath = rootOptions.ConfigFile
+	}
+	log.Println(rootOptions.ConfigFile, configPath)
+
 	if data, err = yaml.Marshal(&config); err == nil {
-		err = ioutil.WriteFile(configOptions.ConfigFileLocation, data, 0644)
+		err = ioutil.WriteFile(configPath, data, 0644)
 	}
 	return
 }

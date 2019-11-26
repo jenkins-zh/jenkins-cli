@@ -34,11 +34,38 @@ var rootCmd = &cobra.Command{
 	Use:   "jcli",
 	Short: i18n.T("jcli is a tool which could help you with your multiple Jenkins"),
 	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
-				  Manage your Jenkins and your pipelines
-				  More information could found at https://jenkins-zh.cn`,
+Manage your Jenkins and your pipelines
+More information could found at https://jenkins-zh.cn`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
 			client.SetLogger(logger)
+		} else {
+			return
+		}
+
+		if rootOptions.ConfigFile == "" {
+			rootOptions.ConfigFile = os.Getenv("JCLI_CONFIG")
+		}
+
+		logger.Debug("read config file", zap.String("path", rootOptions.ConfigFile))
+		if rootOptions.Version && cmd.Flags().NFlag() == 1 {
+			return
+		}
+
+		if rootOptions.ConfigFile == "" {
+			if err := loadDefaultConfig(); err != nil {
+				configLoadErrorHandle(err)
+			}
+		} else {
+			if err := loadConfig(rootOptions.ConfigFile); err != nil {
+				configLoadErrorHandle(err)
+			}
+		}
+
+		// set Header Accept-Language
+		config = getConfig()
+		if config != nil {
+			client.SetLanguage(config.Language)
 		}
 		return
 	},
@@ -60,7 +87,7 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute will exectue the command
+// Execute will execute the command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -70,7 +97,6 @@ func Execute() {
 var rootOptions RootOptions
 
 func init() {
-	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "",
 		i18n.T("An alternative config file"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
@@ -81,26 +107,6 @@ func init() {
 	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
 		i18n.T("Print the version of Jenkins CLI"))
 	rootCmd.SetOut(os.Stdout)
-}
-
-func initConfig() {
-	if rootOptions.Version && rootCmd.Flags().NFlag() == 1 {
-		return
-	}
-	if rootOptions.ConfigFile == "" {
-		if err := loadDefaultConfig(); err != nil {
-			configLoadErrorHandle(err)
-		}
-	} else {
-		if err := loadConfig(rootOptions.ConfigFile); err != nil {
-			configLoadErrorHandle(err)
-		}
-	}
-	// set Header Accept-Language
-	config = getConfig()
-	if config != nil {
-		client.SetLanguage(config.Language)
-	}
 }
 
 func configLoadErrorHandle(err error) {
@@ -250,7 +256,7 @@ __jcli_custom_func() {
             __jcli_get_plugin_name
             return
             ;;
-        jcli_open | jcli_config_select | jcli_config_remove)
+        jcli_open | jcli_config_select | jcli_config_remove | jcli_shell)
             __jcli_get_config_name
             return
             ;;
