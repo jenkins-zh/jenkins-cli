@@ -207,7 +207,6 @@ func saveConfig() (err error) {
 	if rootOptions.ConfigFile != "" {
 		configPath = rootOptions.ConfigFile
 	}
-	log.Println(rootOptions.ConfigFile, configPath)
 
 	if data, err = yaml.Marshal(&config); err == nil {
 		err = ioutil.WriteFile(configPath, data, 0644)
