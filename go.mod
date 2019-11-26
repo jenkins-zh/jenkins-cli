@@ -14,6 +14,7 @@ require (
 	github.com/gosexy/gettext v0.0.0-20160830220431-74466a0a0c4a // indirect
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
+	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -21,5 +22,7 @@ require (
 	github.com/onsi/gomega v1.7.1
 	github.com/spf13/cobra v0.0.5
 	go.uber.org/zap v1.13.0
+	golang.org/x/oauth2 v0.0.0-20191122200657-5d9234df094c // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	gopkg.in/yaml.v2 v2.2.5
 )

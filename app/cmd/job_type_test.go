@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -54,7 +55,7 @@ var _ = Describe("job type command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			initConfig()
+			//initConfig()
 			jclient := &client.JobClient{
 				JenkinsCore: client.JenkinsCore{
 					RoundTripper: jobTypeOption.RoundTripper,

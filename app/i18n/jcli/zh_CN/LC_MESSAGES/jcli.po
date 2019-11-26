@@ -114,6 +114,10 @@ msgstr "Jenkins CLI (jcli) 管理你的 Jenkins"
 msgid "Whether skip the previous command hook"
 msgstr "是否跳过前置命令钩子"
 
+#: app/cmd/shell.go:49 app/cmd/shell.go:50
+msgid   "Create a sub shell so that changes to a specific Jenkins remain local to the shell."
+msgstr  "创建一个子 shell 使得对配置的修改保持在一个上下文中"
+
 #: app/cmd/plugin.go:21 app/cmd/plugin.go:22
 msgid "Manage the plugins of Jenkins"
 msgstr "管理 Jenkins 的插件"
@@ -168,7 +172,7 @@ msgstr "Jenkins 的令牌"
 
 #: app/cmd/config_add.go:32
 msgid "ProxyAuth of the Jenkins"
-msgstr ""
+msgstr "Jenkins 链接的代理认证"
 
 #: app/cmd/center_watch.go:27
 msgid "The watch will be continue util Jenkins needs restart"
@@ -224,7 +228,7 @@ msgstr  "设置更新中心为一个镜像地址"
 
 #: app/cmd/plugin_search.go:33 app/cmd/plugin_search.go:34
 msgid "Print the plugins of your Jenkins"
-msgstr ""
+msgstr "列出你的 Jenkins 中的插件"
 
 #: app/cmd/plugin_upload.go:39
 msgid "Whether show the upload progress"
