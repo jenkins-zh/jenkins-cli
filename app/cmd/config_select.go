@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
@@ -11,8 +12,8 @@ func init() {
 
 var configSelectCmd = &cobra.Command{
 	Use:   "select [<name>]",
-	Short: "Select one config as current Jenkins",
-	Long:  `Select one config as current Jenkins`,
+	Short: i18n.T("Select one config as current Jenkins"),
+	Long:  i18n.T("Select one config as current Jenkins"),
 	Run: func(_ *cobra.Command, args []string) {
 		if len(args) > 0 {
 			jenkinsName := args[0]
