@@ -16,7 +16,9 @@ import (
 
 // PluginUpgradeOption option for plugin list command
 type PluginUpgradeOption struct {
-	Filter []string
+	Filter     []string
+	All        bool
+	Compatible bool
 
 	RoundTripper http.RoundTripper
 }
@@ -26,6 +28,9 @@ var pluginUpgradeOption PluginUpgradeOption
 func init() {
 	pluginCmd.AddCommand(pluginUpgradeCmd)
 	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, "Filter for the list, like: name=foo")
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, "upgrade all plugins")
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, "upgrade all plugins")
+
 }
 
 var pluginUpgradeCmd = &cobra.Command{
@@ -43,7 +48,15 @@ var pluginUpgradeCmd = &cobra.Command{
 
 		var err error
 		targetPlugins := make([]string, 0)
-		if len(args) == 0 {
+		if cmd.Flags() != nil && (cmd.Flag("all").Value.String() == "true" || cmd.Flag("compatible").Value.String() == "true") {
+			if upgradeablePlugins, err := pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
+				if cmd.Flag("all").Value.String() == "true" {
+					targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
+				} else {
+					targetPlugins = pluginUpgradeOption.findCompatiblePlugins(upgradeablePlugins)
+				}
+			}
+		} else if len(args) == 0 {
 			var upgradeablePlugins []client.InstalledPlugin
 			if upgradeablePlugins, err = pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
 				prompt := &survey.MultiSelect{
@@ -90,7 +103,6 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	if plugins, err = jclient.GetPlugins(1); err != nil {
 		return
 	}
-
 	for _, plugin := range plugins.Plugins {
 		if !plugin.HasUpdate {
 			continue
@@ -101,6 +113,27 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 		}
 
 		filteredPlugins = append(filteredPlugins, plugin)
+	}
+	return
+}
+
+func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.InstalledPlugin) (plugins []string) {
+	plugins = make([]string, 0)
+
+	for _, plugin := range installedPlugins {
+		var hasSecurity bool
+		pluginAPI := client.PluginAPI{}
+		if pluginInfo, err := pluginAPI.GetPlugin(plugin.ShortName); err == nil {
+			securityWarnings := pluginInfo.SecurityWarnings
+			for _, securityWarning := range securityWarnings {
+				if securityWarning.Active {
+					hasSecurity = true
+				}
+			}
+		}
+		if !hasSecurity {
+			plugins = append(plugins, plugin.ShortName)
+		}
 	}
 	return
 }

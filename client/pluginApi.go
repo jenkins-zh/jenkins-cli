@@ -51,8 +51,8 @@ type PluginInfo struct {
 	Title             string             `json:"title"`
 	URL               string             `json:"url"`
 	Version           string             `json:"version"`
-
-	Stats PluginInfoStats
+	SecurityWarnings  []SecurityWarning  `json:"securityWarnings"`
+	Stats             PluginInfoStats
 }
 
 // PluginInfoStats is the plugin info stats
@@ -73,10 +73,23 @@ type PluginInstallationInfo struct {
 	Percentage float64
 }
 
+type SecurityWarning struct {
+	Active   bool
+	Id       string
+	Message  string
+	Url      string
+	Versions []Version
+}
+
+type Version struct {
+	firstVersion string
+	lastVersion  string
+}
+
 // ShowTrend show the trend of plugins
 func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
 	var plugin *PluginInfo
-	if plugin, err = d.getPlugin(name); err != nil {
+	if plugin, err = d.GetPlugin(name); err != nil {
 		return
 	}
 
@@ -141,7 +154,7 @@ func (d *PluginAPI) download(url string, name string) (err error) {
 	return
 }
 
-func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
+func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	if d.RoundTripper == nil {
 		cli.Transport = &http.Transport{
@@ -168,7 +181,7 @@ func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 }
 
 func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo) {
-	plugin, err := d.getPlugin(pluginName)
+	plugin, err := d.GetPlugin(pluginName)
 	if err != nil {
 		log.Println("can't get the plugin by name:", pluginName)
 		panic(err)
