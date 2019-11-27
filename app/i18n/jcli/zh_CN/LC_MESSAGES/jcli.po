@@ -24,7 +24,11 @@ msgstr ""
 
 #: app/cmd/plugin_check.go:27 app/cmd/plugin_check.go:28
 msgid "Check update center server"
-msgstr ""
+msgstr "检查插件更新中心"
+
+#: app/cmd/plugin_create.go:18
+msgid   "Create a plugin project from the archetypes"
+msgstr  "根据 Maven 骨架创建插件工程"
 
 #: app/cmd/center_download.go:44
 msgid "Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/"
@@ -89,6 +93,11 @@ msgstr ""
 #: app/cmd/job_input.go:37 app/cmd/job_input.go:38
 msgid "Input a job in your Jenkins"
 msgstr ""
+
+#: app/cmd/plugin_create.go:19
+msgid   "Create a plugin project from the archetypes\n"
+        "Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/"
+msgstr  ""
 
 #: app/cmd/job_log.go:38
 msgid "Print the job's log of your Jenkins"
@@ -228,7 +237,7 @@ msgstr  "设置更新中心为一个镜像地址"
 
 #: app/cmd/plugin_search.go:33 app/cmd/plugin_search.go:34
 msgid "Print the plugins of your Jenkins"
-msgstr "列出你的 Jenkins 中的插件"
+msgstr "搜索插件"
 
 #: app/cmd/plugin_upload.go:39
 msgid "Whether show the upload progress"
