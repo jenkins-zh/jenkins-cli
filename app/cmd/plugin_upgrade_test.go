@@ -84,5 +84,47 @@ var _ = Describe("plugin upgrade command", func() {
 			Expect(len(plugins)).To(Equal(1))
 			Expect(plugins[0]).To(Equal(pluginName))
 		})
+
+		It("upgrade compatible plugin, should success", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			//response := client.PrepareShowPlugins(roundTripper, pluginName)
+			client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"plugin", "upgrade", "--compatible"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("upgrade all plugin, should success", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			//client.PrepareShowPlugins(roundTripper, pluginName)
+			client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"plugin", "upgrade", "--all"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(BeNil())
+
+			Expect(buf.String()).To(Equal(""))
+		})
 	})
 })

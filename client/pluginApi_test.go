@@ -133,5 +133,17 @@ var _ = Describe("plugin api test", func() {
 
 			defer os.Remove("fake.hpi")
 		})
+
+		Context("ShowPlugins", func() {
+			It("basic case", func() {
+				keyword := "fake"
+
+				response := PrepareShowPlugins(roundTripper, keyword)
+
+				_, err := pluginAPI.GetPlugin(keyword)
+				Expect(err).To(BeNil())
+				Expect(response.StatusCode).To(Equal(200))
+			})
+		})
 	})
 })
