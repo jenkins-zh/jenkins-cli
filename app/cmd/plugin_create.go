@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PluginCreateOptions for the plugin create command
 type PluginCreateOptions struct {
 	Debug bool
 }
