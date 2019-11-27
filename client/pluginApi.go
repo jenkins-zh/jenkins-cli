@@ -73,14 +73,16 @@ type PluginInstallationInfo struct {
 	Percentage float64
 }
 
+// SecurityWarning represents the plugin security-warining info
 type SecurityWarning struct {
 	Active   bool
-	Id       string
+	ID       string
 	Message  string
-	Url      string
+	URL      string
 	Versions []Version
 }
 
+// Version represents the SecurityWarning cover version
 type Version struct {
 	firstVersion string
 	lastVersion  string
@@ -154,6 +156,7 @@ func (d *PluginAPI) download(url string, name string) (err error) {
 	return
 }
 
+// GetPlugin will get the plugin information
 func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	if d.RoundTripper == nil {
