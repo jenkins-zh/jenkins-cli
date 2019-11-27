@@ -10,8 +10,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type PluginCreateOptions struct {
+	Debug bool
+}
+
+var pluginCreateOptions PluginCreateOptions
+
 func init() {
 	pluginCmd.AddCommand(pluginCreateCmd)
+	pluginCreateCmd.Flags().BoolVar(&pluginCreateOptions.Debug, "debug-output", false,
+		i18n.T("If you want the maven output the debug info"))
 }
 
 var pluginCreateCmd = &cobra.Command{
@@ -19,11 +27,16 @@ var pluginCreateCmd = &cobra.Command{
 	Short: i18n.T("Create a plugin project from the archetypes"),
 	Long: i18n.T(`Create a plugin project from the archetypes
 Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		binary, err := exec.LookPath("mvn")
 		if err == nil {
 			env := os.Environ()
-			err = syscall.Exec(binary, []string{"-U", "archetype:generate", `-Dfilter="io.jenkins.archetypes:"`}, env)
+
+			mvnArgs := []string{"mvn", "archetype:generate", "-U", `-Dfilter=io.jenkins.archetypes:`}
+			if pluginCreateOptions.Debug {
+				mvnArgs = append(mvnArgs, "-X")
+			}
+			err = syscall.Exec(binary, mvnArgs, env)
 		}
 		return
 	},
