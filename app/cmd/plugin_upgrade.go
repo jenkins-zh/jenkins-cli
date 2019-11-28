@@ -69,7 +69,7 @@ var pluginUpgradeCmd = &cobra.Command{
 			targetPlugins = args
 		}
 
-		if err == nil {
+		if err == nil && len(targetPlugins) != 0 {
 			err = jclient.InstallPlugin(targetPlugins)
 		}
 		helper.CheckErr(cmd, err)
