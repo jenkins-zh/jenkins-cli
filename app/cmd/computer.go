@@ -11,7 +11,7 @@ func init() {
 
 var computerCmd = &cobra.Command{
 	Use:     "computer",
-	Aliases: []string{"cpu"},
+	Aliases: []string{"cpu", "agent"},
 	Short:   i18n.T("Manage the computers of your Jenkins"),
 	Long:    i18n.T(`Manage the computers of your Jenkins`),
 }
