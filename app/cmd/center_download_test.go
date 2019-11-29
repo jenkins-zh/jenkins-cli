@@ -105,8 +105,8 @@ var _ = Describe("center download command", func() {
 
 			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})
 			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("cannot found Jenkins mirror by: fake\n"))
+			Expect(err).To(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("cannot found Jenkins mirror by: fake"))
 		})
 	})
 })
