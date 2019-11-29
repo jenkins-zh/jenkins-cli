@@ -1,9 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
 
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -42,25 +42,30 @@ var centerDownloadCmd = &cobra.Command{
 	Use:   "download",
 	Short: i18n.T("Download Jenkins"),
 	Long:  i18n.T(`Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/`),
-	Run: func(cmd *cobra.Command, _ []string) {
-		mirrorSite := getMirror(centerDownloadOption.Mirror)
-		if mirrorSite == "" {
-			cmd.PrintErrln("cannot found Jenkins mirror by:", centerDownloadOption.Mirror)
-			return
-		}
-
-		jClient := &client.UpdateCenterManager{
-			MirrorSite: mirrorSite,
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: centerDownloadOption.RoundTripper,
-			},
-			LTS:          centerDownloadOption.LTS,
-			Version:      centerDownloadOption.Version,
-			Output:       centerDownloadOption.Output,
-			ShowProgress: centerDownloadOption.ShowProgress,
-		}
-
-		err := jClient.DownloadJenkins()
-		helper.CheckErr(cmd, err)
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		return centerDownloadOption.DownloadJenkins()
 	},
+}
+
+// DownloadJenkins download the Jenkins
+func (c *CenterDownloadOption) DownloadJenkins() (err error) {
+	mirrorSite := getMirror(c.Mirror)
+	if mirrorSite == "" {
+		err = fmt.Errorf("cannot found Jenkins mirror by: %s", c.Mirror)
+		return
+	}
+
+	jClient := &client.UpdateCenterManager{
+		MirrorSite: mirrorSite,
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: c.RoundTripper,
+		},
+		LTS:          c.LTS,
+		Version:      c.Version,
+		Output:       c.Output,
+		ShowProgress: c.ShowProgress,
+	}
+
+	err = jClient.DownloadJenkins()
+	return
 }
