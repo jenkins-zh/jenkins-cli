@@ -66,7 +66,7 @@ sudo mv jcli /usr/local/bin/
 |---|---|
 |`jenkinszh/jcli`|Linux|
 |`jenkinszh/jcli:darwin`|Mac|
-|`jenkinszh/jcli:win`|Windows|
+|`jenkinszh/jcli:win`|Windows，你可以从 `/usr/local/bin/jcli.exe` 这里找到可执行程序|
 
 # 入门
 

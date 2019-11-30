@@ -67,7 +67,7 @@ Download different version of OS? Just need to change the docker image tag:
 |---|---|
 |`jenkinszh/jcli`|Linux|
 |`jenkinszh/jcli:darwin`|Mac|
-|`jenkinszh/jcli:win`|Windows|
+|`jenkinszh/jcli:win`|Windows, you can find it from `/usr/local/bin/jcli.exe`|
 
 # Get started
 
