@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -24,10 +23,10 @@ type CenterStartOption struct {
 
 	Admin string
 
-	HttpsEnable      bool
-	HttpsPort        int
-	HttpsCertificate string
-	HttpsPrivateKey  string
+	HTTPSEnable      bool
+	HTTPSPort        int
+	HTTPSCertificate string
+	HTTPSPrivateKey  string
 
 	Environments []string
 
@@ -44,23 +43,23 @@ func init() {
 	centerStartCmd.Flags().IntVarP(&centerStartOption.Port, "port", "", 8080,
 		i18n.T("Port of Jenkins"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Context, "context", "", "/",
-		i18n.T("The address of update center site mirror"))
+		i18n.T("Web context of Jenkins server"))
 	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "", "", nil,
 		i18n.T("Environments for the Jenkins which as key-value format"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", "lts",
+	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", "2.190.3",
 		i18n.T("The of version of jenkins.war"))
 
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.HttpsEnable, "https-enable", "", false,
+	centerStartCmd.Flags().BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
 		i18n.T("If you want to enable https"))
-	centerStartCmd.Flags().IntVarP(&centerStartOption.HttpsPort, "https-port", "", 8083,
+	centerStartCmd.Flags().IntVarP(&centerStartOption.HTTPSPort, "https-port", "", 8083,
 		i18n.T("The port of https protocol"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.HttpsCertificate, "https-cert", "", "",
+	centerStartCmd.Flags().StringVarP(&centerStartOption.HTTPSCertificate, "https-cert", "", "",
 		i18n.T("Certificate file path for https"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.HttpsPrivateKey, "https-private", "", "",
+	centerStartCmd.Flags().StringVarP(&centerStartOption.HTTPSPrivateKey, "https-private", "", "",
 		i18n.T("Private key file path for https"))
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
@@ -87,10 +86,6 @@ var centerStartCmd = &cobra.Command{
 					Output:       jenkinsWar,
 					ShowProgress: true,
 					Version:      centerStartOption.Version,
-				}
-
-				if err = os.MkdirAll(strings.Replace(jenkinsWar, "jenkins.war", "", -1), os.FileMode(0755)); err != nil {
-					return
 				}
 
 				if err = download.DownloadJenkins(); err != nil {
@@ -122,10 +117,10 @@ var centerStartCmd = &cobra.Command{
 			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin")
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
 
-			if centerStartOption.HttpsEnable {
-				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsPort=%d", centerStartOption.HttpsPort))
-				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsCertificate=%s", centerStartOption.HttpsCertificate),
-					fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HttpsPrivateKey))
+			if centerStartOption.HTTPSEnable {
+				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsPort=%d", centerStartOption.HTTPSPort))
+				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsCertificate=%s", centerStartOption.HTTPSCertificate),
+					fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
 			}
 
 			if !centerStartOption.DryRun {

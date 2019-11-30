@@ -3,6 +3,8 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -49,6 +51,11 @@ var centerDownloadCmd = &cobra.Command{
 
 // DownloadJenkins download the Jenkins
 func (c *CenterDownloadOption) DownloadJenkins() (err error) {
+	parentDir := filepath.Dir(c.Output)
+	if err = os.MkdirAll(parentDir, os.FileMode(0755)); err != nil {
+		return
+	}
+
 	mirrorSite := getMirror(c.Mirror)
 	if mirrorSite == "" {
 		err = fmt.Errorf("cannot found Jenkins mirror by: %s", c.Mirror)
