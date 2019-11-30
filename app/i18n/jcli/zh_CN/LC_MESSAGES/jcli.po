@@ -115,6 +115,10 @@ msgstr "为所有的 jcli 命令生成文档"
 msgid "jcli is a tool which could help you with your multiple Jenkins"
 msgstr "jcli 是帮助你管理多个 Jenkins 的工具"
 
+#: app/cmd/computer.go:15 app/cmd/computer.go:16
+msgid   "管理 Jenkins 节点"
+msgstr  ""
+
 #: app/cmd/root.go:55
 msgid "Jenkins CLI (jcli) manage your Jenkins"
 msgstr "Jenkins CLI (jcli) 管理你的 Jenkins"
@@ -126,6 +130,10 @@ msgstr "是否跳过前置命令钩子"
 #: app/cmd/shell.go:49 app/cmd/shell.go:50
 msgid   "Create a sub shell so that changes to a specific Jenkins remain local to the shell."
 msgstr  "创建一个子 shell 使得对配置的修改保持在一个上下文中"
+
+#: app/cmd/computer_list.go:31 app/cmd/computer_list.go:32
+msgid   "列出所有的 Jenkins 节点"
+msgstr  ""
 
 #: app/cmd/plugin.go:21 app/cmd/plugin.go:22
 msgid "Manage the plugins of Jenkins"
