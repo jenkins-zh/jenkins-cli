@@ -56,6 +56,18 @@ sudo mv jcli /usr/local/bin/
 * [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
 * [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
 
+如果您无法从 GitHub 上下载 `jcli`，请尝试下面的方法：
+
+`jcli_id=$(docker create jenkinszh/jcli) && sudo docker cp $jcli_id:/usr/local/bin/jcli /usr/local/bin/jcli && docker rm -v $jcli_id`
+
+要下载不同操作系统下的二进制文件？只需要修改 docker 容器的标签：
+
+|镜像|描述|
+|---|---|
+|`jenkinszh/jcli`|Linux|
+|`jenkinszh/jcli:darwin`|Mac|
+|`jenkinszh/jcli:win`|Windows，你可以从 `/usr/local/bin/jcli.exe` 这里找到可执行程序|
+
 # 入门
 
 当安装 `jcli` 以后。你需要提供一份配置文件。请执行命令 `jcli config generate`，该命令会帮助你编辑配置文件 `~/.jenkins-cli.yaml` ，你需要根据实际的 Jenkins 配置情况做相应的修改。
@@ -65,7 +77,7 @@ sudo mv jcli /usr/local/bin/
 如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](CONTRIBUTING.md)。我们欢迎任何形式的贡献。
 
 感谢 JetBrains 为我们提供了开源许可证。  
-[![goland.svg](goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+[![goland.svg](https://raw.githubusercontent.com/jenkins-zh/jenkins-cli/master/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
 # 点赞数趋势图
 
