@@ -21,7 +21,7 @@ func (c *CASCManager) Export() (config string, err error) {
 	return
 }
 
-// Export get the schema of configuration-as-code
+// Schema get the schema of configuration-as-code
 func (c *CASCManager) Schema() (schema string, err error) {
 	var (
 		data       []byte
@@ -37,14 +37,14 @@ func (c *CASCManager) Schema() (schema string, err error) {
 	return
 }
 
-// Export reload the config of configuration-as-code
+// Reload reload the config of configuration-as-code
 func (c *CASCManager) Reload() (err error) {
 	_, err = c.RequestWithoutData("POST", "/configuration-as-code/reload",
 		nil, nil, 200)
 	return
 }
 
-// Export apply the config of configuration-as-code
+// Apply apply the config of configuration-as-code
 func (c *CASCManager) Apply() (err error) {
 	_, err = c.RequestWithoutData("POST", "/configuration-as-code/apply",
 		nil, nil, 200)
