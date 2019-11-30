@@ -57,6 +57,18 @@ Here are other package managers:
 * [GoFish](https://gofi.sh/) users can use `gofish install jcli`
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
 
+If you cannot download `jcli` from GitHub, please try the following ways:
+
+`jcli_id=$(docker create jenkinszh/jcli) && sudo docker cp $jcli_id:/usr/local/bin/jcli /usr/local/bin/jcli && docker rm -v $jcli_id`
+
+Download different version of OS? Just need to change the docker image tag:
+
+|image|description|
+|---|---|
+|`jenkinszh/jcli`|Linux|
+|`jenkinszh/jcli:darwin`|Mac|
+|`jenkinszh/jcli:win`|Windows|
+
 # Get started
 
 Read [this document](doc/README.md) for more details on how to use `jcli`.
@@ -67,7 +79,7 @@ If you're interested in this project. Please go through the
 [contribution guide](CONTRIBUTING.md). Any contributions are welcome.
 
 Thanks to JetBrains for giving us the open source licence.  
-[![goland.svg](goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+[![goland.svg](https://raw.githubusercontent.com/jenkins-zh/jenkins-cli/master/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
 # Stargazers over time
 
