@@ -89,3 +89,9 @@ gen-data:
 
 image:
 	docker build . -t jenkinszh/jcli
+
+image-win:
+	docker build . -t jenkinszh/jcli:win
+
+image-darwin:
+	docker build . -t jenkinszh/jcli:darwin
