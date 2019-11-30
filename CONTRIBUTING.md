@@ -61,3 +61,7 @@ are the good start.
 
 We use [git-backup-actions](https://github.com/jenkins-zh/git-backup-actions/) to backup this repo into 
 [gitee](https://gitee.com/jenkins-zh/jenkins-cli).
+
+## go-bindata
+
+If you use MacOS and you don't have go-bindata, you can use command `brew install go-bindata` to install it
