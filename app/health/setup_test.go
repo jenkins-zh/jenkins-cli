@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestI18n(t *testing.T) {
+func TestHealth(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter("test-health.xml")
 	RunSpecsWithDefaultAndCustomReporters(t, "command health check", []Reporter{junitReporter})

@@ -9,7 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestUtils(t *testing.T) {
+func TestApp(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter("test-app.xml")
 	RunSpecsWithDefaultAndCustomReporters(t, "app", []Reporter{junitReporter})
