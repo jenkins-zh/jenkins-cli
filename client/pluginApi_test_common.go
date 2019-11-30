@@ -82,6 +82,7 @@ func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", keyword), nil)
 	response = &http.Response{
 		StatusCode: 200,
+		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
 		{"name":"fake","version": "0.1.8","url": "http://updates.jenkins-ci.org/download/plugins/hugo/0.1.8/hugo.hpi",
@@ -90,6 +91,7 @@ func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 		"message":"XML External Entity (XXE) processing vulnerability","url":"https://jenkins.io/security/advisory/2018-02-05/","active":true}]}
 		`)),
 	}
-	roundTripper.EXPECT().RoundTrip(request).Return(response, nil)
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
 	return
 }

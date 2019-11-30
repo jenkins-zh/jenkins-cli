@@ -128,6 +128,7 @@ func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.In
 			for _, securityWarning := range securityWarnings {
 				if securityWarning.Active {
 					hasSecurity = true
+					break
 				}
 			}
 		}

@@ -2,10 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -88,39 +86,15 @@ var _ = Describe("plugin upgrade command", func() {
 		})
 
 		It("upgrade compatible plugin, should success", func() {
-			jclient := &client.PluginManager{
-				JenkinsCore: client.JenkinsCore{
-					RoundTripper: roundTripper,
-				},
-			}
-			getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
-
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, response := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
+			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			body, err := ioutil.ReadAll(response.Body)
-			var installPlugins client.InstalledPluginList
-			if err := json.Unmarshal(body, &installPlugins); err != nil {
-
-			}
-			var filteredPlugins []client.InstalledPlugin
-			for _, installPlugin := range installPlugins.Plugins {
-				if !installPlugin.HasUpdate {
-					continue
-				}
-
-				if pluginName != "" && !strings.Contains(installPlugin.ShortName, pluginName) {
-					continue
-				}
-
-				filteredPlugins = append(filteredPlugins, installPlugin)
-			}
-			pluginUpgradeOption.Compatible = true
-			pluginUpgradeOption.findCompatiblePlugins(filteredPlugins)
+			//response := client.PrepareShowPlugins(roundTripper, pluginName)
+			client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "upgrade", "--compatible"})
 
@@ -140,6 +114,7 @@ var _ = Describe("plugin upgrade command", func() {
 
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
+			//client.PrepareShowPlugins(roundTripper, pluginName)
 			client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "upgrade", "--all"})
