@@ -85,6 +85,7 @@ gettext:
 	go-xgettext -k=i18n.T "${JCLI_FILES}" > app/i18n/jcli.pot
 
 gen-data:
+# if you use MacOS and you don't install go-bindata, you can use command `brew install go-bindata` to install it
 	cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
 image:
