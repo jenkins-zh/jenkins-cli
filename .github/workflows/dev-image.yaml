@@ -22,6 +22,7 @@ jobs:
 
       - name: Build
         run: |
+          export PATH=$PATH:$GOPATH/bin
           make tools
           echo "brew install go-bindata"
           go get -u github.com/jteeuwen/go-bindata/...
