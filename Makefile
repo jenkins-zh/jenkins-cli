@@ -55,6 +55,7 @@ tools: i18n-tools
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
 	go get -u github.com/go-bindata/go-bindata/...
+	which go-bindata
 
 verify:
 	go vet ./...
