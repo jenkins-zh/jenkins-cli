@@ -141,17 +141,22 @@ func (p *PluginUpgradeOption) assembleData(installedPlugins []client.InstalledPl
 				if plugin.ShortName == pluginInfo.Name {
 					var hasSecurity bool
 					securityWarnings := pluginInfo.SecurityWarnings
-					for _, securityWarning := range securityWarnings {
-						if securityWarning.Active {
-							hasSecurity = true
-							break
-						}
-					}
+					hasSecurity = p.checkSecurity(securityWarnings)
 					if !hasSecurity {
 						plugins = append(plugins, pluginInfo.Name)
 					}
 				}
 			}
+		}
+	}
+	return
+}
+
+func (p *PluginUpgradeOption) checkSecurity(securityWarnings []client.SecurityWarning) (hasSecurity bool) {
+	for _, securityWarning := range securityWarnings {
+		if securityWarning.Active {
+			hasSecurity = true
+			break
 		}
 	}
 	return
