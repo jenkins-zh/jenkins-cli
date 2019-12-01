@@ -1,0 +1,32 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+
+      - name: Build
+        run: |
+          make tools build-all
+
+      - name: Push Image
+        env:
+          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          docker login jenkinszh/jcli --username surenpi --password ${DOCKER_HUB_TOKEN}
+          docker build . -t jenkinszh/jcli:dev -f Dockerfile-dev
+          docker push jenkinszh/jcli:dev
