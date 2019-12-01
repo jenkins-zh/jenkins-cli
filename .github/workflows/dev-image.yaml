@@ -1,4 +1,4 @@
-name: Go
+name: DevImage
 
 on:
   push:
@@ -22,6 +22,7 @@ jobs:
 
       - name: Build
         run: |
+          apt-get install -y go-bindata
           make tools build-all
 
       - name: Push Image
