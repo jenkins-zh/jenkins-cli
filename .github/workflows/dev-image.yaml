@@ -23,7 +23,6 @@ jobs:
       - name: Build
         run: |
           export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-          go env
           make tools
           brew install go-bindata
           make build-all
