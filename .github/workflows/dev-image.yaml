@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     steps:
 
       - name: Set up Go 1.13
@@ -22,9 +22,9 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
           make tools
-          brew install go-bindata
+#          brew install go-bindata
+          go get -u github.com/jteeuwen/go-bindata/...
           make build-all
 
       - name: Push Image
