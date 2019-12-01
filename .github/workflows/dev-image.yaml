@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - tiny-dev-image
 jobs:
   build:
     name: Build
