@@ -22,9 +22,8 @@ jobs:
 
       - name: Build
         run: |
+          export PATH=$GOROOT/bin:$PATH
           make tools
-          which go-bindata
-          $GOROOT/bin/go-bindata
           make build-all
 
       - name: Push Image
