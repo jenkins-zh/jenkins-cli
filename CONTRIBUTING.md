@@ -61,3 +61,7 @@ are the good start.
 
 We use [git-backup-actions](https://github.com/jenkins-zh/git-backup-actions/) to backup this repo into 
 [gitee](https://gitee.com/jenkins-zh/jenkins-cli).
+
+## Develop Environment
+
+If you want to involve in this project, you need to execute the following command: `make tools`

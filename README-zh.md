@@ -67,6 +67,13 @@ sudo mv jcli /usr/local/bin/
 |`jenkinszh/jcli`|Linux|
 |`jenkinszh/jcli:darwin`|Mac|
 |`jenkinszh/jcli:win`|Windows，你可以从 `/usr/local/bin/jcli.exe` 这里找到可执行程序|
+|`jenkinszh/jcli:dev`|你可以从这里找到开发版本 `/go/src/app/bin/linux/jcli` 、`/go/src/app/bin/darwin/jcli` 或 `/go/src/app/bin/windows/jcli.exe`|
+
+想要体验最新的特性？您可以下载不同平台下的开发版本：
+
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/linux/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/darwin/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/windows/jcli.exe . && docker rm -v $jcli_id`
 
 # 入门
 
