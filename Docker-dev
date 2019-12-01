@@ -1,7 +1,0 @@
-FROM golang
-
-WORKDIR /go/src/app
-COPY . .
-RUN make tools build-all && ln -s bin/linux/jcli /usr/local/bin/jcli
-
-ENTRYPOINT ["jcli"]
