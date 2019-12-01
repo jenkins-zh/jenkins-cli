@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$GOROOT/bin:$PATH
+          export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
           ls -ahl $GOPATH
           go env
           make tools
