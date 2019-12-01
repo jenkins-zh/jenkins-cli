@@ -53,8 +53,8 @@ tools: i18n-tools
 	go get -u golang.org/x/lint/golint
 
 i18n-tools:
-	go get github.com/gosexy/gettext/go-xgettext
-	go get github.com/go-bindata/go-bindata/...
+	go get -u github.com/gosexy/gettext/go-xgettext
+	go get -u github.com/go-bindata/go-bindata/...
 
 verify:
 	go vet ./...
