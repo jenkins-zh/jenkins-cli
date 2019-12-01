@@ -32,6 +32,6 @@ jobs:
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         run: |
           brew install docker
-          docker login jenkinszh/jcli --username surenpi --password ${DOCKER_HUB_TOKEN}
+          docker login --username surenpi --password ${DOCKER_HUB_TOKEN}
           docker build . -t jenkinszh/jcli:dev -f Dockerfile-dev
           docker push jenkinszh/jcli:dev
