@@ -24,6 +24,7 @@ jobs:
         run: |
           export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
           ls -ahl $GOPATH
+          ls -ahl /home/runner/go
           go env
           make tools
           make build-all
