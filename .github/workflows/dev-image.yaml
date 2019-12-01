@@ -22,8 +22,9 @@ jobs:
 
       - name: Build
         run: |
-          apt-get install -y go-bindata
-          make tools build-all
+          make tools
+          which go-bindata
+          make build-all
 
       - name: Push Image
         env:
