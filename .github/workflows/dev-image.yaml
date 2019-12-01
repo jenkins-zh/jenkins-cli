@@ -23,6 +23,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$GOROOT/bin:$PATH
+          ls -ahl $GOROOT/bin
           make tools
           make build-all
 
