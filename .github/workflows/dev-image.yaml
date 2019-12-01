@@ -25,7 +25,7 @@ jobs:
           export PATH=$PATH:$GOPATH/bin
           make tools
           echo "brew install go-bindata"
-          go get -u github.com/jteeuwen/go-bindata/...
+          find / -name go-bindata
           make build-all
 
       - name: Push Image
