@@ -24,6 +24,7 @@ jobs:
         run: |
           make tools
           which go-bindata
+          $GOROOT/bin/go-bindata
           make build-all
 
       - name: Push Image
