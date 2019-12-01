@@ -25,8 +25,7 @@ jobs:
           export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
           go env
           make tools
-          which go-bindata > go-bindata.txt
-          cat go-bindata.txt/
+          brew install go-bindata
           make build-all
 
       - name: Push Image
