@@ -23,7 +23,7 @@ jobs:
       - name: Build
         run: |
           make tools
-#          brew install go-bindata
+          echo "brew install go-bindata"
           go get -u github.com/jteeuwen/go-bindata/...
           make build-all
 
