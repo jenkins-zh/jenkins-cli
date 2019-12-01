@@ -27,9 +27,9 @@ var pluginUpgradeOption PluginUpgradeOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUpgradeCmd)
-	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, "Filter for the list, like: name=foo")
-	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, "upgrade all plugins")
-	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, "upgrade all plugins")
+	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, i18n.T("Filter for the list, like: name=foo"))
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, i18n.T("upgrade all plugins"))
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, i18n.T("upgrade all plugins"))
 
 }
 
@@ -48,9 +48,9 @@ var pluginUpgradeCmd = &cobra.Command{
 
 		var err error
 		targetPlugins := make([]string, 0)
-		if cmd.Flags() != nil && (cmd.Flag("all").Value.String() == "true" || cmd.Flag("compatible").Value.String() == "true") {
+		if cmd.Flags() != nil && (pluginUpgradeOption.All || pluginUpgradeOption.Compatible) {
 			if upgradeablePlugins, err := pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
-				if cmd.Flag("all").Value.String() == "true" {
+				if pluginUpgradeOption.All {
 					targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
 				} else {
 					targetPlugins = pluginUpgradeOption.findCompatiblePlugins(upgradeablePlugins)
@@ -119,21 +119,39 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 
 func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.InstalledPlugin) (plugins []string) {
 	plugins = make([]string, 0)
-
-	for _, plugin := range installedPlugins {
-		var hasSecurity bool
-		pluginAPI := client.PluginAPI{}
-		if pluginInfo, err := pluginAPI.GetPlugin(plugin.ShortName); err == nil {
-			securityWarnings := pluginInfo.SecurityWarnings
-			for _, securityWarning := range securityWarnings {
-				if securityWarning.Active {
-					hasSecurity = true
-					break
-				}
+	var pluginNames string
+	for i, plugin := range installedPlugins {
+		if !strings.Contains(pluginNames, plugin.ShortName) {
+			if len(installedPlugins) > i+1 {
+				pluginNames += plugin.ShortName + "|"
+			} else {
+				pluginNames += plugin.ShortName
 			}
 		}
-		if !hasSecurity {
-			plugins = append(plugins, plugin.ShortName)
+	}
+	plugins = pluginUpgradeOption.assembleData(installedPlugins, pluginNames)
+	return
+}
+
+func (p *PluginUpgradeOption) assembleData(installedPlugins []client.InstalledPlugin, pluginNames string) (plugins []string) {
+	pluginAPI := client.PluginAPI{}
+	if pluginsList, err := pluginAPI.BatchSearchPlugins(pluginNames); err == nil {
+		for _, pluginInfo := range pluginsList {
+			for _, plugin := range installedPlugins {
+				if plugin.ShortName == pluginInfo.Name {
+					var hasSecurity bool
+					securityWarnings := pluginInfo.SecurityWarnings
+					for _, securityWarning := range securityWarnings {
+						if securityWarning.Active {
+							hasSecurity = true
+							break
+						}
+					}
+					if !hasSecurity {
+						plugins = append(plugins, pluginInfo.Name)
+					}
+				}
+			}
 		}
 	}
 	return

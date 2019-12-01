@@ -93,8 +93,8 @@ var _ = Describe("plugin upgrade command", func() {
 
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			//response := client.PrepareShowPlugins(roundTripper, pluginName)
-			client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
+			//client.PrepareShowPlugins(roundTripper, pluginName)
+			//client.PrepareForInstallPlugin(roundTripper, "http://localhost:8080/jenkins", pluginName, "admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "upgrade", "--compatible"})
 
