@@ -22,7 +22,8 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin
+          pwd
           make tools
           echo "brew install go-bindata"
           find ~ -name go-bindata
