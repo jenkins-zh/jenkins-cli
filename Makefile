@@ -46,6 +46,9 @@ clean: ## Clean the generated artifacts
 copy: darwin
 	sudo cp bin/darwin/$(NAME) $(shell which jcli)
 
+copy-linux: linux
+	cp bin/linux/$(NAME) /usr/local/bin/jcli
+
 tools: i18n-tools
 	go get -u golang.org/x/lint/golint
 
@@ -91,7 +94,10 @@ image:
 	docker build . -t jenkinszh/jcli
 
 image-win:
-	docker build . -t jenkinszh/jcli:win
+	docker build . -t jenkinszh/jcli:win -f Dockerfile-win
 
 image-darwin:
-	docker build . -t jenkinszh/jcli:darwin
+	docker build . -t jenkinszh/jcli:darwin -f Dockerfile-darwin
+
+image-dev:
+	docker build . -t jenkinszh/jcli:dev -f Docker-dev

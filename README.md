@@ -68,6 +68,13 @@ Download different version of OS? Just need to change the docker image tag:
 |`jenkinszh/jcli`|Linux|
 |`jenkinszh/jcli:darwin`|Mac|
 |`jenkinszh/jcli:win`|Windows, you can find it from `/usr/local/bin/jcli.exe`|
+|`jenkinszh/jcli:dev`|Developing version, find can find them from `/go/src/app/bin/linux/jcli` or `/go/src/app/bin/darwin/jcli` or `/go/src/app/bin/windows/jcli.exe`|
+
+Want to try the latest features? Download the developing version of different platform:
+
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/linux/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/darwin/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/go/src/app/bin/windows/jcli.exe . && docker rm -v $jcli_id`
 
 # Get started
 
