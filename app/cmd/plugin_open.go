@@ -13,8 +13,8 @@ func init() {
 
 var pluginOpenCmd = &cobra.Command{
 	Use:   "open",
-	Short: "Open update center server",
-	Long:  `Open update center server`,
+	Short: "Open update center server in browser",
+	Long:  `Open update center server in browser`,
 	Run: func(_ *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
