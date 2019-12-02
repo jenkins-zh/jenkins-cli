@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"net/http"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -44,7 +45,7 @@ func init() {
 		i18n.T("Port of Jenkins"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Context, "context", "", "/",
 		i18n.T("Web context of Jenkins server"))
-	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "", "", nil,
+	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "env", "", nil,
 		i18n.T("Environments for the Jenkins which as key-value format"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
