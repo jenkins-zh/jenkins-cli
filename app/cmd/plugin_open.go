@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -19,7 +20,7 @@ var pluginOpenCmd = &cobra.Command{
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
 		if jenkins.URL != "" {
-			open(fmt.Sprintf("%s/pluginManager", jenkins.URL))
+			Open(fmt.Sprintf("%s/pluginManager", jenkins.URL), exec.Command)
 		} else {
 			log.Fatal(fmt.Sprintf("No URL fond from %s", jenkins.Name))
 		}
