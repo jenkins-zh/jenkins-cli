@@ -106,7 +106,7 @@ var _ = Describe("plugin search command", func() {
 1      fake-ln    true              1.18.1           fake-ln
 2      fake-is    true              1.18.131-2.0     fake-is
 3      fake-oa    false                              fake-oa
-4      fake-Open  false                              fake-Open
+4      fake-open  false                              fake-open
 5      fake       true              1.0              fake
 `))
 		})
@@ -135,7 +135,7 @@ var _ = Describe("plugin search command", func() {
 1      fake-ln    false                              fake-ln
 2      fake-is    false                              fake-is
 3      fake-oa    false                              fake-oa
-4      fake-Open  false                              fake-Open
+4      fake-open  false                              fake-open
 5      fake       false                              fake
 `))
 		})
