@@ -28,6 +28,7 @@ func Open(url string, cmdContext ExecContext) error {
 	return cmdContext(cmd, args...).Start()
 }
 
+// ExecContext is the context of system command caller
 type ExecContext = func(name string, arg ...string) *exec.Cmd
 
 // FakeExecCommandSuccess is a function that initialises a new exec.Cmd, one which will
