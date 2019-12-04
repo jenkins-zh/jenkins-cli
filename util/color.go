@@ -1,8 +1,6 @@
 package util
 
 import (
-	"sort"
-
 	"github.com/fatih/color"
 )
 
@@ -81,27 +79,4 @@ var colorMap = map[string]color.Attribute{
 	"bghimagenta": color.BgHiMagenta,
 	"bghicyan":    color.BgHiCyan,
 	"bghiwhite":   color.BgHiWhite,
-}
-
-// GetColor returns the color for the list of colour names and option name
-//func GetColor(optionName string, colorNames []string) (*color.Color, error) {
-//	attributes := []color.Attribute{}
-//	for _, colorName := range colorNames {
-//		a := colorMap[colorName]
-//		if a == color.Attribute(0) {
-//			return nil, InvalidOption(optionName, colorName, ColorNameValues())
-//		}
-//		attributes = append(attributes, a)
-//	}
-//	return color.New(attributes...), nil
-//}
-
-// ColorNameValues returns all the color names sorted
-func ColorNameValues() []string {
-	answer := []string{}
-	for k := range colorMap {
-		answer = append(answer, k)
-	}
-	sort.Strings(answer)
-	return answer
 }
