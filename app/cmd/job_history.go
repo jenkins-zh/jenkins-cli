@@ -3,11 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // JobHistoryOption is the job history option
@@ -61,11 +62,22 @@ func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
 		table.AddRow("number", "displayname", "building", "result")
 		for i, build := range buildList {
 			table.AddRow(fmt.Sprintf("%d", i), build.DisplayName,
-				fmt.Sprintf("%v", build.Building), build.Result)
+				fmt.Sprintf("%v", build.Building), colorResult(build.Result))
 		}
 		table.Render()
 		data = buf.Bytes()
 		err = nil
 	}
 	return
+}
+
+func colorResult(result string) string {
+	switch result {
+	case "SUCCESS":
+		return util.ColorInfo(result)
+	case "FAILURE":
+		return util.ColorError(result)
+	default:
+		return util.ColorWarning(result)
+	}
 }
