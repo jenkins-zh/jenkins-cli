@@ -41,7 +41,7 @@ var userDeleteCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		err := jclient.Delete(username)
 		helper.CheckErr(cmd, err)

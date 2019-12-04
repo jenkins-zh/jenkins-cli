@@ -67,7 +67,7 @@ var _ = Describe("plugin upgrade command", func() {
 					RoundTripper: roundTripper,
 				},
 			}
-			getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+			getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")

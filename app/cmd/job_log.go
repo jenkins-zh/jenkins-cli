@@ -47,7 +47,7 @@ It'll print the log text of the last build if you don't give the build id.`),
 				RoundTripper: jobLogOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		lastBuildID := -1
 		var jobBuild *client.JobBuild

@@ -37,7 +37,7 @@ var jobHistoryCmd = &cobra.Command{
 				RoundTripper: jobHistoryOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
 		var builds []*client.JobBuild
 		builds, err = jClient.GetHistory(jobName)

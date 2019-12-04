@@ -36,7 +36,7 @@ var computerListCmd = &cobra.Command{
 				RoundTripper: computerListOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
 		var computers client.ComputerList
 		if computers, err = jClient.List(); err == nil {

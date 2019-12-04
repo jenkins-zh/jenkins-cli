@@ -45,7 +45,7 @@ var jobEditCmd = &cobra.Command{
 				RoundTripper: jobEditOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
 			err = jclient.UpdatePipeline(name, content)

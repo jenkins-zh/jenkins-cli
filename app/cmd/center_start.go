@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
-
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,8 @@ type CenterStartOption struct {
 	Download bool
 	Version  string
 
-	DryRun bool
+	DryRun         bool
+	SystemCallExec util.SystemCallExec
 }
 
 var centerStartOption CenterStartOption
@@ -123,9 +123,7 @@ var centerStartCmd = &cobra.Command{
 					fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
 			}
 
-			if !centerStartOption.DryRun {
-				err = syscall.Exec(binary, jenkinsWarArgs, env)
-			}
+			err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
 		}
 		return
 	},

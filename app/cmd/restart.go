@@ -49,7 +49,7 @@ var restartCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		if err := jclient.Restart(); err == nil {
 			cmd.Println("Please wait while Jenkins is restarting")

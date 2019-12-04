@@ -32,7 +32,7 @@ var pluginCheckCmd = &cobra.Command{
 				RoundTripper: pluginCheckoutOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
 		err := jClient.CheckUpdate(func(response *http.Response) {
 			code := response.StatusCode

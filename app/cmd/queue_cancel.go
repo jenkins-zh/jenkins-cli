@@ -42,7 +42,7 @@ var queueCancelCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		err = jclient.Cancel(queueID)
 		helper.CheckErr(cmd, err)

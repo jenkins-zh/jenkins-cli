@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"syscall"
 )
 
 // Open a URL in a browser
@@ -28,6 +29,18 @@ func Open(url string, cmdContext ExecContext) error {
 	return cmdContext(cmd, args...).Start()
 }
 
+// Exec is the wrapper of syscall.Exec
+func Exec(argv0 string, argv []string, envv []string, systemCallExec SystemCallExec) error {
+	if systemCallExec == nil {
+		systemCallExec = syscall.Exec
+	}
+
+	return systemCallExec(argv0, argv, envv)
+}
+
+// SystemCallExec is the context of syscall.Exec
+type SystemCallExec = func(argv0 string, argv []string, envv []string) (err error)
+
 // ExecContext is the context of system command caller
 type ExecContext = func(name string, arg ...string) *exec.Cmd
 
@@ -40,4 +53,9 @@ func FakeExecCommandSuccess(command string, args ...string) *exec.Cmd {
 	cmd := exec.Command(os.Args[0], cs...)
 	cmd.Env = []string{"GO_TEST_PROCESS=1"}
 	return cmd
+}
+
+// FakeSystemCallExecSuccess is a fake function of syscall.Exec
+func FakeSystemCallExecSuccess(argv0 string, argv []string, envv []string) (err error) {
+	return
 }

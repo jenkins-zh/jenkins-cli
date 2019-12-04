@@ -40,7 +40,7 @@ var jobParamCmd = &cobra.Command{
 				RoundTripper: jobParamOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		job, err := jclient.GetJob(name)
 		var data []byte
