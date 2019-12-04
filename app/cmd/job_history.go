@@ -62,7 +62,7 @@ func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
 		table.AddRow("number", "displayname", "building", "result")
 		for i, build := range buildList {
 			table.AddRow(fmt.Sprintf("%d", i), build.DisplayName,
-				fmt.Sprintf("%v", build.Building), colorResult(build.Result))
+				fmt.Sprintf("%v", build.Building), ColorResult(build.Result))
 		}
 		table.Render()
 		data = buf.Bytes()
@@ -71,7 +71,8 @@ func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
 	return
 }
 
-func colorResult(result string) string {
+// ColorResult output the result with color
+func ColorResult(result string) string {
 	switch result {
 	case "SUCCESS":
 		return util.ColorInfo(result)

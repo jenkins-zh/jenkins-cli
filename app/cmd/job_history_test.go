@@ -74,3 +74,11 @@ var _ = Describe("job history command", func() {
 		})
 	})
 })
+
+var _ = Describe("ColorResult test", func() {
+	It("should success", func() {
+		Expect(ColorResult("unknown")).To(Equal("unknown"))
+		Expect(ColorResult("SUCCESS")).To(Equal("SUCCESS"))
+		Expect(ColorResult("FAILURE")).To(Equal("FAILURE"))
+	})
+})
