@@ -15,10 +15,8 @@ addons:
       secure: 3caad1285eb0edf2b4f65ee07b3cd8edde6c5176 # encrypted value of your token
 
 script:
-  - make clean
   # Execute some tests
-  - export GOPROXY=https://mirrors.aliyun.com/goproxy/
-  - make tools init test
+  - make clean tools init test
   # And finally run the SonarQube analysis - read the "sonar-project.properties"
   # file to see the specific configuration
   - curl -LsS https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip > sonar-scanner-cli-4.0.0.1744-linux.zip
