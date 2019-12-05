@@ -17,6 +17,7 @@ addons:
 script:
   - make clean
   # Execute some tests
+  - export GOPROXY=https://mirrors.aliyun.com/goproxy/
   - make tools init test
   # And finally run the SonarQube analysis - read the "sonar-project.properties"
   # file to see the specific configuration
