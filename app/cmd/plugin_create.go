@@ -3,7 +3,8 @@ package cmd
 import (
 	"os"
 	"os/exec"
-	"syscall"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -12,14 +13,16 @@ import (
 
 // PluginCreateOptions for the plugin create command
 type PluginCreateOptions struct {
-	Debug bool
+	CommonOption
+
+	DebugOutput bool
 }
 
 var pluginCreateOptions PluginCreateOptions
 
 func init() {
 	pluginCmd.AddCommand(pluginCreateCmd)
-	pluginCreateCmd.Flags().BoolVar(&pluginCreateOptions.Debug, "debug-output", false,
+	pluginCreateCmd.Flags().BoolVar(&pluginCreateOptions.DebugOutput, "debug-output", false,
 		i18n.T("If you want the maven output the debug info"))
 }
 
@@ -34,10 +37,10 @@ Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
 			env := os.Environ()
 
 			mvnArgs := []string{"mvn", "archetype:generate", "-U", `-Dfilter=io.jenkins.archetypes:`}
-			if pluginCreateOptions.Debug {
+			if pluginCreateOptions.DebugOutput {
 				mvnArgs = append(mvnArgs, "-X")
 			}
-			err = syscall.Exec(binary, mvnArgs, env)
+			err = util.Exec(binary, mvnArgs, env, centerStartOption.SystemCallExec)
 		}
 		return
 	},

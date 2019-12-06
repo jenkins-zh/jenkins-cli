@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 
-	"net/http"
 	"os"
 	"os/exec"
 
@@ -16,7 +15,7 @@ import (
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	RoundTripper http.RoundTripper
+	CommonOption
 
 	Port        int
 	Context     string
@@ -38,8 +37,7 @@ type CenterStartOption struct {
 	Download bool
 	Version  string
 
-	DryRun         bool
-	SystemCallExec util.SystemCallExec
+	DryRun bool
 }
 
 var centerStartOption CenterStartOption

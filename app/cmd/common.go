@@ -3,12 +3,21 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
+
+// CommonOption contains the common options
+type CommonOption struct {
+	SystemCallExec util.SystemCallExec
+	RoundTripper   http.RoundTripper
+}
 
 // OutputOption represent the format of output
 type OutputOption struct {
