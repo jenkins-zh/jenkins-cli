@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"go.uber.org/zap"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -23,8 +25,8 @@ func init() {
 
 var queueCancelCmd = &cobra.Command{
 	Use:   "cancel <id>",
-	Short: "Cancel the queue of your Jenkins",
-	Long:  `Cancel the queue of your Jenkins`,
+	Short: i18n.T("Cancel the queue items of your Jenkins"),
+	Long:  i18n.T("Cancel the queue items of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		for _, arg := range args {
@@ -37,6 +39,7 @@ var queueCancelCmd = &cobra.Command{
 }
 
 func (c *QueueCancelOption) cancel(id string) (err error) {
+	var queueID int
 	if queueID, err = strconv.Atoi(id); err != nil {
 		return
 	}
