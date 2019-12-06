@@ -60,6 +60,7 @@ i18n-tools:
 go-bindata-download-linux:
 	mkdir -p bin
 	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-linux-amd64 -o bin/go-bindata
+	chmod u+x bin/go-bindata
 
 verify:
 	go vet ./...
