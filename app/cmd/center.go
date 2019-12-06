@@ -46,7 +46,7 @@ func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper 
 			RoundTripper: roundTripper,
 		},
 	}
-	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+	getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 	var centerStatus string
 	if status, err = jclient.Status(); err == nil {

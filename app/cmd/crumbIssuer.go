@@ -27,7 +27,7 @@ var crumbIssuerCmd = &cobra.Command{
 	Long:  `Print crumbIssuer of Jenkins`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkinsCore := &client.JenkinsCore{RoundTripper: crumbIssuerOptions.RoundTripper}
-		getCurrentJenkinsAndClient(jenkinsCore)
+		getCurrentJenkinsAndClientOrDie(jenkinsCore)
 
 		crumb, err := jenkinsCore.GetCrumb()
 		if err == nil {

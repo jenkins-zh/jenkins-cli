@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
+
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,9 @@ type CenterStartOption struct {
 	Context     string
 	SetupWizard bool
 
+	// comes from folder plugin
+	ConcurrentIndexing int
+
 	Admin string
 
 	HTTPSEnable      bool
@@ -29,11 +33,13 @@ type CenterStartOption struct {
 	HTTPSPrivateKey  string
 
 	Environments []string
+	System       []string
 
 	Download bool
 	Version  string
 
-	DryRun bool
+	DryRun         bool
+	SystemCallExec util.SystemCallExec
 }
 
 var centerStartOption CenterStartOption
@@ -44,8 +50,10 @@ func init() {
 		i18n.T("Port of Jenkins"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Context, "context", "", "/",
 		i18n.T("Web context of Jenkins server"))
-	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "", "", nil,
+	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "env", "", nil,
 		i18n.T("Environments for the Jenkins which as key-value format"))
+	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.System, "sys", "", nil,
+		i18n.T("System property key-value"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
@@ -61,6 +69,9 @@ func init() {
 		i18n.T("Certificate file path for https"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.HTTPSPrivateKey, "https-private", "", "",
 		i18n.T("Private key file path for https"))
+
+	centerStartCmd.Flags().IntVarP(&centerStartOption.ConcurrentIndexing, "concurrent-indexing", "", -1,
+		i18n.T("Concurrent indexing limit, take this value only it is bigger than -1"))
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
@@ -103,7 +114,6 @@ var centerStartCmd = &cobra.Command{
 		if err == nil {
 			env := os.Environ()
 			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
-			env = append(env, fmt.Sprintf("jenkins.install.runSetupWizard=%v", centerStartOption.SetupWizard))
 
 			if centerStartOption.Environments != nil {
 				for _, item := range centerStartOption.Environments {
@@ -112,6 +122,7 @@ var centerStartCmd = &cobra.Command{
 			}
 
 			jenkinsWarArgs := []string{"java"}
+			jenkinsWarArgs = centerStartOption.setSystemProperty(jenkinsWarArgs)
 			jenkinsWarArgs = append(jenkinsWarArgs, "-jar", jenkinsWar)
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpPort=%d", centerStartOption.Port))
 			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin")
@@ -123,10 +134,24 @@ var centerStartCmd = &cobra.Command{
 					fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
 			}
 
-			if !centerStartOption.DryRun {
-				err = syscall.Exec(binary, jenkinsWarArgs, env)
-			}
+			err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
 		}
 		return
 	},
+}
+
+func (c *CenterStartOption) setSystemProperty(jenkinsWarArgs []string) []string {
+	if c.System == nil {
+		c.System = []string{}
+	}
+
+	c.System = append(c.System, fmt.Sprintf("jenkins.install.runSetupWizard=%v", c.SetupWizard))
+	if c.ConcurrentIndexing > -1 {
+		c.System = append(c.System, fmt.Sprintf("com.cloudbees.hudson.plugins.folder.computed.ThrottleComputationQueueTaskDispatcher.LIMIT=%d", c.ConcurrentIndexing))
+	}
+
+	for _, item := range centerStartOption.System {
+		jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("-D%s", item))
+	}
+	return jenkinsWarArgs
 }

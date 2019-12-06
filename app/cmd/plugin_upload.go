@@ -119,7 +119,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			},
 			ShowProgress: pluginUploadOption.ShowProgress,
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 		jclient.Debug = rootOptions.Debug
 
 		if pluginUploadOption.Remote != "" {

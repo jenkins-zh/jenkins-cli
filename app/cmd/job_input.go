@@ -54,7 +54,7 @@ var jobInputCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		if inputActions, err := jclient.GetJobInputActions(jobName, buildID); err != nil {
 			log.Fatal(err)

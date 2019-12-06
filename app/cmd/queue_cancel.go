@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
+	"go.uber.org/zap"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -23,28 +25,35 @@ func init() {
 
 var queueCancelCmd = &cobra.Command{
 	Use:   "cancel <id>",
-	Short: "Cancel the queue of your Jenkins",
-	Long:  `Cancel the queue of your Jenkins`,
+	Short: i18n.T("Cancel the queue items of your Jenkins"),
+	Long:  i18n.T("Cancel the queue items of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			queueID int
-			err     error
-		)
-		if queueID, err = strconv.Atoi(args[0]); err != nil {
-			cmd.PrintErrln(err)
-			return
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		for _, arg := range args {
+			if err = queueCancelOption.cancel(arg); err != nil {
+				break
+			}
 		}
-
-		jclient := &client.QueueClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: queueCancelOption.RoundTripper,
-				Debug:        rootOptions.Debug,
-			},
-		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
-
-		err = jclient.Cancel(queueID)
-		helper.CheckErr(cmd, err)
+		return
 	},
+}
+
+func (c *QueueCancelOption) cancel(id string) (err error) {
+	var queueID int
+	if queueID, err = strconv.Atoi(id); err != nil {
+		return
+	}
+
+	jclient := &client.QueueClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: queueCancelOption.RoundTripper,
+			Debug:        rootOptions.Debug,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+
+	logger.Debug("cancel queue by id,", zap.Int("id", queueID))
+
+	err = jclient.Cancel(queueID)
+	return
 }

@@ -38,7 +38,7 @@ var jobCreateCmd = &cobra.Command{
 				RoundTripper: jobCreateOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		var createMode string
 		if createMode, err = jobCreateOption.getCreateMode(jclient); err == nil {

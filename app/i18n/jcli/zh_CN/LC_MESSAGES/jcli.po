@@ -64,7 +64,7 @@ msgid   "Build the job of your Jenkins.\n"
 msgstr  ""
 
 #: app/cmd/open.go:35 app/cmd/open.go:36
-msgid   "Open your Jenkins with a browse"
+msgid   "Open your Jenkins with a browser"
 msgstr  "在浏览器里打开 Jenkins"
 
 #: app/cmd/center_start.go:48

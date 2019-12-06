@@ -46,7 +46,7 @@ var jobStopCmd = &cobra.Command{
 				RoundTripper: jobStopOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		return jclient.StopJob(jobName, buildNum)
 	},

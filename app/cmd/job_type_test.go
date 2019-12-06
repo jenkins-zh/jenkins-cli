@@ -55,7 +55,15 @@ var _ = Describe("job type command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			//initConfig()
+			config = &Config{
+				Current: "fake",
+				JenkinsServers: []JenkinsServer{JenkinsServer{
+					Name:     "fake",
+					URL:      "http://localhost:8080/jenkins",
+					UserName: "admin",
+					Token:    "111e3a2f0231198855dceaff96f20540a9",
+				}},
+			}
 			jclient := &client.JobClient{
 				JenkinsCore: client.JenkinsCore{
 					RoundTripper: jobTypeOption.RoundTripper,

@@ -41,7 +41,7 @@ var pluginSearchCmd = &cobra.Command{
 				RoundTripper: pluginSearchOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		plugins, err := jclient.GetAvailablePlugins()
 		if err == nil {
@@ -77,7 +77,7 @@ func matchPluginsData(plugins []client.AvailablePlugin, pluginJclient *client.Pl
 			RoundTripper: pluginSearchOption.RoundTripper,
 		},
 	}
-	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+	getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 	site, err := jclient.GetSite()
 	noSite := (err != nil || site == nil)
 	installedPlugins, err := pluginJclient.GetPlugins(1)

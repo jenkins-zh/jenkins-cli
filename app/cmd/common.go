@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -107,12 +106,23 @@ type HookOption struct {
 	SkipPostHook bool
 }
 
-func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+	}
 	return
 }

@@ -85,7 +85,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				RoundTripper: jobBuildOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
