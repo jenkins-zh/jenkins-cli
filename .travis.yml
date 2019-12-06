@@ -18,6 +18,7 @@ script:
   # Execute some tests
   - export PATH=${PWD}/bin:$PATH
   - make go-bindata-download-linux && ls -ahl bin
+  - echo $PATH
   - make clean tools init test
   # And finally run the SonarQube analysis - read the "sonar-project.properties"
   # file to see the specific configuration
