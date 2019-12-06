@@ -94,7 +94,8 @@ gettext:
 	go-xgettext -k=i18n.T "${JCLI_FILES}" > app/i18n/jcli.pot
 
 gen-data:
-	ls -ahl bin
+	pwd
+	ls -ahl
 	cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
 image:
