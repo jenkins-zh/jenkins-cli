@@ -3,11 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"os"
 )
 
 var _ = Describe("test open", func() {
@@ -33,7 +34,7 @@ var _ = Describe("test open", func() {
 		_, err = rootCmd.ExecuteC()
 	})
 
-	FIt("open a not exists Jenkins", func() {
+	It("open a not exists Jenkins", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(fmt.Sprint(err)).To(ContainSubstring("no URL found with Jenkins " + jenkinsName))
 	})
