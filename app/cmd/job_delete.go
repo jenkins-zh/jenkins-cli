@@ -41,7 +41,7 @@ var jobDeleteCmd = &cobra.Command{
 				RoundTripper: jobDeleteOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		err := jclient.Delete(jobName)
 		helper.CheckErr(cmd, err)

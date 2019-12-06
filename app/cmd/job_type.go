@@ -37,7 +37,7 @@ var jobTypeCmd = &cobra.Command{
 				RoundTripper: jobTypeOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		status, err := jclient.GetJobTypeCategories()
 		if err == nil {

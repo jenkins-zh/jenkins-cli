@@ -37,7 +37,7 @@ var centerMirrorCmd = &cobra.Command{
 				RoundTripper: centerUpgradeOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		var siteURL string
 		if centerMirrorOption.Enable {
