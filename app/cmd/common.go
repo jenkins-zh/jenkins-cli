@@ -15,8 +15,10 @@ import (
 
 // CommonOption contains the common options
 type CommonOption struct {
-	SystemCallExec util.SystemCallExec
-	RoundTripper   http.RoundTripper
+	ExecContext     util.ExecContext
+	SystemCallExec  util.SystemCallExec
+	LookPathContext util.LookPathContext
+	RoundTripper    http.RoundTripper
 }
 
 // OutputOption represent the format of output

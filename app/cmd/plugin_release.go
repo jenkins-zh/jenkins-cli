@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"os"
-	"os/exec"
-
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -43,7 +41,7 @@ var pluginReleaseCmd = &cobra.Command{
 	Short: i18n.T("Release current plugin project"),
 	Long:  i18n.T("Release current plugin project"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		binary, err := exec.LookPath("mvn")
+		binary, err := util.LookPath("mvn", pluginReleaseOptions.LookPathContext)
 		if err == nil {
 			env := os.Environ()
 
@@ -68,7 +66,7 @@ var pluginReleaseCmd = &cobra.Command{
 			if pluginReleaseOptions.DebugOutput {
 				mvnArgs = append(mvnArgs, "-X")
 			}
-			err = util.Exec(binary, mvnArgs, env, centerStartOption.SystemCallExec)
+			err = util.Exec(binary, mvnArgs, env, pluginReleaseOptions.SystemCallExec)
 		}
 		return
 	},

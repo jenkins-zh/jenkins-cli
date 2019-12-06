@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"os"
-	"os/exec"
-
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -32,7 +30,7 @@ var pluginCreateCmd = &cobra.Command{
 	Long: i18n.T(`Create a plugin project from the archetypes
 Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		binary, err := exec.LookPath("mvn")
+		binary, err := util.LookPath("mvn", pluginCreateOptions.LookPathContext)
 		if err == nil {
 			env := os.Environ()
 
@@ -40,7 +38,7 @@ Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
 			if pluginCreateOptions.DebugOutput {
 				mvnArgs = append(mvnArgs, "-X")
 			}
-			err = util.Exec(binary, mvnArgs, env, centerStartOption.SystemCallExec)
+			err = util.Exec(binary, mvnArgs, env, pluginCreateOptions.SystemCallExec)
 		}
 		return
 	},

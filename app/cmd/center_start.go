@@ -3,12 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"os"
-	"os/exec"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -104,11 +102,7 @@ var centerStartCmd = &cobra.Command{
 		}
 
 		var binary string
-
-		if !centerStartOption.DryRun {
-			binary, err = exec.LookPath("java")
-		}
-
+		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 		if err == nil {
 			env := os.Environ()
 			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))

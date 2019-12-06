@@ -38,11 +38,22 @@ func Exec(argv0 string, argv []string, envv []string, systemCallExec SystemCallE
 	return systemCallExec(argv0, argv, envv)
 }
 
+// LookPath is the wrapper of exec.LookPath
+func LookPath(file string, context LookPathContext) (string, error) {
+	if context == nil {
+		context = exec.LookPath
+	}
+	return context(file)
+}
+
 // SystemCallExec is the context of syscall.Exec
 type SystemCallExec = func(argv0 string, argv []string, envv []string) (err error)
 
 // ExecContext is the context of system command caller
 type ExecContext = func(name string, arg ...string) *exec.Cmd
+
+// LookPathContext is the context of look path
+type LookPathContext = func(file string) (string, error)
 
 // FakeExecCommandSuccess is a function that initialises a new exec.Cmd, one which will
 // simply call TestShellProcessSuccess rather than the command it is provided. It will
@@ -58,4 +69,9 @@ func FakeExecCommandSuccess(command string, args ...string) *exec.Cmd {
 // FakeSystemCallExecSuccess is a fake function of syscall.Exec
 func FakeSystemCallExecSuccess(argv0 string, argv []string, envv []string) (err error) {
 	return
+}
+
+// FakeLookPath is a fake function of exec.LookPath
+func FakeLookPath(path string) (string, error) {
+	return path, nil
 }
