@@ -9,7 +9,8 @@ import (
 var _ = Describe("center start command", func() {
 	It("enable mirror site", func() {
 		centerStartOption.SystemCallExec = util.FakeSystemCallExecSuccess
-		rootCmd.SetArgs([]string{"center", "start", "--dry-run"})
+		centerStartOption.LookPathContext = util.FakeLookPath
+		rootCmd.SetArgs([]string{"center", "start", "--dry-run", "--env", "a=b", "--concurrent-indexing=12", "--https-enable"})
 		_, err := rootCmd.ExecuteC()
 		Expect(err).To(BeNil())
 	})

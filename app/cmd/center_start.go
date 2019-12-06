@@ -3,20 +3,17 @@ package cmd
 import (
 	"fmt"
 
-	"net/http"
-	"os"
-	"os/exec"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
+	"os"
 
 	"github.com/spf13/cobra"
 )
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	RoundTripper http.RoundTripper
+	CommonOption
 
 	Port        int
 	Context     string
@@ -38,8 +35,7 @@ type CenterStartOption struct {
 	Download bool
 	Version  string
 
-	DryRun         bool
-	SystemCallExec util.SystemCallExec
+	DryRun bool
 }
 
 var centerStartOption CenterStartOption
@@ -106,11 +102,7 @@ var centerStartCmd = &cobra.Command{
 		}
 
 		var binary string
-
-		if !centerStartOption.DryRun {
-			binary, err = exec.LookPath("java")
-		}
-
+		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 		if err == nil {
 			env := os.Environ()
 			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
