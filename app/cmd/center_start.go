@@ -3,13 +3,13 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
-	"github.com/mitchellh/go-homedir"
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/spf13/cobra"
 )
