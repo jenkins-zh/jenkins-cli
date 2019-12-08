@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"github.com/sladyn98/Jenkins/jenkins-cli/client"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -26,6 +29,17 @@ var pluginNewCmd = &cobra.Command{
 	Short: "Print all the new plugins",
 	Long:  `Print all the new plugins which are available for installation`,
 
+	Run: func(cmd *cobra.Command, _ []string) {
+		jclient := &client.PluginAPI{}
 
-	//TO-DO -> Add logic
+		newPluginList,err := jclient.NewPlugins()
+
+		if err!=nil {
+			/*
+			  Print the list of plugins
+			*/
+		} else {
+				log.Fatal(err)
+		}
+	},
 }

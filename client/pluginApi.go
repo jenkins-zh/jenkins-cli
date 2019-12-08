@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+type PluginList struct {
+	 List []PluginInfo
+}
+
 type PluginAPI struct {
 	dependencyMap map[string]string
 }
@@ -22,6 +26,50 @@ type PluginDependency struct {
 	Version  string `json:"version"`
 }
 
+type MaintainerInfo struct {
+	ID		string  `json:"id"`
+	Name 	string  `json:"name"`
+	Email   string  `json:"email"`
+}
+
+type WikiInfo struct {
+	Content 	string `json:"content"`
+	URL         string `json:"url"`
+}
+
+type ScmInfo struct {
+	Link			  	string `json:"link"`
+	InLatestRelease   	string `json:"inLatestRelease"`
+	SinceLatestRelease  string `json:"sinceLatestRelease"`
+	PullRequests        string `json:"pullRequests"`
+}
+
+// NewPluginInfo hold the info of the new plugin
+type NewPluginInfo struct {
+	Wiki              []WikiInfo         `json:"wiki"`
+	Sha1              string             `json:"sha1"`
+	RequiredCore      string             `json:"requiredCore"`
+	Maintainers       []MaintainerInfo   `json:"maintainers"`
+	BuildDate         string             `json:"buildDate"`
+	Dependencies      []PluginDependency `json:"dependencies"`
+	Excerpt           string             `json:"excerpt"`
+	FirstRelease      string             `json:"firstRelease"`
+	Gav               string             `json:"gav"`
+	Name              string             `json:"name"`
+	PreviousTimestamp string             `json:"previousTimestamp"`
+	PreviousVersion   string             `json:"previousVersion"`
+	ReleaseTimestamp  string             `json:"releaseTimestamp"`
+	RequireCore       string             `json:"RequireCore"`
+	Title             string             `json:"title"`
+	URL               string             `json:"url"`
+	Version           string             `json:"version"`
+	SecurityWarnings  string             `json:"securityWarnings"`
+	Scm               []ScmInfo          `json:"scm"`
+
+	Stats PluginInfoStats
+}
+
+// PluginInfo hold the info of a plugin
 type PluginInfo struct {
 	BuildDate         string             `json:"buildDate"`
 	Dependencies      []PluginDependency `json:"dependencies"`
@@ -174,20 +222,18 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 }
 
 // New Plugins will list all the new plugins that can be installed.
-func (d *PluginAPI) NewPlugins()(plugin *PluginInfo, err error) {
-	var cli = http.Client{}
+func (d *PluginAPI) NewPlugins() (pluginList *PluginList){
+	var cli= http.Client{}
 	cli.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
 	}
-	resp, err := cli.Get("https://plugins.jenkins.io/api/plugins/new")
+	resp, _ := cli.Get("https://plugins.jenkins.io/api/plugins/new")
 
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
-
-	plugin = &PluginInfo{}
-	err = json.Unmarshal(body, plugin)
+	err = json.Unmarshal(body, pluginList)
 	if err != nil {
 		log.Println("error when unmarshal:", string(body))
 	}
