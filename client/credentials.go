@@ -3,9 +3,10 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"net/url"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // CredentialsManager hold the info of credentials client
@@ -31,7 +32,6 @@ func (c *CredentialsManager) Delete(store, id string) (err error) {
 func (c *CredentialsManager) Create(store, credential string) (err error) {
 	api := fmt.Sprintf("/credentials/store/%s/domain/_/createCredentials", store)
 
-	fmt.Println(credential)
 	formData := url.Values{}
 	formData.Add("json", fmt.Sprintf(`{"credentials": %s}`, credential))
 	payload := strings.NewReader(formData.Encode())
