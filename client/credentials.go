@@ -66,7 +66,7 @@ func (c *CredentialsManager) CreateSecret(store string, cred StringCredentials) 
 type Credential struct {
 	Description string `json:"description"`
 	DisplayName string
-	Fingerprint string
+	Fingerprint interface{}
 	FullName    string
 	ID          string `json:"id"`
 	TypeName    string
