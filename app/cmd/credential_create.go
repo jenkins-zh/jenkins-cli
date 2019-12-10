@@ -49,13 +49,6 @@ var credentialCreateCmd = &cobra.Command{
 	Short: i18n.T("Create a credential from Jenkins"),
 	Long:  i18n.T("Create a credential from Jenkins"),
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-		switch credentialCreateOption.Type {
-		case "basic", "secret":
-		default:
-			err = fmt.Errorf("unknow credential type: %s", credentialCreateOption.Type)
-			return
-		}
-
 		if len(args) >= 1 {
 			credentialCreateOption.Store = args[0]
 		}
