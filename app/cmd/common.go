@@ -66,7 +66,7 @@ type BatchOption struct {
 	Batch bool
 }
 
-// Confirm prompte user if they really want to do this
+// Confirm promote user if they really want to do this
 func (b *BatchOption) Confirm(message string) bool {
 	if !b.Batch {
 		confirm := false
