@@ -3,8 +3,9 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -73,7 +74,6 @@ func (o *ComputerListOption) Output(obj interface{}) (data []byte, err error) {
 func colorOffline(offline bool) string {
 	if offline {
 		return util.ColorWarning("yes")
-	} else {
-		return "no"
 	}
+	return "no"
 }
