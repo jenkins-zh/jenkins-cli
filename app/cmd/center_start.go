@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
-	"os"
 
 	"github.com/spf13/cobra"
 )
