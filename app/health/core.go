@@ -9,7 +9,8 @@ type CommandHealth interface {
 
 // CheckRegister is the register container
 type CheckRegister struct {
-	Member map[*cobra.Command]CommandHealth
+	Member     map[*cobra.Command]CommandHealth
+	PathMember map[string]CommandHealth
 }
 
 // Init init the storage
@@ -20,4 +21,9 @@ func (c *CheckRegister) Init() {
 // Register can register a command and function
 func (c *CheckRegister) Register(cmd *cobra.Command, health CommandHealth) {
 	c.Member[cmd] = health
+}
+
+// Register can register a command and function
+func (c *CheckRegister) RegisterPath(path string, health CommandHealth) {
+	c.PathMember[path] = health
 }
