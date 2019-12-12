@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -15,11 +14,11 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
-var _ = Describe("computer launch command", func() {
+var _ = Describe("computer log command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		buf          io.Writer
+		buf          *bytes.Buffer
 	)
 
 	BeforeEach(func() {
@@ -31,7 +30,7 @@ var _ = Describe("computer launch command", func() {
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
-		computerLaunchOption.RoundTripper = roundTripper
+		computerLogOption.RoundTripper = roundTripper
 	})
 
 	AfterEach(func() {
@@ -57,12 +56,13 @@ var _ = Describe("computer launch command", func() {
 		It("should success", func() {
 			name := "fake"
 
-			client.PrepareForLaunchComputer(roundTripper, "http://localhost:8080/jenkins",
+			client.PrepareForComputerLogRequest(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
 
-			rootCmd.SetArgs([]string{"computer", "launch", name})
+			rootCmd.SetArgs([]string{"computer", "log", name})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(buf.String()).To(Equal("fake-log"))
 		})
 	})
 })

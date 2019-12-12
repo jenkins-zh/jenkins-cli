@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -25,7 +24,7 @@ var computerLogCmd = &cobra.Command{
 	Short: i18n.T("Output the log of the agent"),
 	Long:  i18n.T("Output the log of the agent"),
 	Args:  cobra.MinimumNArgs(1),
-	RunE: func(_ *cobra.Command, args []string) (err error) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jClient := &client.ComputerClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: computerLogOption.RoundTripper,
@@ -35,7 +34,7 @@ var computerLogCmd = &cobra.Command{
 
 		var log string
 		if log, err = jClient.GetLog(args[0]); err == nil {
-			fmt.Print(log)
+			cmd.Print(log)
 		}
 		return
 	},
