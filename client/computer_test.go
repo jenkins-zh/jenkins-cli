@@ -30,18 +30,35 @@ var _ = Describe("computer test", func() {
 
 	It("List", func() {
 		client.PrepareForComputerListRequest(roundTripper, computerClient.URL, "", "")
-		//request, _ := http.NewRequest("GET", fmt.Sprintf("%s/computer/api/json", computerClient.URL), nil)
-		//response := &http.Response{
-		//	StatusCode: 200,
-		//	Request:    request,
-		//	Body:       ioutil.NopCloser(bytes.NewBufferString()),
-		//}
-		//roundTripper.EXPECT().
-		//	RoundTrip(request).Return(response, nil)
 
 		computers, err := computerClient.List()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(computers).NotTo(BeNil())
 		Expect(len(computers.Computer)).To(Equal(1))
+	})
+
+	It("Launch", func() {
+		name := "fake-name"
+		client.PrepareForLaunchComputer(roundTripper, computerClient.URL, "", "", name)
+
+		err := computerClient.Launch(name)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("GetLog", func() {
+		name := "fake-name"
+		client.PrepareForComputerLogRequest(roundTripper, computerClient.URL, "", "", name)
+
+		log, err := computerClient.GetLog(name)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(log).To(Equal("fake-log"))
+	})
+
+	It("GetLog with 500", func() {
+		name := "fake-name"
+		client.PrepareForComputerLogRequestWithCode(roundTripper, computerClient.URL, "", "", name, 500)
+
+		_, err := computerClient.GetLog(name)
+		Expect(err).To(HaveOccurred())
 	})
 })

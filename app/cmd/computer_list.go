@@ -3,8 +3,9 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -36,7 +37,7 @@ var computerListCmd = &cobra.Command{
 				RoundTripper: computerListOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var computers client.ComputerList
 		if computers, err = jClient.List(); err == nil {
@@ -61,11 +62,18 @@ func (o *ComputerListOption) Output(obj interface{}) (data []byte, err error) {
 		for i, computer := range computers {
 			table.AddRow(fmt.Sprintf("%d", i), computer.DisplayName,
 				fmt.Sprintf("%d", computer.NumExecutors), computer.Description,
-				fmt.Sprintf("%v", computer.Offline))
+				colorOffline(computer.Offline))
 		}
 		table.Render()
 		err = nil
 		data = buf.Bytes()
 	}
 	return
+}
+
+func colorOffline(offline bool) string {
+	if offline {
+		return util.ColorWarning("yes")
+	}
+	return "no"
 }
