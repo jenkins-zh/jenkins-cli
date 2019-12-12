@@ -47,7 +47,7 @@ jcli plugin install localization-zh-cn@1.0.9
 			UseMirror:    pluginInstallOption.UseMirror,
 			MirrorURL:    getDefaultMirror(),
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		plugins := make([]string, len(args))
 		plugins = append(plugins, args...)

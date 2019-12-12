@@ -30,7 +30,7 @@ var cascExportCmd = &cobra.Command{
 				RoundTripper: cascExportOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
 		var config string
 		if config, err = jClient.Export(); err == nil {

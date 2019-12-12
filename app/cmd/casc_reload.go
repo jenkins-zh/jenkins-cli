@@ -30,7 +30,7 @@ var cascReloadCmd = &cobra.Command{
 				RoundTripper: cascReloadOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 		return jClient.Reload()
 	},
 }

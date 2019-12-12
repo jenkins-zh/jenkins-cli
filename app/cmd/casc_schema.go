@@ -30,7 +30,7 @@ var cascSchemaCmd = &cobra.Command{
 				RoundTripper: cascSchemaOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
 		var config string
 		if config, err = jClient.Schema(); err == nil {

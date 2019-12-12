@@ -41,7 +41,7 @@ var userTokenCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		tokenName := userTokenOption.Name
 		status, err := jclient.CreateToken(tokenName)

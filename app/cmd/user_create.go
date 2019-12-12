@@ -37,7 +37,7 @@ var userCreateCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		if user, err := jclient.Create(username, password); err == nil {
 			cmd.Println("create user success. Password is:", user.Password1)

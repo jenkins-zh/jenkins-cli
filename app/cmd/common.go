@@ -3,13 +3,23 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
+
+// CommonOption contains the common options
+type CommonOption struct {
+	ExecContext     util.ExecContext
+	SystemCallExec  util.SystemCallExec
+	LookPathContext util.LookPathContext
+	RoundTripper    http.RoundTripper
+}
 
 // OutputOption represent the format of output
 type OutputOption struct {
@@ -56,7 +66,7 @@ type BatchOption struct {
 	Batch bool
 }
 
-// Confirm prompte user if they really want to do this
+// Confirm promote user if they really want to do this
 func (b *BatchOption) Confirm(message string) bool {
 	if !b.Batch {
 		confirm := false
@@ -107,12 +117,23 @@ type HookOption struct {
 	SkipPostHook bool
 }
 
-func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+	}
 	return
 }

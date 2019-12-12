@@ -2,14 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
-	"os/exec"
 	"runtime"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +16,8 @@ type OpenOption struct {
 
 	Name   string
 	Config bool
+
+	ExecContext util.ExecContext
 }
 
 var openOption OpenOption
@@ -34,10 +33,10 @@ func init() {
 
 var openCmd = &cobra.Command{
 	Use:     "open [config name]",
-	Short:   i18n.T("Open your Jenkins with a browse"),
-	Long:    i18n.T(`Open your Jenkins with a browse`),
-	Example: `jcli open -n <config name>`,
-	Run: func(_ *cobra.Command, args []string) {
+	Short:   i18n.T("Open your Jenkins with a browser"),
+	Long:    i18n.T(`Open your Jenkins with a browser`),
+	Example: `jcli open -n [config name]`,
+	RunE: func(_ *cobra.Command, args []string) (err error) {
 		var jenkins *JenkinsServer
 
 		var configName string
@@ -50,10 +49,12 @@ var openCmd = &cobra.Command{
 		if configName == "" && openOption.Interactive {
 			jenkinsNames := getJenkinsNames()
 			prompt := &survey.Select{
-				Message: "Choose a Jenkins that you want to Open:",
+				Message: i18n.T("Choose a Jenkins which you want to open:"),
 				Options: jenkinsNames,
 			}
-			survey.AskOne(prompt, &(configName))
+			if err = survey.AskOne(prompt, &(configName)); err != nil {
+				return
+			}
 		}
 
 		if configName != "" {
@@ -67,15 +68,16 @@ var openCmd = &cobra.Command{
 			if openOption.Config {
 				url = fmt.Sprintf("%s/configure", url)
 			}
-			Open(url, exec.Command)
+			err = util.Open(url, openOption.ExecContext)
 		} else {
-			log.Fatalf("No URL found with Jenkins %s", configName)
+			err = fmt.Errorf("no URL found with Jenkins %s", configName)
 		}
+		return
 	},
 }
 
 // Open a URL in a browser
-func Open(url string, cmdContext ExecContext) error {
+func Open(url string, cmdContext util.ExecContext) error {
 	var cmd string
 	var args []string
 
@@ -90,17 +92,4 @@ func Open(url string, cmdContext ExecContext) error {
 	}
 	args = append(args, url)
 	return cmdContext(cmd, args...).Start()
-}
-
-type ExecContext = func(name string, arg ...string) *exec.Cmd
-
-// FakeExecCommandSuccess is a function that initialises a new exec.Cmd, one which will
-// simply call TestShellProcessSuccess rather than the command it is provided. It will
-// also pass through the command and its arguments as an argument to TestShellProcessSuccess
-func FakeExecCommandSuccess(command string, args ...string) *exec.Cmd {
-	cs := []string{"-test.run=TestShellProcessSuccess", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_TEST_PROCESS=1"}
-	return cmd
 }

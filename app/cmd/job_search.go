@@ -54,7 +54,7 @@ var jobSearchCmd = &cobra.Command{
 				RoundTripper: jobSearchOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		status, err := jclient.Search(keyword, jobSearchOption.Max)
 		if err == nil {

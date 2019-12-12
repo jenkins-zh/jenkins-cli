@@ -133,6 +133,10 @@ func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 }
 
 func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
+	if config == nil {
+		return
+	}
+
 	for _, cfg := range config.JenkinsServers {
 		if cfg.Name == name {
 			jenkinsServer = &cfg

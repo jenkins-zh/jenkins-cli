@@ -33,7 +33,7 @@ var userCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		status, err := jclient.Get()
 		if err == nil {
