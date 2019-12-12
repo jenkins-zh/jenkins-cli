@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"runtime"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -74,22 +72,4 @@ var openCmd = &cobra.Command{
 		}
 		return
 	},
-}
-
-// Open a URL in a browser
-func Open(url string, cmdContext util.ExecContext) error {
-	var cmd string
-	var args []string
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = "cmd"
-		args = []string{"/c", "start"}
-	case "darwin":
-		cmd = "Open"
-	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-Open"
-	}
-	args = append(args, url)
-	return cmdContext(cmd, args...).Start()
 }
