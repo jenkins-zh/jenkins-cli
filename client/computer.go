@@ -25,6 +25,7 @@ func (c *ComputerClient) Launch(name string) (err error) {
 	return
 }
 
+// GetLog fetch the log a computer
 func (c *ComputerClient) GetLog(name string) (log string, err error) {
 	var response *http.Response
 	api := fmt.Sprintf("/computer/%s/logText/progressiveText", name)
