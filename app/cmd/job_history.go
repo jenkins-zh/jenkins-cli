@@ -74,6 +74,8 @@ func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
 // ColorResult output the result with color
 func ColorResult(result string) string {
 	switch result {
+	case "":
+		return ""
 	case "SUCCESS":
 		return util.ColorInfo(result)
 	case "FAILURE":
