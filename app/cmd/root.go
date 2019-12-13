@@ -6,7 +6,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -27,7 +30,13 @@ type RootOptions struct {
 	Version    bool
 	Debug      bool
 
+	Doctor bool
+
 	LoggerLevel string
+}
+
+var healthCheckRegister = &health.CheckRegister{
+	Member: make(map[string]health.CommandHealth, 0),
 }
 
 var rootCmd = &cobra.Command{
@@ -67,6 +76,8 @@ More information could found at https://jenkins-zh.cn`,
 		if config != nil {
 			client.SetLanguage(config.Language)
 		}
+
+		err = rootOptions.RunDiagnose(cmd)
 		return
 	},
 	BashCompletionFunction: jcliBashCompletionFunc,
@@ -87,6 +98,23 @@ More information could found at https://jenkins-zh.cn`,
 	},
 }
 
+// RunDiagnose run the diagnose for a specific command
+func (o *RootOptions) RunDiagnose(cmd *cobra.Command) (err error) {
+	if !o.Doctor {
+		return
+	}
+	path := getCmdPath(cmd)
+
+	for k, v := range healthCheckRegister.Member {
+		if ok, _ := regexp.MatchString(k, path); ok {
+			err = v.Check()
+			break
+		}
+
+	}
+	return
+}
+
 // Execute will execute the command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -104,6 +132,8 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.LoggerLevel, "logger-level", "", "warn",
 		"Logger level which could be: debug, info, warn, error")
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Doctor, "doctor", "", false,
+		i18n.T("Run the diagnose for current command"))
 	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
 		i18n.T("Print the version of Jenkins CLI"))
 	rootCmd.SetOut(os.Stdout)
