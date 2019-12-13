@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -10,15 +11,15 @@ import (
 
 var _ = Describe("Root cmd test", func() {
 	var (
-		ctrl       *gomock.Controller
-		rootCmd    *cobra.Command
-		successCmd string
-		errorCmd   string
+		ctrl        *gomock.Controller
+		fakeRootCmd *cobra.Command
+		successCmd  string
+		errorCmd    string
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		rootCmd = &cobra.Command{Use: "root"}
+		fakeRootCmd = &cobra.Command{Use: "root"}
 		successCmd = "echo 1"
 		errorCmd = "exit 1"
 		config = nil
@@ -29,9 +30,21 @@ var _ = Describe("Root cmd test", func() {
 		ctrl.Finish()
 	})
 
+	Context("invalid logger level", func() {
+		It("cause errors", func() {
+			rootCmd.SetArgs([]string{"--logger-level", "fake"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).To(HaveOccurred())
+
+			rootCmd.SetArgs([]string{"--logger-level", "warn"})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
 	Context("PreHook test", func() {
 		It("only with root cmd", func() {
-			path := getCmdPath(rootCmd)
+			path := getCmdPath(fakeRootCmd)
 			Expect(path).To(Equal(""))
 		})
 
@@ -39,7 +52,7 @@ var _ = Describe("Root cmd test", func() {
 			subCmd := &cobra.Command{
 				Use: "sub",
 			}
-			rootCmd.AddCommand(subCmd)
+			fakeRootCmd.AddCommand(subCmd)
 
 			path := getCmdPath(subCmd)
 			Expect(path).To(Equal("sub"))
@@ -52,7 +65,7 @@ var _ = Describe("Root cmd test", func() {
 			sub2Cmd := &cobra.Command{
 				Use: "sub2",
 			}
-			rootCmd.AddCommand(sub1Cmd)
+			fakeRootCmd.AddCommand(sub1Cmd)
 			sub1Cmd.AddCommand(sub2Cmd)
 
 			path := getCmdPath(sub2Cmd)
@@ -162,5 +175,26 @@ var _ = Describe("Root cmd test", func() {
 			err := executePreCmd(subCmd, nil, &buf)
 			Expect(err).To(HaveOccurred())
 		})
+	})
+})
+
+// FakeOpt only for test
+type FakeOpt struct{}
+
+// Check fake, only for test
+func (o *FakeOpt) Check() error {
+	return nil
+}
+
+var _ = Describe("RunDiagnose test", func() {
+	It("should success", func() {
+		opt := RootOptions{Doctor: true}
+
+		rootCmd := &cobra.Command{
+			Use: "fake",
+		}
+		healthCheckRegister.Register(getCmdPath(rootCmd), &FakeOpt{})
+		err := opt.RunDiagnose(rootCmd)
+		Expect(err).NotTo(HaveOccurred())
 	})
 })
