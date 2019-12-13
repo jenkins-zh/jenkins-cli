@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/health"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -35,8 +36,7 @@ type RootOptions struct {
 }
 
 var healthCheckRegister = &health.CheckRegister{
-	Member:     make(map[*cobra.Command]health.CommandHealth, 0),
-	PathMember: make(map[string]health.CommandHealth, 0),
+	Member: make(map[string]health.CommandHealth, 0),
 }
 
 var rootCmd = &cobra.Command{
@@ -104,18 +104,14 @@ func (o *RootOptions) RunDiagnose(cmd *cobra.Command) (err error) {
 		return
 	}
 	path := getCmdPath(cmd)
-	fmt.Println(path)
 
-	for k, v := range healthCheckRegister.PathMember {
+	for k, v := range healthCheckRegister.Member {
 		if ok, _ := regexp.MatchString(k, path); ok {
 			err = v.Check()
 			break
 		}
 
 	}
-	//if df, ok := healthCheckRegister.Member[cmd]; ok {
-	//	fmt.Println(df)
-	//}
 	return
 }
 

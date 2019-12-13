@@ -3,7 +3,6 @@ package health
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
 )
 
 // Opt only for test
@@ -20,8 +19,9 @@ var _ = Describe("test command health check interface", func() {
 	)
 
 	BeforeEach(func() {
-		register = CheckRegister{}
-		register.Init()
+		register = CheckRegister{
+			Member: make(map[string]CommandHealth, 0),
+		}
 	})
 
 	It("basic test", func() {
@@ -31,7 +31,7 @@ var _ = Describe("test command health check interface", func() {
 
 	Context("register a fake one", func() {
 		It("should success", func() {
-			register.Register(&cobra.Command{}, &Opt{})
+			register.Register("fake", &Opt{})
 			Expect(len(register.Member)).To(Equal(1))
 		})
 	})

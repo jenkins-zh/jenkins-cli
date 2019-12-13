@@ -106,16 +106,8 @@ func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, ro
 // PrepareForOneInstalledPlugin only for test
 func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
-	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
-			"plugins": [{
-				"shortName": "fake",
-				"version": "1.0",
-				"hasUpdate": true,
-				"enable": true,
-				"active": true
-			}]
-		}`))
+	request, response = PrepareForOneInstalledPluginWithPluginName(
+		roundTripper, rootURL, "fake")
 	return
 }
 
