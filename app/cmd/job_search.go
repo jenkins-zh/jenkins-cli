@@ -94,7 +94,7 @@ func (o *JobSearchOption) Check() (err error) {
 		CommonOption: CommonOption{RoundTripper: o.RoundTripper},
 	}
 	const pluginName = "pipeline-restful-api"
-	const targetVersion = "0.2"
+	const targetVersion = "0.3"
 	var plugin *client.InstalledPlugin
 	if plugin, err = opt.FindPlugin(pluginName); err == nil {
 		var (
