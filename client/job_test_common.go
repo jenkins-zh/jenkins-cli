@@ -185,3 +185,33 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 		request.SetBasicAuth(user, password)
 	}
 }
+
+// PrepareOneItem only for test
+func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s", rootURL, name, kind), nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{"name":"fake","displayName":"fake","description":null,"type":"WorkflowJob","shortURL":"job/fake/","url":"job/fake/"}]`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && token != "" {
+		request.SetBasicAuth(user, token)
+	}
+}
+
+// PrepareEmptyItems only for test
+func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s", rootURL, name, kind), nil)
+	response := &http.Response{
+		StatusCode: 200,
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`[]`)),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && token != "" {
+		request.SetBasicAuth(user, token)
+	}
+}

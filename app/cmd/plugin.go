@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
+	CommonOption
+
 	Suite string
 }
 
@@ -23,4 +27,17 @@ var pluginCmd = &cobra.Command{
 	Example: `  jcli plugin list
   jcli plugin search github
   jcli plugin check`,
+}
+
+func (o *PluginOptions) FindPlugin(name string) (plugin *client.InstalledPlugin, err error) {
+	jClient := &client.PluginManager{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: o.RoundTripper,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+	if plugin, err = jClient.FindInstalledPlugin(name); err == nil && plugin == nil {
+		err = fmt.Errorf(fmt.Sprintf("lack of plugin %s", name))
+	}
+	return
 }

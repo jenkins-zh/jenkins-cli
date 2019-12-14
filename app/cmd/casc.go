@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/jenkins-zh/jenkins-cli/client"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
@@ -24,27 +20,10 @@ var cascOptions CASCOptions
 
 // Check do the health check of casc cmd
 func (o *CASCOptions) Check() (err error) {
-	jClient := &client.PluginManager{
-		JenkinsCore: client.JenkinsCore{
-			RoundTripper: cascOptions.RoundTripper,
-		},
+	opt := PluginOptions{
+		CommonOption: CommonOption{RoundTripper: o.RoundTripper},
 	}
-	getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-
-	support := false
-	var plugins *client.InstalledPluginList
-	if plugins, err = jClient.GetPlugins(1); err == nil {
-		for _, plugin := range plugins.Plugins {
-			if plugin.ShortName == "configuration-as-code" {
-				support = true
-				break
-			}
-		}
-	}
-
-	if !support {
-		err = fmt.Errorf(i18n.T("lack of plugin configuration-as-code"))
-	}
+	_, err = opt.FindPlugin("configuration-as-code")
 	return
 }
 

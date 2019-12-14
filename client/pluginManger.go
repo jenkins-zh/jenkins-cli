@@ -101,6 +101,20 @@ func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, 
 	return
 }
 
+// FindInstalledPlugin find the exist plugin by name
+func (p *PluginManager) FindInstalledPlugin(name string) (targetPlugin *InstalledPlugin, err error) {
+	var plugins *InstalledPluginList
+	if plugins, err = p.GetPlugins(1); err == nil {
+		for _, plugin := range plugins.Plugins {
+			if plugin.ShortName == name {
+				targetPlugin = &plugin
+				break
+			}
+		}
+	}
+	return
+}
+
 func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 	pluginNames := make([]string, 0)
 	for _, name := range names {
