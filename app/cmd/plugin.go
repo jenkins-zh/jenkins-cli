@@ -29,6 +29,7 @@ var pluginCmd = &cobra.Command{
   jcli plugin check`,
 }
 
+// FindPlugin find a plugin by name
 func (o *PluginOptions) FindPlugin(name string) (plugin *client.InstalledPlugin, err error) {
 	jClient := &client.PluginManager{
 		JenkinsCore: client.JenkinsCore{

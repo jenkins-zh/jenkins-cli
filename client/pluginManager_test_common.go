@@ -16,7 +16,7 @@ func PrepareForOneInstalledPluginWithPluginName(roundTripper *mhttp.MockRoundTri
 	return
 }
 
-// PrepareForOneInstalledPluginWithPluginNameAndVer
+// PrepareForOneInstalledPluginWithPluginNameAndVer only for test
 func PrepareForOneInstalledPluginWithPluginNameAndVer(roundTripper *mhttp.MockRoundTripper, rootURL,
 	pluginName, version string) (
 	request *http.Request, response *http.Response) {
