@@ -15,8 +15,10 @@ import (
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
 	OutputOption
-	Name string
-	Type string
+	Start int
+	Limit int
+	Name  string
+	Type  string
 
 	RoundTripper http.RoundTripper
 }
@@ -25,6 +27,10 @@ var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Start, "start", "", 0,
+		i18n.T("The list of items offset"))
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Limit, "limit", "", 50,
+		i18n.T("The list of items limit"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Name, "name", "", "",
 		i18n.T("The name of plugin for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
@@ -54,7 +60,8 @@ var jobSearchCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var items []client.JenkinsItem
-		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type); err == nil {
+		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
+			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
 			var data []byte
 			if data, err = jobSearchOption.Output(items); err == nil {
 				cmd.Print(string(data))

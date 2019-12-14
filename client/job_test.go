@@ -39,7 +39,7 @@ var _ = Describe("job test", func() {
 
 			PrepareOneItem(roundTripper, jobClient.URL, name, kind, "", "")
 
-			result, err := jobClient.Search(name, kind)
+			result, err := jobClient.Search(name, kind, 0, 50)
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
 			Expect(len(result)).To(Equal(1))
@@ -52,7 +52,7 @@ var _ = Describe("job test", func() {
 
 			PrepareEmptyItems(roundTripper, jobClient.URL, name, kind, "", "")
 
-			result, err := jobClient.Search(name, kind)
+			result, err := jobClient.Search(name, kind, 0, 50)
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
 			Expect(len(result)).To(Equal(0))

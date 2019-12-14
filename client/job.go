@@ -18,8 +18,9 @@ type JobClient struct {
 }
 
 // Search find a set of jobs by name
-func (q *JobClient) Search(name, kind string) (items []JenkinsItem, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s", name, kind),
+func (q *JobClient) Search(name, kind string, start, limit int) (items []JenkinsItem, err error) {
+	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d",
+		name, kind, start, limit),
 		nil, nil, 200, &items)
 	return
 }
