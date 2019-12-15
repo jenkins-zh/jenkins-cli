@@ -59,7 +59,7 @@ var jobArtifactDownloadCmd = &cobra.Command{
 				RoundTripper: jobArtifactDownloadOption.RoundTripper,
 			},
 		}
-		jobArtifactDownloadOption.Jenkins = getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		jobArtifactDownloadOption.Jenkins = getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		artifacts, err := jclient.List(jobName, buildID)
 		if err == nil {

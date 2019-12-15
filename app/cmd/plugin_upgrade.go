@@ -44,7 +44,7 @@ var pluginUpgradeCmd = &cobra.Command{
 				RoundTripper: pluginUpgradeOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		var err error
 		targetPlugins := make([]string, 0)

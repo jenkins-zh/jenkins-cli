@@ -31,13 +31,18 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   i18n.T("Manage the config of jcli"),
 	Long:    i18n.T("Manage the config of jcli"),
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		current := getCurrentJenkins()
-		if current.Description != "" {
-			cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+		if current == nil {
+			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+			if current.Description != "" {
+				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+			} else {
+				cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+			}
 		}
+		return
 	},
 	Example: `  jcli config generate
   jcli config list
@@ -128,6 +133,10 @@ func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 }
 
 func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
+	if config == nil {
+		return
+	}
+
 	for _, cfg := range config.JenkinsServers {
 		if cfg.Name == name {
 			jenkinsServer = &cfg
@@ -171,7 +180,9 @@ func loadConfig(path string) (err error) {
 
 // getMirrors returns the mirror list, one official mirror should be returned if user don't give it
 func getMirrors() (mirrors []JenkinsMirror) {
-	mirrors = config.Mirrors
+	if config != nil {
+		mirrors = config.Mirrors
+	}
 	if len(mirrors) == 0 {
 		mirrors = []JenkinsMirror{
 			{

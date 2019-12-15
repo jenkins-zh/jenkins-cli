@@ -16,8 +16,8 @@ import (
 type CenterOption struct {
 	WatchOption
 
-	RoundTripper  http.RoundTripper
-	CeneterStatus string
+	RoundTripper http.RoundTripper
+	CenterStatus string
 }
 
 var centerOption CenterOption
@@ -46,7 +46,7 @@ func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper 
 			RoundTripper: roundTripper,
 		},
 	}
-	getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+	getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 	var centerStatus string
 	if status, err = jclient.Status(); err == nil {
@@ -61,8 +61,8 @@ func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper 
 			}
 		}
 
-		if centerOption.CeneterStatus != centerStatus {
-			centerOption.CeneterStatus = centerStatus
+		if centerOption.CenterStatus != centerStatus {
+			centerOption.CenterStatus = centerStatus
 
 			cmd.Printf("%s", centerStatus)
 		}

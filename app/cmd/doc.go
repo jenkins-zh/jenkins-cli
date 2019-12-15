@@ -22,8 +22,6 @@ const (
 	gendocFrontmatterTemplate = `---
 date: %s
 title: "%s"
-anchor: %s
-url: %s
 version: %s
 ---
 `
@@ -39,10 +37,9 @@ var docCmd = &cobra.Command{
 		prepender := func(filename string) string {
 			name := filepath.Base(filename)
 			base := strings.TrimSuffix(name, path.Ext(name))
-			url := "/commands/" + strings.ToLower(base) + "/"
 			return fmt.Sprintf(gendocFrontmatterTemplate, now,
 				strings.Replace(base, "_", " ", -1),
-				base, url, app.GetVersion())
+				app.GetVersion())
 		}
 
 		linkHandler := func(name string) string {

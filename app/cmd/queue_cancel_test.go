@@ -67,9 +67,8 @@ var _ = Describe("queue cancel command", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal("strconv.Atoi: parsing \"a\": invalid syntax\n"))
+			Expect(err).To(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("strconv.Atoi: parsing \"a\": invalid syntax\n"))
 		})
 	})
 })

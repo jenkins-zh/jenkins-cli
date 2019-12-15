@@ -43,7 +43,7 @@ var pluginListCmd = &cobra.Command{
 				RoundTripper: pluginListOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		var (
 			filter       bool

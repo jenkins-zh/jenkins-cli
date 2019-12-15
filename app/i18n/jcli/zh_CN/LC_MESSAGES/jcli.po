@@ -64,7 +64,7 @@ msgid   "Build the job of your Jenkins.\n"
 msgstr  ""
 
 #: app/cmd/open.go:35 app/cmd/open.go:36
-msgid   "Open your Jenkins with a browse"
+msgid   "Open your Jenkins with a browser"
 msgstr  "在浏览器里打开 Jenkins"
 
 #: app/cmd/center_start.go:48
@@ -102,6 +102,14 @@ msgstr "管理 jcli 的配置"
 #: app/cmd/config_generate.go:28
 msgid "Copy the output into clipboard"
 msgstr "拷贝输出到剪贴板"
+
+#: app/cmd/job_build.go:36
+msgid   "Batch mode, no need to confirm"
+msgstr  "批处理模式，无需确认"
+
+#: app/cmd/casc_apply.go:25 app/cmd/casc_apply.go:26
+msgid   "Apply config through configuration-as-code"
+msgstr  "从应用已有的配置"
 
 #: app/cmd/root.go:77
 msgid "An alternative config file"
@@ -141,8 +149,8 @@ msgid "jcli is a tool which could help you with your multiple Jenkins"
 msgstr "jcli 是帮助你管理多个 Jenkins 的工具"
 
 #: app/cmd/computer.go:15 app/cmd/computer.go:16
-msgid   "管理 Jenkins 节点"
-msgstr  ""
+msgid   "Manage the computers of your Jenkins"
+msgstr   "管理 Jenkins 节点"
 
 #: app/cmd/root.go:55
 msgid "Jenkins CLI (jcli) manage your Jenkins"
@@ -172,6 +180,14 @@ msgstr "管理 Jenkins 的插件"
 msgid "Print the version of Jenkins CLI"
 msgstr "打印 Jenkins CLI 的版本"
 
+#: app/cmd/job_history.go:29 app/cmd/job_history.go:30
+msgid   "Print the history of job in your Jenkins"
+msgstr  "输出任务的构建历史"
+
+#: app/cmd/casc_export.go:25 app/cmd/casc_export.go:26
+msgid   "Export the config from configuration-as-code"
+msgstr  "导出配置及代码的配置"
+
 #: app/cmd/completion.go:14 app/cmd/completion.go:15
 msgid "Genereate bash completion scripts"
 msgstr "生成 bash 自动补全的脚本"
@@ -179,6 +195,10 @@ msgstr "生成 bash 自动补全的脚本"
 #: app/cmd/plugin_download.go:31 app/cmd/plugin_install.go:29
 msgid "If you want to show the progress of download a plugin"
 msgstr "你是否希望显示插件下载的进度"
+
+#: app/cmd/casc_open.go:16 app/cmd/casc_open.go:17
+msgid   "Open Configuration as Code page in browser"
+msgstr  "在浏览器中打开配置及代码的页面"
 
 #: app/cmd/center_start.go:61
 msgid   "Certificate file path for https"
@@ -211,6 +231,10 @@ msgstr "远程插件 URL"
 #: app/cmd/plugin_upload.go:52
 msgid "Whether skip the post command hook"
 msgstr "是否跳过后置命令钩子"
+
+#: app/cmd/casc_reload.go:25 app/cmd/casc_reload.go:26
+msgid   "Reload config through configuration-as-code"
+msgstr  "重新加载配置及代码的配置"
 
 #: app/cmd/center_download.go:32
 msgid "Version of the Jenkins which you want to download"
@@ -262,7 +286,7 @@ msgstr "你是否想要跳过下载依赖插件"
 
 #: app/cmd/plugin_upload.go:45
 msgid "Password of remote plugin URL"
-msgstr "远程插件的秘密"
+msgstr "远程插件的密码"
 
 #: app/cmd/plugin_upload.go:58
 msgid "Upload a plugin  to your Jenkins"
@@ -315,6 +339,10 @@ msgstr "搜索插件"
 #: app/cmd/plugin_upload.go:39
 msgid "Whether show the upload progress"
 msgstr "是否显示上传进度"
+
+#: app/cmd/casc_schema.go:25 app/cmd/casc_schema.go:26
+msgid   "Get the schema of configuration-as-code"
+msgstr  "获取配置及代码的结构"
 
 #: app/cmd/plugin_upload.go:47
 msgid "Remote Jenkins which will find from config list"

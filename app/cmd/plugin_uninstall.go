@@ -33,7 +33,7 @@ var pluginUninstallCmd = &cobra.Command{
 				RoundTripper: pluginUninstallOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		err := jclient.UninstallPlugin(pluginName)
 		helper.CheckErr(cmd, err)

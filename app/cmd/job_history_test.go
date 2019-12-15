@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"os"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -72,5 +73,13 @@ var _ = Describe("job history command", func() {
 1      fake        false    
 `))
 		})
+	})
+})
+
+var _ = Describe("ColorResult test", func() {
+	It("should success", func() {
+		Expect(ColorResult("unknown")).To(ContainSubstring("unknown"))
+		Expect(ColorResult("SUCCESS")).To(ContainSubstring("SUCCESS"))
+		Expect(ColorResult("FAILURE")).To(ContainSubstring("FAILURE"))
 	})
 })

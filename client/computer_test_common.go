@@ -3,9 +3,10 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
 // PrepareForComputerListRequest only for test
@@ -15,6 +16,33 @@ func PrepareForComputerListRequest(roundTripper *mhttp.MockRoundTripper, rootURL
 		StatusCode: 200,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(PrepareForComputerList())),
+	}
+	roundTripper.EXPECT().
+		RoundTrip(request).Return(response, nil)
+	if user != "" && password != "" {
+		request.SetBasicAuth(user, password)
+	}
+}
+
+// PrepareForLaunchComputer only for test
+func PrepareForLaunchComputer(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/%s/launchSlaveAgent", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+}
+
+// PrepareForComputerLogRequest only for test
+func PrepareForComputerLogRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
+	PrepareForComputerLogRequestWithCode(roundTripper, rootURL, user, password, name, 200)
+}
+
+// PrepareForComputerLogRequestWithCode only for test
+func PrepareForComputerLogRequestWithCode(roundTripper *mhttp.MockRoundTripper, rootURL, user, password,
+	name string, statusCode int) {
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/computer/%s/logText/progressiveText", rootURL, name), nil)
+	response := &http.Response{
+		StatusCode: statusCode,
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`fake-log`)),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)

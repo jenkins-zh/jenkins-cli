@@ -2,10 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
+
+// PluginOpenOption is the option of plugin open cmd
+type PluginOpenOption struct {
+	ExecContext util.ExecContext
+}
+
+var pluginOpenOption PluginOpenOption
 
 func init() {
 	pluginCmd.AddCommand(pluginOpenCmd)
@@ -13,15 +20,16 @@ func init() {
 
 var pluginOpenCmd = &cobra.Command{
 	Use:   "open",
-	Short: "Open update center server",
-	Long:  `Open update center server`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Short: "Open update center server in browser",
+	Long:  `Open update center server in browser`,
+	RunE: func(_ *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
 		if jenkins.URL != "" {
-			open(fmt.Sprintf("%s/pluginManager", jenkins.URL))
+			err = util.Open(fmt.Sprintf("%s/pluginManager", jenkins.URL), pluginOpenOption.ExecContext)
 		} else {
-			log.Fatal(fmt.Sprintf("No URL fond from %s", jenkins.Name))
+			err = fmt.Errorf("no URL fond from %s", jenkins.Name)
 		}
+		return
 	},
 }

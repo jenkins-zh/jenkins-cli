@@ -34,42 +34,28 @@ var _ = Describe("job test", func() {
 
 	Context("Search", func() {
 		It("basic case with one result item", func() {
-			keyword := "fake"
+			name := "fake"
+			kind := "fake"
 
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s%s&max=1", jobClient.URL, "/search/suggest?query=", keyword), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions": [{"name": "fake"}]}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareOneItem(roundTripper, jobClient.URL, name, kind, "", "")
 
-			result, err := jobClient.Search(keyword, 1)
+			result, err := jobClient.Search(name, kind, 0, 50)
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
-			Expect(len(result.Suggestions)).To(Equal(1))
-			Expect(result.Suggestions[0].Name).To(Equal("fake"))
+			Expect(len(result)).To(Equal(1))
+			Expect(result[0].Name).To(Equal("fake"))
 		})
 
 		It("basic case without any result items", func() {
-			keyword := "fake"
+			name := "fake"
+			kind := "fake"
 
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s%s&max=1", jobClient.URL, "/search/suggest?query=", keyword), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions":[]}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareEmptyItems(roundTripper, jobClient.URL, name, kind, "", "")
 
-			result, err := jobClient.Search(keyword, 1)
+			result, err := jobClient.Search(name, kind, 0, 50)
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
-			Expect(len(result.Suggestions)).To(Equal(0))
+			Expect(len(result)).To(Equal(0))
 		})
 	})
 
