@@ -286,7 +286,7 @@ msgstr "你是否想要跳过下载依赖插件"
 
 #: app/cmd/plugin_upload.go:45
 msgid "Password of remote plugin URL"
-msgstr "远程插件的秘密"
+msgstr "远程插件的密码"
 
 #: app/cmd/plugin_upload.go:58
 msgid "Upload a plugin  to your Jenkins"
