@@ -18,8 +18,10 @@ type JobClient struct {
 }
 
 // Search find a set of jobs by name
-func (q *JobClient) Search(keyword string, max int) (status *SearchResult, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/search/suggest?query=%s&max=%d", keyword, max), nil, nil, 200, &status)
+func (q *JobClient) Search(name, kind string, start, limit int) (items []JenkinsItem, err error) {
+	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d",
+		name, kind, start, limit),
+		nil, nil, 200, &items)
 	return
 }
 
@@ -304,14 +306,13 @@ type JobLog struct {
 	Text      string
 }
 
-// SearchResult holds the result items
-type SearchResult struct {
-	Suggestions []SearchResultItem
-}
-
-// SearchResultItem hold the result item
-type SearchResultItem struct {
-	Name string
+// JenkinsItem represents the item of Jenkins
+type JenkinsItem struct {
+	Name        string
+	DisplayName string
+	URL         string
+	Description string
+	Type        string
 }
 
 // Job represents a job

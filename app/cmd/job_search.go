@@ -1,13 +1,13 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"net/http"
-	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
-
+	"github.com/hashicorp/go-version"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -15,8 +15,10 @@ import (
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
 	OutputOption
-	PrintAll bool
-	Max      int
+	Start int
+	Limit int
+	Name  string
+	Type  string
 
 	RoundTripper http.RoundTripper
 }
@@ -25,85 +27,90 @@ var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
-	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Max, "max", "", 10,
-		i18n.T("The number of limitation to print"))
-	jobSearchCmd.Flags().BoolVarP(&jobSearchOption.PrintAll, "all", "", false,
-		i18n.T("Print all items if there's no keyword"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "json",
-		i18n.T(`Formats of the output which contain name, path`))
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Start, "start", "", 0,
+		i18n.T("The list of items offset"))
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Limit, "limit", "", 50,
+		i18n.T("The list of items limit"))
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Name, "name", "", "",
+		i18n.T("The name of plugin for search"))
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
+		i18n.T("The type of plugin for search"))
+	jobSearchOption.SetFlag(jobSearchCmd)
+
+	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
 }
 
 var jobSearchCmd = &cobra.Command{
-	Use:   "search [keyword]",
-	Short: i18n.T("Print the job of your Jenkins"),
-	Long:  i18n.T(`Print the job of your Jenkins`),
-	Run: func(cmd *cobra.Command, args []string) {
-		if !jobSearchOption.PrintAll && len(args) == 0 {
-			cmd.Help()
-			return
+	Use:     "search",
+	Short:   i18n.T("Print the job of your Jenkins"),
+	Long:    i18n.T(`Print the job of your Jenkins`),
+	Example: "jcli job search [keyword] --name keyword --type Folder",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		if len(args) > 0 {
+			jobSearchOption.Name = args[0]
 		}
-
-		if jobSearchOption.PrintAll && len(args) == 0 {
-			args = []string{""}
-		}
-
-		keyword := args[0]
-
-		jclient := &client.JobClient{
+	},
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		jClient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: jobSearchOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
-		status, err := jclient.Search(keyword, jobSearchOption.Max)
-		if err == nil {
+		var items []client.JenkinsItem
+		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
+			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
 			var data []byte
-			data, err = jobSearchOption.Output(status)
-			if err == nil {
-				cmd.Println(string(data))
+			if data, err = jobSearchOption.Output(items); err == nil {
+				cmd.Print(string(data))
 			}
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 
 // Output render data into byte array
 func (o *JobSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
-		var formatFunc JobNameFormat
-
-		switch o.OutputOption.Format {
-		case "name":
-			formatFunc = simpleFormat
-		case "path":
-			formatFunc = pathFormat
+		items := obj.([]client.JenkinsItem)
+		buf := new(bytes.Buffer)
+		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
+		table.AddRow("number", "name", "displayname", "type", "url")
+		for i, item := range items {
+			table.AddRow(fmt.Sprintf("%d", i), item.Name, item.DisplayName, item.Type, item.URL)
 		}
-
-		if formatFunc == nil {
-			err = fmt.Errorf("unknow format %s", o.OutputOption.Format)
-			return
-		}
-
-		buf := ""
-		searchResult := obj.(*client.SearchResult)
-
-		for _, item := range searchResult.Suggestions {
-			buf = fmt.Sprintf("%s%s\n", buf, formatFunc(item.Name))
-		}
-		data = []byte(strings.Trim(buf, "\n"))
+		table.Render()
+		data = buf.Bytes()
 		err = nil
 	}
 	return
 }
 
-// JobNameFormat format the job name
-type JobNameFormat func(string) string
+// Check do the conditions check
+func (o *JobSearchOption) Check() (err error) {
+	opt := PluginOptions{
+		CommonOption: CommonOption{RoundTripper: o.RoundTripper},
+	}
+	const pluginName = "pipeline-restful-api"
+	const targetVersion = "0.3"
+	var plugin *client.InstalledPlugin
+	if plugin, err = opt.FindPlugin(pluginName); err == nil {
+		var (
+			current      *version.Version
+			target       *version.Version
+			versionMatch bool
+		)
 
-func simpleFormat(name string) string {
-	return name
-}
+		if current, err = version.NewVersion(plugin.Version); err == nil {
+			if target, err = version.NewVersion(targetVersion); err == nil {
+				versionMatch = current.GreaterThanOrEqual(target)
+			}
+		}
 
-func pathFormat(name string) string {
-	return client.ParseJobPath(name)
+		if err == nil && !versionMatch {
+			err = fmt.Errorf("%s version is %s, should be %s", pluginName, plugin.Version, targetVersion)
+		}
+	}
+	return
 }

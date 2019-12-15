@@ -104,6 +104,7 @@ func (o *RootOptions) RunDiagnose(cmd *cobra.Command) (err error) {
 		return
 	}
 	path := getCmdPath(cmd)
+	logger.Debug("start to run diagnose", zap.String("path", path))
 
 	for k, v := range healthCheckRegister.Member {
 		if ok, _ := regexp.MatchString(k, path); ok {
