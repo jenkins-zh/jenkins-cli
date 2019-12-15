@@ -2,17 +2,14 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
-	"net/http"
 	"os"
 
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
 var _ = Describe("job search command", func() {
@@ -36,27 +33,6 @@ var _ = Describe("job search command", func() {
 		ctrl.Finish()
 	})
 
-	Context("no need roundtripper", func() {
-		It("search without any options", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
-			jobSearchCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-			rootCmd.SetArgs([]string{"job", "search"})
-
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal("help"))
-		})
-	})
-
 	Context("basic cases, need roundtrippper", func() {
 		BeforeEach(func() {
 			roundTripper = mhttp.NewMockRoundTripper(ctrl)
@@ -69,33 +45,21 @@ var _ = Describe("job search command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			keyword := "fake"
+			name := "fake"
+			kind := "fake"
 
-			request, _ := http.NewRequest("GET", fmt.Sprintf("http://localhost:8080/jenkins/search/suggest?query=%s&max=10", keyword), nil)
-			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions": [{"name": "fake"}]}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			client.PrepareOneItem(roundTripper, "http://localhost:8080/jenkins", name, kind,
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"job", "search", keyword})
+			rootCmd.SetArgs([]string{"job", "search", name, "--type", kind})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`{
-  "Suggestions": [
-    {
-      "Name": "fake"
-    }
-  ]
-}
+			Expect(buf.String()).To(Equal(`number name displayname type        url
+0      fake fake        WorkflowJob job/fake/
 `))
 		})
 
@@ -105,61 +69,91 @@ var _ = Describe("job search command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/search/suggest?query=&max=10", nil)
-			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions": [{"name": "fake"}]}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			client.PrepareOneItem(roundTripper, "http://localhost:8080/jenkins", "", "",
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"job", "search", "--all"})
+			rootCmd.SetArgs([]string{"job", "search", "--type=", "--name="})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`{
-  "Suggestions": [
-    {
-      "Name": "fake"
-    }
-  ]
-}
+			Expect(buf.String()).To(Equal(`number name displayname type        url
+0      fake fake        WorkflowJob job/fake/
 `))
 		})
+	})
+})
 
-		It("should success, output format is name", func() {
+var _ = Describe("job search command check", func() {
+	var (
+		ctrl         *gomock.Controller
+		roundTripper *mhttp.MockRoundTripper
+		rootURL      string
+		user         string
+		password     string
+	)
+
+	BeforeEach(func() {
+		ctrl = gomock.NewController(GinkgoT())
+		roundTripper = mhttp.NewMockRoundTripper(ctrl)
+		jobSearchOption.RoundTripper = roundTripper
+		rootOptions.Jenkins = ""
+		rootOptions.ConfigFile = "test.yaml"
+		rootURL = "http://localhost:8080/jenkins"
+		user = "admin"
+		password = "111e3a2f0231198855dceaff96f20540a9"
+	})
+
+	AfterEach(func() {
+		rootCmd.SetArgs([]string{})
+		os.Remove(rootOptions.ConfigFile)
+		rootOptions.ConfigFile = ""
+		ctrl.Finish()
+	})
+
+	Context("basic cases", func() {
+		It("without pipeline-restful-api plugin", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/search/suggest?query=&max=10", nil)
-			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"suggestions": [{"name": "fake"},{"name": "fake1"}]}`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			req, _ := client.PrepareForOneInstalledPlugin(roundTripper, rootURL)
+			req.SetBasicAuth(user, password)
 
-			rootCmd.SetArgs([]string{"job", "search", "--all", "-o", "name"})
+			err = jobSearchOption.Check()
+			Expect(err).To(HaveOccurred())
+		})
 
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-			_, err = rootCmd.ExecuteC()
+		It("with pipeline-restful-api 0.2+ plugin", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`fake
-fake1
-`))
+			req, _ := client.PrepareForOneInstalledPluginWithPluginNameAndVer(roundTripper, rootURL,
+				"pipeline-restful-api", "1.0")
+			req.SetBasicAuth(user, password)
+
+			err = jobSearchOption.Check()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("with pipeline-restful-api 0.2- plugin", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			req, _ := client.PrepareForOneInstalledPluginWithPluginNameAndVer(roundTripper, rootURL,
+				"pipeline-restful-api", "0.1")
+			req.SetBasicAuth(user, password)
+
+			err = jobSearchOption.Check()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("should be"))
 		})
 	})
 })
