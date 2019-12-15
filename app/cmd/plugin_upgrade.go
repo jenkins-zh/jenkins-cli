@@ -16,9 +16,9 @@ import (
 
 // PluginUpgradeOption option for plugin list command
 type PluginUpgradeOption struct {
-	Filter     []string
-	All        bool
-	Compatible bool
+	Filter []string
+	All    bool
+	//Compatible bool
 
 	RoundTripper http.RoundTripper
 }
@@ -29,7 +29,7 @@ func init() {
 	pluginCmd.AddCommand(pluginUpgradeCmd)
 	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, i18n.T("Filter for the list, like: name=foo"))
 	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, i18n.T("upgrade all plugins"))
-	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, i18n.T("upgrade all plugins"))
+	//pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, i18n.T("upgrade all plugins"))
 
 }
 
@@ -48,13 +48,13 @@ var pluginUpgradeCmd = &cobra.Command{
 
 		var err error
 		targetPlugins := make([]string, 0)
-		if cmd.Flags() != nil && (pluginUpgradeOption.All || pluginUpgradeOption.Compatible) {
+		if cmd.Flags() != nil && (pluginUpgradeOption.All /*|| pluginUpgradeOption.Compatible*/) {
 			if upgradeablePlugins, err := pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
 				if pluginUpgradeOption.All {
 					targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
-				} else {
+				} /* else {
 					targetPlugins = pluginUpgradeOption.findCompatiblePlugins(upgradeablePlugins)
-				}
+				}*/
 			}
 		} else if len(args) == 0 {
 			var upgradeablePlugins []client.InstalledPlugin
@@ -117,7 +117,7 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	return
 }
 
-func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.InstalledPlugin) (plugins []string) {
+/*func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.InstalledPlugin) (plugins []string) {
 	plugins = make([]string, 0)
 	var pluginNames string
 	for i, plugin := range installedPlugins {
@@ -160,4 +160,4 @@ func (p *PluginUpgradeOption) checkSecurity(securityWarnings []client.SecurityWa
 		}
 	}
 	return
-}
+}*/

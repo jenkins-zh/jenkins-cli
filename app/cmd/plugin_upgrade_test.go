@@ -85,7 +85,7 @@ var _ = Describe("plugin upgrade command", func() {
 			Expect(plugins[0]).To(Equal(pluginName))
 		})
 
-		It("upgrade compatible plugin, should success", func() {
+		/*It("upgrade compatible plugin, should success", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
@@ -104,7 +104,7 @@ var _ = Describe("plugin upgrade command", func() {
 			Expect(err).To(BeNil())
 
 			Expect(buf.String()).To(Equal(""))
-		})
+		})*/
 
 		It("upgrade all plugin, should success", func() {
 			data, err := generateSampleConfig()
