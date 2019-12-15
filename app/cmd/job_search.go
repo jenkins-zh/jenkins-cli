@@ -35,8 +35,7 @@ func init() {
 		i18n.T("The name of plugin for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
 		i18n.T("The type of plugin for search"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "table",
-		i18n.T(`Formats of the output which contain name, url`))
+	jobSearchOption.SetFlag(jobSearchCmd)
 
 	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
 }
@@ -76,7 +75,7 @@ func (o *JobSearchOption) Output(obj interface{}) (data []byte, err error) {
 	if data, err = o.OutputOption.Output(obj); err != nil {
 		items := obj.([]client.JenkinsItem)
 		buf := new(bytes.Buffer)
-		table := util.CreateTable(buf)
+		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
 		table.AddRow("number", "name", "displayname", "type", "url")
 		for i, item := range items {
 			table.AddRow(fmt.Sprintf("%d", i), item.Name, item.DisplayName, item.Type, item.URL)
