@@ -134,13 +134,13 @@ var _ = Describe("plugin api test", func() {
 			defer os.Remove("fake.hpi")
 		})
 
-		/*It("batch search plugins", func() {
+		It("batch search plugins", func() {
 			names = []string{"fake"}
 
 			PrepareShowPlugins(roundTripper, "fake")
 
 			plugins, _ := pluginAPI.BatchSearchPlugins("fake")
 			Expect(len(plugins)).To(Equal(0))
-		})*/
+		})
 	})
 })

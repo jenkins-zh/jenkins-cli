@@ -77,7 +77,7 @@ func PrepareCheckUpdate(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 }
 
 // PrepareShowPlugins only for test
-/*func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
+func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	response *http.Response) {
 	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugins/?q=%s&page=1&limit=1000", keyword), nil)
 	response = &http.Response{
@@ -95,4 +95,4 @@ func PrepareCheckUpdate(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
 	return
-}*/
+}
