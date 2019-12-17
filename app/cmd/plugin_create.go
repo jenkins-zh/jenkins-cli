@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"os"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -41,5 +42,8 @@ Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
 			err = util.Exec(binary, mvnArgs, env, pluginCreateOptions.SystemCallExec)
 		}
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.23",
 	},
 }

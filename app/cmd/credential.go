@@ -14,4 +14,7 @@ var credentialCmd = &cobra.Command{
 	Aliases: []string{"secret", "cred"},
 	Short:   i18n.T("Manage the credentials of your Jenkins"),
 	Long:    i18n.T(`Manage the credentials of your Jenkins`),
+	Annotations: map[string]string{
+		since: "v0.0.24",
+	},
 }

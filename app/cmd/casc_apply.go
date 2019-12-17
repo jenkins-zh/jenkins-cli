@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -32,5 +33,8 @@ var cascApplyCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 		return jClient.Apply()
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }

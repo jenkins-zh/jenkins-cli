@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -37,5 +38,8 @@ var cascExportCmd = &cobra.Command{
 			cmd.Print(config)
 		}
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }

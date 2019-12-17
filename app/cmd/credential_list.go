@@ -3,8 +3,9 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -50,6 +51,9 @@ var credentialListCmd = &cobra.Command{
 			}
 		}
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }
 

@@ -313,6 +313,15 @@ type JenkinsItem struct {
 	URL         string
 	Description string
 	Type        string
+
+	/** comes from Job */
+	Buildable bool
+	Building  bool
+	InQueue   bool
+
+	/** comes from ParameterizedJob */
+	Parameterized bool
+	Disabled      bool
 }
 
 // Job represents a job

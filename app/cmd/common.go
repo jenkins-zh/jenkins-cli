@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -10,7 +11,10 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+)
+
+const (
+	since = "since"
 )
 
 // CommonOption contains the common options

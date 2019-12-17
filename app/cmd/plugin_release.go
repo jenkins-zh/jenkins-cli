@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"os"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -69,5 +70,8 @@ var pluginReleaseCmd = &cobra.Command{
 			err = util.Exec(binary, mvnArgs, env, pluginReleaseOptions.SystemCallExec)
 		}
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }

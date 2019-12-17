@@ -3,11 +3,13 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/go-version"
+	"net/http"
+	"strings"
+
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
-	"net/http"
 
-	"github.com/hashicorp/go-version"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -19,6 +21,8 @@ type JobSearchOption struct {
 	Limit int
 	Name  string
 	Type  string
+
+	Filter []string
 
 	RoundTripper http.RoundTripper
 }
@@ -35,6 +39,8 @@ func init() {
 		i18n.T("The name of plugin for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
 		i18n.T("The type of plugin for search"))
+	jobSearchCmd.Flags().StringArrayVarP(&jobSearchOption.Filter, "filter", "", []string{},
+		i18n.T("Filter for the list"))
 	jobSearchOption.SetFlag(jobSearchCmd)
 
 	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
@@ -61,6 +67,7 @@ var jobSearchCmd = &cobra.Command{
 		var items []client.JenkinsItem
 		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
 			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
+			items = jobSearchOption.ItemsFilter(items)
 			var data []byte
 			if data, err = jobSearchOption.Output(items); err == nil {
 				cmd.Print(string(data))
@@ -68,6 +75,34 @@ var jobSearchCmd = &cobra.Command{
 		}
 		return
 	},
+}
+
+func (o *JobSearchOption) ItemsFilter(items []client.JenkinsItem) (result []client.JenkinsItem) {
+	if len(o.Filter) == 0 {
+		result = items
+		return
+	}
+
+	result = make([]client.JenkinsItem, 0)
+	for _, item := range items {
+		for _, f := range o.Filter {
+			arr := strings.Split(f, "=")
+			if len(arr) < 2 {
+				continue
+			}
+
+			key := arr[0]
+			val := arr[1]
+
+			fmt.Println(util.GetFieldValue(item, key), val)
+			if fmt.Sprint(util.GetFieldValue(item, key)) != val {
+				continue
+			}
+
+			result = append(result, item)
+		}
+	}
+	return
 }
 
 // Output render data into byte array
