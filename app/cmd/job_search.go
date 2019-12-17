@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/hashicorp/go-version"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"net/http"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -39,6 +37,8 @@ func init() {
 		i18n.T("The name of plugin for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
 		i18n.T("The type of plugin for search"))
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Columns, "columns", "", "Name,DisplayName,Type,URL",
+		i18n.T("The columns of table"))
 	jobSearchCmd.Flags().StringArrayVarP(&jobSearchOption.Filter, "filter", "", []string{},
 		i18n.T("Filter for the list"))
 	jobSearchOption.SetFlag(jobSearchCmd)
@@ -68,10 +68,8 @@ var jobSearchCmd = &cobra.Command{
 		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
 			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
 			items = jobSearchOption.ItemsFilter(items)
-			var data []byte
-			if data, err = jobSearchOption.Output(items); err == nil {
-				cmd.Print(string(data))
-			}
+			jobSearchOption.Writer = cmd.OutOrStdout()
+			err = jobSearchOption.OutputV2(items)
 		}
 		return
 	},
@@ -94,30 +92,12 @@ func (o *JobSearchOption) ItemsFilter(items []client.JenkinsItem) (result []clie
 			key := arr[0]
 			val := arr[1]
 
-			fmt.Println(util.GetFieldValue(item, key), val)
-			if fmt.Sprint(util.GetFieldValue(item, key)) != val {
+			if !strings.Contains(util.GetFieldValueAsString(item, key), val) {
 				continue
 			}
 
 			result = append(result, item)
 		}
-	}
-	return
-}
-
-// Output render data into byte array
-func (o *JobSearchOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil {
-		items := obj.([]client.JenkinsItem)
-		buf := new(bytes.Buffer)
-		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
-		table.AddRow("number", "name", "displayname", "type", "url")
-		for i, item := range items {
-			table.AddRow(fmt.Sprintf("%d", i), item.Name, item.DisplayName, item.Type, item.URL)
-		}
-		table.Render()
-		data = buf.Bytes()
-		err = nil
 	}
 	return
 }

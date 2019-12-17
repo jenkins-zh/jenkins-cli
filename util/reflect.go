@@ -1,27 +1,18 @@
 package util
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
-func GetFieldIntValue(v interface{}, field string) int {
+// GetFieldValueAsString returns the value of a field
+func GetFieldValueAsString(v interface{}, field string) string {
 	r := reflect.ValueOf(v)
 	f := reflect.Indirect(r).FieldByName(field)
-	return int(f.Int())
+	return fmt.Sprint(f)
 }
 
-func GetFieldStringValue(v interface{}, field string) string {
-	r := reflect.ValueOf(v)
-	f := reflect.Indirect(r).FieldByName(field)
-	return f.String()
-}
-
-func GetFieldBoolValue(v interface{}, field string) bool {
-	r := reflect.ValueOf(v)
-	f := reflect.Indirect(r).FieldByName(field)
-	return f.Bool()
-}
-
-func GetFieldValue(v interface{}, field string) reflect.Value {
-	r := reflect.ValueOf(v)
-	f := reflect.Indirect(r).FieldByName(field)
-	return f
+// ReflectFieldValueAsString returns the value of a field
+func ReflectFieldValueAsString(v reflect.Value, field string) string {
+	return fmt.Sprint(reflect.Indirect(v).FieldByName(field))
 }

@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/yaml.v2"
+	"io"
 	"net/http"
+	"reflect"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -29,7 +32,10 @@ type CommonOption struct {
 type OutputOption struct {
 	Format string
 
+	Columns        string
 	WithoutHeaders bool
+
+	Writer io.Writer
 }
 
 // FormatOutput is the interface of format output
@@ -47,6 +53,7 @@ const (
 )
 
 // Output print the object into byte array
+// Deprecated see also OutputV2
 func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	switch o.Format {
 	case JSONOutputFormat:
@@ -56,6 +63,42 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	}
 
 	return nil, fmt.Errorf("not support format %s", o.Format)
+}
+
+// OutputV2 print the data line by line
+func (o *OutputOption) OutputV2(obj interface{}) (err error) {
+	var data []byte
+	switch o.Format {
+	case JSONOutputFormat:
+		data, err = json.MarshalIndent(obj, "", "  ")
+	case YAMLOutputFormat:
+		data, err = yaml.Marshal(obj)
+	case TableOutputFormat:
+		table := util.CreateTableWithHeader(o.Writer, o.WithoutHeaders)
+		table.AddHeader(strings.Split(o.Columns, ",")...)
+		items := reflect.ValueOf(obj)
+		for i := 0; i < items.Len(); i++ {
+			table.AddRow(o.GetLine(items.Index(i))...)
+		}
+		table.Render()
+	default:
+		err = fmt.Errorf("not support format %s", o.Format)
+	}
+
+	if err == nil && len(data) > 0 {
+		_, err = o.Writer.Write(data)
+	}
+	return
+}
+
+// GetLine returns the line of a table
+func (o *OutputOption) GetLine(obj reflect.Value) []string {
+	columns := strings.Split(o.Columns, ",")
+	values := make([]string, 0)
+	for _, col := range columns {
+		values = append(values, util.ReflectFieldValueAsString(obj, col))
+	}
+	return values
 }
 
 // SetFlag set flag of output format
