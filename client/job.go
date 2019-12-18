@@ -287,7 +287,8 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 // ParseJobPath leads with slash
 func ParseJobPath(jobName string) (path string) {
 	path = jobName
-	if jobName == "" || strings.HasPrefix(jobName, "/job") {
+	if jobName == "" || strings.HasPrefix(jobName, "/job/") ||
+		strings.HasPrefix(jobName, "job/") {
 		return
 	}
 
@@ -313,6 +314,15 @@ type JenkinsItem struct {
 	URL         string
 	Description string
 	Type        string
+
+	/** comes from Job */
+	Buildable bool
+	Building  bool
+	InQueue   bool
+
+	/** comes from ParameterizedJob */
+	Parameterized bool
+	Disabled      bool
 }
 
 // Job represents a job

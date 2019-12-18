@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // CredentialDeleteOption option for credential delete command
@@ -62,5 +63,8 @@ var credentialDeleteCmd = &cobra.Command{
 
 		err = jClient.Delete(credentialDeleteOption.Store, credentialDeleteOption.ID)
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }

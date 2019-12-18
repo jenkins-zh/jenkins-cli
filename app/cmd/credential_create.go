@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // CredentialCreateOption option for credential delete command
@@ -89,5 +90,8 @@ var credentialCreateCmd = &cobra.Command{
 			err = fmt.Errorf("unknow credential type: %s", credentialCreateOption.Type)
 		}
 		return
+	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
 	},
 }

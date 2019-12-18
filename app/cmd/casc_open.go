@@ -28,4 +28,7 @@ var cascOpenCmd = &cobra.Command{
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		return util.Open(fmt.Sprintf("%s/configuration-as-code", jenkins.URL), cascOpenOption.ExecContext)
 	},
+	Annotations: map[string]string{
+		since: "v0.0.24",
+	},
 }
