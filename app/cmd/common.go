@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
@@ -78,6 +79,7 @@ func (o *OutputOption) OutputV2(obj interface{}) (err error) {
 		return
 	}
 
+	logger.Debug("start to output", zap.Any("filter", o.Filter))
 	obj = o.ListFilter(obj)
 
 	var data []byte
@@ -157,10 +159,21 @@ func (o *OutputOption) GetLine(obj reflect.Value) []string {
 }
 
 // SetFlag set flag of output format
+// Deprecated, see also SetFlagWithHeaders
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat, "Format the output, supported formats: table, json, yaml")
+	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat,
+		i18n.T("Format the output, supported formats: table, json, yaml"))
 	cmd.Flags().BoolVarP(&o.WithoutHeaders, "no-headers", "", false,
-		`When using the default output format, don't print headers (default print headers)`)
+		i18n.T(`When using the default output format, don't print headers (default print headers)`))
+	cmd.Flags().StringArrayVarP(&o.Filter, "filter", "", []string{},
+		i18n.T("Filter for the list by fields"))
+}
+
+// SetFlagWithHeaders set the flags of output
+func (o *OutputOption) SetFlagWithHeaders(cmd *cobra.Command, headers string) {
+	o.SetFlag(cmd)
+	cmd.Flags().StringVarP(&o.Columns, "columns", "", headers,
+		i18n.T("The columns of table"))
 }
 
 // BatchOption represent the options for a batch operation
