@@ -18,7 +18,6 @@ import (
 type PluginUpgradeOption struct {
 	Filter []string
 	All    bool
-	//Compatible bool
 
 	RoundTripper http.RoundTripper
 }
@@ -28,8 +27,7 @@ var pluginUpgradeOption PluginUpgradeOption
 func init() {
 	pluginCmd.AddCommand(pluginUpgradeCmd)
 	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, i18n.T("Filter for the list, like: name=foo"))
-	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, i18n.T("upgrade all plugins"))
-	//pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, i18n.T("upgrade all plugins"))
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, i18n.T("Upgrade all plugins for updated"))
 
 }
 
@@ -48,13 +46,9 @@ var pluginUpgradeCmd = &cobra.Command{
 
 		var err error
 		targetPlugins := make([]string, 0)
-		if cmd.Flags() != nil && (pluginUpgradeOption.All /*|| pluginUpgradeOption.Compatible*/) {
+		if pluginUpgradeOption.All {
 			if upgradeablePlugins, err := pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
-				if pluginUpgradeOption.All {
-					targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
-				} /* else {
-					targetPlugins = pluginUpgradeOption.findCompatiblePlugins(upgradeablePlugins)
-				}*/
+				targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
 			}
 		} else if len(args) == 0 {
 			var upgradeablePlugins []client.InstalledPlugin
