@@ -287,7 +287,8 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 // ParseJobPath leads with slash
 func ParseJobPath(jobName string) (path string) {
 	path = jobName
-	if jobName == "" || strings.HasPrefix(jobName, "/job") {
+	if jobName == "" || strings.HasPrefix(jobName, "/job/") ||
+		strings.HasPrefix(jobName, "job/") {
 		return
 	}
 
