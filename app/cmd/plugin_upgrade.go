@@ -17,6 +17,8 @@ import (
 // PluginUpgradeOption option for plugin list command
 type PluginUpgradeOption struct {
 	Filter []string
+	All    bool
+	//Compatible bool
 
 	RoundTripper http.RoundTripper
 }
@@ -25,7 +27,10 @@ var pluginUpgradeOption PluginUpgradeOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUpgradeCmd)
-	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, "Filter for the list, like: name=foo")
+	pluginUpgradeCmd.Flags().StringArrayVarP(&pluginUpgradeOption.Filter, "filter", "", []string{}, i18n.T("Filter for the list, like: name=foo"))
+	pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.All, "all", "", false, i18n.T("upgrade all plugins"))
+	//pluginUpgradeCmd.Flags().BoolVarP(&pluginUpgradeOption.Compatible, "compatible", "", false, i18n.T("upgrade all plugins"))
+
 }
 
 var pluginUpgradeCmd = &cobra.Command{
@@ -43,7 +48,15 @@ var pluginUpgradeCmd = &cobra.Command{
 
 		var err error
 		targetPlugins := make([]string, 0)
-		if len(args) == 0 {
+		if cmd.Flags() != nil && (pluginUpgradeOption.All /*|| pluginUpgradeOption.Compatible*/) {
+			if upgradeablePlugins, err := pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
+				if pluginUpgradeOption.All {
+					targetPlugins = pluginUpgradeOption.convertToArray(upgradeablePlugins)
+				} /* else {
+					targetPlugins = pluginUpgradeOption.findCompatiblePlugins(upgradeablePlugins)
+				}*/
+			}
+		} else if len(args) == 0 {
 			var upgradeablePlugins []client.InstalledPlugin
 			if upgradeablePlugins, err = pluginUpgradeOption.findUpgradeablePlugins(jclient); err == nil {
 				prompt := &survey.MultiSelect{
@@ -56,7 +69,7 @@ var pluginUpgradeCmd = &cobra.Command{
 			targetPlugins = args
 		}
 
-		if err == nil {
+		if err == nil && len(targetPlugins) != 0 {
 			err = jclient.InstallPlugin(targetPlugins)
 		}
 		helper.CheckErr(cmd, err)
@@ -90,7 +103,6 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	if plugins, err = jclient.GetPlugins(1); err != nil {
 		return
 	}
-
 	for _, plugin := range plugins.Plugins {
 		if !plugin.HasUpdate {
 			continue
@@ -104,3 +116,48 @@ func (p *PluginUpgradeOption) findUpgradeablePlugins(jclient *client.PluginManag
 	}
 	return
 }
+
+/*func (p *PluginUpgradeOption) findCompatiblePlugins(installedPlugins []client.InstalledPlugin) (plugins []string) {
+	plugins = make([]string, 0)
+	var pluginNames string
+	for i, plugin := range installedPlugins {
+		if !strings.Contains(pluginNames, plugin.ShortName) {
+			if len(installedPlugins) > i+1 {
+				pluginNames += plugin.ShortName + "|"
+			} else {
+				pluginNames += plugin.ShortName
+			}
+		}
+	}
+	plugins = pluginUpgradeOption.assembleData(installedPlugins, pluginNames)
+	return
+}
+
+func (p *PluginUpgradeOption) assembleData(installedPlugins []client.InstalledPlugin, pluginNames string) (plugins []string) {
+	pluginAPI := client.PluginAPI{}
+	if pluginsList, err := pluginAPI.BatchSearchPlugins(pluginNames); err == nil {
+		for _, pluginInfo := range pluginsList {
+			for _, plugin := range installedPlugins {
+				if plugin.ShortName == pluginInfo.Name {
+					var hasSecurity bool
+					securityWarnings := pluginInfo.SecurityWarnings
+					hasSecurity = p.checkSecurity(securityWarnings)
+					if !hasSecurity {
+						plugins = append(plugins, pluginInfo.Name)
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+func (p *PluginUpgradeOption) checkSecurity(securityWarnings []client.SecurityWarning) (hasSecurity bool) {
+	for _, securityWarning := range securityWarnings {
+		if securityWarning.Active {
+			hasSecurity = true
+			break
+		}
+	}
+	return
+}*/
