@@ -34,6 +34,7 @@ type OutputOption struct {
 
 	Columns        string
 	WithoutHeaders bool
+	Filter         []string
 
 	Writer io.Writer
 }
@@ -67,13 +68,25 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 
 // OutputV2 print the data line by line
 func (o *OutputOption) OutputV2(obj interface{}) (err error) {
+	if o.Writer == nil {
+		err = fmt.Errorf("no writer found")
+		return
+	}
+
+	if len(o.Columns) == 0 {
+		err = fmt.Errorf("no columns found")
+		return
+	}
+
+	obj = o.ListFilter(obj)
+
 	var data []byte
 	switch o.Format {
 	case JSONOutputFormat:
 		data, err = json.MarshalIndent(obj, "", "  ")
 	case YAMLOutputFormat:
 		data, err = yaml.Marshal(obj)
-	case TableOutputFormat:
+	case TableOutputFormat, "":
 		table := util.CreateTableWithHeader(o.Writer, o.WithoutHeaders)
 		table.AddHeader(strings.Split(o.Columns, ",")...)
 		items := reflect.ValueOf(obj)
@@ -89,6 +102,48 @@ func (o *OutputOption) OutputV2(obj interface{}) (err error) {
 		_, err = o.Writer.Write(data)
 	}
 	return
+}
+
+// ListFilter filter the data list by fields
+func (o *OutputOption) ListFilter(obj interface{}) interface{} {
+	if len(o.Filter) == 0 {
+		return obj
+	}
+
+	elemType := reflect.TypeOf(obj).Elem()
+	elemSlice := reflect.MakeSlice(reflect.SliceOf(elemType), 0, 10)
+	items := reflect.ValueOf(obj)
+	for i := 0; i < items.Len(); i++ {
+		item := items.Index(i)
+		if o.Match(item) {
+			elemSlice = reflect.Append(elemSlice, item)
+		}
+	}
+	return elemSlice.Interface()
+}
+
+// Match filter an item
+func (o *OutputOption) Match(item reflect.Value) bool {
+	if len(o.Filter) == 0 {
+		return true
+	}
+
+	for _, f := range o.Filter {
+		arr := strings.Split(f, "=")
+		if len(arr) < 2 {
+			continue
+		}
+
+		key := arr[0]
+		val := arr[1]
+
+		if !strings.Contains(util.ReflectFieldValueAsString(item, key), val) {
+			continue
+		} else {
+			return true
+		}
+	}
+	return false
 }
 
 // GetLine returns the line of a table

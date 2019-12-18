@@ -58,8 +58,8 @@ var _ = Describe("job search command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number name displayname type        url
-0      fake fake        WorkflowJob job/fake/
+			Expect(buf.String()).To(Equal(`Name DisplayName Type        URL
+fake fake        WorkflowJob job/fake/
 `))
 		})
 
@@ -79,8 +79,8 @@ var _ = Describe("job search command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number name displayname type        url
-0      fake fake        WorkflowJob job/fake/
+			Expect(buf.String()).To(Equal(`Name DisplayName Type        URL
+fake fake        WorkflowJob job/fake/
 `))
 		})
 	})

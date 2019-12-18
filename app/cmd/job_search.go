@@ -3,13 +3,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/hashicorp/go-version"
-	"github.com/jenkins-zh/jenkins-cli/util"
-	"net/http"
-	"strings"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
+	"net/http"
 )
 
 // JobSearchOption is the options of job search command
@@ -19,8 +16,6 @@ type JobSearchOption struct {
 	Limit int
 	Name  string
 	Type  string
-
-	Filter []string
 
 	RoundTripper http.RoundTripper
 }
@@ -67,39 +62,11 @@ var jobSearchCmd = &cobra.Command{
 		var items []client.JenkinsItem
 		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
 			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
-			items = jobSearchOption.ItemsFilter(items)
 			jobSearchOption.Writer = cmd.OutOrStdout()
 			err = jobSearchOption.OutputV2(items)
 		}
 		return
 	},
-}
-
-func (o *JobSearchOption) ItemsFilter(items []client.JenkinsItem) (result []client.JenkinsItem) {
-	if len(o.Filter) == 0 {
-		result = items
-		return
-	}
-
-	result = make([]client.JenkinsItem, 0)
-	for _, item := range items {
-		for _, f := range o.Filter {
-			arr := strings.Split(f, "=")
-			if len(arr) < 2 {
-				continue
-			}
-
-			key := arr[0]
-			val := arr[1]
-
-			if !strings.Contains(util.GetFieldValueAsString(item, key), val) {
-				continue
-			}
-
-			result = append(result, item)
-		}
-	}
-	return
 }
 
 // Check do the conditions check
