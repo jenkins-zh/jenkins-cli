@@ -63,8 +63,8 @@ var _ = Describe("credential list command", func() {
 			rootCmd.SetArgs([]string{"credential", "list"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal(`number displayName id                                   type                   description
-0      displayName 19c27487-acca-4a39-9889-9ddd500388f3 Username with password 
+			Expect(buf.String()).To(Equal(`DisplayName ID                                   TypeName               Description
+displayName 19c27487-acca-4a39-9889-9ddd500388f3 Username with password 
 `))
 		})
 	})

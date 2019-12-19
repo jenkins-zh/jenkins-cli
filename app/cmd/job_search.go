@@ -32,11 +32,7 @@ func init() {
 		i18n.T("The name of plugin for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
 		i18n.T("The type of plugin for search"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Columns, "columns", "", "Name,DisplayName,Type,URL",
-		i18n.T("The columns of table"))
-	jobSearchCmd.Flags().StringArrayVarP(&jobSearchOption.Filter, "filter", "", []string{},
-		i18n.T("Filter for the list"))
-	jobSearchOption.SetFlag(jobSearchCmd)
+	jobSearchOption.SetFlagWithHeaders(jobSearchCmd, "Name,DisplayName,Type,URL")
 
 	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
 }

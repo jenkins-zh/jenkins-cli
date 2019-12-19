@@ -1,12 +1,8 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -23,48 +19,27 @@ var queueListOption QueueListOption
 
 func init() {
 	queueCmd.AddCommand(queueListCmd)
-	queueListOption.SetFlag(queueListCmd)
+	queueListOption.SetFlagWithHeaders(queueListCmd, "ID,Why,URL")
 }
 
 var queueListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Print the queue of your Jenkins",
-	Long:  `Print the queue of your Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
-		jclient := &client.QueueClient{
+	Short: i18n.T("Print the queue of your Jenkins"),
+	Long:  i18n.T("Print the queue of your Jenkins"),
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		jClient := &client.QueueClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: queueListOption.RoundTripper,
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
-		var err error
 		var jobQueue *client.JobQueue
-		if jobQueue, err = jclient.Get(); err == nil {
-			var data []byte
-			if data, err = queueListOption.Output(jobQueue); err == nil && len(data) > 0 {
-				cmd.Print(string(data))
-			}
+		if jobQueue, err = jClient.Get(); err == nil {
+			queueListOption.Writer = cmd.OutOrStdout()
+			err = queueListOption.OutputV2(jobQueue.Items)
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
-}
-
-// Output render data into byte array as a table format
-func (o *QueueListOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil && o.Format == TableOutputFormat {
-		buf := new(bytes.Buffer)
-
-		jobQueue := obj.(*client.JobQueue)
-		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
-		table.AddHeader("number", "id", "why", "url")
-		for i, item := range jobQueue.Items {
-			table.AddRow(fmt.Sprintf("%d", i), fmt.Sprintf("%d", item.ID), item.Why, item.URL)
-		}
-		table.Render()
-		err = nil
-		data = buf.Bytes()
-	}
-	return
 }

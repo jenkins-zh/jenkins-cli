@@ -53,24 +53,21 @@ var _ = Describe("queue list command", func() {
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal(`{
-  "Items": [
-    {
-      "Blocked": false,
-      "Buildable": true,
-      "ID": 62,
-      "Params": "",
-      "Pending": false,
-      "Stuck": true,
-      "URL": "queue/item/62/",
-      "Why": "等待下一个可用的执行器",
-      "BuildableStartMilliseconds": 1567753826770,
-      "InQueueSince": 1567753826770,
-      "Actions": []
-    }
-  ]
-}`))
+			Expect(buf.String()).To(Equal(`[
+  {
+    "Blocked": false,
+    "Buildable": true,
+    "ID": 62,
+    "Params": "",
+    "Pending": false,
+    "Stuck": true,
+    "URL": "queue/item/62/",
+    "Why": "等待下一个可用的执行器",
+    "BuildableStartMilliseconds": 1567753826770,
+    "InQueueSince": 1567753826770,
+    "Actions": []
+  }
+]`))
 		})
 
 		It("output with table format", func() {
@@ -88,8 +85,8 @@ var _ = Describe("queue list command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number id why                    url
-0      62 等待下一个可用的执行器 queue/item/62/
+			Expect(buf.String()).To(Equal(`ID Why                    URL
+62 等待下一个可用的执行器 queue/item/62/
 `))
 		})
 	})

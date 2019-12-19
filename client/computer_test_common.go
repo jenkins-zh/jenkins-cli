@@ -58,6 +58,7 @@ func PrepareForComputerList() string {
   "_class" : "hudson.model.ComputerSet",
   "busyExecutors" : 1,
   "computer" : [
+    {"offline" : true},
     {
       "_class" : "hudson.model.Hudson$MasterComputer",
       "actions" : [

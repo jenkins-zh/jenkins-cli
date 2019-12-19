@@ -52,7 +52,7 @@ var _ = Describe("plugin list command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("number name version update\n"))
+			Expect(buf.String()).To(Equal("ShortName Version HasUpdate\n"))
 		})
 
 		It("one plugin in the list", func() {
@@ -71,8 +71,8 @@ var _ = Describe("plugin list command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number name version update
-0      fake 1.0     true
+			Expect(buf.String()).To(Equal(`ShortName Version HasUpdate
+fake      1.0     true
 `))
 		})
 
@@ -92,7 +92,7 @@ var _ = Describe("plugin list command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`0 fake 1.0 true
+			Expect(buf.String()).To(Equal(`fake 1.0 true
 `))
 		})
 
@@ -105,7 +105,8 @@ var _ = Describe("plugin list command", func() {
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "json", "--filter", "hasUpdate", "--filter", "name=fake", "--filter", "enable", "--filter", "active"})
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "json", "--filter", "HasUpdate=true",
+				"--filter", "ShortName=fake", "--filter", "Enable=true", "--filter", "Active=true"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -124,7 +125,8 @@ var _ = Describe("plugin list command", func() {
 			request, _ := client.PrepareForOneInstalledPlugin(roundTripper, "http://localhost:8080/jenkins")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "yaml", "--filter", "hasUpdate", "--filter", "name=fake", "--filter", "enable", "--filter", "active"})
+			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "yaml", "--filter", "HasUpdate=true",
+				"--filter", "Name=fake", "--filter", "Enable=true", "--filter", "Active=true"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -145,12 +147,10 @@ var _ = Describe("plugin list command", func() {
 
 			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "fake"})
 
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).To(HaveOccurred())
 
-			Expect(buf.String()).To(Equal("error: not support format fake"))
+			Expect(err.Error()).To(ContainSubstring("not support format fake"))
 		})
 	})
 })

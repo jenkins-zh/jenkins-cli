@@ -68,9 +68,9 @@ var _ = Describe("job history command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number displayname building result
-0      fake        false    
-1      fake        false    
+			Expect(buf.String()).To(Equal(`DisplayName Building Result
+fake        false    
+fake        false    
 `))
 		})
 	})
