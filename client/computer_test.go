@@ -34,7 +34,7 @@ var _ = Describe("computer test", func() {
 		computers, err := computerClient.List()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(computers).NotTo(BeNil())
-		Expect(len(computers.Computer)).To(Equal(1))
+		Expect(len(computers.Computer)).To(Equal(2))
 	})
 
 	It("Launch", func() {
