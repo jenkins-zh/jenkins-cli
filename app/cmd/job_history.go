@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -22,7 +20,7 @@ var jobHistoryOption JobHistoryOption
 
 func init() {
 	jobCmd.AddCommand(jobHistoryCmd)
-	jobHistoryOption.SetFlag(jobHistoryCmd)
+	jobHistoryOption.SetFlagWithHeaders(jobHistoryCmd, "DisplayName,Building,Result")
 }
 
 var jobHistoryCmd = &cobra.Command{
@@ -43,44 +41,26 @@ var jobHistoryCmd = &cobra.Command{
 		var builds []*client.JobBuild
 		builds, err = jClient.GetHistory(jobName)
 		if err == nil {
-			var data []byte
-			data, err = jobHistoryOption.Output(builds)
-			if err == nil && len(data) > 0 {
-				cmd.Print(string(data))
+			jobHistoryOption.Writer = cmd.OutOrStdout()
+			jobHistoryOption.CellRenderMap = map[string]RenderCell{
+				"Result": ColorResult,
 			}
+			err = jobHistoryOption.OutputV2(builds)
 		}
 		return
 	},
 }
 
-// Output print the output
-func (o *JobHistoryOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil {
-		buildList := obj.([]*client.JobBuild)
-		buf := new(bytes.Buffer)
-		table := util.CreateTable(buf)
-		table.AddRow("number", "displayname", "building", "result")
-		for i, build := range buildList {
-			table.AddRow(fmt.Sprintf("%d", i), build.DisplayName,
-				fmt.Sprintf("%v", build.Building), ColorResult(build.Result))
-		}
-		table.Render()
-		data = buf.Bytes()
-		err = nil
-	}
-	return
-}
-
 // ColorResult output the result with color
-func ColorResult(result string) string {
-	switch result {
+func ColorResult(cell string) string {
+	switch cell {
 	case "":
 		return ""
 	case "SUCCESS":
-		return util.ColorInfo(result)
+		return util.ColorInfo(cell)
 	case "FAILURE":
-		return util.ColorError(result)
+		return util.ColorError(cell)
 	default:
-		return util.ColorWarning(result)
+		return util.ColorWarning(cell)
 	}
 }

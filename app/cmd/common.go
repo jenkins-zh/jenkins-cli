@@ -37,8 +37,12 @@ type OutputOption struct {
 	WithoutHeaders bool
 	Filter         []string
 
-	Writer io.Writer
+	Writer        io.Writer
+	CellRenderMap map[string]RenderCell
 }
+
+// RenderCell render a specific cell in a table
+type RenderCell = func(string) string
 
 // FormatOutput is the interface of format output
 type FormatOutput interface {
@@ -152,8 +156,18 @@ func (o *OutputOption) Match(item reflect.Value) bool {
 func (o *OutputOption) GetLine(obj reflect.Value) []string {
 	columns := strings.Split(o.Columns, ",")
 	values := make([]string, 0)
+
+	if o.CellRenderMap == nil {
+		o.CellRenderMap = make(map[string]RenderCell, 0)
+	}
+
 	for _, col := range columns {
-		values = append(values, util.ReflectFieldValueAsString(obj, col))
+		cell := util.ReflectFieldValueAsString(obj, col)
+		if renderCell, ok := o.CellRenderMap[col]; ok && renderCell != nil {
+			cell = renderCell(cell)
+		}
+
+		values = append(values, cell)
 	}
 	return values
 }
