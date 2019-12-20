@@ -15,9 +15,10 @@ import (
 type CenterStartOption struct {
 	CommonOption
 
-	Port        int
-	Context     string
-	SetupWizard bool
+	Port                      int
+	Context                   string
+	SetupWizard               bool
+	AdminCanGenerateNewTokens bool
 
 	// comes from folder plugin
 	ConcurrentIndexing int
@@ -52,6 +53,9 @@ func init() {
 		i18n.T("System property key-value"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
+	centerStartCmd.Flags().BoolVarP(&centerStartOption.AdminCanGenerateNewTokens, "admin-can-generate-new-tokens", "", false,
+		i18n.T("If enabled, the users with administer permissions can generate new tokens for other users"))
+
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", "2.190.3",
@@ -138,6 +142,7 @@ func (c *CenterStartOption) setSystemProperty(jenkinsWarArgs []string) []string 
 	}
 
 	c.System = append(c.System, fmt.Sprintf("jenkins.install.runSetupWizard=%v", c.SetupWizard))
+	c.System = append(c.System, fmt.Sprintf("jenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=%v", c.AdminCanGenerateNewTokens))
 	if c.ConcurrentIndexing > -1 {
 		c.System = append(c.System, fmt.Sprintf("com.cloudbees.hudson.plugins.folder.computed.ThrottleComputationQueueTaskDispatcher.LIMIT=%d", c.ConcurrentIndexing))
 	}
