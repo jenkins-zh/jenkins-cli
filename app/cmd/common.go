@@ -266,3 +266,8 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 	}
 	return
 }
+
+// GetAliasesDel returns the aliases for delete command
+func GetAliasesDel() []string {
+	return []string{"remove", "del"}
+}

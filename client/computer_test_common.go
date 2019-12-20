@@ -3,8 +3,11 @@ package client
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -49,6 +52,35 @@ func PrepareForComputerLogRequestWithCode(roundTripper *mhttp.MockRoundTripper, 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
+}
+
+// PrepareForComputerDeleteRequest only for test
+func PrepareForComputerDeleteRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/%s/doDelete", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+}
+
+// PrepareForComputerAgentSecretRequest only for test
+func PrepareForComputerAgentSecretRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name, secret string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/instance/agentSecret?name=%s", rootURL, name), nil)
+	PrepareCommonPost(request, secret, roundTripper, user, password, rootURL)
+}
+
+// PrepareForComputerCreateRequest only for test
+func PrepareForComputerCreateRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
+	formData := url.Values{
+		"name": {name},
+		"mode": {"hudson.slaves.DumbSlave"},
+	}
+	payload := strings.NewReader(formData.Encode())
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/createItem", rootURL), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+
+	payload = GetPayloadForCreateAgent(name)
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/computer/doCreateItem", rootURL), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
 // PrepareForComputerList only for test

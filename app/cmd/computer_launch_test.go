@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -20,6 +22,8 @@ var _ = Describe("computer launch command", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 		buf          io.Writer
+		err          error
+		name         string
 	)
 
 	BeforeEach(func() {
@@ -32,6 +36,13 @@ var _ = Describe("computer launch command", func() {
 		rootOptions.ConfigFile = "test.yaml"
 
 		computerLaunchOption.RoundTripper = roundTripper
+		name = "fake"
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
@@ -41,21 +52,8 @@ var _ = Describe("computer launch command", func() {
 		ctrl.Finish()
 	})
 
-	Context("basic cases", func() {
-		var (
-			err error
-		)
-
-		BeforeEach(func() {
-			var data []byte
-			data, err = generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-		})
-
+	Context("launch a default type of agent", func() {
 		It("should success", func() {
-			name := "fake"
 
 			client.PrepareForLaunchComputer(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
@@ -63,6 +61,36 @@ var _ = Describe("computer launch command", func() {
 			rootCmd.SetArgs([]string{"computer", "launch", name})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("launch a jnlp agent", func() {
+		var (
+			fakeJar string
+		)
+		BeforeEach(func() {
+			fakeJar = "fake-jar-content"
+			computerLaunchOption.SystemCallExec = util.FakeSystemCallExecSuccess
+			computerLaunchOption.LookPathContext = util.FakeLookPath
+
+			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/jnlpJars/agent.jar", nil)
+			response := &http.Response{
+				StatusCode: 200,
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString(fakeJar)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			secret := "fake-secret"
+			client.PrepareForComputerAgentSecretRequest(roundTripper,
+				"http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", name, secret)
+		})
+
+		It("should success", func() {
+			rootCmd.SetArgs([]string{"computer", "launch", name, "--type", "jnlp", "--show-progress=false"})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })
