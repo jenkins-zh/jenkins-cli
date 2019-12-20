@@ -41,12 +41,12 @@ func PrepareCreateUser(roundTripper *mhttp.MockRoundTripper, rootURL,
 
 // PrepareCreateToken only for test
 func PrepareCreateToken(roundTripper *mhttp.MockRoundTripper, rootURL,
-	user, passwd, newTokenName string) (response *http.Response) {
+	user, passwd, newTokenName, targetUser string) (response *http.Response) {
 	formData := url.Values{}
 	formData.Add("newTokenName", newTokenName)
 	payload := strings.NewReader(formData.Encode())
 
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", rootURL, user), payload)
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", rootURL, targetUser), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
 	response = PrepareCommonPost(request, `{"status":"ok"}`, roundTripper, user, passwd, rootURL)
 	return
