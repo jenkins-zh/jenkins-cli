@@ -1,9 +1,8 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -11,8 +10,9 @@ import (
 
 // UserTokenOption represents a user token cmd option
 type UserTokenOption struct {
-	Generate bool
-	Name     string
+	Generate   bool
+	Name       string
+	TargetUser string
 
 	RoundTripper http.RoundTripper
 }
@@ -21,15 +21,20 @@ var userTokenOption UserTokenOption
 
 func init() {
 	userCmd.AddCommand(userTokenCmd)
-	userTokenCmd.Flags().BoolVarP(&userTokenOption.Generate, "generate", "g", false, "Generate the token")
-	userTokenCmd.Flags().StringVarP(&userTokenOption.Name, "name", "n", "", "Name of the token")
+	userTokenCmd.Flags().BoolVarP(&userTokenOption.Generate, "generate", "g", false,
+		i18n.T("Generate the token"))
+	userTokenCmd.Flags().StringVarP(&userTokenOption.Name, "name", "n", "",
+		i18n.T("Name of the token"))
+	userTokenCmd.Flags().StringVarP(&userTokenOption.TargetUser, "target-user", "", "",
+		i18n.T("The target user of the new token"))
 }
 
 var userTokenCmd = &cobra.Command{
-	Use:   "token -g",
-	Short: "Token the user of your Jenkins",
-	Long:  `Token the user of your Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
+	Use:     "token",
+	Short:   i18n.T("Token the user of your Jenkins"),
+	Long:    i18n.T("Token the user of your Jenkins"),
+	Example: `jcli user token -g`,
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		if !userTokenOption.Generate {
 			cmd.Help()
 			return
@@ -43,15 +48,15 @@ var userTokenCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		tokenName := userTokenOption.Name
-		status, err := jclient.CreateToken(tokenName)
+		var token *client.Token
+		token, err = jclient.CreateToken(userTokenOption.TargetUser, userTokenOption.Name)
 		if err == nil {
 			var data []byte
-			data, err = userOption.Output(status)
+			data, err = userOption.Output(token)
 			if err == nil {
 				cmd.Println(string(data))
 			}
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
