@@ -32,7 +32,7 @@ func init() {
 
 var credentialDeleteCmd = &cobra.Command{
 	Use:     "delete [store] [id]",
-	Aliases: []string{"remove", "del"},
+	Aliases: GetAliasesDel(),
 	Short:   i18n.T("Delete a credential from Jenkins"),
 	Long:    i18n.T("Delete a credential from Jenkins"),
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {

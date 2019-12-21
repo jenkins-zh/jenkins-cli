@@ -2,8 +2,11 @@ package client
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // ComputerClient is client for operate computers
@@ -25,6 +28,26 @@ func (c *ComputerClient) Launch(name string) (err error) {
 	return
 }
 
+// Delete removes a agent from Jenkins
+func (c *ComputerClient) Delete(name string) (err error) {
+	api := fmt.Sprintf("/computer/%s/doDelete", name)
+	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	return
+}
+
+// GetSecret returns the secret of an agent
+func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
+	api := fmt.Sprintf("/instance/agentSecret?name=%s", name)
+	var response *http.Response
+	if response, err = c.RequestWithResponse("POST", api, nil, nil); err == nil {
+		var data []byte
+		if data, err = ioutil.ReadAll(response.Body); err == nil {
+			secret = string(data)
+		}
+	}
+	return
+}
+
 // GetLog fetch the log a computer
 func (c *ComputerClient) GetLog(name string) (log string, err error) {
 	var response *http.Response
@@ -42,6 +65,52 @@ func (c *ComputerClient) GetLog(name string) (log string, err error) {
 		}
 	}
 	return
+}
+
+// Create creates a computer by name
+func (c *ComputerClient) Create(name string) (err error) {
+	formData := url.Values{
+		"name": {name},
+		"mode": {"hudson.slaves.DumbSlave"},
+	}
+	payload := strings.NewReader(formData.Encode())
+	if _, err = c.RequestWithoutData("POST", "/computer/createItem",
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200); err == nil {
+		payload = GetPayloadForCreateAgent(name)
+		_, err = c.RequestWithoutData("POST", "/computer/doCreateItem",
+			map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	}
+	return
+}
+
+// GetPayloadForCreateAgent returns a payload for creating an agent
+func GetPayloadForCreateAgent(name string) *strings.Reader {
+	palyLoad := fmt.Sprintf(`{
+	"name": "%s",
+	"nodeDescription": "",
+	"numExecutors": "1",
+	"remoteFS": "/abc",
+	"labelString": "",
+	"mode": "NORMAL",
+	"launcher": {
+		"$class": "hudson.slaves.JNLPLauncher",
+		"workDirSettings": {
+			"disabled": false,
+			"workDirPath": "",
+			"internalDir": "remoting",
+			"failIfWorkDirIsMissing": false
+		},
+		"tunnel": "",
+		"vmargs": ""
+	},
+	"type": "hudson.slaves.DumbSlave"
+}`, name)
+	formData := url.Values{
+		"name": {name},
+		"type": {"hudson.slaves.DumbSlave"},
+		"json": {palyLoad},
+	}
+	return strings.NewReader(formData.Encode())
 }
 
 // Computer is the agent of Jenkins

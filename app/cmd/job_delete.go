@@ -26,10 +26,11 @@ func init() {
 }
 
 var jobDeleteCmd = &cobra.Command{
-	Use:   "delete <jobName>",
-	Short: i18n.T("Delete a job in your Jenkins"),
-	Long:  i18n.T("Delete a job in your Jenkins"),
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "delete <jobName>",
+	Aliases: GetAliasesDel(),
+	Short:   i18n.T("Delete a job in your Jenkins"),
+	Long:    i18n.T("Delete a job in your Jenkins"),
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		jobName := args[0]
 		if !jobDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete job %s ?", jobName)) {
