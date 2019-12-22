@@ -31,3 +31,16 @@ func (q *CoreClient) Restart() (err error) {
 	_, err = q.RequestWithoutData("POST", "/safeRestart", nil, nil, 503)
 	return
 }
+
+// JenkinsIdentity belongs to a Jenkins
+type JenkinsIdentity struct {
+	Fingerprint   string
+	PublicKey     string
+	SystemMessage string
+}
+
+// GetIdentity returns the identity of a Jenkins
+func (q *CoreClient) GetIdentity() (identity JenkinsIdentity, err error) {
+	err = q.RequestWithData("GET", "/instance", nil, nil, 200, &identity)
+	return
+}
