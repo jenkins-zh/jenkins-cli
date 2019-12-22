@@ -22,14 +22,15 @@ func SetLanguage(lan string) {
 	language = lan
 }
 
-// JenkinsCore core informations of Jenkins
+// JenkinsCore core information of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
-	URL       string
-	UserName  string
-	Token     string
-	Proxy     string
-	ProxyAuth string
+	URL                string
+	InsecureSkipVerify bool
+	UserName           string
+	Token              string
+	Proxy              string
+	ProxyAuth          string
 
 	Debug        bool
 	Output       io.Writer
@@ -49,7 +50,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		roundTripper = j.RoundTripper
 	} else {
 		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: j.InsecureSkipVerify},
 		}
 		if err := util.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
 			log.Fatal(err)

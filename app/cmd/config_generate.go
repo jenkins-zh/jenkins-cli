@@ -96,10 +96,11 @@ func getSampleConfig() (sampleConfig Config) {
 		Current: "yourServer",
 		JenkinsServers: []JenkinsServer{
 			{
-				Name:     "yourServer",
-				URL:      "http://localhost:8080/jenkins",
-				UserName: "admin",
-				Token:    "111e3a2f0231198855dceaff96f20540a9",
+				Name:               "yourServer",
+				URL:                "http://localhost:8080/jenkins",
+				UserName:           "admin",
+				Token:              "111e3a2f0231198855dceaff96f20540a9",
+				InsecureSkipVerify: true,
 			},
 		},
 		Mirrors: []JenkinsMirror{

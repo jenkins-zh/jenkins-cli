@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/client"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -12,9 +8,8 @@ import (
 
 // ComputerCreateOption option for config list command
 type ComputerCreateOption struct {
+	CommonOption
 	OutputOption
-
-	RoundTripper http.RoundTripper
 }
 
 var computerCreateOption ComputerCreateOption
@@ -31,15 +26,8 @@ It can only create a JNLP agent.`),
 	Example: `jcli agent create agent-name`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient := &client.ComputerClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: computerCreateOption.RoundTripper,
-			},
-		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-
-		err = jClient.Create(args[0])
-		return
+		jClient, _ := GetComputerClient(computerCreateOption.CommonOption)
+		return jClient.Create(args[0])
 	},
 	Annotations: map[string]string{
 		since: "v0.0.24",
