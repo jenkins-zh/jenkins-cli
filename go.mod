@@ -15,7 +15,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/ginkgo v1.10.3
+	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/spf13/cobra v0.0.5
 	go.uber.org/zap v1.13.0
