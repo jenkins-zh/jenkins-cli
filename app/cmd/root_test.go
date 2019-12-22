@@ -178,6 +178,93 @@ var _ = Describe("Root cmd test", func() {
 		})
 	})
 
+	Context("execute post cmd", func() {
+		It("should error", func() {
+			err := executePostCmd(nil, nil, nil)
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("basic use case with one postHook, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: successCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("1\n"))
+		})
+
+		It("basic use case with many postHooks, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: successCmd,
+				}, CommandHook{
+					Path:    "test",
+					Command: "echo 2",
+				}, CommandHook{
+					Path:    "fake",
+					Command: successCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("1\n2\n"))
+		})
+
+		It("basic use case without postHooks, should success", func() {
+			config = &Config{}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("basic use case with error command, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: errorCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 	Context("basic root command test", func() {
 		var (
 			buf *bytes.Buffer
