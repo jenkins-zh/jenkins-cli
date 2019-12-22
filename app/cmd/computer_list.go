@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"net/http"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -13,9 +11,8 @@ import (
 
 // ComputerListOption option for config list command
 type ComputerListOption struct {
+	CommonOption
 	OutputOption
-
-	RoundTripper http.RoundTripper
 }
 
 var computerListOption ComputerListOption
@@ -30,12 +27,7 @@ var computerListCmd = &cobra.Command{
 	Short: i18n.T("List all Jenkins agents"),
 	Long:  i18n.T("List all Jenkins agents"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jClient := &client.ComputerClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: computerListOption.RoundTripper,
-			},
-		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		jClient, _ := GetComputerClient(computerListOption.CommonOption)
 
 		var computers client.ComputerList
 		if computers, err = jClient.List(); err == nil {

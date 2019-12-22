@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"bytes"
-
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"os"
 )
 
 var _ = Describe("Root cmd test", func() {
@@ -98,7 +99,7 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with one preHook, should success", func() {
 			config = &Config{
-				PreHooks: []CommndHook{CommndHook{
+				PreHooks: []CommandHook{CommandHook{
 					Path:    "test",
 					Command: successCmd,
 				}},
@@ -118,13 +119,13 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with many preHooks, should success", func() {
 			config = &Config{
-				PreHooks: []CommndHook{CommndHook{
+				PreHooks: []CommandHook{CommandHook{
 					Path:    "test",
 					Command: successCmd,
-				}, CommndHook{
+				}, CommandHook{
 					Path:    "test",
 					Command: "echo 2",
-				}, CommndHook{
+				}, CommandHook{
 					Path:    "fake",
 					Command: successCmd,
 				}},
@@ -159,7 +160,7 @@ var _ = Describe("Root cmd test", func() {
 
 		It("basic use case with error command, should success", func() {
 			config = &Config{
-				PreHooks: []CommndHook{CommndHook{
+				PreHooks: []CommandHook{CommandHook{
 					Path:    "test",
 					Command: errorCmd,
 				}},
@@ -174,6 +175,162 @@ var _ = Describe("Root cmd test", func() {
 			var buf bytes.Buffer
 			err := executePreCmd(subCmd, nil, &buf)
 			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("execute post cmd", func() {
+		It("should error", func() {
+			err := executePostCmd(nil, nil, nil)
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("basic use case with one postHook, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: successCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("1\n"))
+		})
+
+		It("basic use case with many postHooks, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: successCmd,
+				}, CommandHook{
+					Path:    "test",
+					Command: "echo 2",
+				}, CommandHook{
+					Path:    "fake",
+					Command: successCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal("1\n2\n"))
+		})
+
+		It("basic use case without postHooks, should success", func() {
+			config = &Config{}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(Equal(""))
+		})
+
+		It("basic use case with error command, should success", func() {
+			config = &Config{
+				PostHooks: []CommandHook{CommandHook{
+					Path:    "test",
+					Command: errorCmd,
+				}},
+			}
+
+			rootCmd := &cobra.Command{}
+			subCmd := &cobra.Command{
+				Use: "test",
+			}
+			rootCmd.AddCommand(subCmd)
+
+			var buf bytes.Buffer
+			err := executePostCmd(subCmd, nil, &buf)
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("basic root command test", func() {
+		var (
+			buf *bytes.Buffer
+		)
+
+		BeforeEach(func() {
+			rootOptions = RootOptions{}
+			buf = new(bytes.Buffer)
+			rootCmd.SetOut(buf)
+		})
+
+		It("should contain substring Version:", func() {
+			rootCmd.SetArgs([]string{"--version"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("Version:"))
+		})
+
+		It("with a fake jenkins as option", func() {
+			rootCmd.SetArgs([]string{"--jenkins", "fake"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).To(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("cannot found the configuration:"))
+		})
+
+		It("with an exists jenkins as option", func() {
+			configFile, err := ioutil.TempFile("/tmp", ".yaml")
+			Expect(err).NotTo(HaveOccurred())
+
+			defer os.Remove(configFile.Name())
+
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(configFile.Name(), data, 0664)
+			Expect(err).To(BeNil())
+
+			rootCmd.SetArgs([]string{"--jenkins", "yourServer", "--configFile", configFile.Name()})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("Current Jenkins is:"))
+		})
+	})
+
+	Context("use connection from options", func() {
+		var (
+			err error
+		)
+
+		BeforeEach(func() {
+			rootOptions = RootOptions{}
+		})
+
+		AfterEach(func() {
+			rootOptions = RootOptions{}
+		})
+
+		It("fake jenkins, but with URL from option", func() {
+			rootCmd.SetArgs([]string{"--configFile", "fake", "--url", "fake-url",
+				"--username", "fake-user", "--token", "fake-token"})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+
+			jenkins := getCurrentJenkinsFromOptions()
+			Expect(jenkins.URL).To(Equal("fake-url"))
+			Expect(jenkins.UserName).To(Equal("fake-user"))
+			Expect(jenkins.Token).To(Equal("fake-token"))
 		})
 	})
 })

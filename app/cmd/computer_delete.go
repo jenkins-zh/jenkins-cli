@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/client"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -27,15 +25,8 @@ var computerDeleteCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	Example: `jcli agent delete agent-name`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient := &client.ComputerClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: computerDeleteOption.RoundTripper,
-			},
-		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-
-		err = jClient.Delete(args[0])
-		return
+		jClient, _ := GetComputerClient(computerDeleteOption.CommonOption)
+		return jClient.Delete(args[0])
 	},
 	Annotations: map[string]string{
 		since: "v0.0.24",

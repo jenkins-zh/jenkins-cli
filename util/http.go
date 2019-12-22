@@ -23,9 +23,10 @@ const (
 
 // HTTPDownloader is the downloader for http request
 type HTTPDownloader struct {
-	TargetFilePath string
-	URL            string
-	ShowProgress   bool
+	TargetFilePath     string
+	URL                string
+	ShowProgress       bool
+	InsecureSkipVerify bool
 
 	UserName string
 	Password string
@@ -75,7 +76,7 @@ func (h *HTTPDownloader) DownloadFile() error {
 		tr = h.RoundTripper
 	} else {
 		trp := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: h.InsecureSkipVerify},
 		}
 		tr = trp
 		if err = SetProxy(h.Proxy, h.ProxyAuth, trp); err != nil {
