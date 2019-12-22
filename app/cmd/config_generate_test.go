@@ -45,6 +45,7 @@ jenkins_servers:
   token: 111e3a2f0231198855dceaff96f20540a9
   proxy: ""
   proxyAuth: ""
+  insecureSkipVerify: true
   description: ""
 preHooks: []
 postHooks: []

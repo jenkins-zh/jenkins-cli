@@ -45,6 +45,9 @@ var computerLaunchCmd = &cobra.Command{
 	Example: `jcli agent launch agent-name
 jcli agent launch agent-name --type jnlp`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {
+		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
+			GetComputerClient(computerLaunchOption.CommonOption)
+
 		if computerLaunchOption.Type != "jnlp" {
 			return
 		}
@@ -64,15 +67,6 @@ jcli agent launch agent-name --type jnlp`,
 	},
 	RunE: func(_ *cobra.Command, args []string) (err error) {
 		name := args[0]
-
-		jClient := &client.ComputerClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: computerLaunchOption.RoundTripper,
-			},
-		}
-		computerLaunchOption.ComputerClient = jClient
-		computerLaunchOption.CurrentJenkins = getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-
 		switch computerLaunchOption.Type {
 		case "":
 			err = computerLaunchOption.Launch(name)

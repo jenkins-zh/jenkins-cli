@@ -51,17 +51,18 @@ var configCmd = &cobra.Command{
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name        string `yaml:"name"`
-	URL         string `yaml:"url"`
-	UserName    string `yaml:"username"`
-	Token       string `yaml:"token"`
-	Proxy       string `yaml:"proxy"`
-	ProxyAuth   string `yaml:"proxyAuth"`
-	Description string `yaml:"description"`
+	Name               string `yaml:"name"`
+	URL                string `yaml:"url"`
+	UserName           string `yaml:"username"`
+	Token              string `yaml:"token"`
+	Proxy              string `yaml:"proxy"`
+	ProxyAuth          string `yaml:"proxyAuth"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	Description        string `yaml:"description"`
 }
 
-// CommndHook is a hook
-type CommndHook struct {
+// CommandHook is a hook
+type CommandHook struct {
 	Path    string `yaml:"path"`
 	Command string `yaml:"cmd"`
 }
@@ -84,8 +85,8 @@ type Config struct {
 	Current        string          `yaml:"current"`
 	Language       string          `yaml:"language"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommndHook    `yaml:"preHooks"`
-	PostHooks      []CommndHook    `yaml:"postHooks"`
+	PreHooks       []CommandHook   `yaml:"preHooks"`
+	PostHooks      []CommandHook   `yaml:"postHooks"`
 	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
 	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }

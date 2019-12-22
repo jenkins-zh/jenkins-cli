@@ -263,6 +263,7 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 		jClient.Token = jenkins.Token
 		jClient.Proxy = jenkins.Proxy
 		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
 }
