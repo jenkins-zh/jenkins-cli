@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -9,8 +10,6 @@ import (
 	"runtime"
 
 	"go.uber.org/zap"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -55,8 +54,9 @@ var shellCmd = &cobra.Command{
 			setCurrentJenkins(jenkinsName)
 		}
 	},
-	RunE: func(cmd *cobra.Command, _ []string) error {
-		tmpDirName, err := ioutil.TempDir("", ".jcli-shell-")
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		var tmpDirName string
+		tmpDirName, err = ioutil.TempDir("", ".jcli-shell-")
 		if err != nil {
 			return err
 		}
@@ -66,8 +66,9 @@ var shellCmd = &cobra.Command{
 		config := getConfig()
 		if data, err = yaml.Marshal(&config); err == nil {
 			err = ioutil.WriteFile(tmpConfigFileName, data, 0644)
-		} else {
-			return err
+		}
+		if err != nil {
+			return
 		}
 
 		fullShell := os.Getenv("SHELL")

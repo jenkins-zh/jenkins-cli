@@ -3,9 +3,10 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
@@ -152,7 +153,6 @@ func buildInstalledPlugins(installedPlugins *client.InstalledPluginList, plugin 
 }
 
 func buildNoMatchPlugins(plugin client.AvailablePlugin, result []client.CenterPlugin) (resultData []client.CenterPlugin) {
-	resultData = result
 	resultPlugin := client.CenterPlugin{}
 	resultPlugin.CompatibleWithInstalledVersion = false
 	resultPlugin.Name = plugin.Name
