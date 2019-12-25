@@ -126,7 +126,7 @@ fake      1.0     true
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			rootCmd.SetArgs([]string{"plugin", "list", "fake", "--output", "yaml", "--filter", "HasUpdate=true",
-				"--filter", "Name=fake", "--filter", "Enable=true", "--filter", "Active=true"})
+				"--filter", "ShortName=fake", "--filter", "Enable=true", "--filter", "Active=true"})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)

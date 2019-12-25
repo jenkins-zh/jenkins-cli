@@ -148,7 +148,7 @@ foo-1
 			Expect(result).To(BeTrue())
 		})
 
-		Context("invalid filter", func() {
+		Context("ignore invalid filter", func() {
 			BeforeEach(func() {
 				outputOption = cmd.OutputOption{
 					Filter: []string{"Name"},
@@ -156,7 +156,7 @@ foo-1
 			})
 
 			It("not matched", func() {
-				Expect(result).To(BeFalse())
+				Expect(result).To(BeTrue())
 			})
 		})
 	})
