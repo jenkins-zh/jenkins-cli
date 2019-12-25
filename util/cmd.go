@@ -22,11 +22,7 @@ func Open(url string, cmdContext ExecContext) error {
 		cmd = "xdg-Open"
 	}
 	args = append(args, url)
-
-	if cmdContext == nil {
-		cmdContext = exec.Command
-	}
-	return cmdContext(cmd, args...).Start()
+	return ExecCommand(cmdContext, cmd, args...).Start()
 }
 
 // Exec is the wrapper of syscall.Exec
