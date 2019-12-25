@@ -31,6 +31,7 @@ fi
 if type -t __start_jcli >/dev/null; then true; else
 	source <(jcli completion)
 fi
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 `
 
 	zshRcFile = `

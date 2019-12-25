@@ -275,8 +275,8 @@ const (
 	jcliBashCompletionFunc = `__plugin_name_parse_get()
 {
     local jcli_output out
-    if jcli_output=$(jcli plugin list --filter hasUpdate --no-headers --filter name="$1" 2>/dev/null); then
-        out=($(echo "${jcli_output}" | awk '{print $2}'))
+    if jcli_output=$(jcli plugin list --filter HasUpdate=true --no-headers --filter ShortName="$1" 2>/dev/null); then
+        out=($(echo "${jcli_output}" | awk '{print $1}'))
         COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
     fi
 }
@@ -293,7 +293,7 @@ __config_name_parse_get()
 {
     local jcli_output out
     if jcli_output=$(jcli config list --no-headers 2>/dev/null); then
-        out=($(echo "${jcli_output}" | awk '{print $2}'))
+        out=($(echo "${jcli_output}" | awk '{print $1}'))
         COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
     fi
 }
@@ -309,7 +309,7 @@ __jcli_get_config_name()
 __job_name_parse_get()
 {
     local jcli_output out
-    if jcli_output=$(jcli job search -o path "$cur" 2>/dev/null); then
+    if jcli_output=$(jcli job search --columns URL --no-headers "$cur" 2>/dev/null); then
         out=($(echo "${jcli_output}"))
         COMPREPLY=( ${out} )
     fi
@@ -323,6 +323,23 @@ __jcli_get_job_name()
     fi
 }
 
+__computer_name_parse_get()
+{
+    local jcli_output out
+    if jcli_output=$(jcli computer list --no-headers --columns DisplayName 2>/dev/null); then
+        out=($(echo "${jcli_output}"))
+        COMPREPLY=( ${out} )
+    fi
+}
+
+__jcli_get_computer_name()
+{
+    __computer_name_parse_get
+    if [[ $? -eq 0 ]]; then
+        return 0
+    fi
+}
+
 __jcli_custom_func() {
     case ${last_command} in
         jcli_plugin_upgrade | jcli_plugin_uninstall)
@@ -331,6 +348,10 @@ __jcli_custom_func() {
             ;;
         jcli_open | jcli_config_select | jcli_config_remove | jcli_shell)
             __jcli_get_config_name
+            return
+            ;;
+        jcli_computer_delete | jcli_computer_delete | jcli_computer_launch)
+            __jcli_get_computer_name
             return
             ;;
         jcli_job_build | jcli_job_stop | jcli_job_log | jcli_job_delete | jcli_job_history | jcli_job_artifact | jcli_job_input)
