@@ -83,12 +83,3 @@ func ExecCommand(context ExecContext, name string, arg ...string) *exec.Cmd {
 	}
 	return context(name, arg...)
 }
-
-// FakeExecCommand is a fake function of exec.Command
-func FakeExecCommand(command string, args ...string) *exec.Cmd {
-	cs := []string{"-test.run=TestShellProcessSuccess", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_TEST_PROCESS=1"}
-	return cmd
-}

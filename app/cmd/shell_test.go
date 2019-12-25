@@ -21,7 +21,7 @@ var _ = Describe("shell command", func() {
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
-		shellOptions.ExecContext = util.FakeExecCommand
+		shellOptions.ExecContext = util.FakeExecCommandSuccess
 	})
 
 	AfterEach(func() {
