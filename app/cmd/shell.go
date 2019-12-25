@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -9,8 +10,6 @@ import (
 	"runtime"
 
 	"go.uber.org/zap"
-
-	"gopkg.in/yaml.v2"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -32,6 +31,7 @@ fi
 if type -t __start_jcli >/dev/null; then true; else
 	source <(jcli completion)
 fi
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
 `
 
 	zshRcFile = `

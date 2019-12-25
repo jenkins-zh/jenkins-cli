@@ -3,12 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
 	"reflect"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -130,10 +131,6 @@ func (o *OutputOption) ListFilter(obj interface{}) interface{} {
 
 // Match filter an item
 func (o *OutputOption) Match(item reflect.Value) bool {
-	if len(o.Filter) == 0 {
-		return true
-	}
-
 	for _, f := range o.Filter {
 		arr := strings.Split(f, "=")
 		if len(arr) < 2 {
@@ -144,12 +141,10 @@ func (o *OutputOption) Match(item reflect.Value) bool {
 		val := arr[1]
 
 		if !strings.Contains(util.ReflectFieldValueAsString(item, key), val) {
-			continue
-		} else {
-			return true
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 // GetLine returns the line of a table
