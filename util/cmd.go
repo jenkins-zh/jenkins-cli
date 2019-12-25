@@ -5,7 +5,6 @@ import (
 	"os/exec"
 	"runtime"
 	"syscall"
-	"testing"
 )
 
 // Open a URL in a browser
@@ -92,11 +91,4 @@ func FakeExecCommand(command string, args ...string) *exec.Cmd {
 	cmd := exec.Command(os.Args[0], cs...)
 	cmd.Env = []string{"GO_TEST_PROCESS=1"}
 	return cmd
-}
-
-func TestShellProcessSuccess(t *testing.T) {
-	if os.Getenv("GO_TEST_PROCESS") != "1" {
-		return
-	}
-	os.Exit(0)
 }
