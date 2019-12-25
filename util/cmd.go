@@ -22,11 +22,7 @@ func Open(url string, cmdContext ExecContext) error {
 		cmd = "xdg-Open"
 	}
 	args = append(args, url)
-
-	if cmdContext == nil {
-		cmdContext = exec.Command
-	}
-	return cmdContext(cmd, args...).Start()
+	return ExecCommand(cmdContext, cmd, args...).Start()
 }
 
 // Exec is the wrapper of syscall.Exec
@@ -74,4 +70,12 @@ func FakeSystemCallExecSuccess(argv0 string, argv []string, envv []string) (err 
 // FakeLookPath is a fake function of exec.LookPath
 func FakeLookPath(path string) (string, error) {
 	return path, nil
+}
+
+// ExecCommand is a warp of exec.Command
+func ExecCommand(context ExecContext, name string, arg ...string) *exec.Cmd {
+	if context == nil {
+		context = exec.Command
+	}
+	return context(name, arg...)
 }
