@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"runtime"
 	"syscall"
+	"testing"
 )
 
 // Open a URL in a browser
@@ -74,4 +75,28 @@ func FakeSystemCallExecSuccess(argv0 string, argv []string, envv []string) (err 
 // FakeLookPath is a fake function of exec.LookPath
 func FakeLookPath(path string) (string, error) {
 	return path, nil
+}
+
+// ExecCommand is a warp of exec.Command
+func ExecCommand(context ExecContext, name string, arg ...string) *exec.Cmd {
+	if context == nil {
+		context = exec.Command
+	}
+	return context(name, arg...)
+}
+
+// FakeExecCommand is a fake function of exec.Command
+func FakeExecCommand(command string, args ...string) *exec.Cmd {
+	cs := []string{"-test.run=TestShellProcessSuccess", "--", command}
+	cs = append(cs, args...)
+	cmd := exec.Command(os.Args[0], cs...)
+	cmd.Env = []string{"GO_TEST_PROCESS=1"}
+	return cmd
+}
+
+func TestShellProcessSuccess(t *testing.T) {
+	if os.Getenv("GO_TEST_PROCESS") != "1" {
+		return
+	}
+	os.Exit(0)
 }

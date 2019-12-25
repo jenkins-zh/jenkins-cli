@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 
@@ -15,6 +15,13 @@ import (
 
 	"github.com/spf13/cobra"
 )
+
+// ShellOptions is the option of shell command
+type ShellOptions struct {
+	CommonOption
+}
+
+var shellOptions ShellOptions
 
 func init() {
 	rootCmd.AddCommand(shellCmd)
@@ -89,16 +96,19 @@ var shellCmd = &cobra.Command{
 		}
 
 		logger.Debug("temporary shell profile loaded", zap.String("path", tmpRCFileName))
-		e := exec.Command(shell, "-rcfile", tmpRCFileName, "-i")
+		//e := exec.Command(shell, "-rcfile", tmpRCFileName, "-i")
+		e := util.ExecCommand(shellOptions.ExecContext, shell, "-rcfile", tmpRCFileName, "-i")
 		if shell == "zsh" {
 			env := os.Environ()
 			env = append(env, fmt.Sprintf("ZDOTDIR=%s", tmpDirName))
-			e = exec.Command(shell, "-i")
+			//e = exec.Command(shell, "-i")
+			e = util.ExecCommand(shellOptions.ExecContext, shell, "-i")
 			e.Env = env
 		} else if shell == "cmd.exe" {
 			env := os.Environ()
 			env = append(env, fmt.Sprintf("JCLI_CONFIG=%s", tmpConfigFileName))
-			e = exec.Command(shell)
+			//e = exec.Command(shell)
+			e = util.ExecCommand(shellOptions.ExecContext, shell)
 			e.Env = env
 		}
 
@@ -107,7 +117,7 @@ var shellCmd = &cobra.Command{
 		e.Stdin = os.Stdin
 		err = e.Run()
 		if deleteError := os.RemoveAll(tmpDirName); deleteError != nil {
-			panic(err)
+			err = fmt.Errorf("cannot remove dir %s, the shell command error is %#v", tmpDirName, err)
 		}
 		return err
 	},
