@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +25,7 @@ func init() {
 	credentialCmd.AddCommand(credentialListCmd)
 	credentialListCmd.Flags().StringVarP(&credentialListOption.Store, "store", "", "system",
 		i18n.T("The store name of Jenkins credentials"))
-	credentialListOption.SetFlag(credentialListCmd)
+	credentialListOption.SetFlagWithHeaders(credentialListCmd, "DisplayName,ID,TypeName,Description")
 }
 
 var credentialListCmd = &cobra.Command{
@@ -44,33 +41,13 @@ var credentialListCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var credentialList client.CredentialList
-		var data []byte
 		if credentialList, err = jClient.GetList(credentialListOption.Store); err == nil {
-			if data, err = credentialListOption.Output(credentialList); err == nil {
-				cmd.Print(string(data))
-			}
+			credentialListOption.Writer = cmd.OutOrStdout()
+			err = credentialListOption.OutputV2(credentialList.Credentials)
 		}
 		return
 	},
 	Annotations: map[string]string{
 		since: "v0.0.24",
 	},
-}
-
-// Output render data into byte array as a table format
-func (o *CredentialListOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil && o.Format == TableOutputFormat {
-		credentialList := obj.(client.CredentialList)
-
-		buf := new(bytes.Buffer)
-		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
-		table.AddHeader("number", "displayName", "id", "type", "description")
-		for i, cred := range credentialList.Credentials {
-			table.AddRow(fmt.Sprintf("%d", i), cred.DisplayName, cred.ID, cred.TypeName, cred.Description)
-		}
-		table.Render()
-		err = nil
-		data = buf.Bytes()
-	}
-	return
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 
@@ -14,12 +15,11 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
-var _ = Describe("credential list command", func() {
+var _ = Describe("create delete command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		buf          *bytes.Buffer
-		store        string
+		buf          io.Writer
 	)
 
 	BeforeEach(func() {
@@ -31,9 +31,7 @@ var _ = Describe("credential list command", func() {
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
-		credentialListOption.RoundTripper = roundTripper
-
-		store = "system"
+		computerDeleteOption.RoundTripper = roundTripper
 	})
 
 	AfterEach(func() {
@@ -57,15 +55,14 @@ var _ = Describe("credential list command", func() {
 		})
 
 		It("should success", func() {
-			client.PrepareForGetCredentialList(roundTripper, "http://localhost:8080/jenkins",
-				"admin", "111e3a2f0231198855dceaff96f20540a9", store)
+			name := "fake-name"
 
-			rootCmd.SetArgs([]string{"credential", "list"})
+			client.PrepareForComputerDeleteRequest(roundTripper, "http://localhost:8080/jenkins",
+				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
+
+			rootCmd.SetArgs([]string{"computer", "delete", name})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal(`DisplayName ID                                   TypeName               Description
-displayName 19c27487-acca-4a39-9889-9ddd500388f3 Username with password 
-`))
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

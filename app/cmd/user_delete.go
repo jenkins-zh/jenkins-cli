@@ -24,10 +24,11 @@ func init() {
 }
 
 var userDeleteCmd = &cobra.Command{
-	Use:   "delete <username>",
-	Short: "Delete a user for your Jenkins",
-	Long:  `Delete a user for your Jenkins`,
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "delete <username>",
+	Aliases: GetAliasesDel(),
+	Short:   "Delete a user for your Jenkins",
+	Long:    `Delete a user for your Jenkins`,
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		username := args[0]
 

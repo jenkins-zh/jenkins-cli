@@ -91,9 +91,9 @@ var _ = Describe("user test", func() {
 			userClient.UserName = username
 			userClient.Token = password
 
-			PrepareCreateToken(roundTripper, userClient.URL, username, password, newTokenName)
+			PrepareCreateToken(roundTripper, userClient.URL, username, password, newTokenName, username)
 
-			token, err := userClient.CreateToken(newTokenName)
+			token, err := userClient.CreateToken("", newTokenName)
 			Expect(err).To(BeNil())
 			Expect(token).NotTo(BeNil())
 			Expect(token.Status).To(Equal("ok"))

@@ -30,6 +30,13 @@ type RootOptions struct {
 	Version    bool
 	Debug      bool
 
+	URL                string
+	Username           string
+	Token              string
+	InsecureSkipVerify bool
+	Proxy              string
+	ProxyAuth          string
+
 	Doctor bool
 
 	LoggerLevel string
@@ -71,9 +78,9 @@ More information could found at https://jenkins-zh.cn`,
 			}
 		}
 
-		// set Header Accept-Language
 		config = getConfig()
 		if config != nil {
+			// set Header Accept-Language
 			client.SetLanguage(config.Language)
 		}
 
@@ -81,20 +88,21 @@ More information could found at https://jenkins-zh.cn`,
 		return
 	},
 	BashCompletionFunction: jcliBashCompletionFunc,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 		if rootOptions.Version {
 			cmd.Printf("Version: %s\n", app.GetVersion())
 			cmd.Printf("Commit: %s\n", app.GetCommit())
 		}
 		if rootOptions.Jenkins != "" {
-			current := getCurrentJenkinsFromOptionsOrDie()
+			current := getCurrentJenkinsFromOptions()
 			if current != nil {
 				cmd.Println("Current Jenkins is:", current.Name)
 			} else {
-				cmd.Println("Cannot found the configuration")
+				err = fmt.Errorf("cannot found the configuration: %s", rootOptions.Jenkins)
 			}
 		}
+		return
 	},
 }
 
@@ -137,6 +145,20 @@ func init() {
 		i18n.T("Run the diagnose for current command"))
 	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
 		i18n.T("Print the version of Jenkins CLI"))
+
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.URL, "url", "", "",
+		i18n.T("The URL of Jenkins"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Username, "username", "", "",
+		i18n.T("The username of Jenkins"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Token, "token", "", "",
+		i18n.T("The token of Jenkins"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.InsecureSkipVerify, "insecureSkipVerify", "", true,
+		i18n.T("If skip insecure skip verify"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.Proxy, "proxy", "", "",
+		i18n.T("The proxy of connection to Jenkins"))
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.ProxyAuth, "proxy-auth", "", "",
+		i18n.T("The auth of proxy of connection to Jenkins"))
+
 	rootCmd.SetOut(os.Stdout)
 }
 
@@ -157,9 +179,29 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 	} else {
 		jenkinsServer = findJenkinsByName(jenkinsOpt)
 	}
+
+	// take URL from options if it's not empty
+	if jenkinsServer == nil && rootOptions.URL != "" {
+		jenkinsServer = &JenkinsServer{}
+	}
+
+	if jenkinsServer != nil {
+		if rootOptions.URL != "" {
+			jenkinsServer.URL = rootOptions.URL
+		}
+
+		if rootOptions.Username != "" {
+			jenkinsServer.UserName = rootOptions.Username
+		}
+
+		if rootOptions.Token != "" {
+			jenkinsServer.Token = rootOptions.Token
+		}
+	}
 	return
 }
 
+// Deprecated, please use getCurrentJenkinsFromOptions instead of it
 func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *JenkinsServer) {
 	if jenkinsServer = getCurrentJenkinsFromOptions(); jenkinsServer == nil {
 		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins)
@@ -204,7 +246,7 @@ func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error)
 func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error) {
 	config := getConfig()
 	if config == nil {
-		err = fmt.Errorf("Cannot find config file")
+		err = fmt.Errorf("cannot find config file")
 		return
 	}
 
@@ -233,8 +275,8 @@ const (
 	jcliBashCompletionFunc = `__plugin_name_parse_get()
 {
     local jcli_output out
-    if jcli_output=$(jcli plugin list --filter hasUpdate --no-headers --filter name="$1" 2>/dev/null); then
-        out=($(echo "${jcli_output}" | awk '{print $2}'))
+    if jcli_output=$(jcli plugin list --filter HasUpdate=true --no-headers --filter ShortName="$1" 2>/dev/null); then
+        out=($(echo "${jcli_output}" | awk '{print $1}'))
         COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
     fi
 }
@@ -251,7 +293,7 @@ __config_name_parse_get()
 {
     local jcli_output out
     if jcli_output=$(jcli config list --no-headers 2>/dev/null); then
-        out=($(echo "${jcli_output}" | awk '{print $2}'))
+        out=($(echo "${jcli_output}" | awk '{print $1}'))
         COMPREPLY=( $( compgen -W "${out[*]}" -- "$cur" ) )
     fi
 }
@@ -267,7 +309,7 @@ __jcli_get_config_name()
 __job_name_parse_get()
 {
     local jcli_output out
-    if jcli_output=$(jcli job search -o path "$cur" 2>/dev/null); then
+    if jcli_output=$(jcli job search --columns URL --no-headers "$cur" 2>/dev/null); then
         out=($(echo "${jcli_output}"))
         COMPREPLY=( ${out} )
     fi
@@ -281,6 +323,23 @@ __jcli_get_job_name()
     fi
 }
 
+__computer_name_parse_get()
+{
+    local jcli_output out
+    if jcli_output=$(jcli computer list --no-headers --columns DisplayName 2>/dev/null); then
+        out=($(echo "${jcli_output}"))
+        COMPREPLY=( ${out} )
+    fi
+}
+
+__jcli_get_computer_name()
+{
+    __computer_name_parse_get
+    if [[ $? -eq 0 ]]; then
+        return 0
+    fi
+}
+
 __jcli_custom_func() {
     case ${last_command} in
         jcli_plugin_upgrade | jcli_plugin_uninstall)
@@ -289,6 +348,10 @@ __jcli_custom_func() {
             ;;
         jcli_open | jcli_config_select | jcli_config_remove | jcli_shell)
             __jcli_get_config_name
+            return
+            ;;
+        jcli_computer_delete | jcli_computer_delete | jcli_computer_launch)
+            __jcli_get_computer_name
             return
             ;;
         jcli_job_build | jcli_job_stop | jcli_job_log | jcli_job_delete | jcli_job_history | jcli_job_artifact | jcli_job_input)

@@ -57,11 +57,13 @@ var _ = Describe("user token command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
+			targetUser := "target-user"
+
 			tokenName := "fakename"
 			client.PrepareCreateToken(roundTripper, "http://localhost:8080/jenkins",
-				"admin", "111e3a2f0231198855dceaff96f20540a9", tokenName)
+				"admin", "111e3a2f0231198855dceaff96f20540a9", tokenName, targetUser)
 
-			rootCmd.SetArgs([]string{"user", "token", "-g", "-n", tokenName})
+			rootCmd.SetArgs([]string{"user", "token", "-g", "-n", tokenName, "--target-user", targetUser})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -77,19 +79,21 @@ var _ = Describe("user token command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
+			targetUser := "target-user"
+
 			tokenName := "fakename"
 			response := client.PrepareCreateToken(roundTripper, "http://localhost:8080/jenkins",
-				"admin", "111e3a2f0231198855dceaff96f20540a9", tokenName)
+				"admin", "111e3a2f0231198855dceaff96f20540a9", tokenName, targetUser)
 			response.StatusCode = 500
 
-			rootCmd.SetArgs([]string{"user", "token", "-g", "-n", tokenName})
+			rootCmd.SetArgs([]string{"user", "token", "-g", "-n", tokenName, "--target-user", targetUser})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).To(HaveOccurred())
 
-			Expect(buf.String()).To(Equal("error: unexpected status code: 500"))
+			Expect(buf.String()).To(ContainSubstring("unexpected status code: 500"))
 		})
 	})
 })

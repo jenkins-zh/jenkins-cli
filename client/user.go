@@ -94,12 +94,16 @@ func (q *UserClient) Create(username, password string) (user *UserForCreate, err
 }
 
 // CreateToken create a token in Jenkins
-func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error) {
+func (q *UserClient) CreateToken(targetUser, newTokenName string) (status *Token, err error) {
 	if newTokenName == "" {
 		newTokenName = fmt.Sprintf("jcli-%s", randomdata.SillyName())
 	}
 
-	api := fmt.Sprintf("/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", q.UserName)
+	if targetUser == "" {
+		targetUser = q.UserName
+	}
+
+	api := fmt.Sprintf("/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", targetUser)
 
 	formData := url.Values{}
 	formData.Add("newTokenName", newTokenName)

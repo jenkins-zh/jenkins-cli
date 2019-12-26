@@ -13,6 +13,7 @@ var _ = Describe("computer test", func() {
 		ctrl           *gomock.Controller
 		computerClient client.ComputerClient
 		roundTripper   *mhttp.MockRoundTripper
+		name           string
 	)
 
 	BeforeEach(func() {
@@ -22,6 +23,7 @@ var _ = Describe("computer test", func() {
 		computerClient = client.ComputerClient{}
 		computerClient.RoundTripper = roundTripper
 		computerClient.URL = "http://localhost"
+		name = "fake-name"
 	})
 
 	AfterEach(func() {
@@ -34,11 +36,10 @@ var _ = Describe("computer test", func() {
 		computers, err := computerClient.List()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(computers).NotTo(BeNil())
-		Expect(len(computers.Computer)).To(Equal(1))
+		Expect(len(computers.Computer)).To(Equal(2))
 	})
 
 	It("Launch", func() {
-		name := "fake-name"
 		client.PrepareForLaunchComputer(roundTripper, computerClient.URL, "", "", name)
 
 		err := computerClient.Launch(name)
@@ -46,7 +47,6 @@ var _ = Describe("computer test", func() {
 	})
 
 	It("GetLog", func() {
-		name := "fake-name"
 		client.PrepareForComputerLogRequest(roundTripper, computerClient.URL, "", "", name)
 
 		log, err := computerClient.GetLog(name)
@@ -55,10 +55,33 @@ var _ = Describe("computer test", func() {
 	})
 
 	It("GetLog with 500", func() {
-		name := "fake-name"
 		client.PrepareForComputerLogRequestWithCode(roundTripper, computerClient.URL, "", "", name, 500)
 
 		_, err := computerClient.GetLog(name)
 		Expect(err).To(HaveOccurred())
+	})
+
+	It("Delete an agent", func() {
+		client.PrepareForComputerDeleteRequest(roundTripper, computerClient.URL, "", "", name)
+
+		err := computerClient.Delete(name)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("GetSecret of an agent", func() {
+		secret := "fake-secret"
+		client.PrepareForComputerAgentSecretRequest(roundTripper,
+			computerClient.URL, "", "", name, secret)
+
+		result, err := computerClient.GetSecret(name)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(result).To(Equal(secret))
+	})
+
+	It("Create an agent", func() {
+		client.PrepareForComputerCreateRequest(roundTripper, computerClient.URL, "", "", name)
+
+		err := computerClient.Create(name)
+		Expect(err).NotTo(HaveOccurred())
 	})
 })

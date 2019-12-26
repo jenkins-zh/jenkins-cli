@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"strings"
 
+	"go.uber.org/zap"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -36,8 +38,12 @@ type OutputOption struct {
 	WithoutHeaders bool
 	Filter         []string
 
-	Writer io.Writer
+	Writer        io.Writer
+	CellRenderMap map[string]RenderCell
 }
+
+// RenderCell render a specific cell in a table
+type RenderCell = func(string) string
 
 // FormatOutput is the interface of format output
 type FormatOutput interface {
@@ -78,6 +84,7 @@ func (o *OutputOption) OutputV2(obj interface{}) (err error) {
 		return
 	}
 
+	logger.Debug("start to output", zap.Any("filter", o.Filter))
 	obj = o.ListFilter(obj)
 
 	var data []byte
@@ -124,10 +131,6 @@ func (o *OutputOption) ListFilter(obj interface{}) interface{} {
 
 // Match filter an item
 func (o *OutputOption) Match(item reflect.Value) bool {
-	if len(o.Filter) == 0 {
-		return true
-	}
-
 	for _, f := range o.Filter {
 		arr := strings.Split(f, "=")
 		if len(arr) < 2 {
@@ -138,29 +141,48 @@ func (o *OutputOption) Match(item reflect.Value) bool {
 		val := arr[1]
 
 		if !strings.Contains(util.ReflectFieldValueAsString(item, key), val) {
-			continue
-		} else {
-			return true
+			return false
 		}
 	}
-	return false
+	return true
 }
 
 // GetLine returns the line of a table
 func (o *OutputOption) GetLine(obj reflect.Value) []string {
 	columns := strings.Split(o.Columns, ",")
 	values := make([]string, 0)
+
+	if o.CellRenderMap == nil {
+		o.CellRenderMap = make(map[string]RenderCell, 0)
+	}
+
 	for _, col := range columns {
-		values = append(values, util.ReflectFieldValueAsString(obj, col))
+		cell := util.ReflectFieldValueAsString(obj, col)
+		if renderCell, ok := o.CellRenderMap[col]; ok && renderCell != nil {
+			cell = renderCell(cell)
+		}
+
+		values = append(values, cell)
 	}
 	return values
 }
 
 // SetFlag set flag of output format
+// Deprecated, see also SetFlagWithHeaders
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat, "Format the output, supported formats: table, json, yaml")
+	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat,
+		i18n.T("Format the output, supported formats: table, json, yaml"))
 	cmd.Flags().BoolVarP(&o.WithoutHeaders, "no-headers", "", false,
-		`When using the default output format, don't print headers (default print headers)`)
+		i18n.T(`When using the default output format, don't print headers (default print headers)`))
+	cmd.Flags().StringArrayVarP(&o.Filter, "filter", "", []string{},
+		i18n.T("Filter for the list by fields"))
+}
+
+// SetFlagWithHeaders set the flags of output
+func (o *OutputOption) SetFlagWithHeaders(cmd *cobra.Command, headers string) {
+	o.SetFlag(cmd)
+	cmd.Flags().StringVarP(&o.Columns, "columns", "", headers,
+		i18n.T("The columns of table"))
 }
 
 // BatchOption represent the options for a batch operation
@@ -236,6 +258,12 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 		jClient.Token = jenkins.Token
 		jClient.Proxy = jenkins.Proxy
 		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
+}
+
+// GetAliasesDel returns the aliases for delete command
+func GetAliasesDel() []string {
+	return []string{"remove", "del"}
 }

@@ -26,6 +26,9 @@ var _ = Describe("core test", func() {
 
 		username = "admin"
 		password = "token"
+
+		coreClient.UserName = username
+		coreClient.Token = password
 	})
 
 	AfterEach(func() {
@@ -34,9 +37,6 @@ var _ = Describe("core test", func() {
 
 	Context("Get", func() {
 		It("should success", func() {
-			coreClient.UserName = username
-			coreClient.Token = password
-
 			PrepareRestart(roundTripper, coreClient.URL, username, password, 503)
 
 			err := coreClient.Restart()
@@ -44,13 +44,22 @@ var _ = Describe("core test", func() {
 		})
 
 		It("should error, 400", func() {
-			coreClient.UserName = username
-			coreClient.Token = password
-
 			PrepareRestart(roundTripper, coreClient.URL, username, password, 400)
 
 			err := coreClient.Restart()
 			Expect(err).To(HaveOccurred())
+		})
+
+		It("GetIdentity", func() {
+			PrepareForGetIdentity(roundTripper, coreClient.URL, username, password)
+
+			identity, err := coreClient.GetIdentity()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(identity).To(Equal(JenkinsIdentity{
+				Fingerprint:   "fingerprint",
+				PublicKey:     "publicKey",
+				SystemMessage: "systemMessage",
+			}))
 		})
 	})
 })
