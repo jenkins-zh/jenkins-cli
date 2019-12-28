@@ -10,9 +10,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("job type command", func() {
+var _ = Describe("completion command", func() {
 	var (
-		ctrl *gomock.Controller
+		ctrl    *gomock.Controller
+		cmdArgs []string
+		buf     *bytes.Buffer
+		err     error
 	)
 
 	BeforeEach(func() {
@@ -20,6 +23,20 @@ var _ = Describe("job type command", func() {
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
+	})
+
+	JustBeforeEach(func() {
+		rootCmd.SetArgs(cmdArgs)
+
+		buf = new(bytes.Buffer)
+		rootCmd.SetOutput(buf)
+		_, err = rootCmd.ExecuteC()
 	})
 
 	AfterEach(func() {
@@ -29,21 +46,47 @@ var _ = Describe("job type command", func() {
 		ctrl.Finish()
 	})
 
-	Context("basic cases", func() {
-		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
+	Context("with default option value", func() {
+		BeforeEach(func() {
+			cmdArgs = []string{"completion"}
+		})
 
-			rootCmd.SetArgs([]string{"completion"})
-
-			buf := new(bytes.Buffer)
-			rootCmd.SetOutput(buf)
-			_, err = rootCmd.ExecuteC()
+		It("should success", func() {
 			Expect(err).To(BeNil())
+			Expect(buf.String()).To(ContainSubstring("bash completion for jcli"))
+		})
+	})
 
+	Context("generate zsh completion", func() {
+		BeforeEach(func() {
+			cmdArgs = []string{"completion", "--type", "zsh"}
+		})
+
+		It("should success", func() {
+			Expect(err).To(BeNil())
 			Expect(buf.String()).NotTo(Equal(""))
+		})
+	})
+
+	Context("generate powerShell completion", func() {
+		BeforeEach(func() {
+			cmdArgs = []string{"completion", "--type", "powerShell"}
+		})
+
+		It("should success", func() {
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(ContainSubstring("using namespace System.Management.Automation"))
+		})
+	})
+
+	Context("generate unknown shell type completion", func() {
+		BeforeEach(func() {
+			cmdArgs = []string{"completion", "--type", "fake"}
+		})
+
+		It("error occurred", func() {
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("unknown shell type"))
 		})
 	})
 })
