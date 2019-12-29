@@ -129,6 +129,16 @@ func TestConfirmCommands(t *testing.T) {
 		BatchOption: &userDeleteOption.BatchOption,
 	})
 
+	RunPromptCommandTest(t, PromptCommandTest{
+		Args: []string{"restart", "-b=false"},
+		Procedure: func(c *expect.Console) {
+			c.ExpectString("Are you sure to restart Jenkins http://localhost:8080/jenkins?")
+			c.SendLine("n")
+			c.ExpectEOF()
+		},
+		BatchOption: &restartOption.BatchOption,
+	})
+
 	RunPromptTest(t, PromptTest{
 		Message:    "message",
 		MsgConfirm: &BatchOption{},

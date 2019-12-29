@@ -114,6 +114,7 @@ func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 
 		test.BatchOption.Stdio = stdio
+		rootOptions.ConfigFile = "test.yaml"
 		rootCmd.SetArgs(test.Args)
 		_, err = rootCmd.ExecuteC()
 		return

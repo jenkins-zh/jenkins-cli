@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
-
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -13,48 +10,37 @@ import (
 // RestartOption holds the options for restart cmd
 type RestartOption struct {
 	BatchOption
-
-	RoundTripper http.RoundTripper
+	CommonOption
 }
 
 var restartOption RestartOption
 
 func init() {
 	rootCmd.AddCommand(restartCmd)
-	restartCmd.Flags().BoolVarP(&restartOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
+	restartOption.SetFlag(restartCmd)
 }
 
 var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: i18n.T("Restart your Jenkins"),
 	Long:  i18n.T("Restart your Jenkins"),
-	Run: func(cmd *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		if !restartOption.Batch {
-			confirm := false
-			prompt := &survey.Confirm{
-				Message: fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL),
-			}
-			if err := survey.AskOne(prompt, &confirm); !confirm {
-				return
-			} else if err != nil {
-				cmd.PrintErrln(err)
-				return
-			}
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		jenkins := getCurrentJenkinsFromOptions()
+		if !restartOption.Confirm(fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL)) {
+			return
 		}
 
-		jclient := &client.CoreClient{
+		jClient := &client.CoreClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: restartOption.RoundTripper,
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
-		if err := jclient.Restart(); err == nil {
+		if err = jClient.Restart(); err == nil {
 			cmd.Println("Please wait while Jenkins is restarting")
-		} else {
-			cmd.PrintErrln(err)
 		}
+		return
 	},
 }

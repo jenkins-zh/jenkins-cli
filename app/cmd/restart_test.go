@@ -66,9 +66,8 @@ var _ = Describe("restart command", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal("bad request, code 400\n"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("bad request, code 400"))
 		})
 	})
 })
