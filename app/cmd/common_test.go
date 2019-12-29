@@ -2,14 +2,10 @@ package cmd_test
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
-	"github.com/hinshun/vt10x"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
 )
@@ -174,70 +170,14 @@ type FakeFoo struct {
 }
 
 func TestHelloTest(t *testing.T) {
-	RunPromptTest(t, PromptTest{
+	cmd.RunPromptTest(t, cmd.PromptTest{
 		Message:    "essage",
 		MsgConfirm: &cmd.BatchOption{},
-		procedure: func(c *expect.Console) {
+		Procedure: func(c *expect.Console) {
 			c.ExpectString("message")
 			c.SendLine("y")
 			c.ExpectEOF()
 		},
-		expected: true,
+		Expected: true,
 	})
-}
-
-type PromptTest struct {
-	Message string
-	//prompt     survey.Prompt
-	MsgConfirm cmd.MsgConfirm
-	procedure  func(*expect.Console)
-	expected   interface{}
-}
-
-func RunPromptTest(t *testing.T, test PromptTest) {
-	var answer interface{}
-	RunTest(t, test.procedure, func(stdio terminal.Stdio) error {
-		batch := &cmd.BatchOption{
-			Batch: false,
-			Stdio: stdio,
-		}
-		answer = batch.Confirm(test.Message)
-		return nil
-	})
-	require.Equal(t, test.expected, answer)
-}
-
-func Stdio(c *expect.Console) terminal.Stdio {
-	return terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
-}
-
-func RunTest(t *testing.T, procedure func(*expect.Console), test func(terminal.Stdio) error) {
-	t.Parallel()
-
-	// Multiplex output to a buffer as well for the raw bytes.
-	buf := new(bytes.Buffer)
-
-	//c, err := expect.NewConsole(expect.WithStdout(buf))
-	//c, err := expect.NewConsole(expect.WithStdout(os.Stdout))
-	c, _, err := vt10x.NewVT10XConsole(expect.WithStdout(buf))
-
-	require.Nil(t, err)
-	defer c.Close()
-
-	donec := make(chan struct{})
-	go func() {
-		defer close(donec)
-		procedure(c)
-	}()
-
-	err = test(Stdio(c))
-	fmt.Println("Raw output: ", buf.String())
-	require.Nil(t, err)
-
-	// Close the slave end of the pty, and read the remaining bytes from the master end.
-	c.Tty().Close()
-	<-donec
-
-	// Dump the terminal's screen.
-	//fmt.Sprintf("\n%s", expect.StripTrailingEmptyLines(state.String()))
 }

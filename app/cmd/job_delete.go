@@ -3,10 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -14,8 +10,7 @@ import (
 // JobDeleteOption is the job delete option
 type JobDeleteOption struct {
 	BatchOption
-
-	RoundTripper http.RoundTripper
+	CommonOption
 }
 
 var jobDeleteOption JobDeleteOption
@@ -31,7 +26,7 @@ var jobDeleteCmd = &cobra.Command{
 	Short:   i18n.T("Delete a job in your Jenkins"),
 	Long:    i18n.T("Delete a job in your Jenkins"),
 	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jobName := args[0]
 		if !jobDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete job %s ?", jobName)) {
 			return
@@ -42,9 +37,9 @@ var jobDeleteCmd = &cobra.Command{
 				RoundTripper: jobDeleteOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
-		err := jclient.Delete(jobName)
-		helper.CheckErr(cmd, err)
+		err = jclient.Delete(jobName)
+		return
 	},
 }

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -29,7 +28,7 @@ var userDeleteCmd = &cobra.Command{
 	Short:   "Delete a user for your Jenkins",
 	Long:    `Delete a user for your Jenkins`,
 	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		username := args[0]
 
 		if !userDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete user %s ?", username)) {
@@ -43,8 +42,6 @@ var userDeleteCmd = &cobra.Command{
 			},
 		}
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
-
-		err := jclient.Delete(username)
-		helper.CheckErr(cmd, err)
+		return jclient.Delete(username)
 	},
 }

@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/Netflix/go-expect"
 	"io/ioutil"
 	"os"
+	"testing"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -74,3 +76,16 @@ var _ = Describe("credential delete command", func() {
 		})
 	})
 })
+
+func TestDeleteCredential(t *testing.T) {
+	RunPromptCommandTest(t, PromptCommandTest{
+		Args: []string{"credential", "delete", "fake-store", "fake-id", "-b=false"},
+		Procedure: func(c *expect.Console) {
+			c.ExpectString("Are you sure to delete credential fake-id")
+			c.SendLine("n")
+			c.ExpectEOF()
+		},
+		BatchOption: &credentialDeleteOption.BatchOption,
+		Expected:    nil,
+	})
+}
