@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/Netflix/go-expect"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"os"
@@ -81,14 +80,4 @@ var _ = Describe("user delete command", func() {
 })
 
 func TestDeleteUser(t *testing.T) {
-	RunPromptCommandTest(t, PromptCommandTest{
-		Args: []string{"user", "delete", "fake-user", "-b=false"},
-		Procedure: func(c *expect.Console) {
-			c.ExpectString("Are you sure to delete user fake-user ?")
-			c.SendLine("n")
-			c.ExpectEOF()
-		},
-		BatchOption: &userDeleteOption.BatchOption,
-		Expected:    nil,
-	})
 }

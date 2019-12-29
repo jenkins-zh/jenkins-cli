@@ -3,11 +3,10 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"

@@ -3,15 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/Netflix/go-expect"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"testing"
-
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io/ioutil"
+	"net/http"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -137,16 +134,3 @@ var _ = Describe("job stop command", func() {
 		})
 	})
 })
-
-func TestStopJob(t *testing.T) {
-	RunPromptCommandTest(t, PromptCommandTest{
-		Args: []string{"job", "stop", "fake", "-b=false"},
-		Procedure: func(c *expect.Console) {
-			c.ExpectString("Are you sure to stop job fake ?")
-			c.SendLine("n")
-			c.ExpectEOF()
-		},
-		BatchOption: &jobStopOption.BatchOption,
-		Expected:    nil,
-	})
-}

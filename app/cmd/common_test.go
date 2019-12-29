@@ -2,12 +2,10 @@ package cmd_test
 
 import (
 	"bytes"
-	"github.com/Netflix/go-expect"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"reflect"
-	"testing"
 )
 
 var _ = Describe("test OutputOption", func() {
@@ -167,17 +165,4 @@ foo-1
 // FakeFoo only for test
 type FakeFoo struct {
 	Name string
-}
-
-func TestHelloTest(t *testing.T) {
-	cmd.RunPromptTest(t, cmd.PromptTest{
-		Message:    "essage",
-		MsgConfirm: &cmd.BatchOption{},
-		Procedure: func(c *expect.Console) {
-			c.ExpectString("message")
-			c.SendLine("y")
-			c.ExpectEOF()
-		},
-		Expected: true,
-	})
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -16,11 +15,10 @@ import (
 // JobBuildOption is the job build option
 type JobBuildOption struct {
 	BatchOption
+	CommonOption
 
 	Param      string
 	ParamArray []string
-
-	RoundTripper http.RoundTripper
 }
 
 var jobBuildOption JobBuildOption
@@ -32,8 +30,7 @@ func ResetJobBuildOption() {
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
-	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false,
-		i18n.T("Batch mode, no need to confirm"))
+	jobBuildOption.SetFlag(jobBuildCmd)
 	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "",
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
@@ -76,7 +73,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 
-		if !jobBuildOption.Batch && !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
+		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
 			return
 		}
 

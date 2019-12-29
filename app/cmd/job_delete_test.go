@@ -92,26 +92,12 @@ var _ = Describe("job delete command", func() {
 	})
 })
 
-func TestDeleteJob(t *testing.T) {
-	RunPromptCommandTest(t, PromptCommandTest{
-		Args: []string{"job", "delete", "fake", "-b=false"},
-		Procedure: func(c *expect.Console) {
-			c.ExpectString("Are you sure to delete job fake ?")
-			c.SendLine("n")
-			c.ExpectEOF()
-		},
-		BatchOption: &jobDeleteOption.BatchOption,
-		Expected:    nil,
-	})
-}
-
 type PromptCommandTest struct {
 	Message     string
 	MsgConfirm  MsgConfirm
 	BatchOption *BatchOption
 	Procedure   func(*expect.Console)
 	Args        []string
-	Expected    interface{}
 }
 
 type PromptTest struct {
@@ -152,7 +138,7 @@ func Stdio(c *expect.Console) terminal.Stdio {
 }
 
 func RunTest(t *testing.T, procedure func(*expect.Console), test func(terminal.Stdio) error) {
-	t.Parallel()
+	//t.Parallel()
 
 	// Multiplex output to a buffer as well for the raw bytes.
 	buf := new(bytes.Buffer)
