@@ -1,37 +1,30 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
 // JobTypeOption is the job type cmd option
 type JobTypeOption struct {
 	OutputOption
-
-	RoundTripper http.RoundTripper
+	CommonOption
 }
 
 var jobTypeOption JobTypeOption
 
 func init() {
 	jobCmd.AddCommand(jobTypeCmd)
-	jobTypeCmd.Flags().StringVarP(&jobTypeOption.Format, "output", "o", "table", "Format the output")
+	jobTypeOption.SetFlagWithHeaders(jobTypeCmd, "DisplayName,Class")
 }
 
 var jobTypeCmd = &cobra.Command{
 	Use:   "type",
 	Short: i18n.T("Print the types of job which in your Jenkins"),
 	Long:  i18n.T("Print the types of job which in your Jenkins"),
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: jobTypeOption.RoundTripper,
@@ -39,15 +32,19 @@ var jobTypeCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		status, err := jclient.GetJobTypeCategories()
+		var jobCategories []client.JobCategory
+		jobCategories, err = jclient.GetJobTypeCategories()
 		if err == nil {
-			var data []byte
-			data, err = jobTypeOption.Output(status)
-			if err == nil && len(data) > 0 {
-				cmd.Print(string(data))
+			var jobCategoryItems []client.JobCategoryItem
+			for _, jobCategory := range jobCategories {
+				for _, item := range jobCategory.Items {
+					jobCategoryItems = append(jobCategoryItems, item)
+				}
 			}
+			jobTypeOption.Writer = cmd.OutOrStdout()
+			err = jobTypeOption.OutputV2(jobCategoryItems)
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 
@@ -69,27 +66,6 @@ func GetCategories(jclient *client.JobClient) (
 			types[i] = tp
 			i++
 		}
-	}
-	return
-}
-
-// Output renders data into a table
-func (o *JobTypeOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil {
-		buf := new(bytes.Buffer)
-
-		jobCategories := obj.([]client.JobCategory)
-		table := util.CreateTable(buf)
-		table.AddRow("number", "name", "type")
-		for _, jobCategory := range jobCategories {
-			for i, item := range jobCategory.Items {
-				table.AddRow(fmt.Sprintf("%d", i), item.DisplayName,
-					jobCategory.Name)
-			}
-		}
-		table.Render()
-		err = nil
-		data = buf.Bytes()
 	}
 	return
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
@@ -188,19 +189,25 @@ func (o *OutputOption) SetFlagWithHeaders(cmd *cobra.Command, headers string) {
 // BatchOption represent the options for a batch operation
 type BatchOption struct {
 	Batch bool
+
+	Stdio terminal.Stdio
+}
+
+// MsgConfirm is the interface for confirming a message
+type MsgConfirm interface {
+	Confirm(message string) bool
 }
 
 // Confirm promote user if they really want to do this
 func (b *BatchOption) Confirm(message string) bool {
 	if !b.Batch {
 		confirm := false
-		prompt := &survey.Confirm{
+		var prompt survey.Prompt
+		prompt = &survey.Confirm{
 			Message: message,
 		}
-		survey.AskOne(prompt, &confirm)
-		if !confirm {
-			return false
-		}
+		survey.AskOne(prompt, &confirm, survey.WithStdio(b.Stdio.In, b.Stdio.Out, b.Stdio.Err))
+		return confirm
 	}
 
 	return true
