@@ -11,7 +11,7 @@ func InitLogger(level string) (logger *zap.Logger, err error) {
 	rawJSON := []byte(fmt.Sprintf(`{
 	  "level": "%s",
 	  "encoding": "json",
-	  "outputPaths": ["stdout", "/tmp/logs"],
+	  "outputPaths": ["stdout"],
 	  "errorOutputPaths": ["stderr"],
 	  "encoderConfig": {
 	    "messageKey": "message",
