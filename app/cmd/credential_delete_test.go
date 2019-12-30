@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -148,5 +149,20 @@ func TestConfirmCommands(t *testing.T) {
 			c.ExpectEOF()
 		},
 		Expected: true,
+	})
+
+	RunEditorTest(t, EditorTest{
+		Message:        "message",
+		DefaultContent: "hello",
+		EditContent:    &CommonOption{},
+		Procedure: func(c *expect.Console) {
+			c.ExpectString("message")
+			c.SendLine("")
+			go c.ExpectEOF()
+			time.Sleep(time.Millisecond)
+			c.Send("ddigood\x1b")
+			c.SendLine(":wq!")
+		},
+		Expected: "good\n",
 	})
 }

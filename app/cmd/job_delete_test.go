@@ -100,11 +100,31 @@ type PromptCommandTest struct {
 	Args        []string
 }
 
+type EditCommandTest struct {
+	Message          string
+	DefaultContent   string
+	EditContent      EditContent
+	CommonOption     *CommonOption
+	BatchOption      *BatchOption
+	ConfirmProcedure func(*expect.Console)
+	Procedure        func(*expect.Console)
+	Expected         string
+	Args             []string
+}
+
 type PromptTest struct {
 	Message    string
 	MsgConfirm MsgConfirm
 	Procedure  func(*expect.Console)
 	Expected   interface{}
+}
+
+type EditorTest struct {
+	Message        string
+	DefaultContent string
+	EditContent    EditContent
+	Procedure      func(*expect.Console)
+	Expected       string
 }
 
 func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
@@ -132,6 +152,18 @@ func RunPromptTest(t *testing.T, test PromptTest) {
 		return nil
 	})
 	require.Equal(t, test.Expected, answer)
+}
+
+func RunEditorTest(t *testing.T, test EditorTest) {
+	var content string
+	RunTest(t, test.Procedure, func(stdio terminal.Stdio) (err error) {
+		editor := &CommonOption{
+			Stdio: stdio,
+		}
+		content, err = editor.Editor(test.DefaultContent, test.Message)
+		return nil
+	})
+	require.Equal(t, test.Expected, content)
 }
 
 func Stdio(c *expect.Console) terminal.Stdio {

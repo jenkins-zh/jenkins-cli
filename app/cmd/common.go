@@ -29,6 +29,8 @@ type CommonOption struct {
 	SystemCallExec  util.SystemCallExec
 	LookPathContext util.LookPathContext
 	RoundTripper    http.RoundTripper
+
+	Stdio terminal.Stdio
 }
 
 // OutputOption represent the format of output
@@ -211,6 +213,25 @@ func (b *BatchOption) Confirm(message string) bool {
 	}
 
 	return true
+}
+
+// EditContent is the interface for editing content from a file
+type EditContent interface {
+	Editor(defaultContent, message string) (content string, err error)
+}
+
+// Editor edit a file than return the content
+func (o *CommonOption) Editor(defaultContent, message string) (content string, err error) {
+	prompt := &survey.Editor{
+		Message:       message,
+		FileName:      "*.sh",
+		Default:       defaultContent,
+		HideDefault:   true,
+		AppendDefault: true,
+	}
+
+	err = survey.AskOne(prompt, &content, survey.WithStdio(o.Stdio.In, o.Stdio.Out, o.Stdio.Err))
+	return
 }
 
 // SetFlag the flag for batch option

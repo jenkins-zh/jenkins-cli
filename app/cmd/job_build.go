@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"log"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -82,7 +80,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				RoundTripper: jobBuildOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
@@ -102,22 +100,12 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 						continue
 					}
 
-					if data, err := json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
+					var data []byte
+					if data, err = json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
 						content := string(data)
-						prompt := &survey.Editor{
-							Message:       "Edit your pipeline script",
-							FileName:      "*.sh",
-							Default:       content,
-							HideDefault:   true,
-							AppendDefault: true,
-						}
-
-						if err = survey.AskOne(prompt, &content); err != nil {
-							log.Fatal(err)
-						}
-
-						if err = json.Unmarshal([]byte(content), &paramDefs); err != nil {
-							log.Fatal(err)
+						content, err = jobBuildOption.Editor(content, "Edit your pipeline script")
+						if err == nil {
+							err = json.Unmarshal([]byte(content), &paramDefs)
 						}
 					}
 					hasParam = true
