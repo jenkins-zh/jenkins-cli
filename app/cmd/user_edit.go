@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"log"
-
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
 // UserEditOption is the user edit cmd option
 type UserEditOption struct {
+	CommonOption
+
 	Description bool
 }
 
@@ -24,35 +23,22 @@ var userEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit the user of your Jenkins",
 	Long:  `Edit the user of your Jenkins`,
-	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.UserClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
-
-		if status, err := jclient.Get(); err == nil {
-			description := status.Description
-
-			prompt := &survey.Editor{
-				Message:       "Edit user description",
-				FileName:      "*.sh",
-				Default:       description,
-				HideDefault:   true,
-				AppendDefault: true,
-			}
-
-			if err = survey.AskOne(prompt, &description); err != nil {
-				log.Fatal(err)
-			} else {
-				if err = jclient.EditDesc(description); err != nil {
-					log.Fatal(err)
-				}
-			}
-		} else {
-			log.Fatal(err)
+	RunE: func(_ *cobra.Command, _ []string) (err error) {
+		jClient := &client.UserClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: userEditOption.RoundTripper,
+			},
 		}
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+
+		var user *client.User
+		if user, err = jClient.Get(); err == nil {
+			var content string
+			content, err = jobBuildOption.Editor(user.Description, "Edit user description")
+			if err == nil {
+				err = jClient.EditDesc(content)
+			}
+		}
+		return
 	},
 }
