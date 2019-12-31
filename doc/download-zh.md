@@ -1,7 +1,7 @@
 ## JFrog Bintray
 你可以从 [bintray.com/jenkins-zh](https://bintray.com/jenkins-zh/jenkins-cli/jenkins-cli) 下载 `jcli`.
 
-`curl -L "https://bintray.com/jenkins-zh/jenkins-cli/download_file?file_path=jcli-darwin-amd64.tar.gz"|tar xzv`
+`curl -L "https://bintray.com/jenkins-zh/jenkins-cli/download_file?file_path=v0.0.24%2Fjcli-darwin-amd64.tar.gz"|tar xzv`
 
 ## 镜像
 如果您无法从 GitHub 上下载 `jcli`，请尝试下面的方法：
