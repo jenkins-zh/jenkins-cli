@@ -1,22 +1,22 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
 // JobEditOption is the option for job create command
 type JobEditOption struct {
+	CommonOption
+
 	Filename string
 	Script   string
 	URL      string
-
-	RoundTripper http.RoundTripper
 }
 
 var jobEditOption JobEditOption
@@ -76,21 +76,8 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 		if job != nil {
 			content = job.Script
 		}
-		script, err = modifyScript(content)
+		script, err = j.Editor(content, "Edit your pipeline script")
 	}
-	return
-}
-
-func modifyScript(script string) (content string, err error) {
-	prompt := &survey.Editor{
-		Message:       "Edit your pipeline script",
-		FileName:      "*.sh",
-		Default:       script,
-		HideDefault:   true,
-		AppendDefault: true,
-	}
-
-	err = survey.AskOne(prompt, &content)
 	return
 }
 
