@@ -122,7 +122,9 @@ var _ = Describe("Table util test", func() {
 
 var _ = Describe("GetConfigFromHome", func() {
 	It("should success", func() {
-		path, err := GetConfigFromHome()
+		config := &DefaultConfig{}
+
+		path, err := config.GetConfigFromHome()
 		Expect(err).To(BeNil())
 		Expect(path).To(ContainSubstring(".jenkins-cli.yaml"))
 	})

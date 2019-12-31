@@ -18,7 +18,7 @@ func PrepareGetUser(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd 
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"fullName":"admin"}`)),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"fullName":"admin","description":"fake-description"}`)),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)

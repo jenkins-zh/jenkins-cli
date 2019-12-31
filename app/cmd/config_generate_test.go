@@ -2,9 +2,16 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/Netflix/go-expect"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/mock/mconfig"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"os"
+	"path"
+	"testing"
+	"time"
 )
 
 var _ = Describe("config generate command", func() {
@@ -65,3 +72,34 @@ mirrors:
 		})
 	})
 })
+
+func TestConfigGenerate(t *testing.T) {
+	RunEditCommandTest(t, EditCommandTest{
+		ConfirmProcedure: func(c *expect.Console) {
+			c.ExpectString("Cannot found your config file, do you want to edit it?")
+			c.SendLine("y")
+			//c.ExpectEOF()
+		},
+		Procedure: func(c *expect.Console) {
+			c.ExpectString("Edit your config file")
+			c.SendLine("")
+			go c.ExpectEOF()
+			time.Sleep(time.Millisecond)
+			c.Send(`ifake-config`)
+			c.Send("\x1b")
+			c.SendLine(":wq!")
+		},
+		Test: func(stdio terminal.Stdio) (err error) {
+			configFile := path.Join(os.TempDir(), "fake.yaml")
+			defer os.Remove(configFile)
+			configGenerateOption.BatchOption.Stdio = stdio
+			configGenerateOption.CommonOption.Stdio = stdio
+			configGenerateOption.ConfigPathLocator = &mconfig.FakeConfigPathLocator{
+				Path: "fake.yaml",
+			}
+			rootCmd.SetArgs([]string{"config", "generate", "--interactive", "--copy", "--configFile=" + configFile})
+			_, err = rootCmd.ExecuteC()
+			return
+		},
+	})
+}

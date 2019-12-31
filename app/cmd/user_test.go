@@ -55,7 +55,7 @@ var _ = Describe("user command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("{\n  \"absoluteUrl\": \"\",\n  \"Description\": \"\",\n  \"fullname\": \"admin\",\n  \"ID\": \"\"\n}\n"))
+			Expect(buf.String()).To(Equal("{\n  \"absoluteUrl\": \"\",\n  \"Description\": \"fake-description\",\n  \"fullname\": \"admin\",\n  \"ID\": \"\"\n}\n"))
 		})
 
 		It("with status code 500", func() {

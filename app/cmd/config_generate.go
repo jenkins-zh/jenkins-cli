@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/mitchellh/go-homedir"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -15,7 +17,9 @@ type ConfigGenerateOption struct {
 	InteractiveOption
 	CommonOption
 	BatchOption
-	Copy bool
+
+	Copy              bool
+	ConfigPathLocator ConfigPathLocator
 }
 
 var configGenerateOption ConfigGenerateOption
@@ -26,6 +30,8 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
+
+	configGenerateOption.ConfigPathLocator = &DefaultConfig{}
 }
 
 var configGenerateCmd = &cobra.Command{
@@ -54,13 +60,6 @@ var configGenerateCmd = &cobra.Command{
 // InteractiveWithConfig be friendly for a newer
 func (o *ConfigGenerateOption) InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
 	configPath := configOptions.ConfigFileLocation
-
-	if configPath == "" { // config file isn't exists
-		if configPath, err = GetConfigFromHome(); err != nil {
-			return
-		}
-	}
-
 	_, err = os.Stat(configPath)
 	if err != nil && os.IsNotExist(err) {
 		confirm := o.Confirm("Cannot found your config file, do you want to edit it?")
@@ -118,4 +117,16 @@ func getSampleConfig() (sampleConfig Config) {
 func generateSampleConfig() ([]byte, error) {
 	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
+}
+
+type DefaultConfig struct {
+}
+
+// GetConfigFromHome returns the config file path from user home dir
+func (c *DefaultConfig) GetConfigFromHome() (configPath string, homeErr error) {
+	userHome, homeErr := homedir.Dir()
+	if homeErr == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	}
+	return
 }

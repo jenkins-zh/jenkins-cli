@@ -3,6 +3,8 @@ package cmd
 import (
 	"github.com/Netflix/go-expect"
 	"io/ioutil"
+	"os"
+	"path"
 	"testing"
 	"time"
 
@@ -23,21 +25,27 @@ func TestEditUser(t *testing.T) {
 			c.SendLine(":wq!")
 		},
 		Test: func(stdio terminal.Stdio) (err error) {
+			configFile := path.Join(os.TempDir(), "fake.yaml")
+			defer os.Remove(configFile)
+
 			data, err := generateSampleConfig()
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			err = ioutil.WriteFile(configFile, data, 0664)
 
 			var (
-				description = "fake-description"
+				description = "fake-description\n"
 			)
 
 			ctrl := gomock.NewController(t)
 			roundTripper := mhttp.NewMockRoundTripper(ctrl)
 
+			client.PrepareGetUser(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9")
+
 			client.PrepareForEditUserDesc(roundTripper, "http://localhost:8080/jenkins",
-				"admin", "admin", description, "111e3a2f0231198855dceaff96f20540a9")
+				"admin", description, "admin", "111e3a2f0231198855dceaff96f20540a9")
 
-			rootCmd.SetArgs([]string{"user", "edit", "--desc", description})
+			rootCmd.SetArgs([]string{"user", "edit", "--desc", description, "--configFile", configFile})
 
+			userEditOption.RoundTripper = roundTripper
 			userEditOption.CommonOption.Stdio = stdio
 			_, err = rootCmd.ExecuteC()
 			return
