@@ -93,7 +93,7 @@ func TestConfigGenerate(t *testing.T) {
 			defer os.Remove(configFile)
 			configGenerateOption.BatchOption.Stdio = stdio
 			configGenerateOption.CommonOption.Stdio = stdio
-			rootCmd.SetArgs([]string{"config", "generate", "--interactive", "--copy", "--configFile=" + configFile})
+			rootCmd.SetArgs([]string{"config", "generate", "--interactive", "--copy=false", "--configFile=" + configFile})
 			_, err = rootCmd.ExecuteC()
 			return
 		},
