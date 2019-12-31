@@ -4,7 +4,7 @@
 `curl -L "https://bintray.com/jenkins-zh/jenkins-cli/download_file?file_path=v0.0.24%2Fjcli-darwin-amd64.tar.gz"|tar xzv`
 
 ## 镜像
-如果您无法从 GitHub 上下载 `jcli`，请尝试下面的方法：
+你也可以尝试下面的方法：
 
 `jcli_id=$(docker create jenkinszh/jcli) && sudo docker cp $jcli_id:/usr/local/bin/jcli /usr/local/bin/jcli && docker rm -v $jcli_id`
 
