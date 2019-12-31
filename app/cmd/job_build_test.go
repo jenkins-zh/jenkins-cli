@@ -107,7 +107,6 @@ var _ = Describe("job build command", func() {
 
 func TestBuildJob(t *testing.T) {
 	RunEditCommandTest(t, EditCommandTest{
-		Args: []string{"job", "build", "fake", "-b=false"},
 		ConfirmProcedure: func(c *expect.Console) {
 			c.ExpectString("Are you sure to build job fake")
 			c.SendLine("y")
@@ -124,34 +123,30 @@ func TestBuildJob(t *testing.T) {
 		},
 		CommonOption: &jobBuildOption.CommonOption,
 		BatchOption:  &jobBuildOption.BatchOption,
-	})
-}
+		Test: func(stdio terminal.Stdio) (err error) {
+			var data []byte
+			rootOptions.ConfigFile = "test.yaml"
+			data, err = generateSampleConfig()
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 
-func RunEditCommandTest(t *testing.T, test EditCommandTest) {
-	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		var data []byte
-		rootOptions.ConfigFile = "test.yaml"
-		data, err = generateSampleConfig()
-		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			ctrl := gomock.NewController(t)
+			roundTripper := mhttp.NewMockRoundTripper(ctrl)
 
-		ctrl := gomock.NewController(t)
-		roundTripper := mhttp.NewMockRoundTripper(ctrl)
+			var (
+				url     = "http://localhost:8080/jenkins"
+				jobName = "fake"
+				user    = "admin"
+				token   = "111e3a2f0231198855dceaff96f20540a9"
+			)
 
-		var (
-			url     = "http://localhost:8080/jenkins"
-			jobName = "fake"
-			user    = "admin"
-			token   = "111e3a2f0231198855dceaff96f20540a9"
-		)
-
-		request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json",
-			url, jobName), nil)
-		request.SetBasicAuth(user, token)
-		response := &http.Response{
-			StatusCode: 200,
-			Proto:      "HTTP/1.1",
-			Request:    request,
-			Body: ioutil.NopCloser(bytes.NewBufferString(`
+			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json",
+				url, jobName), nil)
+			request.SetBasicAuth(user, token)
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
 				{"name":"fake",
 "property" : [
     {
@@ -172,17 +167,22 @@ func RunEditCommandTest(t *testing.T, test EditCommandTest) {
     }
 ]}
 				`)),
-		}
-		roundTripper.EXPECT().
-			RoundTrip(request).Return(response, nil)
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
 
-		client.PrepareForBuildWithParams(roundTripper, url, jobName, user, token)
+			client.PrepareForBuildWithParams(roundTripper, url, jobName, user, token)
 
-		jobBuildOption.RoundTripper = roundTripper
-		test.BatchOption.Stdio = stdio
-		test.CommonOption.Stdio = stdio
-		rootCmd.SetArgs(test.Args)
-		_, err = rootCmd.ExecuteC()
-		return
-	}, test.ConfirmProcedure, test.Procedure)
+			jobBuildOption.RoundTripper = roundTripper
+			jobBuildOption.BatchOption.Stdio = stdio
+			jobBuildOption.CommonOption.Stdio = stdio
+			rootCmd.SetArgs([]string{"job", "build", "fake", "-b=false"})
+			_, err = rootCmd.ExecuteC()
+			return
+		},
+	})
+}
+
+func RunEditCommandTest(t *testing.T, test EditCommandTest) {
+	RunTest(t, test.Test, test.ConfirmProcedure, test.Procedure)
 }

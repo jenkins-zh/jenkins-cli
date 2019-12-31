@@ -109,6 +109,7 @@ type EditCommandTest struct {
 	BatchOption      *BatchOption
 	ConfirmProcedure func(*expect.Console)
 	Procedure        func(*expect.Console)
+	Test             func(stdio terminal.Stdio) (err error)
 	Expected         string
 	Args             []string
 }
@@ -188,7 +189,9 @@ func RunTest(t *testing.T, test func(terminal.Stdio) error, procedures ...func(*
 	go func() {
 		defer close(donec)
 		for _, procedure := range procedures {
-			procedure(c)
+			if procedure != nil {
+				procedure(c)
+			}
 		}
 	}()
 

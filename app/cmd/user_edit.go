@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -9,14 +10,15 @@ import (
 type UserEditOption struct {
 	CommonOption
 
-	Description bool
+	Description string
 }
 
 var userEditOption UserEditOption
 
 func init() {
 	userCmd.AddCommand(userEditCmd)
-	userEditCmd.Flags().BoolVarP(&userEditOption.Description, "desc", "d", false, "Edit the description")
+	userEditCmd.Flags().StringVarP(&userEditOption.Description, "desc", "d", "",
+		i18n.T("Edit the description"))
 }
 
 var userEditCmd = &cobra.Command{
@@ -34,7 +36,7 @@ var userEditCmd = &cobra.Command{
 		var user *client.User
 		if user, err = jClient.Get(); err == nil {
 			var content string
-			content, err = jobBuildOption.Editor(user.Description, "Edit user description")
+			content, err = userEditOption.Editor(user.Description, "Edit user description")
 			if err == nil {
 				err = jClient.EditDesc(content)
 			}
