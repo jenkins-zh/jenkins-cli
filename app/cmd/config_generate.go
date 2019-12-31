@@ -18,8 +18,7 @@ type ConfigGenerateOption struct {
 	CommonOption
 	BatchOption
 
-	Copy              bool
-	ConfigPathLocator ConfigPathLocator
+	Copy bool
 }
 
 var configGenerateOption ConfigGenerateOption
@@ -30,8 +29,6 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
-
-	configGenerateOption.ConfigPathLocator = &DefaultConfig{}
 }
 
 var configGenerateCmd = &cobra.Command{
@@ -119,11 +116,8 @@ func generateSampleConfig() ([]byte, error) {
 	return yaml.Marshal(&sampleConfig)
 }
 
-type DefaultConfig struct {
-}
-
 // GetConfigFromHome returns the config file path from user home dir
-func (c *DefaultConfig) GetConfigFromHome() (configPath string, homeErr error) {
+func GetConfigFromHome() (configPath string, homeErr error) {
 	userHome, homeErr := homedir.Dir()
 	if homeErr == nil {
 		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)

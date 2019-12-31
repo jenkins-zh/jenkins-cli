@@ -5,7 +5,6 @@ import (
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
 	"github.com/golang/mock/gomock"
-	"github.com/jenkins-zh/jenkins-cli/mock/mconfig"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"os"
@@ -94,9 +93,6 @@ func TestConfigGenerate(t *testing.T) {
 			defer os.Remove(configFile)
 			configGenerateOption.BatchOption.Stdio = stdio
 			configGenerateOption.CommonOption.Stdio = stdio
-			configGenerateOption.ConfigPathLocator = &mconfig.FakeConfigPathLocator{
-				Path: "fake.yaml",
-			}
 			rootCmd.SetArgs([]string{"config", "generate", "--interactive", "--copy", "--configFile=" + configFile})
 			_, err = rootCmd.ExecuteC()
 			return

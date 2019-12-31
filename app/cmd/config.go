@@ -225,8 +225,3 @@ func saveConfig() (err error) {
 	}
 	return
 }
-
-// ConfigPathLocator is the interface for getting config path
-type ConfigPathLocator interface {
-	GetConfigFromHome() (configPath string, homeErr error)
-}
