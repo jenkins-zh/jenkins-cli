@@ -3,8 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -58,6 +59,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				paramDefs = append(paramDefs, client.ParameterDefinition{
 					Name:  entryArray[0],
 					Value: entryArray[1],
+					Type:  "StringParameterDefinition",
 				})
 			}
 		}

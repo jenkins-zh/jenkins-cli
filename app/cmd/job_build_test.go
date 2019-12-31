@@ -3,15 +3,18 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/Netflix/go-expect"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"testing"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
@@ -102,29 +105,30 @@ var _ = Describe("job build command", func() {
 	})
 })
 
-//func TestBuildJob(t *testing.T) {
-//	RunEditCommandTest(t, EditCommandTest{
-//		Args: []string{"job", "build", "fake", "-b=false"},
-//		ConfirmProcedure: func(c *expect.Console) {
-//			c.ExpectString("Are you sure to build job fake")
-//			c.SendLine("y")
-//			c.ExpectEOF()
-//		},
-//		Procedure: func(c *expect.Console) {
-//			c.ExpectString("Edit your pipeline script [Enter to launch editor]")
-//			c.SendLine("")
-//			go c.ExpectEOF()
-//			time.Sleep(time.Millisecond)
-//			//c.Send("ddigood\x1b")
-//			c.SendLine(":wq!")
-//		},
-//		CommonOption: &jobBuildOption.CommonOption,
-//		BatchOption:  &jobBuildOption.BatchOption,
-//	})
-//}
+func TestBuildJob(t *testing.T) {
+	RunEditCommandTest(t, EditCommandTest{
+		Args: []string{"job", "build", "fake", "-b=false"},
+		ConfirmProcedure: func(c *expect.Console) {
+			c.ExpectString("Are you sure to build job fake")
+			c.SendLine("y")
+			//c.ExpectEOF()
+		},
+		Procedure: func(c *expect.Console) {
+			c.ExpectString("Edit your pipeline script")
+			c.SendLine("")
+			go c.ExpectEOF()
+			time.Sleep(time.Millisecond)
+			c.Send(`VGdi[{"Description":"","name":"name","Type":"StringParameterDefinition","value":"value","DefaultParameterValue":{"Description":"","Value":null}}]`)
+			c.Send("\x1b")
+			c.SendLine(":wq!")
+		},
+		CommonOption: &jobBuildOption.CommonOption,
+		BatchOption:  &jobBuildOption.BatchOption,
+	})
+}
 
 func RunEditCommandTest(t *testing.T, test EditCommandTest) {
-	RunTest(t, test.ConfirmProcedure, func(stdio terminal.Stdio) (err error) {
+	RunTest(t, func(stdio terminal.Stdio) (err error) {
 		var data []byte
 		rootOptions.ConfigFile = "test.yaml"
 		data, err = generateSampleConfig()
@@ -158,7 +162,7 @@ func RunEditCommandTest(t *testing.T, test EditCommandTest) {
           "defaultParameterValue" : {
             "_class" : "hudson.model.StringParameterValue",
             "name" : "name",
-            "value" : ""
+            "value" : "value"
           },
           "description" : "",
           "name" : "name",
@@ -174,15 +178,11 @@ func RunEditCommandTest(t *testing.T, test EditCommandTest) {
 
 		client.PrepareForBuildWithParams(roundTripper, url, jobName, user, token)
 
-		RunTest(t, test.Procedure, func(stdio terminal.Stdio) (err error) {
-			test.CommonOption.Stdio = stdio
-			return
-		})
-
 		jobBuildOption.RoundTripper = roundTripper
 		test.BatchOption.Stdio = stdio
+		test.CommonOption.Stdio = stdio
 		rootCmd.SetArgs(test.Args)
 		_, err = rootCmd.ExecuteC()
 		return
-	})
+	}, test.ConfirmProcedure, test.Procedure)
 }

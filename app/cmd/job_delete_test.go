@@ -3,17 +3,18 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/Netflix/go-expect"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"testing"
+
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/golang/mock/gomock"
 	"github.com/hinshun/vt10x"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"testing"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -128,7 +129,7 @@ type EditorTest struct {
 }
 
 func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
-	RunTest(t, test.Procedure, func(stdio terminal.Stdio) (err error) {
+	RunTest(t, func(stdio terminal.Stdio) (err error) {
 		var data []byte
 		data, err = generateSampleConfig()
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
@@ -138,31 +139,31 @@ func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
 		rootCmd.SetArgs(test.Args)
 		_, err = rootCmd.ExecuteC()
 		return
-	})
+	}, test.Procedure)
 }
 
 func RunPromptTest(t *testing.T, test PromptTest) {
 	var answer interface{}
-	RunTest(t, test.Procedure, func(stdio terminal.Stdio) error {
+	RunTest(t, func(stdio terminal.Stdio) error {
 		batch := &BatchOption{
 			Batch: false,
 			Stdio: stdio,
 		}
 		answer = batch.Confirm(test.Message)
 		return nil
-	})
+	}, test.Procedure)
 	require.Equal(t, test.Expected, answer)
 }
 
 func RunEditorTest(t *testing.T, test EditorTest) {
 	var content string
-	RunTest(t, test.Procedure, func(stdio terminal.Stdio) (err error) {
+	RunTest(t, func(stdio terminal.Stdio) (err error) {
 		editor := &CommonOption{
 			Stdio: stdio,
 		}
 		content, err = editor.Editor(test.DefaultContent, test.Message)
 		return nil
-	})
+	}, test.Procedure)
 	require.Equal(t, test.Expected, content)
 }
 
@@ -170,7 +171,7 @@ func Stdio(c *expect.Console) terminal.Stdio {
 	return terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
 }
 
-func RunTest(t *testing.T, procedure func(*expect.Console), test func(terminal.Stdio) error) {
+func RunTest(t *testing.T, test func(terminal.Stdio) error, procedures ...func(*expect.Console)) {
 	//t.Parallel()
 
 	// Multiplex output to a buffer as well for the raw bytes.
@@ -186,11 +187,13 @@ func RunTest(t *testing.T, procedure func(*expect.Console), test func(terminal.S
 	donec := make(chan struct{})
 	go func() {
 		defer close(donec)
-		procedure(c)
+		for _, procedure := range procedures {
+			procedure(c)
+		}
 	}()
 
 	err = test(Stdio(c))
-	fmt.Println("Raw output: ", buf.String())
+	//fmt.Println("Raw output: ", buf.String())
 	require.Nil(t, err)
 
 	// Close the slave end of the pty, and read the remaining bytes from the master end.
