@@ -220,6 +220,11 @@ type EditContent interface {
 	Editor(defaultContent, message string) (content string, err error)
 }
 
+// Selector is the interface for selecting an option
+type Selector interface {
+	Select(options []string, message, defaultOpt string) (target string, err error)
+}
+
 // Editor edit a file than return the content
 func (o *CommonOption) Editor(defaultContent, message string) (content string, err error) {
 	prompt := &survey.Editor{
@@ -231,6 +236,17 @@ func (o *CommonOption) Editor(defaultContent, message string) (content string, e
 	}
 
 	err = survey.AskOne(prompt, &content, survey.WithStdio(o.Stdio.In, o.Stdio.Out, o.Stdio.Err))
+	return
+}
+
+// Select return a target
+func (o *CommonOption) Select(options []string, message, defaultOpt string) (target string, err error) {
+	prompt := &survey.Select{
+		Message: message,
+		Options: options,
+		Default: defaultOpt,
+	}
+	err = survey.AskOne(prompt, &target, survey.WithStdio(o.Stdio.In, o.Stdio.Out, o.Stdio.Err))
 	return
 }
 
