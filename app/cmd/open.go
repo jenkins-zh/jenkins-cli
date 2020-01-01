@@ -22,6 +22,7 @@ func init() {
 	openCmd.Flags().BoolVarP(&openOption.Config, "config", "c", false,
 		i18n.T("Open the configuration page of Jenkins"))
 	openOption.SetFlag(openCmd)
+	openOption.Stdio = GetSystemStdio()
 }
 
 var openCmd = &cobra.Command{

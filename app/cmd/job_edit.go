@@ -29,6 +29,7 @@ func init() {
 		i18n.T("Filename to files to use to replace pipeline"))
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Script, "script", "s", "",
 		i18n.T("Script to use to replace pipeline. Use script first if you give filename at the meantime."))
+	jobEditOption.Stdio = GetSystemStdio()
 }
 
 var jobEditCmd = &cobra.Command{

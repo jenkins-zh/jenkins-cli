@@ -29,6 +29,8 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
+	configGenerateOption.CommonOption.Stdio = GetSystemStdio()
+	configGenerateOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var configGenerateCmd = &cobra.Command{

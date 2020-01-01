@@ -18,6 +18,8 @@ var jobDeleteOption JobDeleteOption
 func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
 	jobDeleteOption.SetFlag(jobDeleteCmd)
+	jobDeleteOption.BatchOption.Stdio = GetSystemStdio()
+	jobDeleteOption.CommonOption.Stdio = GetSystemStdio()
 }
 
 var jobDeleteCmd = &cobra.Command{

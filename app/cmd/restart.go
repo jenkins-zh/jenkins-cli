@@ -18,6 +18,8 @@ var restartOption RestartOption
 func init() {
 	rootCmd.AddCommand(restartCmd)
 	restartOption.SetFlag(restartCmd)
+	restartOption.BatchOption.Stdio = GetSystemStdio()
+	restartOption.CommonOption.Stdio = GetSystemStdio()
 }
 
 var restartCmd = &cobra.Command{

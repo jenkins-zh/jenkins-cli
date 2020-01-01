@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -19,7 +20,9 @@ var userDeleteOption UserDeleteOption
 
 func init() {
 	userCmd.AddCommand(userDeleteCmd)
-	userDeleteCmd.Flags().BoolVarP(&userDeleteOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
+	userDeleteCmd.Flags().BoolVarP(&userDeleteOption.Batch, "batch", "b", false,
+		i18n.T("Batch mode, no need confirm"))
+	userDeleteOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var userDeleteCmd = &cobra.Command{

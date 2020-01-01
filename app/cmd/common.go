@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 
@@ -213,6 +214,15 @@ func (b *BatchOption) Confirm(message string) bool {
 	}
 
 	return true
+}
+
+// GetSystemStdio returns the stdio from system
+func GetSystemStdio() terminal.Stdio {
+	return terminal.Stdio{
+		In:  os.Stdin,
+		Out: os.Stdout,
+		Err: os.Stderr,
+	}
 }
 
 // EditContent is the interface for editing content from a file

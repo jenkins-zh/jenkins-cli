@@ -12,6 +12,7 @@ type ConfigSelectOptions struct {
 
 func init() {
 	configCmd.AddCommand(configSelectCmd)
+	configSelectOptions.Stdio = GetSystemStdio()
 }
 
 var configSelectOptions ConfigSelectOptions

@@ -19,6 +19,7 @@ func init() {
 	userCmd.AddCommand(userEditCmd)
 	userEditCmd.Flags().StringVarP(&userEditOption.Description, "desc", "d", "",
 		i18n.T("Edit the description"))
+	userEditOption.Stdio = GetSystemStdio()
 }
 
 var userEditCmd = &cobra.Command{

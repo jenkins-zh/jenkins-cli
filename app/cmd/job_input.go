@@ -10,7 +10,6 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -22,7 +21,6 @@ type JobInputOption struct {
 	Action string
 
 	RoundTripper http.RoundTripper
-	Stdio        terminal.Stdio
 }
 
 var jobInputOption JobInputOption
@@ -31,6 +29,7 @@ func init() {
 	jobCmd.AddCommand(jobInputCmd)
 	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "",
 		i18n.T("The action whether you want to process or abort."))
+	jobInputOption.Stdio = GetSystemStdio()
 }
 
 var jobInputCmd = &cobra.Command{

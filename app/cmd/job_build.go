@@ -34,6 +34,8 @@ func init() {
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
+	jobBuildOption.BatchOption.Stdio = GetSystemStdio()
+	jobBuildOption.CommonOption.Stdio = GetSystemStdio()
 }
 
 var jobBuildCmd = &cobra.Command{

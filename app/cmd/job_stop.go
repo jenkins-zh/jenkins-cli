@@ -19,6 +19,8 @@ var jobStopOption JobStopOption
 func init() {
 	jobCmd.AddCommand(jobStopCmd)
 	jobStopOption.SetFlag(jobStopCmd)
+	jobStopOption.CommonOption.Stdio = GetSystemStdio()
+	jobStopOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var jobStopCmd = &cobra.Command{

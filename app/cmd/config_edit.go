@@ -19,6 +19,7 @@ var configEditOption ConfigEditOption
 
 func init() {
 	configCmd.AddCommand(configEditCmd)
+	configEditOption.Stdio = GetSystemStdio()
 }
 
 var configEditCmd = &cobra.Command{
