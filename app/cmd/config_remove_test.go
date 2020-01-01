@@ -54,7 +54,7 @@ var _ = Describe("config remove command", func() {
 		)
 
 		It("remove a not exist jenkins", func() {
-			rootCmd.SetArgs([]string{"config", "remove", "fake"})
+			rootCmd.SetArgs([]string{"config", "remove", "fake", "--configFile", configPath})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("cannot found by name fake"))
