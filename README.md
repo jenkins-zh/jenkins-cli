@@ -48,7 +48,8 @@ sudo mv jcli /usr/local/bin/
 
 ## Windows
 
-You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). Download the tar file and copy the uncompressed `jcli` directory into your system path.
+You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). 
+Download the tar file and copy the uncompressed `jcli` directory into your system path.
 
 ## Other package managers
 
@@ -57,28 +58,11 @@ Here are other package managers:
 * [GoFish](https://gofi.sh/) users can use `gofish install jcli`
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
 
-If you cannot download `jcli` from GitHub, please try the following ways:
-
-`jcli_id=$(docker create jenkinszh/jcli) && sudo docker cp $jcli_id:/usr/local/bin/jcli /usr/local/bin/jcli && docker rm -v $jcli_id`
-
-Download different version of OS? Just need to change the docker image tag:
-
-|image|description|
-|---|---|
-|`jenkinszh/jcli`|Linux|
-|`jenkinszh/jcli:darwin`|Mac|
-|`jenkinszh/jcli:win`|Windows, you can find it from `/usr/local/bin/jcli.exe`|
-|`jenkinszh/jcli:dev`|Developing version, find can find them from `/bin/linux/jcli` or `/bin/darwin/jcli` or `/bin/windows/jcli.exe`|
-
-Want to try the latest features? Download the developing version of different platform:
-
-- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/linux/jcli . && docker rm -v $jcli_id`
-- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/darwin/jcli . && docker rm -v $jcli_id`
-- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/windows/jcli.exe . && docker rm -v $jcli_id`
+See more about [how to download jcli](doc/download.md).
 
 # Get started
 
-Read [this document](doc/README.md) for more details on how to use `jcli`.
+Read the [official document](http://jcli.jenkins-zh.cn/) for more details on how to use `jcli`.
 
 # Contribution
 
@@ -86,7 +70,7 @@ If you're interested in this project. Please go through the
 [contribution guide](CONTRIBUTING.md). Any contributions are welcome.
 
 Thanks to JetBrains for giving us the open source licence.  
-[![goland.svg](https://raw.githubusercontent.com/jenkins-zh/jenkins-cli/master/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+[![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
 # Stargazers over time
 
