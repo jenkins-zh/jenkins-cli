@@ -81,6 +81,11 @@ test: clean gen-data verify fmt
 	go vet ./...
 	go test ./... -v -coverprofile coverage.out
 
+test-slow: clean gen-data verify fmt
+	mkdir -p bin
+	go vet ./...
+	JENKINS_VERSION=2.190.3 go test ./... -v -coverprofile coverage.out
+
 dep:
 	go get github.com/AlecAivazis/survey/v2
 	go get github.com/gosuri/uiprogress

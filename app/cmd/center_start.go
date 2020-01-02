@@ -33,8 +33,9 @@ type CenterStartOption struct {
 	Environments []string
 	System       []string
 
-	Download bool
-	Version  string
+	RandomWebDir bool
+	Download     bool
+	Version      string
 
 	DryRun bool
 }
@@ -73,6 +74,8 @@ func init() {
 	centerStartCmd.Flags().IntVarP(&centerStartOption.ConcurrentIndexing, "concurrent-indexing", "", -1,
 		i18n.T("Concurrent indexing limit, take this value only it is bigger than -1"))
 
+	centerStartCmd.Flags().BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
+		i18n.T("If start jenkins.war in a random web dir"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
 }
@@ -109,7 +112,12 @@ var centerStartCmd = &cobra.Command{
 		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 		if err == nil {
 			env := os.Environ()
-			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+
+			if centerStartOption.RandomWebDir {
+				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version))
+			} else {
+				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+			}
 
 			if centerStartOption.Environments != nil {
 				for _, item := range centerStartOption.Environments {
@@ -121,7 +129,8 @@ var centerStartCmd = &cobra.Command{
 			jenkinsWarArgs = centerStartOption.setSystemProperty(jenkinsWarArgs)
 			jenkinsWarArgs = append(jenkinsWarArgs, "-jar", jenkinsWar)
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpPort=%d", centerStartOption.Port))
-			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin")
+			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin")
+			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.roles.admin=admin")
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
 
 			if centerStartOption.HTTPSEnable {
