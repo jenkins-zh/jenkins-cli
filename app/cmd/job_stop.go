@@ -5,15 +5,13 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"net/http"
 	"strconv"
 )
 
 // JobStopOption is the job stop option
 type JobStopOption struct {
 	BatchOption
-
-	RoundTripper http.RoundTripper
+	CommonOption
 }
 
 var jobStopOption JobStopOption
@@ -21,6 +19,8 @@ var jobStopOption JobStopOption
 func init() {
 	jobCmd.AddCommand(jobStopCmd)
 	jobStopOption.SetFlag(jobStopCmd)
+	jobStopOption.CommonOption.Stdio = GetSystemStdio()
+	jobStopOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var jobStopCmd = &cobra.Command{

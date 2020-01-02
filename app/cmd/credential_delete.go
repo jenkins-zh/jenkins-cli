@@ -28,6 +28,7 @@ func init() {
 	credentialDeleteCmd.Flags().StringVarP(&credentialDeleteOption.ID, "id", "", "",
 		i18n.T("The ID of Jenkins credentials"))
 	credentialDeleteOption.SetFlag(credentialDeleteCmd)
+	credentialDeleteOption.Stdio = GetSystemStdio()
 }
 
 var credentialDeleteCmd = &cobra.Command{

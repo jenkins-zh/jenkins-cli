@@ -225,12 +225,3 @@ func saveConfig() (err error) {
 	}
 	return
 }
-
-// GetConfigFromHome returns the config file path from user home dir
-func GetConfigFromHome() (configPath string, homeErr error) {
-	userHome, homeErr := homedir.Dir()
-	if homeErr == nil {
-		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
-	}
-	return
-}

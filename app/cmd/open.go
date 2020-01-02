@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -10,27 +9,24 @@ import (
 
 // OpenOption is the open cmd option
 type OpenOption struct {
+	CommonOption
 	InteractiveOption
 
-	Name   string
 	Config bool
-
-	ExecContext util.ExecContext
 }
 
 var openOption OpenOption
 
 func init() {
 	rootCmd.AddCommand(openCmd)
-	openCmd.Flags().StringVarP(&openOption.Name, "name", "n", "",
-		i18n.T("Open a specific Jenkins by name"))
 	openCmd.Flags().BoolVarP(&openOption.Config, "config", "c", false,
 		i18n.T("Open the configuration page of Jenkins"))
 	openOption.SetFlag(openCmd)
+	openOption.Stdio = GetSystemStdio()
 }
 
 var openCmd = &cobra.Command{
-	Use:     "open [config name]",
+	Use:     "open",
 	Short:   i18n.T("Open your Jenkins with a browser"),
 	Long:    i18n.T(`Open your Jenkins with a browser`),
 	Example: `jcli open -n [config name]`,
@@ -40,35 +36,30 @@ var openCmd = &cobra.Command{
 		var configName string
 		if len(args) > 0 {
 			configName = args[0]
-		} else if openOption.Name != "" {
-			configName = openOption.Name
 		}
 
 		if configName == "" && openOption.Interactive {
 			jenkinsNames := getJenkinsNames()
-			prompt := &survey.Select{
-				Message: i18n.T("Choose a Jenkins which you want to open:"),
-				Options: jenkinsNames,
-			}
-			if err = survey.AskOne(prompt, &(configName)); err != nil {
-				return
-			}
+			configName, err = openOption.Select(jenkinsNames,
+				i18n.T("Choose a Jenkins which you want to open:"), "")
 		}
 
-		if configName != "" {
-			jenkins = findJenkinsByName(configName)
-		} else {
-			jenkins = getCurrentJenkins()
-		}
-
-		if jenkins != nil && jenkins.URL != "" {
-			url := jenkins.URL
-			if openOption.Config {
-				url = fmt.Sprintf("%s/configure", url)
+		if err == nil {
+			if configName != "" {
+				jenkins = findJenkinsByName(configName)
+			} else {
+				jenkins = getCurrentJenkins()
 			}
-			err = util.Open(url, openOption.ExecContext)
-		} else {
-			err = fmt.Errorf("no URL found with Jenkins %s", configName)
+
+			if jenkins != nil && jenkins.URL != "" {
+				url := jenkins.URL
+				if openOption.Config {
+					url = fmt.Sprintf("%s/configure", url)
+				}
+				err = util.Open(url, openOption.ExecContext)
+			} else {
+				err = fmt.Errorf("no URL found with Jenkins %s", configName)
+			}
 		}
 		return
 	},

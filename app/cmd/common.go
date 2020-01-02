@@ -3,9 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 
@@ -28,6 +30,8 @@ type CommonOption struct {
 	SystemCallExec  util.SystemCallExec
 	LookPathContext util.LookPathContext
 	RoundTripper    http.RoundTripper
+
+	Stdio terminal.Stdio
 }
 
 // OutputOption represent the format of output
@@ -188,22 +192,72 @@ func (o *OutputOption) SetFlagWithHeaders(cmd *cobra.Command, headers string) {
 // BatchOption represent the options for a batch operation
 type BatchOption struct {
 	Batch bool
+
+	Stdio terminal.Stdio
+}
+
+// MsgConfirm is the interface for confirming a message
+type MsgConfirm interface {
+	Confirm(message string) bool
 }
 
 // Confirm promote user if they really want to do this
 func (b *BatchOption) Confirm(message string) bool {
 	if !b.Batch {
 		confirm := false
-		prompt := &survey.Confirm{
+		var prompt survey.Prompt
+		prompt = &survey.Confirm{
 			Message: message,
 		}
-		survey.AskOne(prompt, &confirm)
-		if !confirm {
-			return false
-		}
+		survey.AskOne(prompt, &confirm, survey.WithStdio(b.Stdio.In, b.Stdio.Out, b.Stdio.Err))
+		return confirm
 	}
 
 	return true
+}
+
+// GetSystemStdio returns the stdio from system
+func GetSystemStdio() terminal.Stdio {
+	return terminal.Stdio{
+		In:  os.Stdin,
+		Out: os.Stdout,
+		Err: os.Stderr,
+	}
+}
+
+// EditContent is the interface for editing content from a file
+type EditContent interface {
+	Editor(defaultContent, message string) (content string, err error)
+}
+
+// Selector is the interface for selecting an option
+type Selector interface {
+	Select(options []string, message, defaultOpt string) (target string, err error)
+}
+
+// Editor edit a file than return the content
+func (o *CommonOption) Editor(defaultContent, message string) (content string, err error) {
+	prompt := &survey.Editor{
+		Message:       message,
+		FileName:      "*.sh",
+		Default:       defaultContent,
+		HideDefault:   true,
+		AppendDefault: true,
+	}
+
+	err = survey.AskOne(prompt, &content, survey.WithStdio(o.Stdio.In, o.Stdio.Out, o.Stdio.Err))
+	return
+}
+
+// Select return a target
+func (o *CommonOption) Select(options []string, message, defaultOpt string) (target string, err error) {
+	prompt := &survey.Select{
+		Message: message,
+		Options: options,
+		Default: defaultOpt,
+	}
+	err = survey.AskOne(prompt, &target, survey.WithStdio(o.Stdio.In, o.Stdio.Out, o.Stdio.Err))
+	return
 }
 
 // SetFlag the flag for batch option

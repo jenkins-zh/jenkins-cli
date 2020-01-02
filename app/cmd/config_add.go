@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -38,10 +36,8 @@ var configAddCmd = &cobra.Command{
 	Use:   "add",
 	Short: i18n.T("Add a Jenkins config item"),
 	Long:  i18n.T("Add a Jenkins config item"),
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := addJenkins(configAddOptions.JenkinsServer); err != nil {
-			log.Fatal(err)
-		}
+	RunE: func(_ *cobra.Command, _ []string) error {
+		return addJenkins(configAddOptions.JenkinsServer)
 	},
 	Example: "jcli config add -n demo",
 }
@@ -49,12 +45,12 @@ var configAddCmd = &cobra.Command{
 func addJenkins(jenkinsServer JenkinsServer) (err error) {
 	jenkinsName := jenkinsServer.Name
 	if jenkinsName == "" {
-		err = fmt.Errorf("Name cannot be empty")
+		err = fmt.Errorf("name cannot be empty")
 		return
 	}
 
 	if findJenkinsByName(jenkinsName) != nil {
-		err = fmt.Errorf("Jenkins %s is existed", jenkinsName)
+		err = fmt.Errorf("jenkins %s is existed", jenkinsName)
 		return
 	}
 

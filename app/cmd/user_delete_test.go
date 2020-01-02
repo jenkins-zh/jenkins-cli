@@ -5,6 +5,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"os"
+	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
@@ -72,9 +73,11 @@ var _ = Describe("user delete command", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal("error: unexpected status code: 500"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("unexpected status code: 500"))
 		})
 	})
 })
+
+func TestDeleteUser(t *testing.T) {
+}

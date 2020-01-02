@@ -3,12 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"log"
-	"net/http"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -16,11 +14,10 @@ import (
 // JobBuildOption is the job build option
 type JobBuildOption struct {
 	BatchOption
+	CommonOption
 
 	Param      string
 	ParamArray []string
-
-	RoundTripper http.RoundTripper
 }
 
 var jobBuildOption JobBuildOption
@@ -32,12 +29,13 @@ func ResetJobBuildOption() {
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
-	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false,
-		i18n.T("Batch mode, no need to confirm"))
+	jobBuildOption.SetFlag(jobBuildCmd)
 	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "",
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
+	jobBuildOption.BatchOption.Stdio = GetSystemStdio()
+	jobBuildOption.CommonOption.Stdio = GetSystemStdio()
 }
 
 var jobBuildCmd = &cobra.Command{
@@ -63,6 +61,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				paramDefs = append(paramDefs, client.ParameterDefinition{
 					Name:  entryArray[0],
 					Value: entryArray[1],
+					Type:  "StringParameterDefinition",
 				})
 			}
 		}
@@ -76,7 +75,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 
-		if !jobBuildOption.Batch && !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
+		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
 			return
 		}
 
@@ -85,7 +84,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				RoundTripper: jobBuildOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		paramDefs := []client.ParameterDefinition{}
 		hasParam := false
@@ -105,22 +104,12 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 						continue
 					}
 
-					if data, err := json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
+					var data []byte
+					if data, err = json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
 						content := string(data)
-						prompt := &survey.Editor{
-							Message:       "Edit your pipeline script",
-							FileName:      "*.sh",
-							Default:       content,
-							HideDefault:   true,
-							AppendDefault: true,
-						}
-
-						if err = survey.AskOne(prompt, &content); err != nil {
-							log.Fatal(err)
-						}
-
-						if err = json.Unmarshal([]byte(content), &paramDefs); err != nil {
-							log.Fatal(err)
+						content, err = jobBuildOption.Editor(content, "Edit your pipeline script")
+						if err == nil {
+							err = json.Unmarshal([]byte(content), &paramDefs)
 						}
 					}
 					hasParam = true

@@ -13,11 +13,13 @@ require (
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/hashicorp/go-version v1.2.0
+	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.11.0
 	github.com/onsi/gomega v1.8.1
 	github.com/spf13/cobra v0.0.5
+	github.com/stretchr/testify v1.4.0
 	go.uber.org/zap v1.13.0
 	gopkg.in/yaml.v2 v2.2.5
 )

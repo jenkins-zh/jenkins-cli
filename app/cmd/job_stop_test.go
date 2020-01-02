@@ -3,13 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"os"
-
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io/ioutil"
+	"net/http"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )

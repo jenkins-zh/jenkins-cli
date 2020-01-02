@@ -7,12 +7,10 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("job artifact command", func() {
@@ -47,14 +45,10 @@ var _ = Describe("job artifact command", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 
-			jobArtifactCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
-
 			rootCmd.SetArgs([]string{"job", "artifact"})
 			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("help"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("requires at least 1 arg(s), only received 0"))
 		})
 
 		It("should success", func() {
@@ -72,8 +66,8 @@ var _ = Describe("job artifact command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`id name  path  size
-n1 a.log a.log 0
+			Expect(buf.String()).To(Equal(`Name  Path  Size
+a.log a.log 0
 `))
 		})
 
@@ -93,8 +87,8 @@ n1 a.log a.log 0
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`id name  path  size
-n1 a.log a.log 0
+			Expect(buf.String()).To(Equal(`Name  Path  Size
+a.log a.log 0
 `))
 		})
 
@@ -109,9 +103,8 @@ n1 a.log a.log 0
 
 			rootCmd.SetArgs([]string{"job", "artifact", jobName, "invalid"})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-
-			Expect(buf.String()).To(Equal("strconv.Atoi: parsing \"invalid\": invalid syntax\n"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("invalid syntax"))
 		})
 	})
 })

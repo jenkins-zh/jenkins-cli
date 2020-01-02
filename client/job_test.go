@@ -170,6 +170,7 @@ var _ = Describe("job test", func() {
 			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
 				Name:  "name",
 				Value: "value",
+				Type:  "StringParameterDefinition",
 			}})
 			Expect(err).To(BeNil())
 		})

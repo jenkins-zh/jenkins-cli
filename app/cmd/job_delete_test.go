@@ -3,13 +3,18 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/Netflix/go-expect"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"testing"
 
+	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/golang/mock/gomock"
+	"github.com/hinshun/vt10x"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/require"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -87,3 +92,117 @@ var _ = Describe("job delete command", func() {
 		})
 	})
 })
+
+type PromptCommandTest struct {
+	Message     string
+	MsgConfirm  MsgConfirm
+	BatchOption *BatchOption
+	Procedure   func(*expect.Console)
+	Args        []string
+}
+
+type EditCommandTest struct {
+	Message          string
+	DefaultContent   string
+	EditContent      EditContent
+	CommonOption     *CommonOption
+	BatchOption      *BatchOption
+	ConfirmProcedure func(*expect.Console)
+	Procedure        func(*expect.Console)
+	Test             func(stdio terminal.Stdio) (err error)
+	Expected         string
+	Args             []string
+}
+
+type PromptTest struct {
+	Message    string
+	MsgConfirm MsgConfirm
+	Procedure  func(*expect.Console)
+	Expected   interface{}
+}
+
+type EditorTest struct {
+	Message        string
+	DefaultContent string
+	EditContent    EditContent
+	Procedure      func(*expect.Console)
+	Expected       string
+}
+
+func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
+	RunTest(t, func(stdio terminal.Stdio) (err error) {
+		var data []byte
+		data, err = generateSampleConfig()
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+
+		test.BatchOption.Stdio = stdio
+		rootOptions.ConfigFile = "test.yaml"
+		rootCmd.SetArgs(test.Args)
+		_, err = rootCmd.ExecuteC()
+		return
+	}, test.Procedure)
+}
+
+func RunPromptTest(t *testing.T, test PromptTest) {
+	var answer interface{}
+	RunTest(t, func(stdio terminal.Stdio) error {
+		batch := &BatchOption{
+			Batch: false,
+			Stdio: stdio,
+		}
+		answer = batch.Confirm(test.Message)
+		return nil
+	}, test.Procedure)
+	require.Equal(t, test.Expected, answer)
+}
+
+func RunEditorTest(t *testing.T, test EditorTest) {
+	var content string
+	RunTest(t, func(stdio terminal.Stdio) (err error) {
+		editor := &CommonOption{
+			Stdio: stdio,
+		}
+		content, err = editor.Editor(test.DefaultContent, test.Message)
+		return nil
+	}, test.Procedure)
+	require.Equal(t, test.Expected, content)
+}
+
+func Stdio(c *expect.Console) terminal.Stdio {
+	return terminal.Stdio{In: c.Tty(), Out: c.Tty(), Err: c.Tty()}
+}
+
+func RunTest(t *testing.T, test func(terminal.Stdio) error, procedures ...func(*expect.Console)) {
+	//t.Parallel()
+
+	// Multiplex output to a buffer as well for the raw bytes.
+	buf := new(bytes.Buffer)
+
+	//c, err := expect.NewConsole(expect.WithStdout(buf))
+	//c, err := expect.NewConsole(expect.WithStdout(os.Stdout))
+	c, _, err := vt10x.NewVT10XConsole(expect.WithStdout(buf))
+
+	require.Nil(t, err)
+	defer c.Close()
+
+	donec := make(chan struct{})
+	go func() {
+		defer close(donec)
+		for _, procedure := range procedures {
+			if procedure != nil {
+				procedure(c)
+			}
+		}
+	}()
+
+	err = test(Stdio(c))
+	//fmt.Println("Raw output: ", buf.String())
+	require.Nil(t, err)
+
+	// Close the slave end of the pty, and read the remaining bytes from the master end.
+	c.Tty().Close()
+	<-donec
+
+	// Dump the terminal's screen.
+	//fmt.Sprintf("\n%s", expect.StripTrailingEmptyLines(state.String()))
+}

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -20,7 +20,9 @@ var userDeleteOption UserDeleteOption
 
 func init() {
 	userCmd.AddCommand(userDeleteCmd)
-	userDeleteCmd.Flags().BoolVarP(&userDeleteOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
+	userDeleteCmd.Flags().BoolVarP(&userDeleteOption.Batch, "batch", "b", false,
+		i18n.T("Batch mode, no need confirm"))
+	userDeleteOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var userDeleteCmd = &cobra.Command{
@@ -29,7 +31,7 @@ var userDeleteCmd = &cobra.Command{
 	Short:   "Delete a user for your Jenkins",
 	Long:    `Delete a user for your Jenkins`,
 	Args:    cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		username := args[0]
 
 		if !userDeleteOption.Confirm(fmt.Sprintf("Are you sure to delete user %s ?", username)) {
@@ -43,8 +45,6 @@ var userDeleteCmd = &cobra.Command{
 			},
 		}
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
-
-		err := jclient.Delete(username)
-		helper.CheckErr(cmd, err)
+		return jclient.Delete(username)
 	},
 }

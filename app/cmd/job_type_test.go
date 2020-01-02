@@ -101,7 +101,7 @@ var _ = Describe("job type command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("number name type\n"))
+			Expect(buf.String()).To(Equal("DisplayName Class\n"))
 		})
 
 		It("should success, empty list", func() {
@@ -128,7 +128,7 @@ var _ = Describe("job type command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("number name type\n"))
+			Expect(buf.String()).To(Equal("DisplayName Class\n"))
 		})
 
 		It("should success, one item", func() {
@@ -173,8 +173,8 @@ var _ = Describe("job type command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal(`number name        type
-0      displayName Nested Projects
+			Expect(buf.String()).To(Equal(`DisplayName Class
+displayName class
 `))
 		})
 	})

@@ -3,13 +3,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,6 @@ type JobInputOption struct {
 	Action string
 
 	RoundTripper http.RoundTripper
-	Stdio        terminal.Stdio
 }
 
 var jobInputOption JobInputOption
@@ -30,6 +29,7 @@ func init() {
 	jobCmd.AddCommand(jobInputCmd)
 	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "",
 		i18n.T("The action whether you want to process or abort."))
+	jobInputOption.Stdio = GetSystemStdio()
 }
 
 var jobInputCmd = &cobra.Command{
@@ -66,20 +66,9 @@ var jobInputCmd = &cobra.Command{
 				inputsJSON, _ := json.MarshalIndent(inputAction.Inputs, "", " ")
 				content := string(inputsJSON)
 
-				prompt := &survey.Editor{
-					Message:       "Edit your pipeline input parameters",
-					FileName:      "*.json",
-					Default:       content,
-					HideDefault:   true,
-					AppendDefault: true,
-				}
-
-				if err = survey.AskOne(prompt, &content); err != nil {
-					log.Fatal(err)
-				}
-
-				if err = json.Unmarshal([]byte(content), &(inputAction.Inputs)); err != nil {
-					log.Fatal(err)
+				content, err = jobBuildOption.Editor(content, "Edit your pipeline input parameters")
+				if err == nil {
+					err = json.Unmarshal([]byte(content), &(inputAction.Inputs))
 				}
 
 				for _, input := range inputAction.Inputs {

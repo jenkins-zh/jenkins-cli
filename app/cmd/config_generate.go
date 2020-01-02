@@ -1,20 +1,23 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/mitchellh/go-homedir"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/atotto/clipboard"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 // ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
 	InteractiveOption
+	CommonOption
+	BatchOption
+
 	Copy bool
 }
 
@@ -26,6 +29,8 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
+	configGenerateOption.CommonOption.Stdio = GetSystemStdio()
+	configGenerateOption.BatchOption.Stdio = GetSystemStdio()
 }
 
 var configGenerateCmd = &cobra.Command{
@@ -33,11 +38,12 @@ var configGenerateCmd = &cobra.Command{
 	Aliases: []string{"gen"},
 	Short:   i18n.T("Generate a sample config file for you"),
 	Long:    i18n.T("Generate a sample config file for you"),
-	Run: func(cmd *cobra.Command, _ []string) {
-		data, err := generateSampleConfig()
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		var data []byte
+		data, err = generateSampleConfig()
 		if err == nil {
 			if configGenerateOption.Interactive {
-				err = InteractiveWithConfig(cmd, data)
+				err = configGenerateOption.InteractiveWithConfig(cmd, data)
 			} else {
 				printCfg(cmd, data)
 			}
@@ -46,39 +52,21 @@ var configGenerateCmd = &cobra.Command{
 				err = clipboard.WriteAll(string(data))
 			}
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }
 
 // InteractiveWithConfig be friendly for a newer
-func InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
+func (o *ConfigGenerateOption) InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
 	configPath := configOptions.ConfigFileLocation
-
-	if configPath == "" { // config file isn't exists
-		if configPath, err = GetConfigFromHome(); err != nil {
-			return
-		}
-	}
-
 	_, err = os.Stat(configPath)
 	if err != nil && os.IsNotExist(err) {
-		confirm := false
-		prompt := &survey.Confirm{
-			Message: "Cannot found your config file, do you want to edit it?",
-		}
-		err = survey.AskOne(prompt, &confirm)
-		if err == nil && confirm {
-			prompt := &survey.Editor{
-				Message:       "Edit your config file",
-				FileName:      "*.yaml",
-				Default:       string(data),
-				HideDefault:   true,
-				AppendDefault: true,
-			}
-
-			var configContext string
-			if err = survey.AskOne(prompt, &configContext); err == nil {
-				err = ioutil.WriteFile(configPath, []byte(configContext), 0644)
+		confirm := o.Confirm("Cannot found your config file, do you want to edit it?")
+		if confirm {
+			var content string
+			content, err = o.Editor(string(data), "Edit your config file")
+			if err == nil {
+				err = ioutil.WriteFile(configPath, []byte(content), 0644)
 			}
 		}
 	}
@@ -128,4 +116,13 @@ func getSampleConfig() (sampleConfig Config) {
 func generateSampleConfig() ([]byte, error) {
 	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
+}
+
+// GetConfigFromHome returns the config file path from user home dir
+func GetConfigFromHome() (configPath string, homeErr error) {
+	userHome, homeErr := homedir.Dir()
+	if homeErr == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	}
+	return
 }
