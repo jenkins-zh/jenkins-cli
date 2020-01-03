@@ -81,7 +81,7 @@ test: clean gen-data verify fmt
 	go vet ./...
 	go test ./... -v -coverprofile coverage.out
 
-test-slow: clean gen-data verify fmt
+test-slow:
 	mkdir -p bin
 	go vet ./...
 	JENKINS_VERSION=2.190.3 go test ./... -v -coverprofile coverage.out
