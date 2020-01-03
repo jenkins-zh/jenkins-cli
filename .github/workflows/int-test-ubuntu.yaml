@@ -1,10 +1,10 @@
 name: DevImage
 
 on:
-  push:
+  pull_request:
     branches:
       - master
-      - tiny-dev-image
+
 jobs:
   build:
     name: Build
