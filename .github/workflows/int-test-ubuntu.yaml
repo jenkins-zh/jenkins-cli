@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
           make go-bindata-download-linux tools init copy-linux
 
       - name: Test
