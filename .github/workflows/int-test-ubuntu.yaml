@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin
           make tools
           make copy-linux
 
