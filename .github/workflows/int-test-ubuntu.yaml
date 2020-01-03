@@ -23,8 +23,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin
-          make tools
-          make copy-linux
+          make go-bindata-download-linux tools int copy-linux
 
       - name: Test
         run: |
