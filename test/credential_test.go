@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListJobType(t *testing.T) {
-	cmd := exec.Command("jcli", "job", "type", "--url", "http://localhost:8080")
+func TestListCredentials(t *testing.T) {
+	cmd := exec.Command("jcli", "credential", "list", "--url", "http://localhost:8080")
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

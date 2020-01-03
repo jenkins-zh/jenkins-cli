@@ -2,12 +2,13 @@ package test
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -40,8 +41,24 @@ func TestMain(m *testing.M) {
 	err = cmd.Wait()
 }
 
-func TestHello(t *testing.T) {
+func TestListPlugins(t *testing.T) {
 	cmd := exec.Command("jcli", "plugin", "list", "--url", "http://localhost:8080")
+	data, err := cmd.CombinedOutput()
+	assert.Nil(t, err)
+
+	fmt.Println(string(data))
+}
+
+func TestSearchPlugins(t *testing.T) {
+	cmd := exec.Command("jcli", "plugin", "search", "localization-zh-cn", "--url", "http://localhost:8080")
+	data, err := cmd.CombinedOutput()
+	assert.Nil(t, err)
+
+	fmt.Println(string(data))
+}
+
+func TestCheckUpdateCenter(t *testing.T) {
+	cmd := exec.Command("jcli", "plugin", "check", "--url", "http://localhost:8080")
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -50,6 +67,18 @@ func TestHello(t *testing.T) {
 
 func TestInstallPlugin(t *testing.T) {
 	cmd := exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", "http://localhost:8080")
+	data, err := cmd.CombinedOutput()
+	assert.Nil(t, err)
+
+	fmt.Println(string(data))
+}
+
+func TestDownloadPlugin(t *testing.T) {
+	tempDir := os.TempDir()
+	defer os.Remove(tempDir)
+
+	cmd := exec.Command("jcli", "plugin", "download", "localization-zh-cn",
+		"--download-dir", tempDir, "--url", "http://localhost:8080")
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

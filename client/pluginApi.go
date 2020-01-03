@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -22,6 +23,7 @@ type PluginAPI struct {
 	UseMirror      bool
 	ShowProgress   bool
 	MirrorURL      string
+	DownloadDir    string
 
 	RoundTripper http.RoundTripper
 }
@@ -94,7 +96,7 @@ func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
 }
 
 // DownloadPlugins will download those plugins from update center
-func (d *PluginAPI) DownloadPlugins(names []string) {
+func (d *PluginAPI) DownloadPlugins(names []string) (err error) {
 	d.dependencyMap = make(map[string]string)
 	logger.Info("start to collect plugin dependencies...")
 	plugins := make([]PluginInfo, 0)
@@ -104,7 +106,6 @@ func (d *PluginAPI) DownloadPlugins(names []string) {
 	}
 
 	logger.Info("ready to download plugins", zap.Int("total", len(plugins)))
-	var err error
 	for i, plugin := range plugins {
 		logger.Info("start to download plugin",
 			zap.String("name", plugin.Name),
@@ -114,8 +115,10 @@ func (d *PluginAPI) DownloadPlugins(names []string) {
 
 		if err = d.download(plugin.URL, plugin.Name); err != nil {
 			logger.Error("download plugin error", zap.String("name", plugin.Name), zap.Error(err))
+			break
 		}
 	}
+	return
 }
 
 func (d *PluginAPI) getMirrorURL(url string) (mirror string) {
@@ -133,7 +136,7 @@ func (d *PluginAPI) download(url string, name string) (err error) {
 
 	downloader := util.HTTPDownloader{
 		RoundTripper:   d.RoundTripper,
-		TargetFilePath: fmt.Sprintf("%s.hpi", name),
+		TargetFilePath: path.Join(d.DownloadDir, fmt.Sprintf("%s.hpi", name)),
 		URL:            url,
 		ShowProgress:   d.ShowProgress,
 	}
