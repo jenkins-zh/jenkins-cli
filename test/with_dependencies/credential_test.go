@@ -1,4 +1,4 @@
-package test
+package with_dependencies
 
 import (
 	"fmt"
