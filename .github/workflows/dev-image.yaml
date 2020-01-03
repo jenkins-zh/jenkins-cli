@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - tiny-dev-image
 jobs:
   build:
     name: Build
@@ -23,8 +22,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin
-          make tools
-          make build-all
+          make clean go-bindata-download-linux tools init test build-all
 
       - name: Push Image
         env:
