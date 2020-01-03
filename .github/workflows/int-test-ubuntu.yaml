@@ -1,4 +1,4 @@
-name: DevImage
+name: IntTest
 
 on:
   pull_request:
