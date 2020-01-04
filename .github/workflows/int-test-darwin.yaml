@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: macOS-latest
     steps:
 
       - name: Set up Go 1.13
@@ -22,29 +22,29 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
-          make go-bindata-download-linux tools init linux
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin
+          make go-bindata-download-darwin tools init darwin
 
       - name: Test in Jenkins 2.190.1
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin
           export JENKINS_VERSION=2.190.1
           make test-slow
 
       - name: Test in Jenkins 2.190.2
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin
           export JENKINS_VERSION=2.190.2
           make test-slow
 
       - name: Test in Jenkins 2.190.3
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin
           export JENKINS_VERSION=2.190.2
           make test-slow
 
       - name: Test in Jenkins 2.204.1
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
+          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin
           export JENKINS_VERSION=2.204.1
           make test-slow

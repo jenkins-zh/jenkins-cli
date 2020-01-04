@@ -62,6 +62,16 @@ go-bindata-download-linux:
 	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-linux-amd64 -o bin/go-bindata
 	chmod u+x bin/go-bindata
 
+go-bindata-download-darwin:
+	mkdir -p bin
+	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-darwin-amd64 -o bin/go-bindata
+	chmod u+x bin/go-bindata
+
+go-bindata-download-windows:
+	mkdir -p bin
+	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-windows-amd64 -o bin/go-bindata
+	chmod u+x bin/go-bindata
+
 verify:
 	go vet ./...
 	golint -set_exit_status app/cmd/...
@@ -81,10 +91,11 @@ test: clean gen-data verify fmt
 	go vet ./...
 	go test ./... -v -coverprofile coverage.out
 
+test-slow-latest:
+	JENKINS_VERSION=2.190.3 make test-slow
+
 test-slow:
-	mkdir -p bin
-	go vet ./...
-	JENKINS_VERSION=2.190.3 go test ./... -v -coverprofile coverage.out
+	go test ./... -v -coverprofile coverage.out
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
