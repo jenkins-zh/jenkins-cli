@@ -9,7 +9,7 @@ import (
 )
 
 func TestListCredentials(t *testing.T) {
-	cmd := exec.Command("jcli", "credential", "list", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "credential", "list", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

@@ -7,7 +7,7 @@ import (
 )
 
 func TestListQueue(t *testing.T) {
-	cmd := exec.Command("jcli", "queue", "list", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "queue", "list", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

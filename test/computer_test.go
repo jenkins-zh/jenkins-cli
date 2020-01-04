@@ -9,7 +9,7 @@ import (
 )
 
 func TestListComputers(t *testing.T) {
-	cmd := exec.Command("jcli", "computer", "list", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "computer", "list", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

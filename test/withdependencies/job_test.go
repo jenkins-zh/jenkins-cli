@@ -9,7 +9,7 @@ import (
 )
 
 func TestSearchJobs(t *testing.T) {
-	cmd := exec.Command("jcli", "job", "search", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "job", "search", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -18,7 +18,7 @@ func TestSearchJobs(t *testing.T) {
 
 func TestCreateJob(t *testing.T) {
 	cmd := exec.Command("jcli", "job", "create", "fake",
-		"--type", "com.cloudbees.hudson.plugins.folder.Folder", "--url", "http://localhost:8080")
+		"--type", "com.cloudbees.hudson.plugins.folder.Folder", "--url", GetJenkinsURL())
 	_, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 }

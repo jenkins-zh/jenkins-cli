@@ -9,12 +9,21 @@ import (
 	"testing"
 )
 
+var jenkinsURL string
+
+func GetJenkinsURL() string {
+	return jenkinsURL
+}
 func TestMain(m *testing.M) {
 	version := os.Getenv("JENKINS_VERSION")
 	if version == "" {
 		return
 	}
-	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--version", version)
+
+	jenkinsURL = "http://localhost:9090"
+
+	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false",
+		"--version", version, "--port", "9090")
 	cmdStderrPipe, _ := cmd.StderrPipe()
 	err := cmd.Start()
 	if err != nil {
@@ -32,18 +41,18 @@ func TestMain(m *testing.M) {
 			}
 		}
 
-		err = exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", "http://localhost:8080").Run()
+		err = exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println("install localization-zh-cn done")
 
-		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", "http://localhost:8080").Run()
+		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}
 
-		err = exec.Command("jcli", "restart", "-b", "--url", "http://localhost:8080").Run()
+		err = exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}
@@ -55,20 +64,20 @@ func TestMain(m *testing.M) {
 			}
 		}
 
-		exec.Command("jcli", "center", "mirror", "--url", "http://localhost:8080").Run()
-		exec.Command("jcli", "plugin", "check", "--url", "http://localhost:8080").Run()
-		err = exec.Command("jcli", "plugin", "install", "pipeline-restful-api", "--url", "http://localhost:8080").Run()
+		exec.Command("jcli", "center", "mirror", "--url", GetJenkinsURL()).Run()
+		exec.Command("jcli", "plugin", "check", "--url", GetJenkinsURL()).Run()
+		err = exec.Command("jcli", "plugin", "install", "pipeline-restful-api", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println("install pipeline-restful-api done")
 
-		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", "http://localhost:8080").Run()
+		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}
 
-		err = exec.Command("jcli", "restart", "-b", "--url", "http://localhost:8080").Run()
+		err = exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
 		if err != nil {
 			panic(err)
 		}

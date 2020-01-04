@@ -10,7 +10,7 @@ import (
 )
 
 func TestListPlugins(t *testing.T) {
-	cmd := exec.Command("jcli", "plugin", "list", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "plugin", "list", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -18,7 +18,7 @@ func TestListPlugins(t *testing.T) {
 }
 
 func TestSearchPlugins(t *testing.T) {
-	cmd := exec.Command("jcli", "plugin", "search", "localization-zh-cn", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "plugin", "search", "localization-zh-cn", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -26,7 +26,7 @@ func TestSearchPlugins(t *testing.T) {
 }
 
 func TestCheckUpdateCenter(t *testing.T) {
-	cmd := exec.Command("jcli", "plugin", "check", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "plugin", "check", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -34,7 +34,7 @@ func TestCheckUpdateCenter(t *testing.T) {
 }
 
 func TestInstallPlugin(t *testing.T) {
-	cmd := exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", "http://localhost:8080")
+	cmd := exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
@@ -46,7 +46,7 @@ func TestDownloadPlugin(t *testing.T) {
 	defer os.Remove(tempDir)
 
 	cmd := exec.Command("jcli", "plugin", "download", "localization-zh-cn",
-		"--download-dir", tempDir, "--url", "http://localhost:8080")
+		"--download-dir", tempDir, "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
