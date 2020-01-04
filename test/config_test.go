@@ -9,7 +9,7 @@ import (
 func TestConfigList(t *testing.T) {
 	cmd := exec.Command("jcli", "config", "list")
 	_, err := cmd.CombinedOutput()
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 }
 
 func TestConfigGenerate(t *testing.T) {

@@ -42,7 +42,9 @@ func TestMain(m *testing.M) {
 
 		m.Run()
 
-		cmd.Process.Kill()
+		if err = cmd.Process.Kill(); err != nil {
+			panic(err)
+		}
 	}(cmdStderrPipe, cmd)
 
 	err = cmd.Wait()
