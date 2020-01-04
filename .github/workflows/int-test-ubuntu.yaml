@@ -1,4 +1,4 @@
-name: IntTest
+name: IntTest-Ubuntu
 
 on:
   pull_request:

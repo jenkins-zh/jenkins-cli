@@ -3,8 +3,6 @@ package cmd
 import (
 	"net/http"
 
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/spf13/cobra"
@@ -25,14 +23,14 @@ var crumbIssuerCmd = &cobra.Command{
 	Use:   "crumb",
 	Short: "Print crumbIssuer of Jenkins",
 	Long:  `Print crumbIssuer of Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkinsCore := &client.JenkinsCore{RoundTripper: crumbIssuerOptions.RoundTripper}
-		getCurrentJenkinsAndClientOrDie(jenkinsCore)
+		getCurrentJenkinsAndClient(jenkinsCore)
 
-		crumb, err := jenkinsCore.GetCrumb()
-		if err == nil {
+		var crumb *client.JenkinsCrumb
+		if crumb, err = jenkinsCore.GetCrumb(); err == nil {
 			cmd.Printf("%s=%s\n", crumb.CrumbRequestField, crumb.Crumb)
 		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }

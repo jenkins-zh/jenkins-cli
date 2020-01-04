@@ -1,4 +1,4 @@
-name: IntTest
+name: IntTest-Darwin
 
 on:
   pull_request:
