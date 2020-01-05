@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
+// JobOption is the job cmd option
 type JobOption struct {
 	OutputOption
 }
@@ -17,9 +19,8 @@ func init() {
 
 var jobCmd = &cobra.Command{
 	Use:   "job",
-	Short: "Print the job of your Jenkins",
-	Long:  `Print the job of your Jenkins`,
-	Run: func(cmd *cobra.Command, _ []string) {
-		cmd.Help()
-	},
+	Short: i18n.T("Manage the job of your Jenkins"),
+	Long: i18n.T(`Manage the job of your Jenkins
+Editing the pipeline job needs to install a plugin which is pipeline-restful-api
+https://plugins.jenkins.io/pipeline-restful-api`),
 }

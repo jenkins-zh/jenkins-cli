@@ -2,13 +2,21 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
+
+// PluginCheckoutOption is the option for plugin checkout command
+type PluginCheckoutOption struct {
+	RoundTripper http.RoundTripper
+}
+
+var pluginCheckoutOption PluginCheckoutOption
 
 func init() {
 	pluginCmd.AddCommand(pluginCheckCmd)
@@ -16,26 +24,23 @@ func init() {
 
 var pluginCheckCmd = &cobra.Command{
 	Use:   "check",
-	Short: "Checkout update center server",
-	Long:  `Checkout update center server`,
-	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.PluginManager{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+	Short: i18n.T("Check update center server"),
+	Long:  i18n.T(`Check update center server`),
+	Run: func(cmd *cobra.Command, _ []string) {
+		jClient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginCheckoutOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
 
-		jclient.CheckUpdate(func(response *http.Response) {
+		err := jClient.CheckUpdate(func(response *http.Response) {
 			code := response.StatusCode
-			if code == 200 {
-				fmt.Println("update site updated.")
-			} else {
+			if code != 200 {
 				contentData, _ := ioutil.ReadAll(response.Body)
-				log.Fatal(fmt.Sprintf("response code is %d, content: %s",
-					code, string(contentData)))
+				cmd.PrintErrln(fmt.Sprintf("response code is %d, content: %s", code, string(contentData)))
 			}
 		})
+		helper.CheckErr(cmd, err)
 	},
 }

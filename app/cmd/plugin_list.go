@@ -3,7 +3,8 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strings"
 
@@ -31,17 +32,18 @@ func init() {
 
 var pluginListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Print all the plugins which are installed",
-	Long:  `Print all the plugins which are installed`,
+	Short: i18n.T("Print all the plugins which are installed"),
+	Long:  i18n.T("Print all the plugins which are installed"),
 	Example: `  jcli plugin list --filter name=github
-  jcli plugin list --filter hasUpdate`,
+  jcli plugin list --filter hasUpdate
+  jcli plugin list --no-headers`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: pluginListOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		var (
 			filter       bool
@@ -71,7 +73,9 @@ var pluginListCmd = &cobra.Command{
 			}
 		}
 
-		if plugins, err := jclient.GetPlugins(); err == nil {
+		var err error
+		var plugins *client.InstalledPluginList
+		if plugins, err = jclient.GetPlugins(1); err == nil {
 			filteredPlugins := make([]client.InstalledPlugin, 0)
 			for _, plugin := range plugins.Plugins {
 				if filter {
@@ -99,27 +103,23 @@ var pluginListCmd = &cobra.Command{
 				}
 			}
 
-			if data, err := pluginListOption.Output(filteredPlugins); err == nil {
-				if len(data) > 0 {
-					cmd.Print(string(data))
-				}
-			} else {
-				log.Fatal(err)
+			var data []byte
+			if data, err = pluginListOption.Output(filteredPlugins); err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }
 
 // Output render data into byte array as a table format
 func (o *PluginListOption) Output(obj interface{}) (data []byte, err error) {
-	if data, err = o.OutputOption.Output(obj); err != nil {
+	if data, err = o.OutputOption.Output(obj); err != nil && o.Format == TableOutputFormat {
 		buf := new(bytes.Buffer)
 
 		pluginList := obj.([]client.InstalledPlugin)
-		table := util.CreateTable(buf)
-		table.AddRow("number", "name", "version", "update")
+		table := util.CreateTableWithHeader(buf, o.WithoutHeaders)
+		table.AddHeader("number", "name", "version", "update")
 		for i, plugin := range pluginList {
 			table.AddRow(fmt.Sprintf("%d", i), plugin.ShortName, plugin.Version, fmt.Sprintf("%v", plugin.HasUpdate))
 		}

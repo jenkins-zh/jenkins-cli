@@ -1,11 +1,22 @@
+[English](https://github.com/jenkins-zh/jenkins-cli/blob/master/README.md)
+
 # Jenkins CLI
 
-[![Go Report Card](https://goreportcard.com/badge/jenkins-zh/jenkins-cli)](https://goreportcard.com/report/jenkins-zh/jenkins-cli)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status)](https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli)
+[![Go Report Card][go-report-card-badge]][go-report-card-url]
+[![Quality Gate Status][sonar-badge]][sonar-link]
+[![GoDoc][godoc-badge]][godoc-url]
+![Sonar Coverage](https://img.shields.io/sonar/coverage/jenkins-zh_jenkins-cli?server=https%3A%2F%2Fsonarcloud.io)
+[![Travis](https://img.shields.io/travis/jenkins-zh/jenkins-cli.svg?logo=travis&label=build&logoColor=white)](https://travis-ci.org/jenkins-zh/jenkins-cli)
+[![Contributors](https://img.shields.io/github/contributors/jenkins-zh/jenkins-cli.svg)](https://github.com/jenkins-zh/jenkins-cli/graphs/contributors)
+[![GitHub release](https://img.shields.io/github/release/jenkins-zh/jenkins-cli.svg?label=release)](https://github.com/jenkins-zh/jenkins-cli/releases/latest)
+![GitHub All Releases](https://img.shields.io/github/downloads/jenkins-zh/jenkins-cli/total)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jenkinszh/jcli.svg)](https://hub.docker.com/r/jenkinszh/jcli/tags)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/jenkins-zh/jenkins-cli)
+[![Gitter](https://badges.gitter.im/jenkinsci/jenkins-cli.svg)](https://gitter.im/jenkinsci/jenkins-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Jenkins CLI 可以帮忙你轻松地管理 Jenkins。不管你是一名插件开发者、管理员或者只是一个普通的 Jenkins 用户，它都是为你而生的！
 
-# 特点
+# 特性
 
 * 支持多 Jenkins 实例管理
 * 插件管理（查看列表、搜索、安装、上传）
@@ -42,7 +53,27 @@ sudo mv jcli /usr/local/bin/
 
 这里还有一些其他的包管理器：
 
-* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装。
+* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
+* [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
+
+如果您无法从 GitHub 上下载 `jcli`，请尝试下面的方法：
+
+`jcli_id=$(docker create jenkinszh/jcli) && sudo docker cp $jcli_id:/usr/local/bin/jcli /usr/local/bin/jcli && docker rm -v $jcli_id`
+
+要下载不同操作系统下的二进制文件？只需要修改 docker 容器的标签：
+
+|镜像|描述|
+|---|---|
+|`jenkinszh/jcli`|Linux|
+|`jenkinszh/jcli:darwin`|Mac|
+|`jenkinszh/jcli:win`|Windows，你可以从 `/usr/local/bin/jcli.exe` 这里找到可执行程序|
+|`jenkinszh/jcli:dev`|你可以从这里找到开发版本 `/bin/linux/jcli` 、`/bin/darwin/jcli` 或 `/bin/windows/jcli.exe`|
+
+想要体验最新的特性？您可以下载不同平台下的开发版本：
+
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/linux/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/darwin/jcli . && docker rm -v $jcli_id`
+- `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/windows/jcli.exe . && docker rm -v $jcli_id`
 
 # 入门
 
@@ -50,4 +81,18 @@ sudo mv jcli /usr/local/bin/
 
 # 贡献
 
-该工具还处在非常早期的开发阶段，我们欢迎任何形式的贡献。
+如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](CONTRIBUTING.md)。我们欢迎任何形式的贡献。
+
+感谢 JetBrains 为我们提供了开源许可证。  
+[![goland.svg](https://raw.githubusercontent.com/jenkins-zh/jenkins-cli/master/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+
+# 点赞数趋势图
+
+[![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
+
+[go-report-card-url]: https://goreportcard.com/report/jenkins-zh/jenkins-cli
+[go-report-card-badge]: https://goreportcard.com/badge/jenkins-zh/jenkins-cli
+[sonar-badge]: https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status
+[sonar-link]: https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli
+[godoc-url]: https://godoc.org/github.com/jenkins-zh/jenkins-cli
+[godoc-badge]: http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square

@@ -1,16 +1,20 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
+// UserTokenOption represents a user token cmd option
 type UserTokenOption struct {
 	Generate bool
 	Name     string
+
+	RoundTripper http.RoundTripper
 }
 
 var userTokenOption UserTokenOption
@@ -22,7 +26,7 @@ func init() {
 }
 
 var userTokenCmd = &cobra.Command{
-	Use:   "token",
+	Use:   "token -g",
 	Short: "Token the user of your Jenkins",
 	Long:  `Token the user of your Jenkins`,
 	Run: func(cmd *cobra.Command, _ []string) {
@@ -31,24 +35,23 @@ var userTokenCmd = &cobra.Command{
 			return
 		}
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.UserClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.UserClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: userTokenOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
+		}
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		tokenName := userTokenOption.Name
-		if status, err := jclient.CreateToken(tokenName); err == nil {
+		status, err := jclient.CreateToken(tokenName)
+		if err == nil {
 			var data []byte
-			if data, err = userOption.Output(status); err == nil {
-				fmt.Printf("%s\n", string(data))
-			} else {
-				log.Fatal(err)
+			data, err = userOption.Output(status)
+			if err == nil {
+				cmd.Println(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
 }

@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -11,6 +13,8 @@ import (
 // RestartOption holds the options for restart cmd
 type RestartOption struct {
 	BatchOption
+
+	RoundTripper http.RoundTripper
 }
 
 var restartOption RestartOption
@@ -22,28 +26,35 @@ func init() {
 
 var restartCmd = &cobra.Command{
 	Use:   "restart",
-	Short: "Restart your Jenkins",
-	Long:  `Restart your Jenkins`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Short: i18n.T("Restart your Jenkins"),
+	Long:  i18n.T("Restart your Jenkins"),
+	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		if !restartOption.Batch {
 			confirm := false
 			prompt := &survey.Confirm{
 				Message: fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL),
 			}
-			survey.AskOne(prompt, &confirm)
-			if !confirm {
+			if err := survey.AskOne(prompt, &confirm); !confirm {
+				return
+			} else if err != nil {
+				cmd.PrintErrln(err)
 				return
 			}
 		}
 
-		jclient := &client.CoreClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.CoreClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: restartOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
+		}
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		jclient.Restart()
+		if err := jclient.Restart(); err == nil {
+			cmd.Println("Please wait while Jenkins is restarting")
+		} else {
+			cmd.PrintErrln(err)
+		}
 	},
 }

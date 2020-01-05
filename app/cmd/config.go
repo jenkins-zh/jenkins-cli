@@ -2,15 +2,20 @@ package cmd
 
 import (
 	"fmt"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"io/ioutil"
 	"log"
 	"os"
-	"runtime"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
+// ConfigOptions is the config cmd option
 type ConfigOptions struct {
 	ConfigFileLocation string
 }
@@ -24,14 +29,14 @@ func init() {
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"cfg"},
-	Short:   "Manage the config of jcli",
-	Long:    `Manage the config of jcli`,
-	Run: func(_ *cobra.Command, _ []string) {
+	Short:   i18n.T("Manage the config of jcli"),
+	Long:    i18n.T("Manage the config of jcli"),
+	Run: func(cmd *cobra.Command, _ []string) {
 		current := getCurrentJenkins()
 		if current.Description != "" {
-			fmt.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
+			cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 		} else {
-			fmt.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
+			cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
 		}
 	},
 	Example: `  jcli config generate
@@ -63,13 +68,21 @@ type PluginSuite struct {
 	Description string   `yaml:"description"`
 }
 
+// JenkinsMirror represents the mirror of Jenkins
+type JenkinsMirror struct {
+	Name string
+	URL  string
+}
+
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
+	Language       string          `yaml:"language"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
 	PreHooks       []CommndHook    `yaml:"preHooks"`
 	PostHooks      []CommndHook    `yaml:"postHooks"`
 	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
+	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {
@@ -98,7 +111,6 @@ func getConfig() *Config {
 }
 
 func getJenkinsNames() []string {
-	config := getConfig()
 	names := make([]string, 0)
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
@@ -107,8 +119,6 @@ func getJenkinsNames() []string {
 }
 
 func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
-	config := getConfig()
-
 	if config != nil {
 		current := config.Current
 		jenkinsServer = findJenkinsByName(current)
@@ -118,6 +128,10 @@ func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 }
 
 func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
+	if config == nil {
+		return
+	}
+
 	for _, cfg := range config.JenkinsServers {
 		if cfg.Name == name {
 			jenkinsServer = &cfg
@@ -138,12 +152,14 @@ func findSuiteByName(name string) (suite *PluginSuite) {
 }
 
 func loadDefaultConfig() (err error) {
-	userHome := userHomeDir()
-	configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
-	if _, err = os.Stat(configPath); err == nil {
-		err = loadConfig(configPath)
+	var userHome string
+	userHome, err = homedir.Dir()
+	if err == nil {
+		configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+		if _, err = os.Stat(configPath); err == nil {
+			err = loadConfig(configPath)
+		}
 	}
-
 	return
 }
 
@@ -157,28 +173,56 @@ func loadConfig(path string) (err error) {
 	return
 }
 
-func saveConfig() (err error) {
-	var data []byte
-	config := getConfig()
-
-	if data, err = yaml.Marshal(&config); err == nil {
-		err = ioutil.WriteFile(configOptions.ConfigFileLocation, data, 0644)
+// getMirrors returns the mirror list, one official mirror should be returned if user don't give it
+func getMirrors() (mirrors []JenkinsMirror) {
+	mirrors = config.Mirrors
+	if len(mirrors) == 0 {
+		mirrors = []JenkinsMirror{
+			{
+				Name: "default",
+				URL:  "http://mirrors.jenkins.io/",
+			},
+		}
 	}
 	return
 }
 
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	} else if runtime.GOOS == "linux" {
-		home := os.Getenv("XDG_CONFIG_HOME")
-		if home != "" {
-			return home
+func getMirror(name string) string {
+	mirrors := getMirrors()
+
+	for _, mirror := range mirrors {
+		if mirror.Name == name {
+			logger.Debug("find mirror", zap.String("name", name), zap.String("url", mirror.URL))
+			return mirror.URL
 		}
 	}
-	return os.Getenv("HOME")
+	return ""
+}
+
+func getDefaultMirror() string {
+	return getMirror("default")
+}
+
+func saveConfig() (err error) {
+	var data []byte
+	config := getConfig()
+
+	configPath := configOptions.ConfigFileLocation
+	if rootOptions.ConfigFile != "" {
+		configPath = rootOptions.ConfigFile
+	}
+
+	if data, err = yaml.Marshal(&config); err == nil {
+		err = ioutil.WriteFile(configPath, data, 0644)
+	}
+	return
+}
+
+// GetConfigFromHome returns the config file path from user home dir
+func GetConfigFromHome() (configPath string, homeErr error) {
+	userHome, homeErr := homedir.Dir()
+	if homeErr == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	}
+	return
 }

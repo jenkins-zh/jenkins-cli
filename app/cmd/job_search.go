@@ -1,8 +1,12 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -21,15 +25,18 @@ var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
-	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Max, "max", "", 10, "The number of limitation to print")
-	jobSearchCmd.Flags().BoolVarP(&jobSearchOption.PrintAll, "all", "", false, "Print all items if there's no keyword")
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "json", "Format the output")
+	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Max, "max", "", 10,
+		i18n.T("The number of limitation to print"))
+	jobSearchCmd.Flags().BoolVarP(&jobSearchOption.PrintAll, "all", "", false,
+		i18n.T("Print all items if there's no keyword"))
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Format, "output", "o", "json",
+		i18n.T(`Formats of the output which contain name, path`))
 }
 
 var jobSearchCmd = &cobra.Command{
 	Use:   "search [keyword]",
-	Short: "Print the job of your Jenkins",
-	Long:  `Print the job of your Jenkins`,
+	Short: i18n.T("Print the job of your Jenkins"),
+	Long:  i18n.T(`Print the job of your Jenkins`),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !jobSearchOption.PrintAll && len(args) == 0 {
 			cmd.Help()
@@ -47,17 +54,56 @@ var jobSearchCmd = &cobra.Command{
 				RoundTripper: jobSearchOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		if status, err := jclient.Search(keyword, jobSearchOption.Max); err == nil {
+		status, err := jclient.Search(keyword, jobSearchOption.Max)
+		if err == nil {
 			var data []byte
-			if data, err = Format(status, jobSearchOption.Format); err == nil {
+			data, err = jobSearchOption.Output(status)
+			if err == nil {
 				cmd.Println(string(data))
-			} else {
-				log.Fatal(err)
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
+}
+
+// Output render data into byte array
+func (o *JobSearchOption) Output(obj interface{}) (data []byte, err error) {
+	if data, err = o.OutputOption.Output(obj); err != nil {
+		var formatFunc JobNameFormat
+
+		switch o.OutputOption.Format {
+		case "name":
+			formatFunc = simpleFormat
+		case "path":
+			formatFunc = pathFormat
+		}
+
+		if formatFunc == nil {
+			err = fmt.Errorf("unknow format %s", o.OutputOption.Format)
+			return
+		}
+
+		buf := ""
+		searchResult := obj.(*client.SearchResult)
+
+		for _, item := range searchResult.Suggestions {
+			buf = fmt.Sprintf("%s%s\n", buf, formatFunc(item.Name))
+		}
+		data = []byte(strings.Trim(buf, "\n"))
+		err = nil
+	}
+	return
+}
+
+// JobNameFormat format the job name
+type JobNameFormat func(string) string
+
+func simpleFormat(name string) string {
+	return name
+}
+
+func pathFormat(name string) string {
+	return client.ParseJobPath(name)
 }

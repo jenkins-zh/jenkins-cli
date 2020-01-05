@@ -8,22 +8,36 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"go.uber.org/zap"
 )
 
 type PluginList struct {
 	 List []PluginInfo
 }
 
+// PluginAPI represents a plugin API
 type PluginAPI struct {
 	dependencyMap map[string]string
+
+	SkipDependency bool
+	SkipOptional   bool
+	UseMirror      bool
+	ShowProgress   bool
+	MirrorURL      string
+
+	RoundTripper http.RoundTripper
 }
 
+// PluginDependency represents a plugin dependency
 type PluginDependency struct {
-	Name     string `json:"name"`
-	Implied  bool   `json:"implied"`
-	Optional bool   `json:"optional"`
-	Title    string `json:"title"`
-	Version  string `json:"version"`
+	Name      string `json:"name"`
+	Implied   bool   `json:"implied"`
+	Optional  bool   `json:"optional"`
+	Title     string `json:"title"`
+	Version   string `json:"version"`
+	ShortName string `json:"shortName"`
 }
 
 type MaintainerInfo struct {
@@ -88,6 +102,7 @@ type PluginInfo struct {
 	Stats PluginInfoStats
 }
 
+// PluginInfoStats is the plugin info stats
 type PluginInfoStats struct {
 	CurrentInstalls                   int
 	Installations                     []PluginInstallationInfo
@@ -97,6 +112,7 @@ type PluginInfoStats struct {
 	Trend                             int
 }
 
+// PluginInstallationInfo represents the plugin installation info
 type PluginInstallationInfo struct {
 	Timestamp  int64
 	Total      int
@@ -104,96 +120,96 @@ type PluginInstallationInfo struct {
 	Percentage float64
 }
 
-func (a *PluginAPI) ShowTrend(name string) {
-	if plugin, err := a.getPlugin(name); err == nil {
-		data := []float64{}
-		installations := plugin.Stats.Installations
-		offset, count := 0, 10
-		if len(installations) > count {
-			offset = len(installations) - count
-		}
-		for _, installation := range installations[offset:] {
-			data = append(data, float64(installation.Total))
-		}
-
-		min, max := 0.0, 0.0
-		for _, item := range data {
-			if item < min {
-				min = item
-			} else if item > max {
-				max = item
-			}
-		}
-
-		unit := (max - min) / 100
-		for _, num := range data {
-			total := (int)(num / unit)
-			if total == 0 {
-				total = 1
-			}
-			arr := make([]int, total)
-			for _ = range arr {
-				fmt.Print("*")
-			}
-			fmt.Println("", num)
-		}
-	} else {
-		log.Fatal(err)
+// ShowTrend show the trend of plugins
+func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
+	var plugin *PluginInfo
+	if plugin, err = d.getPlugin(name); err != nil {
+		return
 	}
+
+	data := []float64{}
+	installations := plugin.Stats.Installations
+	offset, count := 0, 10
+	if len(installations) > count {
+		offset = len(installations) - count
+	}
+	for _, installation := range installations[offset:] {
+		data = append(data, float64(installation.Total))
+	}
+	trend = util.PrintCollectTrend(data)
+	return
 }
 
 // DownloadPlugins will download those plugins from update center
 func (d *PluginAPI) DownloadPlugins(names []string) {
 	d.dependencyMap = make(map[string]string)
-	fmt.Println("Start to collect plugin dependencies...")
+	logger.Info("start to collect plugin dependencies...")
 	plugins := make([]PluginInfo, 0)
 	for _, name := range names {
+		logger.Debug("start to collect dependency", zap.String("plugin", name))
 		plugins = append(plugins, d.collectDependencies(strings.ToLower(name))...)
 	}
 
-	fmt.Printf("Ready to download plugins, total: %d.\n", len(plugins))
+	logger.Info("ready to download plugins", zap.Int("total", len(plugins)))
+	var err error
 	for i, plugin := range plugins {
-		fmt.Printf("Start to download plugin %s, version: %s, number: %d\n",
-			plugin.Name, plugin.Version, i)
+		logger.Info("start to download plugin",
+			zap.String("name", plugin.Name),
+			zap.String("version", plugin.Version),
+			zap.String("url", plugin.URL),
+			zap.Int("number", i))
 
-		d.download(plugin.URL, plugin.Name)
-	}
-}
-
-func (d *PluginAPI) download(url string, name string) {
-	if resp, err := http.Get(url); err != nil {
-		fmt.Println(err)
-	} else {
-		defer resp.Body.Close()
-		if body, err := ioutil.ReadAll(resp.Body); err != nil {
-			fmt.Println(err)
-		} else {
-			if err = ioutil.WriteFile(fmt.Sprintf("%s.hpi", name), body, 0644); err != nil {
-				fmt.Println(err)
-			}
+		if err = d.download(plugin.URL, plugin.Name); err != nil {
+			logger.Error("download plugin error", zap.String("name", plugin.Name), zap.Error(err))
 		}
 	}
 }
 
+func (d *PluginAPI) getMirrorURL(url string) (mirror string) {
+	mirror = url
+	if d.UseMirror && d.MirrorURL != "" {
+		logger.Debug("replace with mirror", zap.String("original", url))
+		mirror = strings.Replace(url, "http://updates.jenkins-ci.org/download/", d.MirrorURL, -1)
+	}
+	return
+}
+
+func (d *PluginAPI) download(url string, name string) (err error) {
+	url = d.getMirrorURL(url)
+	logger.Info("prepare to download", zap.String("name", name), zap.String("url", url))
+
+	downloader := util.HTTPDownloader{
+		RoundTripper:   d.RoundTripper,
+		TargetFilePath: fmt.Sprintf("%s.hpi", name),
+		URL:            url,
+		ShowProgress:   d.ShowProgress,
+	}
+	err = downloader.DownloadFile()
+	return
+}
+
 func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
-	cli.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-		},
-	}
-	resp, err := cli.Get("https://plugins.jenkins.io/api/plugin/" + name)
-	if err != nil {
-		return plugin, err
+	if d.RoundTripper == nil {
+		cli.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	} else {
+		cli.Transport = d.RoundTripper
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	pluginAPI := fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", name)
+	logger.Debug("fetch data from plugin API", zap.String("url", pluginAPI))
 
-	plugin = &PluginInfo{}
-	err = json.Unmarshal(body, plugin)
-	if err != nil {
-		log.Println("error when unmarshal:", string(body))
+	var resp *http.Response
+	if resp, err = cli.Get(pluginAPI); err == nil {
+		var body []byte
+		if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			plugin = &PluginInfo{}
+			err = json.Unmarshal(body, plugin)
+		}
 	}
 	return
 }
@@ -207,9 +223,12 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 
 	plugins = make([]PluginInfo, 0)
 	plugins = append(plugins, *plugin)
+	if d.SkipDependency {
+		return
+	}
 
 	for _, dependency := range plugin.Dependencies {
-		if dependency.Optional {
+		if d.SkipOptional && dependency.Optional {
 			continue
 		}
 		if _, ok := d.dependencyMap[dependency.Name]; !ok {

@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -20,26 +23,19 @@ func init() {
 
 var pluginUninstallCmd = &cobra.Command{
 	Use:   "uninstall [pluginName]",
-	Short: "Uninstall the plugins",
-	Long:  `Uninstall the plugins`,
+	Short: i18n.T("Uninstall the plugins"),
+	Long:  i18n.T("Uninstall the plugins"),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var pluginName string
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
-		pluginName = args[0]
-
+		pluginName := args[0]
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: pluginUninstallOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		if err := jclient.UninstallPlugin(pluginName); err != nil {
-			cmd.PrintErr(err)
-		}
+		err := jclient.UninstallPlugin(pluginName)
+		helper.CheckErr(cmd, err)
 	},
 }

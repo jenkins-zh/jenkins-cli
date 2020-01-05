@@ -3,9 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"io"
 	"net/url"
 	"strings"
 
@@ -13,134 +11,52 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
+// UserClient for connect the user
 type UserClient struct {
 	JenkinsCore
 }
 
+// Token is the token of user
 type Token struct {
 	Status string
 	Data   TokenData
 }
 
+// TokenData represents the token
 type TokenData struct {
 	TokenName  string
-	TokenUuid  string
+	TokenUUID  string
 	TokenValue string
 }
 
+// Get returns a user's detail
 func (q *UserClient) Get() (status *User, err error) {
-	api := fmt.Sprintf("%s/user/%s/api/json", q.URL, q.UserName)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("GET", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &User{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	api := fmt.Sprintf("/user/%s/api/json", q.UserName)
+	err = q.RequestWithData("GET", api, nil, nil, 200, &status)
 	return
 }
 
+// EditDesc update the description of a user
 func (q *UserClient) EditDesc(description string) (err error) {
-	api := fmt.Sprintf("%s/user/%s/submitDescription", q.URL, q.UserName)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
 	formData := url.Values{}
 	formData.Add("description", description)
 	payload := strings.NewReader(formData.Encode())
-
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
+// Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
-	api := fmt.Sprintf("%s/securityRealm/user/%s/doDelete", q.URL, username)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 && code != 302 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }
 
-func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
-	api := fmt.Sprintf("%s/securityRealm/createAccountByAdmin", q.URL)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	passwd := util.GeneratePassword(8)
-
+func genSimpleUserAsPayload(username, password string) (payload io.Reader, user *UserForCreate) {
 	user = &UserForCreate{
 		User:      User{FullName: username},
 		Username:  username,
-		Password1: passwd,
-		Password2: passwd,
+		Password1: password,
+		Password2: password,
 		Email:     fmt.Sprintf("%s@%s.com", username, username),
 	}
 
@@ -148,81 +64,53 @@ func (q *UserClient) Create(username string) (user *UserForCreate, err error) {
 	formData := url.Values{
 		"json":      {string(userData)},
 		"username":  {username},
-		"password1": {passwd},
-		"password2": {passwd},
+		"password1": {password},
+		"password2": {password},
 		"fullname":  {username},
 		"email":     {user.Email},
 	}
-	payload := strings.NewReader(formData.Encode())
+	payload = strings.NewReader(formData.Encode())
+	return
+}
 
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
+// Create will create a user in Jenkins
+func (q *UserClient) Create(username, password string) (user *UserForCreate, err error) {
+	var (
+		payload io.Reader
+		code    int
+	)
+
+	if password == "" {
+		password = util.GeneratePassword(8)
 	}
 
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code != 200 && code != 302 {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
+	payload, user = genSimpleUserAsPayload(username, password)
+	code, err = q.RequestWithoutData("POST", "/securityRealm/createAccountByAdmin",
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	if code == 302 {
+		err = nil
 	}
 	return
 }
 
+// CreateToken create a token in Jenkins
 func (q *UserClient) CreateToken(newTokenName string) (status *Token, err error) {
 	if newTokenName == "" {
 		newTokenName = fmt.Sprintf("jcli-%s", randomdata.SillyName())
 	}
 
-	api := fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", q.URL, q.UserName)
-	var (
-		req      *http.Request
-		response *http.Response
-	)
+	api := fmt.Sprintf("/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", q.UserName)
 
 	formData := url.Values{}
 	formData.Add("newTokenName", newTokenName)
 	payload := strings.NewReader(formData.Encode())
 
-	req, err = http.NewRequest("POST", api, payload)
-	if err == nil {
-		q.AuthHandle(req)
-	} else {
-		return
-	}
-
-	req.Header.Set(util.CONTENT_TYPE, util.APP_FORM)
-	if err = q.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := q.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			if err == nil {
-				status = &Token{}
-				err = json.Unmarshal(data, status)
-			}
-		} else {
-			log.Fatal(string(data))
-		}
-	} else {
-		log.Fatal(err)
-	}
+	err = q.RequestWithData("POST", api,
+		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200, &status)
 	return
 }
 
+// User for Jenkins
 type User struct {
 	AbsoluteURL string `json:"absoluteUrl"`
 	Description string
@@ -230,8 +118,9 @@ type User struct {
 	ID          string
 }
 
+// UserForCreate is the data for creatig a user
 type UserForCreate struct {
-	User      `json:inline`
+	User      `json:",inline"`
 	Username  string `json:"username"`
 	Password1 string `json:"password1"`
 	Password2 string `json:"password2"`

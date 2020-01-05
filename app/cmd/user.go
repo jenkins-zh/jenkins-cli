@@ -1,15 +1,18 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
+// UserOption is the user cmd option
 type UserOption struct {
 	OutputOption
+
+	RoundTripper http.RoundTripper
 }
 
 var userOption UserOption
@@ -23,23 +26,22 @@ var userCmd = &cobra.Command{
 	Use:   "user",
 	Short: "Print the user of your Jenkins",
 	Long:  `Print the user of your Jenkins`,
-	Run: func(_ *cobra.Command, _ []string) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.UserClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
-
-		if status, err := jclient.Get(); err == nil {
-			if data, err := userOption.Output(status); err == nil {
-				fmt.Println(string(data))
-			} else {
-				log.Fatal(err)
-			}
-		} else {
-			log.Fatal(err)
+	Run: func(cmd *cobra.Command, _ []string) {
+		jclient := &client.UserClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: userOption.RoundTripper,
+				Debug:        rootOptions.Debug,
+			},
 		}
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+
+		status, err := jclient.Get()
+		if err == nil {
+			data, err := userOption.Output(status)
+			if err == nil {
+				cmd.Println(string(data))
+			}
+		}
+		helper.CheckErr(cmd, err)
 	},
 }

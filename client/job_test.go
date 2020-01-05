@@ -158,22 +158,34 @@ var _ = Describe("job test", func() {
 		It("basic case with one build", func() {
 			jobName := "fake"
 			buildID := 2
-
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/api/json", jobClient.URL, jobName, buildID), nil)
-			response := &http.Response{
-				StatusCode: 200,
-				Proto:      "HTTP/1.1",
-				Request:    request,
-				Body: ioutil.NopCloser(bytes.NewBufferString(`
-				{"displayName":"fake"}
-				`)),
-			}
-			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 2, "", "")
 
 			result, err := jobClient.GetBuild(jobName, buildID)
 			Expect(err).To(BeNil())
 			Expect(result).NotTo(BeNil())
+		})
+	})
+
+	Context("BuildWithParams", func() {
+		It("no params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithNoParams(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{})
+			Expect(err).To(BeNil())
+		})
+
+		It("with params", func() {
+			jobName := "fake"
+
+			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+				Name:  "name",
+				Value: "value",
+			}})
+			Expect(err).To(BeNil())
 		})
 	})
 
@@ -182,6 +194,36 @@ var _ = Describe("job test", func() {
 			jobName := "fakeJob"
 			buildID := 1
 			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/%d/stop", jobClient.URL, jobName, buildID), nil)
+			request.Header.Add("CrumbRequestField", "Crumb")
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			responseCrumb := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    requestCrumb,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`
+				{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+				`)),
+			}
+			roundTripper.EXPECT().
+				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+
+			err := jobClient.StopJob(jobName, buildID)
+			Expect(err).To(BeNil())
+		})
+
+		It("stop the last job build without a folder", func() {
+			jobName := "fakeJob"
+			buildID := -1
+			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 200,
@@ -260,8 +302,35 @@ var _ = Describe("job test", func() {
 
 	Context("UpdatePipeline", func() {
 		It("simple case, should success", func() {
-			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "")
+			PrepareForUpdatePipelineJob(roundTripper, jobClient.URL, "", "", "")
 			err := jobClient.UpdatePipeline("test", "")
+			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("Create", func() {
+		var (
+			jobPayload CreateJobPayload
+		)
+
+		BeforeEach(func() {
+			jobPayload = CreateJobPayload{
+				Name: "jobName",
+				Mode: "jobType",
+			}
+		})
+
+		It("create a normal job, should success", func() {
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
+			Expect(err).To(BeNil())
+		})
+
+		It("create a job by copy mode", func() {
+			jobPayload.From = "another-one"
+			jobPayload.Mode = "copy"
+			PrepareForCreatePipelineJob(roundTripper, jobClient.URL, "", "", jobPayload)
+			err := jobClient.Create(jobPayload)
 			Expect(err).To(BeNil())
 		})
 	})
@@ -271,7 +340,7 @@ var _ = Describe("job test", func() {
 			jobName := "fakeJob"
 			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
-			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -295,6 +364,106 @@ var _ = Describe("job test", func() {
 
 			err := jobClient.Delete(jobName)
 			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("GetJobInputActions", func() {
+		It("simple case, should success", func() {
+			PrepareForGetJobInputActions(roundTripper, jobClient.URL, "", "", "jobName", 1)
+			actions, err := jobClient.GetJobInputActions("jobName", 1)
+			Expect(err).To(BeNil())
+			Expect(len(actions)).To(Equal(1))
+			Expect(actions[0].Message).To(Equal("message"))
+		})
+	})
+
+	Context("JobInputSubmit", func() {
+		It("simple case, should success", func() {
+			PrepareForSubmitInput(roundTripper, jobClient.URL, "/job/jobName", "", "")
+			err := jobClient.JobInputSubmit("jobName", "Eff7d5dba32b4da32d9a67a519434d3f", 1, true, nil)
+			Expect(err).To(BeNil())
+		})
+	})
+
+	Context("GetHistory", func() {
+		It("simple case, should success", func() {
+			jobName := "fakeJob"
+
+			PrepareForGetJob(roundTripper, jobClient.URL, jobName, "", "")
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 1, "", "")
+			PrepareForGetBuild(roundTripper, jobClient.URL, jobName, 2, "", "")
+
+			builds, err := jobClient.GetHistory(jobName)
+			Expect(err).To(BeNil())
+			Expect(builds).NotTo(BeNil())
+			Expect(len(builds)).To(Equal(2))
+		})
+	})
+
+	Context("Log", func() {
+		It("with a specific build number", func() {
+			jobName := "fakeJob"
+
+			PrepareForJobLog(roundTripper, jobClient.URL, jobName, 1, "", "")
+
+			log, err := jobClient.Log(jobName, 1, 0)
+			Expect(err).To(BeNil())
+			Expect(log.Text).To(Equal("fake log"))
+		})
+
+		It("get the last job's log", func() {
+			jobName := "fakeJob"
+
+			PrepareForJobLog(roundTripper, jobClient.URL, jobName, -1, "", "")
+
+			log, err := jobClient.Log(jobName, -1, 0)
+			Expect(err).To(BeNil())
+			Expect(log.Text).To(Equal("fake log"))
+		})
+	})
+})
+
+var _ = Describe("test function ParseJobPath", func() {
+	var (
+		path    string
+		jobName string
+	)
+
+	JustBeforeEach(func() {
+		path = ParseJobPath(jobName)
+	})
+
+	It("job name is empty", func() {
+		Expect(path).To(BeEmpty())
+	})
+
+	Context("job name is not empty", func() {
+		BeforeEach(func() {
+			jobName = "abc"
+		})
+
+		It("job name separate with whitespaces", func() {
+			Expect(path).To(Equal(fmt.Sprintf("/job/%s", jobName)))
+		})
+
+		Context("multi level of job name", func() {
+			BeforeEach(func() {
+				jobName = "abc def"
+			})
+
+			It("should success", func() {
+				Expect(path).To(Equal("/job/abc/job/def"))
+			})
+		})
+	})
+
+	Context("job name with URL path", func() {
+		BeforeEach(func() {
+			jobName = "/job/abc/job/def"
+		})
+
+		It("should success", func() {
+			Expect(path).To(Equal(jobName))
 		})
 	})
 })

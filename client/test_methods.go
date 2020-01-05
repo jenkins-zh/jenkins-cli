@@ -2,14 +2,18 @@ package client
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // PrepareForEmptyAvaiablePluginList only for test
@@ -18,7 +22,6 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`{
 			"status": "ok",
@@ -33,31 +36,63 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 // PrepareForOneAvaiablePlugin only for test
 func PrepareForOneAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
-	response = &http.Response{
-		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    request,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`{
+	request, response = PrepareForEmptyAvaiablePluginList(roundTripper, rootURL)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"status": "ok",
 			"data": [{
-				"name": "fake",
-				"title": "fake"
+					"name": "fake",
+					"title": "fake"
 			}]
-		}`)),
-	}
-	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		}`))
+	return
+}
+
+// PrepareForManyAvaiablePlugin only for test
+func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	request *http.Request, response *http.Response) {
+	request, response = PrepareForEmptyAvaiablePluginList(roundTripper, rootURL)
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
+			"status": "ok",
+			"data": [
+				{
+					"name": "fake-ocean",
+					"title": "fake-ocean"
+				},
+				{
+					"name": "fake-ln",
+					"title": "fake-ln"
+				},
+				{
+					"name": "fake-is",
+					"title": "fake-is"
+				},
+				{
+					"name": "fake-oa",
+					"title": "fake-oa"
+				},
+				{
+					"name": "fake-open",
+					"title": "fake-open"
+				},
+				{
+					"name": "fake",
+					"title": "fake"
+				}
+			]
+		}`))
 	return
 }
 
 // PrepareForEmptyInstalledPluginList only for test
-func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
+	if depth > 1 {
+		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth), nil)
+	} else {
+		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
+	}
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`{
 				"plugins": []
@@ -71,7 +106,7 @@ func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, ro
 // PrepareForOneInstalledPlugin only for test
 func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
 	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
 			"plugins": [{
 				"shortName": "fake",
@@ -84,10 +119,61 @@ func PrepareForOneInstalledPlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 	return
 }
 
-// PrepareFor500InstalledPluginList only for test
-func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+// PrepareForManyInstalledPlugins only for test
+func PrepareForManyInstalledPlugins(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
-	request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL)
+	if depth > 1 {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth)
+	} else {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
+	}
+	response.Body = ioutil.NopCloser(bytes.NewBufferString(`{
+			"plugins": [
+				{
+					"shortName": "fake-ocean",
+					"version": "1.18.111",
+					"hasUpdate": false,
+					"enable": true,
+					"active": true,
+                    "dependencies":[{"optional":true,"shortName":"fake-ln","version":"1.19"}]
+				},
+				{
+					"shortName": "fake-ln",
+					"version": "1.18.1",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true,
+                    "dependencies":[{"optional":true,"shortName":"fake-is","version":"1.18.121-2.0"}]
+				},
+				{
+					"shortName": "fake-is",
+					"version": "1.18.131-2.0",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true,
+                    "dependencies":[]
+				},
+				{
+					"shortName": "fake",
+					"version": "1.0",
+					"hasUpdate": true,
+					"enable": true,
+					"active": true,
+                    "dependencies":[]
+				}
+			]
+		}`))
+	return
+}
+
+// PrepareFor500InstalledPluginList only for test
+func PrepareFor500InstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
+	request *http.Request, response *http.Response) {
+	if depth > 1 {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, depth)
+	} else {
+		request, response = PrepareForEmptyInstalledPluginList(roundTripper, rootURL, 1)
+	}
 	response.StatusCode = 500
 	return
 }
@@ -108,7 +194,6 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
@@ -116,7 +201,7 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)
+	requestCrumb, responseCrumb = PrepareForGetIssuer(roundTripper, rootURL, "", "")
 	return
 }
 
@@ -127,7 +212,6 @@ func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pl
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
@@ -135,7 +219,7 @@ func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pl
 		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, responseCrumb = RequestCrumb(roundTripper, rootURL)
+	requestCrumb, responseCrumb = PrepareForGetIssuer(roundTripper, rootURL, "", "")
 	return
 }
 
@@ -154,17 +238,15 @@ func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 	response := &http.Response{
 		StatusCode: 200,
 		Header:     map[string][]string{},
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
+	PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
 	}
 }
 
@@ -174,7 +256,6 @@ func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd
 	response := &http.Response{
 		StatusCode: 200,
 		Header:     map[string][]string{},
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
 		{
@@ -208,20 +289,148 @@ func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd
 	}
 }
 
-// RequestCrumb only for the test case
-func RequestCrumb(roundTripper *mhttp.MockRoundTripper, rootURL string) (
-	requestCrumb *http.Request, responseCrumb *http.Response) {
-	requestCrumb, _ = http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, "/crumbIssuer/api/json"), nil)
-	responseCrumb = &http.Response{
+// PrepareForRequestUpdateCenter only for the test case
+func PrepareForRequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	responseCenter = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
-		Request:    requestCrumb,
+		Request:    requestCenter,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
-		{"crumbRequestField":"CrumbRequestField","crumb":"Crumb"}
+		{
+			"_class": "hudson.model.UpdateSite",
+			"connectionCheckUrl": "http://www.google.com/",
+			"dataTimestamp": 1567999067717,
+			"hasUpdates": true,
+			"id": "default",
+			"updates": [{
+				"name": "fake-ocean",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.19.011",
+				"title": "fake-ocean",
+				"sourceId": "default",
+				"installed": {
+					"active": true,
+					"backupVersion": "1.17.011",
+					"hasUpdate": true,
+					"version": "1.18.111"
+				}
+			},{
+				"name": "fake-ln",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.19.011",
+				"title": "fake-ln",
+				"sourceId": "default",
+				"installed": {
+					"active": true,
+					"hasUpdate": true,
+					"version": "1.18.1"
+				}
+			},{
+				"name": "fake-is",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.19.1",
+				"title": "fake-is",
+				"sourceId": "default",
+				"installed": {
+					"active": true,
+					"backupVersion": "1.17.011",
+					"hasUpdate": true,
+					"version": "1.18.111"
+				}
+			}
+			],
+			"availables": [{
+				"name": "fake-oa",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.13.011",
+				"title": "fake-oa",
+				"installed": null
+			},{
+				"name": "fake-open",
+				"sourceId": "default",
+				"requiredCore": "2.138.4",
+				"version": "1.13.0",
+				"title": "fake-open",
+				"installed": null
+			}
+			],
+			"url": "https://updates.jenkins.io/update-center.json"
+		}
 		`)),
 	}
+	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	return
+}
+
+// PrepareForNoAvailablePlugins only for the test case
+func PrepareForNoAvailablePlugins(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	responseCenter = &http.Response{
+		StatusCode: 200,
+		Request:    requestCenter,
+		Body: ioutil.NopCloser(bytes.NewBufferString(`
+		{
+			"_class": "hudson.model.UpdateSite",
+			"connectionCheckUrl": "http://www.google.com/",
+			"dataTimestamp": 1567999067717,
+			"hasUpdates": true,
+			"id": "default",
+			"updates": [
+			],
+			"availables": [
+			],
+			"url": "https://updates.jenkins.io/update-center.json"
+		}
+		`)),
+	}
+	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	return
+}
+
+// PrepareForRequest500UpdateCenter only for the test case
+func PrepareForRequest500UpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
+	requestCenter *http.Request, responseCenter *http.Response) {
+	requestCenter, responseCenter = PrepareForNoAvailablePlugins(roundTripper, rootURL)
+	responseCenter.StatusCode = 500
+	return
+}
+
+// PrepareForInstallPlugin only for test
+func PrepareForInstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName, user, passwd string) {
+	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName, user, passwd)
+}
+
+// PrepareForInstallPluginWithVersion only for test
+func PrepareForInstallPluginWithVersion(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName, version, user, passwd string) {
+	PrepareForInstallPluginWithCode(roundTripper, 200, rootURL, pluginName+"@"+version, user, passwd)
+}
+
+// PrepareForInstallPluginWithCode only for test
+func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
+	statusCode int, rootURL, pluginName, user, passwd string) (response *http.Response) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/install?plugin.%s=", rootURL, pluginName), nil)
+	request.Header.Add("CrumbRequestField", "Crumb")
+	response = &http.Response{
+		StatusCode: statusCode,
+		Request:    request,
+		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+	}
 	roundTripper.EXPECT().
-		RoundTrip(requestCrumb).Return(responseCrumb, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+
+	// common crumb request
+	requestCrumb, _ := PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
+
+	if user != "" && passwd != "" {
+		request.SetBasicAuth(user, passwd)
+		requestCrumb.SetBasicAuth(user, passwd)
+	}
 	return
 }
 
@@ -231,9 +440,8 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/job/test/restFul", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
-		Body: ioutil.NopCloser(bytes.NewBufferString(`{"type":null,"displayName":null,"script":"script","sandbox":true}`)),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"type":null,"displayName":null,"script":"script","sandbox":true}`)),
 	}
 	roundTripper.EXPECT().
 		RoundTrip(request).Return(response, nil)
@@ -245,23 +453,47 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 }
 
 // PrepareForUpdatePipelineJob only for test
-func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update", rootURL), nil)
+func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, script, user, password string) {
+	formData := url.Values{}
+	formData.Add("script", script)
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update?%s", rootURL, formData.Encode()), nil)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+	return
+}
+
+// PrepareForCreatePipelineJob only for test
+func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, jobPayload CreateJobPayload) {
+	playLoadData, _ := json.Marshal(jobPayload)
+	formData := url.Values{
+		"json": {string(playLoadData)},
+		"name": {jobPayload.Name},
+		"mode": {jobPayload.Mode},
+		"from": {jobPayload.From},
+	}
+	payload := strings.NewReader(formData.Encode())
+
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
+	request.Header.Add(util.ContentType, util.ApplicationForm)
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+	return
+}
+
+// PrepareCommonPost only for test
+func PrepareCommonPost(request *http.Request, responseBody string, roundTripper *mhttp.MockRoundTripper, user, passwd, rootURL string) (
+	response *http.Response) {
 	request.Header.Add("CrumbRequestField", "Crumb")
-	response := &http.Response{
+	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
-		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+		RoundTrip(NewVerboseRequestMatcher(request).WithBody().WithQuery()).Return(response, nil)
 
 	// common crumb request
-	requestCrumb, _ := RequestCrumb(roundTripper, rootURL)
-
+	PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
-		requestCrumb.SetBasicAuth(user, passwd)
 	}
+	return
 }

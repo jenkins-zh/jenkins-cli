@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"strconv"
-
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
+	"net/http"
+	"strconv"
 )
 
+// JobStopOption is the job stop option
 type JobStopOption struct {
 	BatchOption
 
@@ -24,22 +24,16 @@ func init() {
 }
 
 var jobStopCmd = &cobra.Command{
-	Use:   "stop <jobName> <buildNumbe>",
-	Short: "Stop a job build in your Jenkins",
-	Long:  `Stop a job build in your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) < 2 {
-			cmd.Help()
-			return
-		}
-
-		var (
-			buildNum int
-			err      error
-		)
-		if buildNum, err = strconv.Atoi(args[1]); err != nil {
-			cmd.PrintErrln(err)
-			return
+	Use:   "stop <jobName> [buildNumber]",
+	Short: i18n.T("Stop a job build in your Jenkins"),
+	Long:  i18n.T("Stop a job build in your Jenkins"),
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		buildNum := -1
+		if len(args) > 1 {
+			if buildNum, err = strconv.Atoi(args[1]); err != nil {
+				return
+			}
 		}
 
 		jobName := args[0]
@@ -52,10 +46,8 @@ var jobStopCmd = &cobra.Command{
 				RoundTripper: jobStopOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		if err := jclient.StopJob(jobName, buildNum); err != nil {
-			log.Fatal(err)
-		}
+		return jclient.StopJob(jobName, buildNum)
 	},
 }

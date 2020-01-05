@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
@@ -17,12 +18,9 @@ func init() {
 
 var pluginCmd = &cobra.Command{
 	Use:   "plugin",
-	Short: "Manage the plugins of Jenkins",
-	Long:  `Manage the plugins of Jenkins`,
+	Short: i18n.T("Manage the plugins of Jenkins"),
+	Long:  i18n.T("Manage the plugins of Jenkins"),
 	Example: `  jcli plugin list
   jcli plugin search github
   jcli plugin check`,
-	Run: func(cmd *cobra.Command, _ []string) {
-		cmd.Help()
-	},
 }

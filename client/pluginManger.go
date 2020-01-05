@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -19,9 +18,12 @@ import (
 type PluginManager struct {
 	JenkinsCore
 
+	UseMirror    bool
+	MirrorURL    string
 	ShowProgress bool
 }
 
+// Plugin represents a plugin of Jenkins
 type Plugin struct {
 	Active       bool
 	Enabled      bool
@@ -30,16 +32,18 @@ type Plugin struct {
 	Deleted      bool
 }
 
-// PluginList represent a list of plugins
+// InstalledPluginList represent a list of plugins
 type InstalledPluginList struct {
 	Plugins []InstalledPlugin
 }
 
+// AvailablePluginList represents a list of available plugins
 type AvailablePluginList struct {
 	Data   []AvailablePlugin
 	Status string
 }
 
+// AvailablePlugin represetns a available plugin
 type AvailablePlugin struct {
 	Plugin
 
@@ -65,28 +69,20 @@ type InstalledPlugin struct {
 	MinimumJavaVersion string
 	SupportDynamicLoad string
 	BackVersion        string
+	Dependencies       []PluginDependency
 }
 
-// CheckUpdate fetch the lastest plugins from update center site
-func (p *PluginManager) CheckUpdate(handle func(*http.Response)) {
-	api := fmt.Sprintf("%s/pluginManager/checkUpdatesServer", p.URL)
-	req, err := http.NewRequest("POST", api, nil)
+var debugLogFile = "debug.html"
+
+// CheckUpdate fetch the latest plugins from update center site
+func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
+	api := "/pluginManager/checkUpdatesServer"
+	var response *http.Response
+	response, err = p.RequestWithResponseHeader("POST", api, nil, nil, nil)
 	if err == nil {
-		p.AuthHandle(req)
-	} else {
-		log.Fatal(err)
-	}
-
-	if err = p.CrumbHandle(req); err != nil {
-		log.Fatal(err)
-	}
-
-	client := p.GetClient()
-	if response, err := client.Do(req); err == nil {
 		p.handleCheck(handle)(response)
-	} else {
-		log.Fatal(err)
 	}
+	return
 }
 
 // GetAvailablePlugins get the aviable plugins from Jenkins
@@ -96,65 +92,98 @@ func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, 
 }
 
 // GetPlugins get installed plugins
-func (p *PluginManager) GetPlugins() (pluginList *InstalledPluginList, err error) {
-	err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, err error) {
+	if depth > 1 {
+		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
+	} else {
+		err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+	}
 	return
 }
 
-func getPluginsInstallQuery(names []string) string {
+func (p *PluginManager) getPluginsInstallQuery(names []string) string {
 	pluginNames := make([]string, 0)
 	for _, name := range names {
 		if name == "" {
 			continue
 		}
-		pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		if !strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, fmt.Sprintf("plugin.%s=", name))
+		}
+	}
+	if len(pluginNames) == 0 {
+		return ""
 	}
 	return strings.Join(pluginNames, "&")
 }
 
+func (p *PluginManager) getVersionalPlugins(names []string) []string {
+	pluginNames := make([]string, 0)
+	for _, name := range names {
+		if strings.Contains(name, "@") {
+			pluginNames = append(pluginNames, name)
+		}
+	}
+	return pluginNames
+}
+
 // InstallPlugin install a plugin by name
 func (p *PluginManager) InstallPlugin(names []string) (err error) {
-	api := fmt.Sprintf("%s/pluginManager/install?%s", p.URL, getPluginsInstallQuery(names))
-	var (
-		req      *http.Request
-		response *http.Response
-	)
-
-	req, err = http.NewRequest("POST", api, nil)
-	if err == nil {
-		if err = p.AuthHandle(req); err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		return
+	plugins := p.getPluginsInstallQuery(names)
+	versionalPlugins := p.getVersionalPlugins(names)
+	if plugins != "" {
+		err = p.installPluginsWithoutVersion(plugins)
 	}
 
-	client := p.GetClient()
-	if response, err = client.Do(req); err == nil {
-		code := response.StatusCode
-		var data []byte
-		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
-			fmt.Println("install succeed.")
-		} else if code == 400 {
-			if errMsg, ok := response.Header["X-Error"]; ok {
-				for _, msg := range errMsg {
-					fmt.Println(msg)
-				}
-			} else {
-				fmt.Println("Cannot found plugins", names)
+	if err == nil && len(versionalPlugins) > 0 {
+		err = p.installPluginsWithVersion(versionalPlugins)
+	}
+	return
+}
+
+func (p *PluginManager) installPluginsWithoutVersion(plugins string) (err error) {
+	api := fmt.Sprintf("/pluginManager/install?%s", plugins)
+	var response *http.Response
+	response, err = p.RequestWithResponse("POST", api, nil, nil)
+	if response != nil && response.StatusCode == 400 {
+		if errMsg, ok := response.Header["X-Error"]; ok {
+			for _, msg := range errMsg {
+				err = fmt.Errorf(msg)
 			}
 		} else {
-			fmt.Println(response.Header)
-			fmt.Println("status code", code)
-			if err == nil && p.Debug && len(data) > 0 {
-				ioutil.WriteFile("debug.html", data, 0664)
-			} else if err != nil {
-				log.Fatal(err)
-			}
+			err = fmt.Errorf("cannot found plugins %s", plugins)
 		}
-	} else {
-		log.Fatal(err)
+	}
+	return
+}
+
+func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) {
+	for _, plugin := range plugins {
+		if err = p.installPluginWithVersion(plugin); err != nil {
+			break
+		}
+	}
+	return
+}
+
+// installPluginWithVersion install a plugin by name & version
+func (p *PluginManager) installPluginWithVersion(name string) (err error) {
+	pluginAPI := PluginAPI{
+		RoundTripper: p.RoundTripper,
+		UseMirror:    p.UseMirror,
+		MirrorURL:    p.MirrorURL,
+		ShowProgress: p.ShowProgress,
+	}
+	pluginName := "%s.hpi"
+	pluginVersion := strings.Split(name, "@")
+
+	defer os.Remove(fmt.Sprintf(pluginName, name))
+	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
+		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+
+	url = pluginAPI.getMirrorURL(url)
+	if err = pluginAPI.download(url, name); err == nil {
+		err = p.Upload(fmt.Sprintf(pluginName, name))
 	}
 	return
 }
@@ -171,7 +200,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if p.Debug {
-				ioutil.WriteFile("debug.html", data, 0664)
+				ioutil.WriteFile(debugLogFile, data, 0664)
 			}
 		}
 	}
@@ -196,7 +225,7 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
 		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile("debug.html", data, 0664)
+			ioutil.WriteFile(debugLogFile, data, 0664)
 		}
 	}
 	return err

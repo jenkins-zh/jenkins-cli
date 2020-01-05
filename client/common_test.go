@@ -116,7 +116,7 @@ var _ = Describe("common test", func() {
 		})
 
 		It("with crumb setting", func() {
-			RequestCrumb(roundTripper, jenkinsCore.URL)
+			PrepareForGetIssuer(roundTripper, jenkinsCore.URL, "", "")
 
 			crumb, err := jenkinsCore.GetCrumb()
 			Expect(err).To(BeNil())
@@ -126,6 +126,72 @@ var _ = Describe("common test", func() {
 		})
 
 		It("with error from server", func() {
+			//requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
+			//responseCrumb := &http.Response{
+			//	StatusCode: 500,
+			//	Proto:      "HTTP/1.1",
+			//	Request:    requestCrumb,
+			//	Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+			//}
+			//roundTripper.EXPECT().
+			//	RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			PrepareForGetIssuerWith500(roundTripper, jenkinsCore.URL, "", "")
+
+			_, err := jenkinsCore.GetCrumb()
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("with Language", func() {
+			request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/view/all/itemCategories?depth=3"), nil)
+			response := &http.Response{
+				StatusCode: 200,
+				Proto:      "HTTP/1.1",
+				Request:    request,
+				Body: ioutil.NopCloser(bytes.NewBufferString(`number name                       type
+0      构建一个自由风格的软件项目 Standalone Projects
+1      构建一个maven项目          Standalone Projects
+2      流水线                     Standalone Projects
+3      构建一个多配置项目         Standalone Projects
+0      Bitbucket Team/Project     Nested Projects
+1      文件夹                     Nested Projects
+2      GitHub 组织                Nested Projects
+3      多分支流水线               Nested Projects
+`)),
+			}
+			request.Header.Set("Accept-Language", "zh-CN")
+			roundTripper.EXPECT().
+				RoundTrip(request).Return(response, nil)
+
+			SetLanguage("zh-CN")
+			statusCode, data, err := jenkinsCore.Request("GET", "/view/all/itemCategories?depth=3", nil, nil)
+			SetLanguage("")
+			Expect(err).To(BeNil())
+			Expect(statusCode).To(Equal(200))
+			Expect(string(data)).To(Equal(`number name                       type
+0      构建一个自由风格的软件项目 Standalone Projects
+1      构建一个maven项目          Standalone Projects
+2      流水线                     Standalone Projects
+3      构建一个多配置项目         Standalone Projects
+0      Bitbucket Team/Project     Nested Projects
+1      文件夹                     Nested Projects
+2      GitHub 组织                Nested Projects
+3      多分支流水线               Nested Projects
+`))
+		})
+
+		It("with 404 error from server", func() {
+			err := jenkinsCore.ErrorHandle(404, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("not found resources"))
+		})
+
+		It("with 403 error from server", func() {
+			err := jenkinsCore.ErrorHandle(403, []byte{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("the current user has not permission, code 403"))
+		})
+
+		It("with CrumbHandle error from server", func() {
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 500,
@@ -135,9 +201,17 @@ var _ = Describe("common test", func() {
 			}
 			roundTripper.EXPECT().
 				RoundTrip(requestCrumb).Return(responseCrumb, nil)
-
-			_, err := jenkinsCore.GetCrumb()
+			err := jenkinsCore.CrumbHandle(requestCrumb)
 			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("unexpected status code: 500"))
+		})
+
+		It("test GetClient", func() {
+			jenkinsCore.RoundTripper = nil
+			jenkinsCore.Proxy = "kljasdsll"
+			jenkinsCore.ProxyAuth = "kljaslkdjkslad"
+			jclient := jenkinsCore.GetClient()
+			Expect(jclient).NotTo(BeNil())
 		})
 	})
 })

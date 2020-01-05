@@ -3,14 +3,17 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
+// JobTypeOption is the job type cmd option
 type JobTypeOption struct {
 	OutputOption
 
@@ -26,29 +29,48 @@ func init() {
 
 var jobTypeCmd = &cobra.Command{
 	Use:   "type",
-	Short: "Print the types of job which in your Jenkins",
-	Long:  `Print the types of job which in your Jenkins`,
+	Short: i18n.T("Print the types of job which in your Jenkins"),
+	Long:  i18n.T("Print the types of job which in your Jenkins"),
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
-				RoundTripper: centerUpgradeOption.RoundTripper,
+				RoundTripper: jobTypeOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		if status, err := jclient.GetJobTypeCategories(); err == nil {
+		status, err := jclient.GetJobTypeCategories()
+		if err == nil {
 			var data []byte
-			if data, err = jobTypeOption.Output(status); err == nil {
-				if len(data) > 0 {
-					cmd.Print(string(data))
-				}
-			} else {
-				log.Fatal(err)
+			data, err = jobTypeOption.Output(status)
+			if err == nil && len(data) > 0 {
+				cmd.Print(string(data))
 			}
-		} else {
-			log.Fatal(err)
 		}
+		helper.CheckErr(cmd, err)
 	},
+}
+
+// GetCategories returns the categories of current Jenkins
+func GetCategories(jclient *client.JobClient) (
+	typeMap map[string]string, types []string, err error) {
+	typeMap = make(map[string]string)
+	var categories []client.JobCategory
+	if categories, err = jclient.GetJobTypeCategories(); err == nil {
+		for _, category := range categories {
+			for _, item := range category.Items {
+				typeMap[item.DisplayName] = item.Class
+			}
+		}
+
+		types = make([]string, len(typeMap))
+		i := 0
+		for tp := range typeMap {
+			types[i] = tp
+			i++
+		}
+	}
+	return
 }
 
 // Output renders data into a table

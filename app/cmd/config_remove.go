@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
@@ -12,18 +12,13 @@ func init() {
 }
 
 var configRemoveCmd = &cobra.Command{
-	Use:   "remove",
-	Short: "Remove a Jenkins config",
-	Long:  `Remove a Jenkins config`,
-	Run: func(_ *cobra.Command, args []string) {
-		if len(args) == 0 {
-			log.Fatal("You need to give a name")
-		}
-
+	Use:   "remove <name>",
+	Short: i18n.T("Remove a Jenkins config"),
+	Long:  i18n.T("Remove a Jenkins config"),
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(_ *cobra.Command, args []string) error {
 		target := args[0]
-		if err := removeJenkins(target); err != nil {
-			log.Fatal(err)
-		}
+		return removeJenkins(target)
 	},
 }
 

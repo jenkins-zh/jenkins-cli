@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -33,21 +35,28 @@ var pluginUploadOption PluginUploadOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUploadCmd)
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true, "Whether show the upload progress")
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "", "Remote plugin URL")
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "", "User of remote plugin URL")
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "", "Password of remote plugin URL")
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "", "Remote Jenkins which will find from config list")
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
+		i18n.T("Whether show the upload progress"))
+	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
+		i18n.T("Remote plugin URL"))
+	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
+		i18n.T("User of remote plugin URL"))
+	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "",
+		i18n.T("Password of remote plugin URL"))
+	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "",
+		i18n.T("Remote Jenkins which will find from config list"))
 
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false, "Whether skip the previous command hook")
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false, "Whether skip the post command hook")
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false,
+		i18n.T("Whether skip the previous command hook"))
+	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
+		i18n.T("Whether skip the post command hook"))
 }
 
 var pluginUploadCmd = &cobra.Command{
 	Use:     "upload",
 	Aliases: []string{"up"},
-	Short:   "Upload a plugin  to your Jenkins",
-	Long:    `Upload a plugin from local filesystem or remote URL to your Jenkins`,
+	Short:   i18n.T("Upload a plugin  to your Jenkins"),
+	Long:    i18n.T(`Upload a plugin from local filesystem or remote URL to your Jenkins`),
 	Example: `  jcli plugin upload --remote https://server/sample.hpi
 jcli plugin upload sample.hpi
 jcli plugin upload sample.hpi --show-progress=false`,
@@ -110,13 +119,14 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			},
 			ShowProgress: pluginUploadOption.ShowProgress,
 		}
-		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 		jclient.Debug = rootOptions.Debug
 
 		if pluginUploadOption.Remote != "" {
 			defer os.Remove(pluginUploadOption.pluginFilePath)
 		}
 
-		jclient.Upload(pluginUploadOption.pluginFilePath)
+		err := jclient.Upload(pluginUploadOption.pluginFilePath)
+		helper.CheckErr(cmd, err)
 	},
 }

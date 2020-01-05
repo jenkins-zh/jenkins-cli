@@ -31,19 +31,25 @@ labels:
     color: c5def5
   - name: documentation
     color: 5ce05e
+  - name: Hacktoberfest
+    description: More details from https://hacktoberfest.digitalocean.com/
+    color: 5ce05e
   - name: test
     color: c2c2fc
   - name: chore
     color: c2c2fc
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
   - name: no-changelog
     color: c2c2fc
 branches:
   - name: master
     protection:
       required_pull_request_reviews:
-        required_approving_review_count: 2
+        required_approving_review_count: 1
         dismiss_stale_reviews: true
-        require_code_owner_reviews: false
+        require_code_owner_reviews: true
         dismissal_restrictions:
           users: []
           teams: []

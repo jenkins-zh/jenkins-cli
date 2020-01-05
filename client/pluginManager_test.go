@@ -17,6 +17,7 @@ var _ = Describe("PluginManager test", func() {
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
 		pluginMgr    PluginManager
+		updateMgr    UpdateCenterManager
 	)
 
 	BeforeEach(func() {
@@ -25,6 +26,9 @@ var _ = Describe("PluginManager test", func() {
 		pluginMgr = PluginManager{}
 		pluginMgr.RoundTripper = roundTripper
 		pluginMgr.URL = "http://localhost"
+		updateMgr = UpdateCenterManager{}
+		updateMgr.RoundTripper = roundTripper
+		updateMgr.URL = "http://localhost"
 	})
 
 	AfterEach(func() {
@@ -34,16 +38,16 @@ var _ = Describe("PluginManager test", func() {
 	Context("basic function test", func() {
 		It("get install plugin query string", func() {
 			names := make([]string, 0)
-			Expect(getPluginsInstallQuery(names)).To(Equal(""))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal(""))
 
 			names = append(names, "abc")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc="))
 
 			names = append(names, "def")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 
 			names = append(names, "")
-			Expect(getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
+			Expect(pluginMgr.getPluginsInstallQuery(names)).To(Equal("plugin.abc=&plugin.def="))
 		})
 	})
 
@@ -67,6 +71,16 @@ var _ = Describe("PluginManager test", func() {
 			Expect(pluginList.Data[0].Name).To(Equal("fake"))
 		})
 
+		It("many plugins in the list", func() {
+			PrepareForManyAvaiablePlugin(roundTripper, pluginMgr.URL)
+
+			pluginList, err := pluginMgr.GetAvailablePlugins()
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Data)).To(Equal(6))
+			Expect(pluginList.Data[0].Name).To(Equal("fake-ocean"))
+		})
+
 		It("response with 500", func() {
 			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
 			response := &http.Response{
@@ -85,9 +99,9 @@ var _ = Describe("PluginManager test", func() {
 
 	Context("GetPlugins", func() {
 		It("no plugin in the list", func() {
-			PrepareForEmptyInstalledPluginList(roundTripper, pluginMgr.URL)
+			PrepareForEmptyInstalledPluginList(roundTripper, pluginMgr.URL, 1)
 
-			pluginList, err := pluginMgr.GetPlugins()
+			pluginList, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(BeNil())
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Plugins)).To(Equal(0))
@@ -96,7 +110,7 @@ var _ = Describe("PluginManager test", func() {
 		It("one plugin in the list", func() {
 			PrepareForOneInstalledPlugin(roundTripper, pluginMgr.URL)
 
-			pluginList, err := pluginMgr.GetPlugins()
+			pluginList, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(BeNil())
 			Expect(pluginList).NotTo(BeNil())
 			Expect(len(pluginList.Plugins)).To(Equal(1))
@@ -104,10 +118,73 @@ var _ = Describe("PluginManager test", func() {
 		})
 
 		It("response with 500", func() {
-			PrepareFor500InstalledPluginList(roundTripper, pluginMgr.URL)
+			PrepareFor500InstalledPluginList(roundTripper, pluginMgr.URL, 1)
 
-			_, err := pluginMgr.GetPlugins()
+			_, err := pluginMgr.GetPlugins(1)
 			Expect(err).To(HaveOccurred())
+		})
+
+		It("test with parameter", func() {
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL, 2)
+
+			pluginList, err := pluginMgr.GetPlugins(2)
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Plugins[0].Dependencies)).To(Equal(1))
+		})
+	})
+
+	Context("InstallPlugin", func() {
+		var (
+			pluginName string
+		)
+
+		BeforeEach(func() {
+			pluginName = "fake"
+		})
+
+		It("normal case, should success", func() {
+			PrepareForInstallPlugin(roundTripper, pluginMgr.URL, pluginName, "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).To(BeNil())
+		})
+
+		It("upload a plugin with a specific version, should success", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			PrepareDownloadPlugin(roundTripper)
+			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
+			Expect(err).To(BeNil())
+		})
+
+		It("upload a not exists plugin", func() {
+			pluginName = "hugo"
+			version := "0.1.8"
+			response := PrepareDownloadPlugin(roundTripper)
+			response.StatusCode = 400
+
+			err := pluginMgr.InstallPlugin([]string{pluginName + "@" + version})
+			Expect(err).NotTo(BeNil())
+		})
+
+		It("with 400", func() {
+			PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).NotTo(BeNil())
+		})
+
+		It("with 400, error message", func() {
+			response := PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
+			response.Header = map[string][]string{
+				"X-Error": []string{"X-Error"},
+			}
+
+			err := pluginMgr.InstallPlugin([]string{pluginName})
+			Expect(err).To(Equal(fmt.Errorf("X-Error")))
 		})
 	})
 
@@ -142,7 +219,62 @@ var _ = Describe("PluginManager test", func() {
 
 			PrepareForUploadPlugin(roundTripper, pluginMgr.URL)
 
-			pluginMgr.Upload(tmpfile.Name())
+			err = pluginMgr.Upload(tmpfile.Name())
+			Expect(err).NotTo(HaveOccurred())
+		})
+	})
+
+	Context("UpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForRequestUpdateCenter(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
+		})
+	})
+
+	Context("NullUpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForNoAvailablePlugins(roundTripper, pluginMgr.URL)
+
+			site, err := updateMgr.GetSite()
+			Expect(err).To(BeNil())
+			Expect(site).NotTo(BeNil())
+			Expect(site.ID).To(Equal("default"))
+		})
+	})
+
+	Context("ManyInstalledPlugins", func() {
+		It("normal case, should success", func() {
+			PrepareForManyInstalledPlugins(roundTripper, pluginMgr.URL, 1)
+
+			pluginList, err := pluginMgr.GetPlugins(1)
+			Expect(err).To(BeNil())
+			Expect(pluginList).NotTo(BeNil())
+			Expect(len(pluginList.Plugins)).To(Equal(4))
+			Expect(pluginList.Plugins[0].ShortName).To(Equal("fake-ocean"))
+		})
+	})
+
+	Context("500UpdateCenter", func() {
+		It("normal case, should success", func() {
+			PrepareForRequest500UpdateCenter(roundTripper, pluginMgr.URL)
+
+			_, err := updateMgr.GetSite()
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
+	Context("CheckUpdate", func() {
+		It("normal case, should success", func() {
+			PrepareCheckUpdate(roundTripper, pluginMgr.URL, "", "")
+
+			err := pluginMgr.CheckUpdate(func(_ *http.Response) {
+				// do nothing
+			})
+			Expect(err).To(BeNil())
 		})
 	})
 })

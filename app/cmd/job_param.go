@@ -2,17 +2,22 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
+// JobParamOption is the job param option
 type JobParamOption struct {
 	OutputOption
 
 	Indent bool
+
+	RoundTripper http.RoundTripper
 }
 
 var jobParamOption JobParamOption
@@ -25,28 +30,22 @@ func init() {
 
 var jobParamCmd = &cobra.Command{
 	Use:   "param <jobName>",
-	Short: "Get param of the job of your Jenkins",
-	Long:  `Get param of the job of your Jenkins`,
+	Short: i18n.T("Get parameters of the job of your Jenkins"),
+	Long:  i18n.T("Get parameters of the job of your Jenkins"),
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
 		name := args[0]
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobParamOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		if job, err := jclient.GetJob(name); err == nil {
+		job, err := jclient.GetJob(name)
+		var data []byte
+		if err == nil {
 			proCount := len(job.Property)
-			if jobBuildOption.Debug {
-				fmt.Println("Found properties ", proCount)
-			}
 			if proCount != 0 {
 				for _, pro := range job.Property {
 					if len(pro.ParameterDefinitions) == 0 {
@@ -54,23 +53,17 @@ var jobParamCmd = &cobra.Command{
 					}
 
 					if jobParamOption.Indent {
-						if data, err := json.MarshalIndent(pro.ParameterDefinitions, "", " "); err == nil {
-							fmt.Println(string(data))
-						} else {
-							log.Fatal(err)
-						}
+						data, err = json.MarshalIndent(pro.ParameterDefinitions, "", " ")
 					} else {
-						if data, err := json.Marshal(pro.ParameterDefinitions); err == nil {
-							fmt.Println(string(data))
-						} else {
-							log.Fatal(err)
-						}
+						data, err = json.Marshal(pro.ParameterDefinitions)
 					}
 					break
 				}
 			}
-		} else {
-			log.Fatal(err)
 		}
+		if err == nil && len(data) > 0 {
+			cmd.Println(string(data))
+		}
+		helper.CheckErr(cmd, err)
 	},
 }

@@ -9,8 +9,18 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
+
+	"github.com/jenkins-zh/jenkins-cli/app"
+	"github.com/jenkins-zh/jenkins-cli/util"
 )
+
+// language is for global Accept Language
+var language string
+
+// SetLanguage set the language
+func SetLanguage(lan string) {
+	language = lan
+}
 
 // JenkinsCore core informations of Jenkins
 type JenkinsCore struct {
@@ -32,6 +42,7 @@ type JenkinsCrumb struct {
 	Crumb             string
 }
 
+// GetClient get the default http Jenkins client
 func (j *JenkinsCore) GetClient() (client *http.Client) {
 	var roundTripper http.RoundTripper
 	if j.RoundTripper != nil {
@@ -40,18 +51,8 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		}
-		if j.Proxy != "" {
-			if proxyURL, err := url.Parse(j.Proxy); err == nil {
-				tr.Proxy = http.ProxyURL(proxyURL)
-			} else {
-				log.Fatal(err)
-			}
-
-			if j.ProxyAuth != "" {
-				basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
-				tr.ProxyConnectHeader = http.Header{}
-				tr.ProxyConnectHeader.Add("Proxy-Authorization", basicAuth)
-			}
+		if err := util.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
+			log.Fatal(err)
 		}
 		roundTripper = tr
 	}
@@ -59,6 +60,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 	return
 }
 
+// ProxyHandle takes care of the proxy setting
 func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	if j.ProxyAuth != "" {
 		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
@@ -66,13 +68,20 @@ func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	}
 }
 
+// AuthHandle takes care of the auth
 func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 	if j.UserName != "" && j.Token != "" {
 		request.SetBasicAuth(j.UserName, j.Token)
 	}
 
+	// not add the User-Agent for tests
+	if j.RoundTripper == nil {
+		request.Header.Set("User-Agent", app.GetCombinedVersion())
+	}
+
 	j.ProxyHandle(request)
 
+	// all post request to Jenkins must be has the crumb
 	if request.Method == "POST" {
 		err = j.CrumbHandle(request)
 	}
@@ -82,7 +91,7 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 // CrumbHandle handle crum with http request
 func (j *JenkinsCore) CrumbHandle(request *http.Request) error {
 	if c, err := j.GetCrumb(); err == nil && c != nil {
-		// cannot get the crumb could be a noraml situation
+		// cannot get the crumb could be a normal situation
 		j.CrumbRequestField = c.CrumbRequestField
 		j.Crumb = c.Crumb
 		request.Header.Add(j.CrumbRequestField, j.Crumb)
@@ -102,7 +111,7 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 
 	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
 		if statusCode == 200 {
-			json.Unmarshal(data, &crumbIssuer)
+			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
 		} else {
@@ -123,7 +132,7 @@ func (j *JenkinsCore) RequestWithData(method, api string, headers map[string]str
 
 	if statusCode, data, err = j.Request(method, api, headers, payload); err == nil {
 		if statusCode == successCode {
-			json.Unmarshal(data, obj)
+			err = json.Unmarshal(data, obj)
 		} else {
 			err = j.ErrorHandle(statusCode, data)
 		}
@@ -147,11 +156,65 @@ func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]
 
 // ErrorHandle handles the error cases
 func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
-	err = fmt.Errorf("unexpected status code: %d", statusCode)
+	if statusCode >= 400 && statusCode < 500 {
+		err = j.PermissionError(statusCode)
+	} else {
+		err = fmt.Errorf("unexpected status code: %d", statusCode)
+	}
 	if j.Debug {
 		ioutil.WriteFile("debug.html", data, 0664)
 	}
 	return
+}
+
+// PermissionError handles the no permission
+func (j *JenkinsCore) PermissionError(statusCode int) (err error) {
+	switch statusCode {
+	case 400:
+		err = fmt.Errorf("bad request, code %d", statusCode)
+	case 404:
+		err = fmt.Errorf("not found resources")
+	default:
+		err = fmt.Errorf("the current user has not permission, code %d", statusCode)
+	}
+	return
+}
+
+// RequestWithResponseHeader make a common request
+func (j *JenkinsCore) RequestWithResponseHeader(method, api string, headers map[string]string, payload io.Reader, obj interface{}) (
+	response *http.Response, err error) {
+	response, err = j.RequestWithResponse(method, api, headers, payload)
+
+	if err == nil && obj != nil && response.StatusCode == 200 {
+		var data []byte
+		if data, err = ioutil.ReadAll(response.Body); err == nil {
+			err = json.Unmarshal(data, obj)
+		}
+	}
+
+	return
+}
+
+// RequestWithResponse make a common request
+func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string]string, payload io.Reader) (
+	response *http.Response, err error) {
+	var (
+		req *http.Request
+	)
+
+	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
+		return
+	}
+	if err = j.AuthHandle(req); err != nil {
+		return
+	}
+
+	for k, v := range headers {
+		req.Header.Add(k, v)
+	}
+
+	client := j.GetClient()
+	return client.Do(req)
 }
 
 // Request make a common request
@@ -161,11 +224,15 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		req      *http.Request
 		response *http.Response
 	)
-
 	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
 		return
 	}
-	j.AuthHandle(req)
+	if language != "" {
+		req.Header.Set("Accept-Language", language)
+	}
+	if err = j.AuthHandle(req); err != nil {
+		return
+	}
 
 	for k, v := range headers {
 		req.Header.Add(k, v)

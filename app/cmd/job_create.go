@@ -1,65 +1,85 @@
 package cmd
 
 import (
-	"log"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
 
+// JobCreateOption is the job create option
 type JobCreateOption struct {
+	Copy string
+	Type string
+
+	RoundTripper http.RoundTripper
 }
 
 var jobCreateOption JobCreateOption
 
 func init() {
 	jobCmd.AddCommand(jobCreateCmd)
+	jobCreateCmd.Flags().StringVarP(&jobCreateOption.Copy, "copy", "", "", "Copy an exists job")
+	jobCreateCmd.Flags().StringVarP(&jobCreateOption.Type, "type", "", "", "Which type do you want to create")
 }
 
 var jobCreateCmd = &cobra.Command{
 	Use:   "create <jobName>",
-	Short: "Create a job in your Jenkins",
-	Long:  `Create a job in your Jenkins`,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			cmd.Help()
-			return
-		}
-
+	Short: i18n.T("Create a job in your Jenkins"),
+	Long:  i18n.T(`Create a job in your Jenkins`),
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jobName := args[0]
+		jclient := &client.JobClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: jobCreateOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JobClient{}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
-
-		types := make(map[string]string)
-		if categories, err := jclient.GetJobTypeCategories(); err == nil {
-			for _, category := range categories {
-				for _, item := range category.Items {
-					types[item.DisplayName] = item.Class
-				}
+		var createMode string
+		if createMode, err = jobCreateOption.getCreateMode(jclient); err == nil {
+			payload := client.CreateJobPayload{
+				Name: jobName,
+				Mode: createMode,
+				From: jobCreateOption.Copy,
 			}
-		}
-		typesArray := make([]string, 0)
-		for tp := range types {
-			typesArray = append(typesArray, tp)
-		}
 
-		var jobType string
-		prompt := &survey.Select{
-			Message: "Choose a job type:",
-			Options: typesArray,
-			Default: jobType,
+			if jobCreateOption.Copy != "" {
+				payload.Mode = "copy"
+			}
+			err = jclient.Create(payload)
 		}
-		survey.AskOne(prompt, &jobType)
-
-		if err := jclient.Create(jobName, types[jobType]); err != nil {
-			log.Fatal(err)
-		}
+		return
 	},
+}
+
+func (j *JobCreateOption) getCreateMode(jclient *client.JobClient) (mode string, err error) {
+	mode = j.Type
+	if j.Copy != "" || mode != "" {
+		return
+	}
+
+	var types []string
+	var typeMap map[string]string
+	typeMap, types, err = GetCategories(jclient)
+	if err != nil {
+		return
+	}
+
+	var jobType string
+	prompt := &survey.Select{
+		Message: "Choose a job type:",
+		Options: types,
+		Default: jobType,
+	}
+	if err = survey.AskOne(prompt, &jobType); err != nil {
+		return
+	}
+
+	mode = typeMap[jobType]
+	return
 }

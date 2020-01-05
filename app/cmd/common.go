@@ -3,31 +3,49 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
 
+// CommonOption contains the common options
+type CommonOption struct {
+	ExecContext     util.ExecContext
+	SystemCallExec  util.SystemCallExec
+	LookPathContext util.LookPathContext
+	RoundTripper    http.RoundTripper
+}
+
 // OutputOption represent the format of output
 type OutputOption struct {
 	Format string
+
+	WithoutHeaders bool
 }
 
+// FormatOutput is the interface of format output
 type FormatOutput interface {
 	Output(obj interface{}, format string) (data []byte, err error)
 }
 
 const (
-	JsonOutputFormat  string = "json"
-	YAMLOutputFormat  string = "yaml"
+	// JSONOutputFormat is the format of json
+	JSONOutputFormat string = "json"
+	// YAMLOutputFormat is the format of yaml
+	YAMLOutputFormat string = "yaml"
+	// TableOutputFormat is the format of table
 	TableOutputFormat string = "table"
 )
 
+// Output print the object into byte array
 func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 	switch o.Format {
-	case JsonOutputFormat:
+	case JSONOutputFormat:
 		return json.MarshalIndent(obj, "", "  ")
 	case YAMLOutputFormat:
 		return yaml.Marshal(obj)
@@ -38,17 +56,9 @@ func (o *OutputOption) Output(obj interface{}) (data []byte, err error) {
 
 // SetFlag set flag of output format
 func (o *OutputOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().StringVarP(&o.Format, "output", "o", "table", "Format the output, supported formats: table, json, yaml")
-}
-
-func Format(obj interface{}, format string) (data []byte, err error) {
-	if format == JsonOutputFormat {
-		return json.MarshalIndent(obj, "", "  ")
-	} else if format == YAMLOutputFormat {
-		return yaml.Marshal(obj)
-	}
-
-	return nil, fmt.Errorf("not support format %s", format)
+	cmd.Flags().StringVarP(&o.Format, "output", "o", TableOutputFormat, "Format the output, supported formats: table, json, yaml")
+	cmd.Flags().BoolVarP(&o.WithoutHeaders, "no-headers", "", false,
+		`When using the default output format, don't print headers (default print headers)`)
 }
 
 // BatchOption represent the options for a batch operation
@@ -72,6 +82,7 @@ func (b *BatchOption) Confirm(message string) bool {
 	return true
 }
 
+// SetFlag the flag for batch option
 func (b *BatchOption) SetFlag(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&b.Batch, "batch", "b", false, "Batch mode, no need confirm")
 }
@@ -96,7 +107,8 @@ type InteractiveOption struct {
 
 // SetFlag set the option flag to this cmd
 func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
-	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false, "Interactive mode")
+	cmd.Flags().BoolVarP(&b.Interactive, "interactive", "i", false,
+		i18n.T("Interactive mode"))
 }
 
 // HookOption is the option whether skip command hook
@@ -105,12 +117,23 @@ type HookOption struct {
 	SkipPostHook bool
 }
 
-func getCurrentJenkinsAndClient(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
 	jclient.Token = jenkins.Token
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+	}
 	return
 }

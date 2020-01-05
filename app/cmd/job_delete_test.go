@@ -19,6 +19,7 @@ var _ = Describe("job delete command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		err          error
 	)
 
 	BeforeEach(func() {
@@ -32,12 +33,16 @@ var _ = Describe("job delete command", func() {
 
 	AfterEach(func() {
 		rootCmd.SetArgs([]string{})
-		os.Remove(rootOptions.ConfigFile)
+		err = os.Remove(rootOptions.ConfigFile)
 		rootOptions.ConfigFile = ""
 		ctrl.Finish()
 	})
 
 	Context("basic cases", func() {
+		It("should not error", func() {
+			Expect(err).NotTo(HaveOccurred())
+		})
+
 		It("should success, with batch mode", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
@@ -48,7 +53,7 @@ var _ = Describe("job delete command", func() {
 			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/doDelete", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
-			request.Header.Add(util.CONTENT_TYPE, util.APP_FORM)
+			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

@@ -24,6 +24,7 @@ func init() {
 	pluginListCmd.Flags().StringArrayVarP(&pluginNewOption.New,"new", "", []string{}, "List of new plugins")
 }
 
+
 var pluginNewCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Print all the new plugins",

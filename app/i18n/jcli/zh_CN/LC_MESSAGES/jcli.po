@@ -1,0 +1,377 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: EMAIL\n"
+"POT-Creation-Date: 2019-11-21 13:00+0800\n"
+"PO-Revision-Date: 2019-11-22 23:01+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.4\n"
+"Last-Translator: rick <rick@jenkins-zh.cn>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_CN\n"
+
+#: app/cmd/job_type.go:32 app/cmd/job_type.go:33
+msgid "Print the types of job which in your Jenkins"
+msgstr ""
+
+#: app/cmd/plugin_check.go:27 app/cmd/plugin_check.go:28
+msgid "Check update center server"
+msgstr "检查插件更新中心"
+
+#: app/cmd/plugin_create.go:18
+msgid   "Create a plugin project from the archetypes"
+msgstr  "根据 Maven 骨架创建插件工程"
+
+#: app/cmd/center_download.go:44
+msgid "Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/"
+msgstr ""
+
+#: app/cmd/center_start.go:54
+msgid   "The of version of jenkins.war"
+msgstr  "jenkins.war 的版本"
+
+#: app/cmd/center_mirror.go:25
+msgid   "If you want to enable update center server"
+msgstr  "你是否想要启动更新中心"
+
+#: app/cmd/job.go:22
+msgid "Manage the job of your Jenkins"
+msgstr ""
+
+#: app/cmd/job_artifact_download.go:34
+msgid "Whether show the progress"
+msgstr "是否显示进度条"
+
+#: app/cmd/job_edit.go:29
+msgid "Filename to files to use to replace pipeline"
+msgstr ""
+
+#: app/cmd/job_build.go:40
+msgid   "Parameters of the job which are the entry format, for example: --param-entry name=value"
+msgstr  ""
+
+#: app/cmd/job_build.go:46
+msgid   "Build the job of your Jenkins.\n"
+        "You need to give the parameters if your pipeline has them. Learn more about it from https://jenkins.io/doc/book/pipeline/syntax/#parameters."
+msgstr  ""
+
+#: app/cmd/open.go:35 app/cmd/open.go:36
+msgid   "Open your Jenkins with a browser"
+msgstr  "在浏览器里打开 Jenkins"
+
+#: app/cmd/center_start.go:48
+msgid   "Environments for the Jenkins which as key-value format"
+msgstr  "传递给 Jenkins 的键值对的环境变量"
+
+#: app/cmd/plugin_download.go:36
+msgid "Download the plugins"
+msgstr "下载插件"
+
+#: app/cmd/restart.go:29 app/cmd/restart.go:30
+msgid "Restart your Jenkins"
+msgstr "重启 Jenkins"
+
+#: app/cmd/root.go:79
+msgid "Select a Jenkins server for this time"
+msgstr "选择本次执行的 Jenkins"
+
+#: app/cmd/center_start.go:63
+msgid   "Private key file path for https"
+msgstr  "HTTPS 协议的私钥文件路径"
+
+#: app/cmd/config_add.go:30
+msgid "Proxy of the Jenkins"
+msgstr "Jenkins 的代理"
+
+#: app/cmd/plugin_upgrade.go:32 app/cmd/plugin_upgrade.go:33
+msgid "Upgrade the specific plugin"
+msgstr "升级指定插件"
+
+#: app/cmd/config.go:31 app/cmd/config.go:32
+msgid "Manage the config of jcli"
+msgstr "管理 jcli 的配置"
+
+#: app/cmd/config_generate.go:28
+msgid "Copy the output into clipboard"
+msgstr "拷贝输出到剪贴板"
+
+#: app/cmd/job_build.go:36
+msgid   "Batch mode, no need to confirm"
+msgstr  "批处理模式，无需确认"
+
+#: app/cmd/casc_apply.go:25 app/cmd/casc_apply.go:26
+msgid   "Apply config through configuration-as-code"
+msgstr  "从应用已有的配置"
+
+#: app/cmd/root.go:77
+msgid "An alternative config file"
+msgstr "指定另外一个配置文件"
+
+#: app/cmd/config_list.go:19 app/cmd/config_list.go:20
+msgid "List all Jenkins config items"
+msgstr "列出所有的 Jenkins 配置项"
+
+#: app/cmd/job_edit.go:31
+msgid "Script to use to replace pipeline. Use script first if you give filename at the meantime."
+msgstr ""
+
+#: app/cmd/job_input.go:37 app/cmd/job_input.go:38
+msgid "Input a job in your Jenkins"
+msgstr ""
+
+#: app/cmd/plugin_create.go:19
+msgid   "Create a plugin project from the archetypes\n"
+        "Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/"
+msgstr  ""
+
+#: app/cmd/job_log.go:38
+msgid "Print the job's log of your Jenkins"
+msgstr "输出任务的日志"
+
+#: app/cmd/config_generate.go:34 app/cmd/config_generate.go:35
+msgid "Generate a sample config file for you"
+msgstr "为你生成一份样本配置文件"
+
+#: app/cmd/doc.go:30 app/cmd/doc.go:31
+msgid "Generate document for all jcl commands"
+msgstr "为所有的 jcli 命令生成文档"
+
+#: app/cmd/root.go:37
+msgid "jcli is a tool which could help you with your multiple Jenkins"
+msgstr "jcli 是帮助你管理多个 Jenkins 的工具"
+
+#: app/cmd/computer.go:15 app/cmd/computer.go:16
+msgid   "Manage the computers of your Jenkins"
+msgstr   "管理 Jenkins 节点"
+
+#: app/cmd/root.go:55
+msgid "Jenkins CLI (jcli) manage your Jenkins"
+msgstr "Jenkins CLI (jcli) 管理你的 Jenkins"
+
+#: app/cmd/plugin_upload.go:50
+msgid "Whether skip the previous command hook"
+msgstr "是否跳过前置命令钩子"
+
+#: app/cmd/shell.go:49 app/cmd/shell.go:50
+msgid   "Create a sub shell so that changes to a specific Jenkins remain local to the shell."
+msgstr  "创建一个子 shell 使得对配置的修改保持在一个上下文中"
+
+#: app/cmd/center_start.go:66
+msgid   "Don't run jenkins.war really"
+msgstr  "不真正地运行 jenkins.war"
+
+#: app/cmd/computer_list.go:31 app/cmd/computer_list.go:32
+msgid   "List all Jenkins agents"
+msgstr  "列出所有的 Jenkins 节点"
+
+#: app/cmd/plugin.go:21 app/cmd/plugin.go:22
+msgid "Manage the plugins of Jenkins"
+msgstr "管理 Jenkins 的插件"
+
+#: app/cmd/root.go:81
+msgid "Print the version of Jenkins CLI"
+msgstr "打印 Jenkins CLI 的版本"
+
+#: app/cmd/job_history.go:29 app/cmd/job_history.go:30
+msgid   "Print the history of job in your Jenkins"
+msgstr  "输出任务的构建历史"
+
+#: app/cmd/casc_export.go:25 app/cmd/casc_export.go:26
+msgid   "Export the config from configuration-as-code"
+msgstr  "导出配置及代码的配置"
+
+#: app/cmd/completion.go:14 app/cmd/completion.go:15
+msgid "Genereate bash completion scripts"
+msgstr "生成 bash 自动补全的脚本"
+
+#: app/cmd/plugin_download.go:31 app/cmd/plugin_install.go:29
+msgid "If you want to show the progress of download a plugin"
+msgstr "你是否希望显示插件下载的进度"
+
+#: app/cmd/casc_open.go:16 app/cmd/casc_open.go:17
+msgid   "Open Configuration as Code page in browser"
+msgstr  "在浏览器中打开配置及代码的页面"
+
+#: app/cmd/center_start.go:61
+msgid   "Certificate file path for https"
+msgstr  "HTTPS 协议的证书文件路径"
+
+#: app/cmd/plugin_download.go:37
+msgid "Download the plugins which contain the target plugin and its dependencies"
+msgstr "下载插件及其依赖"
+
+#: app/cmd/plugin_uninstall.go:26 app/cmd/plugin_uninstall.go:27
+msgid "Uninstall the plugins"
+msgstr "卸载插件"
+
+#: app/cmd/center_start.go:50
+msgid   "If you want to show the setup wizard at first start"
+msgstr  "是否要在第一次启动时显示配置向导"
+
+#: app/cmd/center_download.go:45
+msgid   "Download Jenkins"
+msgstr  "下载 Jenkins"
+
+#: app/cmd/center_start.go:46
+msgid   "Web context of Jenkins server"
+msgstr  "Jenkins Web 应用的上下文"
+
+#: app/cmd/plugin_upload.go:41
+msgid "Remote plugin URL"
+msgstr "远程插件 URL"
+
+#: app/cmd/plugin_upload.go:52
+msgid "Whether skip the post command hook"
+msgstr "是否跳过后置命令钩子"
+
+#: app/cmd/casc_reload.go:25 app/cmd/casc_reload.go:26
+msgid   "Reload config through configuration-as-code"
+msgstr  "重新加载配置及代码的配置"
+
+#: app/cmd/center_download.go:32
+msgid "Version of the Jenkins which you want to download"
+msgstr "你希望下载的 Jenkins 版本"
+
+#: app/cmd/center_download.go:38
+msgid   "If you want to show the download progress"
+msgstr  "是否显示下载进度"
+
+#: app/cmd/center_start.go:59
+msgid   "The port of https protocol"
+msgstr  "HTTPS 协议的端口"
+
+#: app/cmd/center_mirror.go:27
+msgid   "The address of update center site mirror"
+msgstr  "更新中心的地址"
+
+#: app/cmd/config_add.go:39 app/cmd/config_add.go:40
+msgid   "Add a Jenkins config item"
+msgstr  "增加一项 Jenkins 配置"
+
+#: app/cmd/config_add.go:22
+msgid "Name of the Jenkins"
+msgstr "Jenkins 的名称"
+
+#: app/cmd/config_add.go:28
+msgid "Token of the Jenkins"
+msgstr "Jenkins 的令牌"
+
+#: app/cmd/config_add.go:32
+msgid "ProxyAuth of the Jenkins"
+msgstr "Jenkins 链接的代理认证"
+
+#: app/cmd/center_watch.go:27
+msgid "The watch will be continue util Jenkins needs restart"
+msgstr ""
+
+#: app/cmd/config_add.go:26
+msgid "UserName of the Jenkins"
+msgstr "Jenkins 的用户名"
+
+#: app/cmd/config_edit.go:21 app/cmd/config_edit.go:22
+msgid "Edit a Jenkins config"
+msgstr "编辑 Jenkins 配置"
+
+#: app/cmd/plugin_download.go:25
+msgid "If you want to skip download dependency of plugin"
+msgstr "你是否想要跳过下载依赖插件"
+
+#: app/cmd/plugin_upload.go:45
+msgid "Password of remote plugin URL"
+msgstr "远程插件的秘密"
+
+#: app/cmd/plugin_upload.go:58
+msgid "Upload a plugin  to your Jenkins"
+msgstr "上传插件到你的 Jenkins"
+
+#: app/cmd/center.go:30
+msgid "Manage your update center"
+msgstr "管理你的 Jenkins 更新中心"
+
+#: app/cmd/job_artifact.go:33 app/cmd/job_artifact.go:34
+msgid "Print the artifact list of target job"
+msgstr "输出目标任务的归档文件列表"
+
+#: app/cmd/job_edit.go:27
+msgid   "URL of the Jenkinsfile to files to use to replace pipeline"
+msgstr  ""
+
+#: app/cmd/center_start.go:44
+msgid   "Port of Jenkins"
+msgstr  "Jenkins 的端口"
+
+#: app/cmd/center_start.go:52
+msgid   "If you want to download jenkins.war when it does not exist"
+msgstr  "当文件不存在时是否要下载 jenkins.war"
+
+#: app/cmd/job_search.go:29
+msgid "The number of limitation to print"
+msgstr "输出的数量限制"
+
+#: app/cmd/open.go:29
+msgid "Open the configuration page of Jenkins"
+msgstr ""
+
+#: app/cmd/plugin_install.go:35
+msgid "Install the plugins"
+msgstr "安装插件"
+
+#: app/cmd/center_download.go:38
+msgid   "The file of output"
+msgstr  "输出的文件路径"
+
+#: app/cmd/center_mirror.go:32 app/cmd/center_mirror.go:33
+msgid   "Set the update center to a mirror address"
+msgstr  "设置更新中心为一个镜像地址"
+
+#: app/cmd/plugin_search.go:33 app/cmd/plugin_search.go:34
+msgid "Print the plugins of your Jenkins"
+msgstr "搜索插件"
+
+#: app/cmd/plugin_upload.go:39
+msgid "Whether show the upload progress"
+msgstr "是否显示上传进度"
+
+#: app/cmd/casc_schema.go:25 app/cmd/casc_schema.go:26
+msgid   "Get the schema of configuration-as-code"
+msgstr  "获取配置及代码的结构"
+
+#: app/cmd/plugin_upload.go:47
+msgid "Remote Jenkins which will find from config list"
+msgstr ""
+
+#: app/cmd/plugin_download.go:29 app/cmd/plugin_install.go:27
+msgid "If you want to download plugin from a mirror site"
+msgstr "你是否想要从镜像站点下载插件"
+
+#: app/cmd/center_start.go:57
+msgid   "If you want to enable https"
+msgstr  "是否要启用 HTTPS"
+
+#: app/cmd/plugin_list.go:35 app/cmd/plugin_list.go:36
+msgid "Print all the plugins which are installed"
+msgstr "输出已经安装的插件"
+
+#: app/cmd/center_watch.go:29
+msgid "The watch will be continue util all Jenkins plugins installation is completed"
+msgstr ""
+
+#: app/cmd/common.go:101 app/cmd/config_generate.go:26
+msgid "Interactive mode"
+msgstr "交互模式"
+
+#: app/cmd/plugin_upload.go:43
+msgid "User of remote plugin URL"
+msgstr ""
+
+#: app/cmd/plugin_upload.go:59
+msgid "Upload a plugin from local filesystem or remote URL to your Jenkins"
+msgstr "上传来自本地文件系统或者远程 URL 的插件到你的 Jenkins"

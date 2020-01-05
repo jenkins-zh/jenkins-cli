@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+
 	"io/ioutil"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +18,8 @@ func init() {
 
 var configEditCmd = &cobra.Command{
 	Use:   "edit",
-	Short: "Edit a Jenkins config",
-	Long:  `Edit a Jenkins config`,
+	Short: i18n.T("Edit a Jenkins config"),
+	Long:  i18n.T(`Edit a Jenkins config`),
 	Run: func(_ *cobra.Command, _ []string) {
 		current := getCurrentJenkinsFromOptionsOrDie()
 		configPath := configOptions.ConfigFileLocation
