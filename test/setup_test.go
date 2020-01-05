@@ -1,11 +1,9 @@
 package test
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 )
 
@@ -31,14 +29,7 @@ func TestMain(m *testing.M) {
 	}
 
 	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		buf := make([]byte, 1024, 1024)
-		for {
-			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
-				break
-			} else {
-				fmt.Print(string(buf[:strNum]))
-			}
-		}
+		WaitRunningUp(reader)
 
 		m.Run()
 

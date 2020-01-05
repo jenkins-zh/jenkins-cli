@@ -1,11 +1,10 @@
 package withdependencies
 
 import (
-	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/test"
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"testing"
 )
 
@@ -31,64 +30,24 @@ func TestMain(m *testing.M) {
 	}
 
 	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		buf := make([]byte, 1024, 1024)
-		for {
-			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
-				fmt.Print(string(buf[:strNum]))
-				break
-			} else {
-				fmt.Print(string(buf[:strNum]))
-			}
-		}
+		test.WaitRunningUp(reader)
 
-		err = exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("install localization-zh-cn done")
+		test.InstallPlugin("localization-zh-cn", GetJenkinsURL(), true)
 
-		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
+		test.RestartAndWait(GetJenkinsURL(), reader)
 
-		// should assert the error of restart
-		exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
-		for {
-			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
-				break
-			} else {
-				fmt.Print(string(buf[:strNum]))
-			}
-		}
+		test.ExecuteCmd("center", "mirror", "--url", GetJenkinsURL())
+		test.ExecuteCmd("plugin", "check", "--url", GetJenkinsURL())
+		test.InstallPlugin("configuration-as-code", GetJenkinsURL(), true)
+		test.InstallPlugin("pipeline-restful-api", GetJenkinsURL(), true)
 
-		exec.Command("jcli", "center", "mirror", "--url", GetJenkinsURL()).Run()
-		exec.Command("jcli", "plugin", "check", "--url", GetJenkinsURL()).Run()
-		err = exec.Command("jcli", "plugin", "install", "pipeline-restful-api", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println("install pipeline-restful-api done")
-
-		err = exec.Command("jcli", "center", "watch", "--util-install-complete", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
-
-		// should assert the error of restart
-		exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
-		for {
-			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
-				fmt.Print(string(buf[:strNum]))
-				break
-			} else {
-				fmt.Print(string(buf[:strNum]))
-			}
-		}
+		test.RestartAndWait(GetJenkinsURL(), reader)
 
 		m.Run()
 
-		cmd.Process.Kill()
+		if err = cmd.Process.Kill(); err != nil {
+			panic(err)
+		}
 	}(cmdStderrPipe, cmd)
 
 	err = cmd.Wait()

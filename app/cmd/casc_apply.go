@@ -31,7 +31,7 @@ var cascApplyCmd = &cobra.Command{
 				RoundTripper: cascApplyOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 		return jClient.Apply()
 	},
 	Annotations: map[string]string{
