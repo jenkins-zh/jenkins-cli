@@ -52,10 +52,8 @@ func TestMain(m *testing.M) {
 			panic(err)
 		}
 
-		err = exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
+		// should assert the error of restart
+		exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
 		for {
 			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
 				break
@@ -77,10 +75,8 @@ func TestMain(m *testing.M) {
 			panic(err)
 		}
 
-		err = exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
-		if err != nil {
-			panic(err)
-		}
+		// should assert the error of restart
+		exec.Command("jcli", "restart", "-b", "--url", GetJenkinsURL()).Run()
 		for {
 			if strNum, err := reader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
 				fmt.Print(string(buf[:strNum]))
