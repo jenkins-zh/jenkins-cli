@@ -27,7 +27,7 @@ Jenkins CLI 可以帮忙你轻松地管理 Jenkins。不管你是一名插件开
 
 # 安装
 
-我们目前支持的操作系统包括：MacOS、Linux 以及 Widnows。
+我们目前支持的操作系统包括：MacOS、Linux 以及 Windows。
 
 ## mac
 
