@@ -57,6 +57,7 @@ Here are other package managers:
 
 * [GoFish](https://gofi.sh/) users can use `gofish install jcli`
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
+* [Chocolatey](https://chocolatey.org/packages/jcli) users can use `choco install jcli`
 
 See more about [how to download jcli](doc/download.md).
 
