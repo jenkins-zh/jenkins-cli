@@ -15,7 +15,6 @@ func PrepareShowTrend(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", keyword), nil)
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
 		{"name":"fake","version": "0.1.8","url": "http://updates.jenkins-ci.org/download/plugins/hugo/0.1.8/hugo.hpi",
@@ -82,7 +81,6 @@ func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugins/?q=%s&page=1&limit=1000", keyword), nil)
 	response = &http.Response{
 		StatusCode: 200,
-		Proto:      "HTTP/1.1",
 		Request:    request,
 		Body: ioutil.NopCloser(bytes.NewBufferString(`
 		"limit":1000,"page":1,"pages"":1,"total":1,
