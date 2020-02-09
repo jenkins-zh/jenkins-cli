@@ -9,8 +9,8 @@ BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSIO
 COVERED_MAIN_SRC_FILE=./main
 
 gen-mock:
-	go get github.com/golang/mock/gomock
-	go install github.com/golang/mock/mockgen
+	GO111MODULE=on go get github.com/golang/mock/gomock
+	GO111MODULE=on go install github.com/golang/mock/mockgen
 	find / -name mockgen
 	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
