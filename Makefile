@@ -11,7 +11,6 @@ COVERED_MAIN_SRC_FILE=./main
 gen-mock:
 	GO111MODULE=on go get github.com/golang/mock/gomock
 	GO111MODULE=on go install github.com/golang/mock/mockgen
-	find / -name mockgen
 	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
 init: gen-mock
