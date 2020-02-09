@@ -10,7 +10,7 @@ COVERED_MAIN_SRC_FILE=./main
 
 gen-mock:
 	go get github.com/golang/mock/gomock@v1.4.0
-	go get github.com/golang/mock/mockgen@v1.4.0
+	go install github.com/golang/mock/mockgen@v1.4.0
 	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
 init: gen-mock
