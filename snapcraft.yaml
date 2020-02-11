@@ -1,0 +1,33 @@
+name: jcli
+version: git
+summary: Jenkins CLI allows you manage your Jenkins in an easy way.
+description: |
+  Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a plugin
+
+confinement: devmode
+base: core18
+
+parts:
+  jcli:
+    plugin: go
+    source: https://github.com/jenkins-zh/jenkins-cli
+    source-type: git
+    override-build: |
+       echo "\nStarting override-build for jcli part:"
+       export GOPROXY=https://mirrors.aliyun.com/goproxy/
+       export GOPATH=$(dirname $SNAPCRAFT_PART_INSTALL)/go
+       cd $GOPATH/src/github.com/jenkins-zh/jenkins-cli
+       mkdir -p bin
+       curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-linux-amd64 -o bin/go-bindata
+       chmod u+x bin/go-bindata
+       go get -u github.com/gosexy/gettext/go-xgettext
+       go get -u golang.org/x/lint/golint
+       GO111MODULE=on go get github.com/golang/mock/gomock
+       GO111MODULE=on go install github.com/golang/mock/mockgen
+       mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+
+       CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o bin/linux/jcli
+       chmod +x bin/linux/jcli
+apps:
+  jcli:
+    command: bin/linux/jcli
