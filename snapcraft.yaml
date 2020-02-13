@@ -2,7 +2,7 @@ name: jcli
 version: v0.0.25
 summary: Jenkins CLI allows you manage your Jenkins in an easy way.
 description: |
-  Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a plugin
+  Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a plugin developer, administrator or just a regular user, it is made for you!
 
 confinement: strict
 base: core18
