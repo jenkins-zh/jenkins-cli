@@ -20,7 +20,11 @@ var _ = Describe("shell command", func() {
 		ctrl = gomock.NewController(GinkgoT())
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+
+		tempFile, err := ioutil.TempFile("", "example")
+		Expect(err).To(BeNil())
+
+		rootOptions.ConfigFile = tempFile.Name()
 		shellOptions.ExecContext = util.FakeExecCommandSuccess
 	})
 
