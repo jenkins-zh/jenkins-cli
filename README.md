@@ -58,7 +58,7 @@ Here are other package managers:
 * [GoFish](https://gofi.sh/) users can use `gofish install jcli`
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
 * [Chocolatey](https://chocolatey.org/packages/jcli) users can use `choco install jcli`
-* [snapcraft](https://snapcraft.io/jcli) users can use `sudo snap install jcli --beta`
+* [Snapcraft](https://snapcraft.io/jcli) users can use `sudo snap install jcli`
 
 See more about [how to download jcli](doc/download.md).
 You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
