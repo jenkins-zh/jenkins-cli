@@ -68,7 +68,9 @@ var _ = Describe("job test", func() {
 
 	Context("CreateSecret", func() {
 		It("should success", func() {
-			cred := client.StringCredentials{}
+			cred := client.StringCredentials{
+				Credential: client.Credential{Scope: "GLOBAL"},
+			}
 
 			client.PrepareForCreateSecretCredential(roundTripper, credentialsManager.URL,
 				"", "", store, cred)

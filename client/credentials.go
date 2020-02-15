@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"net/url"
 	"strings"
 
@@ -32,6 +33,8 @@ func (c *CredentialsManager) Delete(store, id string) (err error) {
 func (c *CredentialsManager) Create(store, credential string) (err error) {
 	api := fmt.Sprintf("/credentials/store/%s/domain/_/createCredentials", store)
 
+	logger.Debug("create credential", zap.String("api", api), zap.String("payload", credential))
+
 	formData := url.Values{}
 	formData.Add("json", fmt.Sprintf(`{"credentials": %s}`, credential))
 	payload := strings.NewReader(formData.Encode())
@@ -55,7 +58,6 @@ func (c *CredentialsManager) CreateUsernamePassword(store string, cred UsernameP
 func (c *CredentialsManager) CreateSecret(store string, cred StringCredentials) (err error) {
 	var payload []byte
 	cred.Class = "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl"
-	cred.Scope = "GLOBAL"
 	if payload, err = json.Marshal(cred); err == nil {
 		err = c.Create(store, string(payload))
 	}
