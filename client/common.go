@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"log"
@@ -162,9 +163,8 @@ func (j *JenkinsCore) ErrorHandle(statusCode int, data []byte) (err error) {
 	} else {
 		err = fmt.Errorf("unexpected status code: %d", statusCode)
 	}
-	if j.Debug {
-		ioutil.WriteFile("debug.html", data, 0664)
-	}
+
+	logger.Debug("get response", zap.String("data", string(data)))
 	return
 }
 
