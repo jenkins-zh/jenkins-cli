@@ -188,7 +188,7 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 
 // PrepareOneItem only for test
 func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d",
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
 		rootURL, name, kind, 0, 50), nil)
 	response := &http.Response{
 		StatusCode: 200,
@@ -204,7 +204,7 @@ func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, u
 
 // PrepareEmptyItems only for test
 func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d",
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
 		rootURL, name, kind, 0, 50), nil)
 	response := &http.Response{
 		StatusCode: 200,

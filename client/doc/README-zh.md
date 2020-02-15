@@ -125,3 +125,11 @@ func BuildJob(jobBuild JobBuildOptions) (e error) {
 	return
 }
 ```
+
+## 插件依赖
+
+本 Jenkins 客户端的部分 API 需要依赖特定的插件，请参考下面的列表：
+
+| API | Plugin |
+|---|---|
+| Search Job | [pipeline-restful-api](https://github.com/jenkinsci/pipeline-restful-api-plugin) |

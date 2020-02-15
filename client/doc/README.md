@@ -125,3 +125,11 @@ func BuildJob(jobBuild JobBuildOptions) (e error) {
 	return
 }
 ```
+
+## Plugin Dependencies
+
+Pay attention to the part of the Jenkins CLI, they need some special plugins. Please read through the following table：
+
+| API | Plugin |
+|---|---|
+| Search Job | [pipeline-restful-api](https://github.com/jenkinsci/pipeline-restful-api-plugin) |
