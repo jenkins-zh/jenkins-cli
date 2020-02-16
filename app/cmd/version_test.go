@@ -2,52 +2,51 @@ package cmd
 
 import (
 	"bytes"
+	"io/ioutil"
+	"os"
+
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 )
 
-var _ = Describe("doc command test", func() {
+var _ = Describe("version command", func() {
 	var (
 		ctrl *gomock.Controller
+		err  error
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		config = nil
-
+		rootCmd.SetArgs([]string{})
+		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
-		data, err := generateSampleConfig()
+		var data []byte
+		data, err = generateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
-		config = nil
+		rootCmd.SetArgs([]string{})
+		os.Remove(rootOptions.ConfigFile)
+		rootOptions.ConfigFile = ""
 		ctrl.Finish()
 	})
 
-	Context("basic test", func() {
+	Context("normal case", func() {
 		It("should success", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 
-			tmpdir, err := ioutil.TempDir("", "test-gen-cmd-tree")
-			Expect(err).To(BeNil())
-			defer os.RemoveAll(tmpdir)
-
-			rootCmd.SetArgs([]string{"doc", tmpdir})
+			rootCmd.SetArgs([]string{"version"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal(""))
-
-			_, err = os.Stat(filepath.Join(tmpdir, "jcli_doc.md"))
-			Expect(err).To(BeNil())
+			Expect(buf.String()).To(ContainSubstring(`Version: 
+Commit: 
+`))
 		})
 	})
 })

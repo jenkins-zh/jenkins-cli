@@ -18,6 +18,7 @@ var _ = Describe("user token command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		err          error
 	)
 
 	BeforeEach(func() {
@@ -27,6 +28,12 @@ var _ = Describe("user token command", func() {
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
@@ -52,11 +59,6 @@ var _ = Describe("user token command", func() {
 		})
 
 		It("should success", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
 			targetUser := "target-user"
 
 			tokenName := "fakename"
@@ -74,11 +76,6 @@ var _ = Describe("user token command", func() {
 		})
 
 		It("with status code 500", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
 			targetUser := "target-user"
 
 			tokenName := "fakename"

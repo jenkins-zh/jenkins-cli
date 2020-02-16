@@ -8,7 +8,6 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
 )
 
 var _ = Describe("queue command", func() {
@@ -38,16 +37,16 @@ var _ = Describe("queue command", func() {
 			Expect(err).To(BeNil())
 
 			rootCmd.SetArgs([]string{"queue"})
-			rootCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-				cmd.Print("help")
-			})
+			//rootCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
+			//	cmd.Print("help")
+			//})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
-			Expect(buf.String()).To(Equal("help"))
+			Expect(buf.String()).To(ContainSubstring("Manage the queue of your Jenkins"))
 		})
 	})
 })
