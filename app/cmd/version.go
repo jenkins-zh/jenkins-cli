@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -13,6 +14,8 @@ import (
 type VersionOption struct {
 	Changelog  bool
 	ShowLatest bool
+
+	GitHubClient *github.Client
 }
 
 var versionOption VersionOption
@@ -29,6 +32,11 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the user of your Jenkins",
 	Long:  `Print the user of your Jenkins`,
+	PreRun: func(cmd *cobra.Command, _ []string) {
+		if versionOption.GitHubClient == nil {
+			versionOption.GitHubClient = github.NewClient(nil)
+		}
+	},
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 
@@ -42,6 +50,7 @@ var versionCmd = &cobra.Command{
 				cmd.Println("Current Jenkins is:", current.Name)
 			} else {
 				err = fmt.Errorf("cannot found the configuration: %s", rootOptions.Jenkins)
+				return
 			}
 		}
 
@@ -49,7 +58,9 @@ var versionCmd = &cobra.Command{
 			version = strings.ReplaceAll(version, "dev-", "")
 		}
 
-		ghClient := &client.GitHubReleaseClient{}
+		ghClient := &client.GitHubReleaseClient{
+			Client: versionOption.GitHubClient,
+		}
 		var asset *client.ReleaseAsset
 		if versionOption.Changelog {
 			if asset, err = ghClient.GetJCLIAsset(version); err == nil && asset != nil {

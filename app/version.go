@@ -14,6 +14,11 @@ func GetVersion() string {
 	return version
 }
 
+// SetVersion is only for the test purpose
+func SetVersion(ver string) {
+	version = ver
+}
+
 // GetCommit returns the commit id
 func GetCommit() string {
 	return commit

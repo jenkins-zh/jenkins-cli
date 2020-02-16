@@ -10,7 +10,7 @@ require (
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
 	github.com/fatih/color v1.7.0
 	github.com/golang/mock v1.3.1
-	github.com/google/go-github v17.0.0+incompatible // indirect
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v29 v29.0.3
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
