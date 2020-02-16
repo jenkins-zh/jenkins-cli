@@ -6,18 +6,18 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
+	CommonOption
 	OutputOption
+	Name   string
+	Type   string
+	Parent string
+
 	Start int
 	Limit int
-	Name  string
-	Type  string
-
-	RoundTripper http.RoundTripper
 }
 
 var jobSearchOption JobSearchOption
@@ -29,9 +29,11 @@ func init() {
 	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Limit, "limit", "", 50,
 		i18n.T("The list of items limit"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Name, "name", "", "",
-		i18n.T("The name of plugin for search"))
+		i18n.T("The name of items for search"))
 	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
-		i18n.T("The type of plugin for search"))
+		i18n.T("The type of items for search"))
+	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Parent, "parent", "", "",
+		i18n.T("The parent of items for search"))
 	jobSearchOption.SetFlagWithHeaders(jobSearchCmd, "Name,DisplayName,Type,URL")
 
 	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
@@ -52,6 +54,7 @@ var jobSearchCmd = &cobra.Command{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: jobSearchOption.RoundTripper,
 			},
+			Parent: jobSearchOption.Parent,
 		}
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 

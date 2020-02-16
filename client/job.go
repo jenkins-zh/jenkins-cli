@@ -15,12 +15,14 @@ import (
 // JobClient is client for operate jobs
 type JobClient struct {
 	JenkinsCore
+
+	Parent string
 }
 
 // Search find a set of jobs by name
 func (q *JobClient) Search(name, kind string, start, limit int) (items []JenkinsItem, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d",
-		name, kind, start, limit),
+	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d&parent=%s",
+		name, kind, start, limit, q.Parent),
 		nil, nil, 200, &items)
 	return
 }
