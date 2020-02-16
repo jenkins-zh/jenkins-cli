@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// PrepareForGetJCLIAsset only for test
 func PrepareForGetJCLIAsset(ver string) (client *github.Client, teardown func()) {
 	var mux *http.ServeMux
 
@@ -21,6 +22,7 @@ func PrepareForGetJCLIAsset(ver string) (client *github.Client, teardown func())
 	return
 }
 
+// PrepareForGetReleaseAssetByTagName only for test
 func PrepareForGetReleaseAssetByTagName() (client *github.Client, teardown func()) {
 	var mux *http.ServeMux
 
@@ -33,6 +35,7 @@ func PrepareForGetReleaseAssetByTagName() (client *github.Client, teardown func(
 	return
 }
 
+// PrepareForGetLatestJCLIAsset only for test
 func PrepareForGetLatestJCLIAsset() (client *github.Client, teardown func()) {
 	var mux *http.ServeMux
 
@@ -45,6 +48,7 @@ func PrepareForGetLatestJCLIAsset() (client *github.Client, teardown func()) {
 	return
 }
 
+// PrepareForGetLatestReleaseAsset only for test
 func PrepareForGetLatestReleaseAsset() (client *github.Client, teardown func()) {
 	var mux *http.ServeMux
 
