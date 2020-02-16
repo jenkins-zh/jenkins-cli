@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -27,7 +28,11 @@ var computerListCmd = &cobra.Command{
 	Short: i18n.T("List all Jenkins agents"),
 	Long:  i18n.T("List all Jenkins agents"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jClient, _ := GetComputerClient(computerListOption.CommonOption)
+		jClient, config := GetComputerClient(computerListOption.CommonOption)
+		if config == nil {
+			err = fmt.Errorf("cannot found the configuration")
+			return
+		}
 
 		var computers client.ComputerList
 		if computers, err = jClient.List(); err == nil {

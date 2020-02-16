@@ -16,7 +16,6 @@ import (
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
-	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -27,7 +26,6 @@ var logger *zap.Logger
 type RootOptions struct {
 	ConfigFile string
 	Jenkins    string
-	Version    bool
 	Debug      bool
 
 	URL                string
@@ -59,51 +57,50 @@ More information could found at https://jenkins-zh.cn`,
 			return
 		}
 
-		if rootOptions.ConfigFile == "" {
-			rootOptions.ConfigFile = os.Getenv("JCLI_CONFIG")
-		}
-
-		logger.Debug("read config file", zap.String("path", rootOptions.ConfigFile))
-		if rootOptions.Version && cmd.Flags().NFlag() == 1 {
-			return
-		}
-
-		if rootOptions.ConfigFile == "" {
-			if err := loadDefaultConfig(); err != nil {
-				configLoadErrorHandle(err)
+		if needReadConfig(cmd) {
+			if rootOptions.ConfigFile == "" {
+				rootOptions.ConfigFile = os.Getenv("JCLI_CONFIG")
 			}
-		} else {
-			if err := loadConfig(rootOptions.ConfigFile); err != nil {
-				configLoadErrorHandle(err)
+
+			logger.Debug("read config file", zap.String("path", rootOptions.ConfigFile))
+			if rootOptions.ConfigFile == "" {
+				if err = loadDefaultConfig(); err != nil {
+					configLoadErrorHandle(err)
+				}
+			} else {
+				if err = loadConfig(rootOptions.ConfigFile); err != nil {
+					configLoadErrorHandle(err)
+				}
 			}
 		}
 
-		config = getConfig()
-		if config != nil {
-			// set Header Accept-Language
-			client.SetLanguage(config.Language)
-		}
+		if err == nil {
+			config = getConfig()
+			if config != nil {
+				// set Header Accept-Language
+				client.SetLanguage(config.Language)
+			}
 
-		err = rootOptions.RunDiagnose(cmd)
+			err = rootOptions.RunDiagnose(cmd)
+		}
 		return
 	},
 	BashCompletionFunction: jcliBashCompletionFunc,
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
-		if rootOptions.Version {
-			cmd.Printf("Version: %s\n", app.GetVersion())
-			cmd.Printf("Commit: %s\n", app.GetCommit())
+}
+
+func needReadConfig(cmd *cobra.Command) bool {
+	ignoreConfigLoad := []string{
+		"config.generate",
+		"version",
+	}
+	configPath := getCmdPath(cmd)
+
+	for _, item := range ignoreConfigLoad {
+		if item == configPath {
+			return false
 		}
-		if rootOptions.Jenkins != "" {
-			current := getCurrentJenkinsFromOptions()
-			if current != nil {
-				cmd.Println("Current Jenkins is:", current.Name)
-			} else {
-				err = fmt.Errorf("cannot found the configuration: %s", rootOptions.Jenkins)
-			}
-		}
-		return
-	},
+	}
+	return true
 }
 
 // RunDiagnose run the diagnose for a specific command
@@ -143,8 +140,6 @@ func init() {
 		"Logger level which could be: debug, info, warn, error")
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Doctor, "doctor", "", false,
 		i18n.T("Run the diagnose for current command"))
-	rootCmd.Flags().BoolVarP(&rootOptions.Version, "version", "v", false,
-		i18n.T("Print the version of Jenkins CLI"))
 
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.URL, "url", "", "",
 		i18n.T("The URL of Jenkins"))
