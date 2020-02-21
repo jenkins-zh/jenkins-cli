@@ -1,10 +1,10 @@
-name: DevImage
+name: Pull Request Build
 
 on:
-  push:
+  pull_request:
     branches:
       - master
-      - tiny-dev-image
+
 jobs:
   build:
     name: Build
@@ -42,11 +42,3 @@ jobs:
         with:
           name: windows
           path: bin/windows/jcli.exe
-
-      - name: Push Image
-        env:
-          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-        run: |
-          docker login --username surenpi --password ${DOCKER_HUB_TOKEN}
-          docker build . -t jenkinszh/jcli:dev -f Dockerfile-dev
-          docker push jenkinszh/jcli:dev
