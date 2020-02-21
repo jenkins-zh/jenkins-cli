@@ -25,13 +25,6 @@ jobs:
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make clean go-bindata-download-linux tools init build-all test
 
-      - name: Monitor coverage
-        id: coverage-monitor
-        uses: slavcodev/coverage-monitor-action@1.0.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          clover_file: "coverage.out"
-
       - name: Upload darwin artifact
         uses: actions/upload-artifact@v1.0.0
         with:
