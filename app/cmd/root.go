@@ -91,6 +91,7 @@ More information could found at https://jenkins-zh.cn`,
 func needReadConfig(cmd *cobra.Command) bool {
 	ignoreConfigLoad := []string{
 		"config.generate",
+		"center.start",
 		"version",
 	}
 	configPath := getCmdPath(cmd)
