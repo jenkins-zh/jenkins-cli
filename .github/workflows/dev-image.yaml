@@ -22,9 +22,26 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin
-          make tools
-          make build-all
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+          make clean go-bindata-download-linux tools init build-all test
+
+      - name: Upload darwin artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: darwin
+          path: bin/darwin/jcli
+
+      - name: Upload linux artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: linux
+          path: bin/linux/jcli
+
+      - name: Upload windows artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: windows
+          path: bin/windows/jcli
 
       - name: Push Image
         env:
