@@ -37,14 +37,12 @@ var _ = Describe("queue command", func() {
 			Expect(err).To(BeNil())
 
 			rootCmd.SetArgs([]string{"queue"})
-			//rootCmd.SetHelpFunc(func(cmd *cobra.Command, _ []string) {
-			//	cmd.Print("help")
-			//})
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("subcommand is required"))
 
 			Expect(buf.String()).To(ContainSubstring("Manage the queue of your Jenkins"))
 		})
