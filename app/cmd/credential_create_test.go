@@ -70,7 +70,9 @@ var _ = Describe("credential create command", func() {
 		})
 
 		It("should success with user name and password", func() {
-			credential := client.UsernamePasswordCredential{}
+			credential := client.UsernamePasswordCredential{
+				Credential: client.Credential{Scope: "GLOBAL"},
+			}
 
 			client.PrepareForCreateUsernamePasswordCredential(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", store, credential)
@@ -81,7 +83,9 @@ var _ = Describe("credential create command", func() {
 		})
 
 		It("should success with secret", func() {
-			credential := client.StringCredentials{}
+			credential := client.StringCredentials{
+				Credential: client.Credential{Scope: "GLOBAL"},
+			}
 
 			client.PrepareForCreateSecretCredential(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", store, credential)

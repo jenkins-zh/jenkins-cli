@@ -53,8 +53,8 @@ type PluginInfo struct {
 	Title             string             `json:"title"`
 	URL               string             `json:"url"`
 	Version           string             `json:"version"`
-
-	Stats PluginInfoStats
+	SecurityWarnings  []SecurityWarning  `json:"securityWarnings"`
+	Stats             PluginInfoStats
 }
 
 // PluginInfoStats is the plugin info stats
@@ -75,10 +75,34 @@ type PluginInstallationInfo struct {
 	Percentage float64
 }
 
+// SecurityWarning represents the plugin security-warining info
+type SecurityWarning struct {
+	Active   bool
+	ID       string
+	Message  string
+	URL      string
+	Versions []Version
+}
+
+// Version represents the SecurityWarning cover version
+type Version struct {
+	firstVersion string
+	lastVersion  string
+}
+
+// Plugins represents multi PluginInfo
+type Plugins struct {
+	Limit   int          `json:"limit"`
+	Page    int          `json:"page"`
+	Pages   int          `json:"pages"`
+	Total   int          `json:"total"`
+	Plugins []PluginInfo `json:"plugins"`
+}
+
 // ShowTrend show the trend of plugins
 func (d *PluginAPI) ShowTrend(name string) (trend string, err error) {
 	var plugin *PluginInfo
-	if plugin, err = d.getPlugin(name); err != nil {
+	if plugin, err = d.GetPlugin(name); err != nil {
 		return
 	}
 
@@ -144,7 +168,8 @@ func (d *PluginAPI) download(url string, name string) (err error) {
 	return
 }
 
-func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
+// GetPlugin will get the plugin information
+func (d *PluginAPI) GetPlugin(name string) (plugin *PluginInfo, err error) {
 	var cli = http.Client{}
 	if d.RoundTripper == nil {
 		cli.Transport = &http.Transport{
@@ -171,7 +196,7 @@ func (d *PluginAPI) getPlugin(name string) (plugin *PluginInfo, err error) {
 }
 
 func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo) {
-	plugin, err := d.getPlugin(pluginName)
+	plugin, err := d.GetPlugin(pluginName)
 	if err != nil {
 		log.Println("can't get the plugin by name:", pluginName)
 		panic(err)
@@ -191,6 +216,34 @@ func (d *PluginAPI) collectDependencies(pluginName string) (plugins []PluginInfo
 			d.dependencyMap[dependency.Name] = dependency.Version
 
 			plugins = append(plugins, d.collectDependencies(dependency.Name)...)
+		}
+	}
+	return
+}
+
+// BatchSearchPlugins will batch search plugins
+func (d *PluginAPI) BatchSearchPlugins(pluginNames string) (plugins []PluginInfo, err error) {
+	var cli = http.Client{}
+	if d.RoundTripper == nil {
+		cli.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+	} else {
+		cli.Transport = d.RoundTripper
+	}
+
+	pluginAPI := fmt.Sprintf("https://plugins.jenkins.io/api/plugins/?q=%s&page=1&limit=1000", pluginNames)
+	logger.Debug("fetch data from plugin API", zap.String("url", pluginAPI))
+
+	var resp *http.Response
+	if resp, err = cli.Get(pluginAPI); err == nil {
+		var body []byte
+		if body, err = ioutil.ReadAll(resp.Body); err == nil {
+			var pluginsInfo Plugins
+			err = json.Unmarshal(body, &pluginsInfo)
+			plugins = pluginsInfo.Plugins
 		}
 	}
 	return

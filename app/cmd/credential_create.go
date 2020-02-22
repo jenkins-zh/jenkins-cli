@@ -20,7 +20,8 @@ type CredentialCreateOption struct {
 
 	Secret string
 
-	Type string
+	Scope string
+	Type  string
 
 	RoundTripper http.RoundTripper
 }
@@ -33,11 +34,13 @@ func init() {
 		i18n.T("The store name of Jenkins credentials"))
 	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Type, "type", "", "basic",
 		i18n.T("The type of Jenkins credentials which could be: basic, secret"))
-	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.ID, "id", "", "",
+	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Scope, "scope", "", "GLOBAL",
+		i18n.T("The scope of Jenkins credentials which might be GLOBAL or SYSTEM"))
+	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.ID, "credential-id", "", "",
 		i18n.T("The ID of Jenkins credentials"))
-	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Username, "username", "", "",
+	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Username, "credential-username", "", "",
 		i18n.T("The Username of Jenkins credentials"))
-	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Password, "password", "", "",
+	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Password, "credential-password", "", "",
 		i18n.T("The Password of Jenkins credentials"))
 	credentialCreateCmd.Flags().StringVarP(&credentialCreateOption.Description, "desc", "", "",
 		i18n.T("The Description of Jenkins credentials"))
@@ -74,6 +77,7 @@ var credentialCreateCmd = &cobra.Command{
 				Username: credentialCreateOption.Username,
 				Password: credentialCreateOption.Password,
 				Credential: client.Credential{
+					Scope:       credentialCreateOption.Scope,
 					ID:          credentialCreateOption.ID,
 					Description: credentialCreateOption.Description,
 				},
@@ -82,6 +86,7 @@ var credentialCreateCmd = &cobra.Command{
 			err = jClient.CreateSecret(credentialCreateOption.Store, client.StringCredentials{
 				Secret: credentialCreateOption.Secret,
 				Credential: client.Credential{
+					Scope:       credentialCreateOption.Scope,
 					ID:          credentialCreateOption.ID,
 					Description: credentialCreateOption.Description,
 				},

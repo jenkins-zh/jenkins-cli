@@ -1,6 +1,12 @@
 Welcome! Any kinds of contributions are very welcome. Please go through our contribution
 guide before you create a Pull Request for `jcli`.
 
+## Golang Environment
+
+Go module proxy setting can speed the download of the dependencies:
+
+`export GOPROXY=https://mirrors.aliyun.com/goproxy/`
+
 ## CLI
 
 `jcli` is a command line interface. So a CLI framework is super important for us. Thanks to 

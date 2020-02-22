@@ -17,6 +17,13 @@ var _ = Describe("doc command test", func() {
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		config = nil
+
+		rootOptions.ConfigFile = "test.yaml"
+
+		data, err := generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {

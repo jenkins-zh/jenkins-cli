@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"io"
 	"io/ioutil"
 	"os"
 
@@ -19,7 +18,7 @@ var _ = Describe("computer list command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		buf          io.Writer
+		buf          *bytes.Buffer
 	)
 
 	BeforeEach(func() {
@@ -60,6 +59,13 @@ var _ = Describe("computer list command", func() {
 			rootCmd.SetArgs([]string{"computer", "list"})
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
+		})
+
+		It("with a fake jenkins as option", func() {
+			rootCmd.SetArgs([]string{"computer", "list", "--jenkins", "fake"})
+			_, err := rootCmd.ExecuteC()
+			Expect(err).To(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("cannot found the configuration"))
 		})
 	})
 })

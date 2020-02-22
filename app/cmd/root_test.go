@@ -31,18 +31,6 @@ var _ = Describe("Root cmd test", func() {
 		ctrl.Finish()
 	})
 
-	Context("invalid logger level", func() {
-		It("cause errors", func() {
-			rootCmd.SetArgs([]string{"--logger-level", "fake"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).To(HaveOccurred())
-
-			rootCmd.SetArgs([]string{"--logger-level", "warn"})
-			_, err = rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
-		})
-	})
-
 	Context("PreHook test", func() {
 		It("only with root cmd", func() {
 			path := getCmdPath(fakeRootCmd)
@@ -276,20 +264,6 @@ var _ = Describe("Root cmd test", func() {
 			rootCmd.SetOut(buf)
 		})
 
-		It("should contain substring Version:", func() {
-			rootCmd.SetArgs([]string{"--version"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
-			Expect(buf.String()).To(ContainSubstring("Version:"))
-		})
-
-		It("with a fake jenkins as option", func() {
-			rootCmd.SetArgs([]string{"--jenkins", "fake"})
-			_, err := rootCmd.ExecuteC()
-			Expect(err).To(HaveOccurred())
-			Expect(buf.String()).To(ContainSubstring("cannot found the configuration:"))
-		})
-
 		It("with an exists jenkins as option", func() {
 			configFile, err := ioutil.TempFile("/tmp", ".yaml")
 			Expect(err).NotTo(HaveOccurred())
@@ -303,8 +277,9 @@ var _ = Describe("Root cmd test", func() {
 
 			rootCmd.SetArgs([]string{"--jenkins", "yourServer", "--configFile", configFile.Name()})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
-			Expect(buf.String()).To(ContainSubstring("Current Jenkins is:"))
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("subcommand is required"))
+			Expect(buf.String()).To(ContainSubstring("jcli is Jenkins CLI which could help with your multiple Jenkins"))
 		})
 	})
 
@@ -325,7 +300,8 @@ var _ = Describe("Root cmd test", func() {
 			rootCmd.SetArgs([]string{"--configFile", "fake", "--url", "fake-url",
 				"--username", "fake-user", "--token", "fake-token"})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("subcommand is required"))
 
 			jenkins := getCurrentJenkinsFromOptions()
 			Expect(jenkins.URL).To(Equal("fake-url"))

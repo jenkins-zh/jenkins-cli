@@ -17,6 +17,7 @@ var _ = Describe("job stop command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		err          error
 	)
 
 	BeforeEach(func() {
@@ -26,6 +27,12 @@ var _ = Describe("job stop command", func() {
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
@@ -37,10 +44,6 @@ var _ = Describe("job stop command", func() {
 
 	Context("basic cases", func() {
 		It("should success, with batch mode", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
 
 			jobName := "fakeJob"
 			buildID := 1

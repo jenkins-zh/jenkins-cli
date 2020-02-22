@@ -15,6 +15,7 @@ import (
 var _ = Describe("config list command", func() {
 	var (
 		ctrl *gomock.Controller
+		err  error
 	)
 
 	BeforeEach(func() {
@@ -22,6 +23,12 @@ var _ = Describe("config list command", func() {
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
@@ -34,11 +41,6 @@ var _ = Describe("config list command", func() {
 
 	Context("basic cases", func() {
 		It("should success", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			rootCmd.SetArgs([]string{"config", "list"})

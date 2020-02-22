@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -72,6 +73,9 @@ func (c *CenterDownloadOption) DownloadJenkins() (err error) {
 		Output:       c.Output,
 		ShowProgress: c.ShowProgress,
 	}
+
+	jenkinsWarURL := jClient.GetJenkinsWarURL()
+	logger.Info("prepare to download jenkins.war", zap.String("URL", jenkinsWarURL))
 
 	err = jClient.DownloadJenkins()
 	return

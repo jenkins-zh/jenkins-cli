@@ -1,9 +1,10 @@
-name: DevImage
+name: Pull Request Build
 
 on:
-  push:
+  pull_request:
     branches:
       - master
+
 jobs:
   build:
     name: Build
@@ -21,8 +22,8 @@ jobs:
 
       - name: Build
         run: |
-          export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux
-          make clean go-bindata-download-linux tools init test build-all
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+          make clean go-bindata-download-linux tools init build-all test
 
       - name: Upload darwin artifact
         uses: actions/upload-artifact@v1.0.0
@@ -41,11 +42,3 @@ jobs:
         with:
           name: windows
           path: bin/windows/jcli.exe
-
-      - name: Push Image
-        env:
-          DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-        run: |
-          docker login --username surenpi --password ${DOCKER_HUB_TOKEN}
-          docker build . -t jenkinszh/jcli:dev -f Dockerfile-dev
-          docker push jenkinszh/jcli:dev

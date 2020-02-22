@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -36,6 +37,7 @@ type CenterStartOption struct {
 	RandomWebDir bool
 	Download     bool
 	Version      string
+  LTS          bool
 
 	DryRun bool
 }
@@ -61,6 +63,8 @@ func init() {
 		i18n.T("If you want to download jenkins.war when it does not exist"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", "2.190.3",
 		i18n.T("The of version of jenkins.war"))
+	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
+		i18n.T("If you want to download Jenkins as LTS"))
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
 		i18n.T("If you want to enable https"))
@@ -92,11 +96,13 @@ var centerStartCmd = &cobra.Command{
 
 		jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, centerStartOption.Version)
 
+		logger.Info("prepare to download jenkins.war", zap.String("localPath", jenkinsWar))
+
 		if !centerStartOption.DryRun {
 			if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
 				download := &CenterDownloadOption{
 					Mirror:       "default",
-					LTS:          true,
+					LTS:          centerStartOption.LTS,
 					Output:       jenkinsWar,
 					ShowProgress: true,
 					Version:      centerStartOption.Version,
