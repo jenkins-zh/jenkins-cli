@@ -12,7 +12,7 @@ grade: stable
 parts:
   jcli:
     plugin: dump
-    source: hhttps://github.com/jenkins-zh/jenkins-cli/releases/download/v0.0.26/jcli-linux-amd64.tar.gz
+    source: https://github.com/jenkins-zh/jenkins-cli/releases/download/v0.0.26/jcli-linux-amd64.tar.gz
     source-type: tar
     organize:
       jcli: bin/linux
