@@ -14,8 +14,6 @@ parts:
     plugin: dump
     source: https://github.com/jenkins-zh/jenkins-cli/releases/download/v0.0.26/jcli-linux-amd64.tar.gz
     source-type: tar
-    organize:
-      jcli: bin/linux
 apps:
   jcli:
-    command: bin/linux/jcli
+    command: jcli
