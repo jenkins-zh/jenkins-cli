@@ -277,7 +277,8 @@ var _ = Describe("Root cmd test", func() {
 
 			rootCmd.SetArgs([]string{"--jenkins", "yourServer", "--configFile", configFile.Name()})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("subcommand is required"))
 			Expect(buf.String()).To(ContainSubstring("jcli is Jenkins CLI which could help with your multiple Jenkins"))
 		})
 	})
@@ -299,7 +300,8 @@ var _ = Describe("Root cmd test", func() {
 			rootCmd.SetArgs([]string{"--configFile", "fake", "--url", "fake-url",
 				"--username", "fake-user", "--token", "fake-token"})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).NotTo(HaveOccurred())
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("subcommand is required"))
 
 			jenkins := getCurrentJenkinsFromOptions()
 			Expect(jenkins.URL).To(Equal("fake-url"))
