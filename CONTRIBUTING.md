@@ -71,3 +71,13 @@ We use [git-backup-actions](https://github.com/jenkins-zh/git-backup-actions/) t
 ## Develop Environment
 
 If you want to involve in this project, you need to execute the following command: `make tools`
+
+## Release
+
+### Snapcraft
+
+| Name | Description |
+|---|---|
+| `confinement` | `devmode` or `strict` |
+| `grade` |`devel` or `stable` |
+| `version` | `git` (will be replaced by a git describe based version string) or `v0.0.26` |
