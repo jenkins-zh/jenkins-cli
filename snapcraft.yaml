@@ -1,5 +1,5 @@
 name: jcli
-version: v0.0.25
+version: v0.0.26
 summary: Jenkins CLI allows you manage your Jenkins in an easy way.
 description: |
   Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a plugin developer, administrator or just a regular user, it is made for you!
@@ -12,7 +12,8 @@ grade: stable
 parts:
   jcli:
     plugin: dump
-    source: .
+    source: hhttps://github.com/jenkins-zh/jenkins-cli/releases/download/v0.0.26/jcli-linux-amd64.tar.gz
+    source-type: tar
     organize:
       jcli: bin/linux
 apps:
