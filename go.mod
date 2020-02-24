@@ -19,7 +19,7 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.11.0
-	github.com/onsi/gomega v1.8.1
+	github.com/onsi/gomega v1.9.0
 	github.com/spf13/cobra v0.0.6
 	github.com/stretchr/testify v1.4.0
 	go.uber.org/zap v1.13.0
