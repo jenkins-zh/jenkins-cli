@@ -21,6 +21,6 @@ require (
 	github.com/onsi/gomega v1.9.0
 	github.com/spf13/cobra v0.0.6
 	github.com/stretchr/testify v1.4.0
-	go.uber.org/zap v1.13.0
+	go.uber.org/zap v1.14.0
 	gopkg.in/yaml.v2 v2.2.5
 )
