@@ -92,6 +92,7 @@ func needReadConfig(cmd *cobra.Command) bool {
 	ignoreConfigLoad := []string{
 		"config.generate",
 		"center.start",
+		"cwp",
 		"version",
 	}
 	configPath := getCmdPath(cmd)
