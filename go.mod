@@ -3,7 +3,7 @@ module github.com/jenkins-zh/jenkins-cli
 go 1.12
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.0.6
+	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/atotto/clipboard v0.1.2
