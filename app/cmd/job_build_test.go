@@ -3,12 +3,13 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/Netflix/go-expect"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	expect "github.com/Netflix/go-expect"
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/golang/mock/gomock"

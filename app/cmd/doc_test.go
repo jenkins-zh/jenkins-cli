@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/golang/mock/gomock"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/golang/mock/gomock"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("doc command test", func() {
@@ -33,21 +34,20 @@ var _ = Describe("doc command test", func() {
 	})
 
 	Context("basic test", func() {
-		It("should success", func() {
+		FIt("should success", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 
-			tmpdir, err := ioutil.TempDir("", "test-gen-cmd-tree")
-			Expect(err).To(BeNil())
+			tmpdir := os.TempDir()
 			defer os.RemoveAll(tmpdir)
 
 			rootCmd.SetArgs([]string{"doc", tmpdir})
-			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			_, err := rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
 			Expect(buf.String()).To(Equal(""))
 
 			_, err = os.Stat(filepath.Join(tmpdir, "jcli_doc.md"))
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })
