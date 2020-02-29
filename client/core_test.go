@@ -50,6 +50,13 @@ var _ = Describe("core test", func() {
 			Expect(err).To(HaveOccurred())
 		})
 
+		It("should success", func() {
+			PrepareRestartDirectly(roundTripper, coreClient.URL, username, password, 503)
+
+			err := coreClient.RestartDirectly()
+			Expect(err).To(BeNil())
+		})
+
 		It("GetIdentity", func() {
 			PrepareForGetIdentity(roundTripper, coreClient.URL, username, password)
 

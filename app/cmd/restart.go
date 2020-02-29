@@ -11,6 +11,8 @@ import (
 type RestartOption struct {
 	BatchOption
 	CommonOption
+
+	Safe bool
 }
 
 var restartOption RestartOption
@@ -18,6 +20,8 @@ var restartOption RestartOption
 func init() {
 	rootCmd.AddCommand(restartCmd)
 	restartOption.SetFlag(restartCmd)
+	restartCmd.Flags().BoolVarP(&restartOption.Safe, "safe", "s", true,
+		i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then restart Jenkins"))
 	restartOption.BatchOption.Stdio = GetSystemStdio()
 	restartOption.CommonOption.Stdio = GetSystemStdio()
 }
@@ -40,7 +44,13 @@ var restartCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
-		if err = jClient.Restart(); err == nil {
+		if restartOption.Safe {
+			err = jClient.Restart()
+		} else {
+			err = jClient.RestartDirectly()
+		}
+
+		if err == nil {
 			cmd.Println("Please wait while Jenkins is restarting")
 		}
 		return
