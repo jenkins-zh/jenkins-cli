@@ -30,11 +30,11 @@ jobs:
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make test
 
-      - name: SonarCloud Scan
-        uses: LinuxSuRen/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: 3caad1285eb0edf2b4f65ee07b3cd8edde6c5176
+#      - name: SonarCloud Scan
+#        uses: LinuxSuRen/sonarcloud-github-action@master
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload darwin artifact
         uses: actions/upload-artifact@v1.0.0
