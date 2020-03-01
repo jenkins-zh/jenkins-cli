@@ -15,10 +15,6 @@ jobs:
         go-version: 1.13
       id: go
     - uses: actions/checkout@v1
-    - name: Build
-      run: |
-        export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-        git fetch --prune --unshallow
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v1
       with:
