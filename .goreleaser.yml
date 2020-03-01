@@ -17,9 +17,6 @@ builds:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.Commit}}
 dist: release
-sign:
-  signature: "${artifact}.asc"
-  artifacts: all
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
   replacements:
