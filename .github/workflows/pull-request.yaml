@@ -20,6 +20,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: check
+
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
