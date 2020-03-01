@@ -63,6 +63,9 @@ go-bindata-download-linux:
 	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-linux-amd64 -o bin/go-bindata
 	chmod u+x bin/go-bindata
 
+gen-data-linux: go-bindata-download-linux
+	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
+
 verify:
 	go vet ./...
 	golint -set_exit_status app/cmd/...
