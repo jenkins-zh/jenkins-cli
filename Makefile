@@ -7,6 +7,7 @@ COMMIT := $(shell git rev-parse --short HEAD)
 VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
 BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
+PATH  := $(PATH):$(PWD)/bin
 
 gen-mock:
 	go get github.com/golang/mock/gomock
@@ -94,7 +95,7 @@ gettext:
 	go-xgettext -k=i18n.T "${JCLI_FILES}" > app/i18n/jcli.pot
 
 gen-data:
-	PATH=$(PATH):$(shell pwd)/bin cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
+	cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
 image:
 	docker build . -t jenkinszh/jcli
