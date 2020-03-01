@@ -15,7 +15,7 @@ builds:
     - darwin
   ldflags:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
-    - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.Commit}}
+    - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
@@ -31,7 +31,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .Tag }}-next-{{.ShortCommit}}"
 changelog:
   skip: true
   sort: asc
