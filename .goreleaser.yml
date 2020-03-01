@@ -11,6 +11,8 @@ builds:
   goos:
     - freebsd
     - windows
+    - linux
+    - darwin
   ldflags:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.Commit}}
