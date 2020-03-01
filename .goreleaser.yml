@@ -13,13 +13,13 @@ builds:
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.Commit}}
 dist: release
 archives:
-- name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+- name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
   replacements:
     darwin: darwin
     linux: linux
     windows: windows
-    386: i386
-    amd64: x86_64
+    386: 386
+    amd64: amd64
   format_overrides:
     - goos: windows
       format: zip
