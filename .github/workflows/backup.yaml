@@ -16,7 +16,7 @@ jobs:
       id: go
     - uses: actions/checkout@v1
     - name: Download bindata
-      run: go-bindata-download-linux
+      run: make go-bindata-download-linux
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v1
       with:
