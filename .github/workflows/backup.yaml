@@ -25,7 +25,7 @@ jobs:
         cp release/jcli-darwin-amd64.tar.gz jcli-repo
         cp release/jcli-linux-amd64.tar.gz jcli-repo
         cp release/jcli-windows-386.tar.gz jcli-repo
-        cd jcli-repo && git config --local user.email "rick@jenkins-zh.cn" && git config --local user.name "rick" && git add . && git commit -m 'Auto commit by bot' && git push https://linuxsuren:${{ secrets.GITHUB_TOKEN }}@github.com/jenkins-zh/jcli-repo.git
+        cd jcli-repo && git config --local user.email "rick@jenkins-zh.cn" && git config --local user.name "rick" && git add . && git commit -m 'Auto commit by bot' && git push https://linuxsuren:${{ secrets.GITHUB_SECRETS }}@github.com/jenkins-zh/jcli-repo.git
 
     - name: backup
       uses: jenkins-zh/git-backup-actions@v0.0.3
