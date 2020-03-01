@@ -8,6 +8,9 @@ builds:
 - env:
   - CGO_ENABLED=0
   binary: jcli
+  goos:
+    - freebsd
+    - windows
   ldflags:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.Commit}}
