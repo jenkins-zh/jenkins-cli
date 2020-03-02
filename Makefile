@@ -7,6 +7,7 @@ COMMIT := $(shell git rev-parse --short HEAD)
 VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
 BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
 COVERED_MAIN_SRC_FILE=./main
+PATH  := $(PATH):$(PWD)/bin
 
 gen-mock:
 	go get github.com/golang/mock/gomock
@@ -31,7 +32,7 @@ win: gen-data
 
 build-all: darwin linux win
 
-release: clean build-all
+release: build-all
 	mkdir release
 	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-darwin-amd64.tar.gz > jcli-darwin-amd64.txt
 	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-linux-amd64.tar.gz > jcli-linux-amd64.txt
@@ -63,6 +64,9 @@ go-bindata-download-linux:
 	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-linux-amd64 -o bin/go-bindata
 	chmod u+x bin/go-bindata
 
+gen-data-linux: go-bindata-download-linux
+	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
+
 verify:
 	go vet ./...
 	golint -set_exit_status app/cmd/...
@@ -77,7 +81,7 @@ fmt:
 	go fmt ./client/...
 	go fmt ./app/...
 
-test: clean gen-data verify fmt
+test: verify fmt
 	mkdir -p bin
 	go vet ./...
 	go test ./... -v -coverprofile coverage.out

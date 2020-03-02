@@ -20,10 +20,27 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: latest
+          args: check
+
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make clean go-bindata-download-linux tools init build-all test
+          make clean go-bindata-download-linux tools init build-all
+
+      - name: Test
+        run: |
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+          make test
+
+#      - name: SonarCloud Scan
+#        uses: LinuxSuRen/sonarcloud-github-action@master
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Upload darwin artifact
         uses: actions/upload-artifact@v1.0.0

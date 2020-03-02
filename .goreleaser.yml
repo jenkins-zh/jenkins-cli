@@ -1,0 +1,84 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: jcli
+#before:
+#  hooks:
+#    - make gen-data
+builds:
+- env:
+  - CGO_ENABLED=0
+  binary: jcli
+  goos:
+    - freebsd
+    - windows
+    - linux
+    - darwin
+  ldflags:
+    - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
+    - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
+dist: release
+archives:
+- name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
+  replacements:
+    darwin: darwin
+    linux: linux
+    windows: windows
+    386: 386
+    amd64: amd64
+  format_overrides:
+    - goos: windows
+      format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next-{{.ShortCommit}}"
+changelog:
+  skip: true
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+brews:
+  -
+    name: jcli
+    github:
+      owner: jenkins-zh
+      name: homebrew-jcli
+    folder: Formula
+    homepage: "https://github.com/jenkins-zh/jenkins-cli"
+    description: Jenkins CLI allows you manage your Jenkins as an easy way
+    test: |
+      version_output = shell_output("#{bin}/jcli version")
+      assert_match version.to_s, version_output
+    install: |
+      bin.install name
+
+      # Install bash completion
+      output = Utils.popen_read("#{bin}/jcli completion")
+      (bash_completion/"jcli").write output
+
+      # Install zsh completion
+      output = Utils.popen_read("#{bin}/jcli completion --type zsh")
+      (zsh_completion/"_jcli").write output
+
+      prefix.install_metafiles
+nfpms:
+  - file_name_template: "{{ .Binary }}-{{.Os}}-{{.Arch}}"
+    homepage: https://github.com/jenkins-zh/jenkins-cli
+    description: Jenkins CLI allows you manage your Jenkins as an easy way
+    maintainer: rick <rick@jenkins-zh.cn>
+    license: MIT
+    vendor: Jenkins
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    replacements:
+      amd64: 64bit
+      386: 32bit
+      arm: ARM
+      arm64: ARM64
+      darwin: macOS
+      linux: linux
+      windows: windows
