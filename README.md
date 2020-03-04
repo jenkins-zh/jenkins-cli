@@ -22,6 +22,7 @@ developer, administrator or just a regular user, it is made for you!
 * Multiple Jenkins support
 * Plugins management (list, search, install, upload)
 * Job management (search, build, log)
+* Configuration as Code support
 * Open your Jenkins with a browser
 * Restart your Jenkins
 * Connection with proxy support
