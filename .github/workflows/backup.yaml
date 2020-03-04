@@ -49,7 +49,7 @@ jobs:
         curl -T release/jcli-linux-64bit.rpm -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/jcli-linux-64bit.rpm
-        curl -X POST https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/publish
+        curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/publish
 
         curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X DELETE https://api.bintray.com/packages/jenkins-zh/generic/jenkins-cli/versions/dev
         curl -T release/jcli-darwin-386.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
@@ -76,7 +76,7 @@ jobs:
         curl -T release/jcli-windows-amd64.zip -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-windows-amd64.zip
-        curl -X POST -ulinuxsuren:$BINTRAY_TOKEN https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/publish
+        curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST -ulinuxsuren:$BINTRAY_TOKEN https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/publish
 
     - name: backup
       uses: jenkins-zh/git-backup-actions@v0.0.3
