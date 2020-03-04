@@ -1,7 +1,19 @@
 ## JFrog Bintray
-你可以从 [bintray.com/jenkins-zh](https://bintray.com/jenkins-zh/jenkins-cli/jenkins-cli) 下载 `jcli`.
+你可以从 [bintray.com/jenkins-zh](https://bintray.com/beta/#/jenkins-zh/generic/jenkins-cli/) 下载 `jcli`.
 
 `curl -L "https://bintray.com/jenkins-zh/jenkins-cli/download_file?file_path=v0.0.24%2Fjcli-darwin-amd64.tar.gz"|tar xzv`
+
+点击[这里](https://dl.bintray.com/jenkins-zh/generic/jenkins-cli/)查看所有版本。
+
+## YUM
+
+通过下面的命令添加 YUM 源：
+
+```shell script
+wget https://bintray.com/jenkins-zh/rpm/rpm -O /etc/yum.repos.d/bintray-jcli.repo
+```
+
+然后，你就可以安装了：`yum install jcli`
 
 ## 镜像
 你也可以尝试下面的方法：
