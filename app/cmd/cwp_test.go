@@ -25,7 +25,7 @@ var _ = Describe("cwp command test", func() {
 		ctrl = gomock.NewController(GinkgoT())
 		localCache = os.TempDir()
 		roundTripper := mhttp.NewMockRoundTripper(ctrl)
-		cwpOpts := CWPOptions{
+		cwpOptions = CWPOptions{
 			CommonOption: CommonOption{RoundTripper: roundTripper},
 			MetadataURL:  "http://localhost/maven-metadata.xml",
 			LocalCache:   localCache,
@@ -33,7 +33,7 @@ var _ = Describe("cwp command test", func() {
 		prepareMavenMetadataRequest(roundTripper)
 
 		fakeContent := "hello"
-		prepareDownloadFileRequest(cwpOpts.GetCWPURL("2.0-alpha-2"), fakeContent, roundTripper)
+		prepareDownloadFileRequest(cwpOptions.GetCWPURL("2.0-alpha-2"), fakeContent, roundTripper)
 
 		cwpOptions.SystemCallExec = util.FakeSystemCallExecSuccess
 		cwpOptions.LookPathContext = util.FakeLookPath
@@ -48,7 +48,7 @@ var _ = Describe("cwp command test", func() {
 		It("should success", func() {
 			rootCmd.SetArgs([]string{"cwp"})
 			_, err := rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })
