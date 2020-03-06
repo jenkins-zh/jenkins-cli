@@ -217,3 +217,35 @@ func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind
 		request.SetBasicAuth(user, token)
 	}
 }
+
+// PrepareForDisableJob only for test
+func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/disable", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
+	//response := &http.Response{
+	//	StatusCode: 200,
+	//	Request:    request,
+	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
+	//}
+	//roundTripper.EXPECT().
+	//	RoundTrip(request).Return(response, nil)
+	//if user != "" && token != "" {
+	//	request.SetBasicAuth(user, token)
+	//}
+}
+
+// PrepareForEnableJob only for test
+func PrepareForEnableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/enable", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
+	//response := &http.Response{
+	//	StatusCode: 200,
+	//	Request:    request,
+	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
+	//}
+	//roundTripper.EXPECT().
+	//	RoundTrip(request).Return(response, nil)
+	//if user != "" && token != "" {
+	//	request.SetBasicAuth(user, token)
+	//}
+}

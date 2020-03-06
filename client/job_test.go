@@ -408,6 +408,26 @@ var _ = Describe("job test", func() {
 			Expect(log.Text).To(Equal("fake log"))
 		})
 	})
+
+	Context("Disable or enable a job", func() {
+		It("disable a job", func() {
+			jobName := "fakeJob"
+
+			PrepareForDisableJob(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.DisableJob(jobName)
+			Expect(err).To(BeNil())
+		})
+
+		It("enable a job", func() {
+			jobName := "fakeJob"
+
+			PrepareForEnableJob(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.EnableJob(jobName)
+			Expect(err).To(BeNil())
+		})
+	})
 })
 
 var _ = Describe("test function ParseJobPath", func() {
