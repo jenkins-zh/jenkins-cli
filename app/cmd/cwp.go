@@ -29,7 +29,7 @@ func init() {
 		i18n.T("Enables demo mode with predefined config file"))
 	cwpCmd.Flags().StringVarP(&cwpOptions.MvnSettingsFile, "mvn-settings-file", "", "",
 		i18n.T("Path to a custom Maven settings file to be used within the build"))
-	cwpCmd.Flags().StringVarP(&cwpOptions.TmpDir, "tmp-dir", "", "tmp",
+	cwpCmd.Flags().StringVarP(&cwpOptions.TmpDir, "tmp-dir", "", "",
 		i18n.T("Temporary directory for generated files and the output WAR."))
 	cwpCmd.Flags().StringVarP(&cwpOptions.Version, "version", "", "1.0-SNAPSHOT",
 		i18n.T("Version of WAR to be set."))
@@ -74,8 +74,9 @@ var cwpOptions CWPOptions
 var cwpCmd = &cobra.Command{
 	Use:   "cwp",
 	Short: i18n.T("Custom Jenkins WAR packager for Jenkins"),
-	Long:  i18n.T("Custom Jenkins WAR packager for Jenkins"),
-	RunE:  cwpOptions.Run,
+	Long: i18n.T(`Custom Jenkins WAR packager for Jenkins
+This's a wrapper of https://github.com/jenkinsci/custom-war-packager`),
+	RunE: cwpOptions.Run,
 	Annotations: map[string]string{
 		since: "v0.0.27",
 	},
@@ -116,7 +117,10 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		if o.ConfigPath != "" {
 			cwpArgs = append(cwpArgs, "-configPath", o.ConfigPath)
 		}
-		cwpArgs = append(cwpArgs, "-tmpDir", o.TmpDir)
+
+		if o.TmpDir != "" {
+			cwpArgs = append(cwpArgs, "-tmpDir", o.TmpDir)
+		}
 		err = util.Exec(binary, cwpArgs, env, o.SystemCallExec)
 	}
 	return
