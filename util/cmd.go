@@ -1,7 +1,6 @@
 package util
 
 import (
-	"os"
 	"os/exec"
 	"runtime"
 	"syscall"
@@ -57,7 +56,8 @@ type LookPathContext = func(file string) (string, error)
 func FakeExecCommandSuccess(command string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestShellProcessSuccess", "--", command}
 	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
+	cmd := exec.Command("go", cs...)
+	//cmd := exec.Command(os.Args[0], cs...)
 	cmd.Env = []string{"GO_TEST_PROCESS=1"}
 	return cmd
 }
