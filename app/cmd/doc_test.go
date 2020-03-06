@@ -34,7 +34,7 @@ var _ = Describe("doc command test", func() {
 	})
 
 	Context("basic test", func() {
-		FIt("should success", func() {
+		It("should success", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 
