@@ -20,7 +20,7 @@ wget https://bintray.com/jenkins-zh/rpm/rpm -O /etc/yum.repos.d/bintray-jcli.rep
 通过下面的命令添加 deb 源：
 
 ```shell script
-echo "deb https://dl.bintray.com/jenkins-zh/deb jcli jcli" | sudo tee -a /etc/apt/sources.list
+echo "deb https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/apt/sources.list
 ```
 
 然后，你就可以安装了：`sudo apt-get install jcli`

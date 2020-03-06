@@ -38,10 +38,18 @@ jobs:
         cp release/jcli-linux-amd64.tar.gz jcli-repo
         cp release/jcli-windows-386.zip jcli-repo
         cp release/jcli-windows-amd64.zip jcli-repo
+        cp release/jcli-freebsd-arm.tar.gz jcli-repo
+        cp release/jcli-linux-arm64.tar.gz jcli-repo
+        cp release/jcli-linux-arm.deb jcli-repo
+        cp release/jcli-linux-arm.tar.gz jcli-repo
+        cp release/jcli-linux-arm.rpm jcli-repo
+        cp release/jcli-linux-arm64.rpm jcli-repo
+        cp release/jcli-linux-arm64.deb jcli-repo
         cd jcli-repo && git config --local user.email "361981269@qq.com" && git config --local user.name "rick" && git add . && git commit -m 'Auto commit by rick bot' && git push https://linuxsuren:${{ secrets.GITHUB_SECRETS }}@github.com/jenkins-zh/jcli-repo.git
 
     - name: Publish Dev Version to Bintray
       run: |
+        echo "start to upload rpm packages"
         curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X DELETE https://api.bintray.com/packages/jenkins-zh/rpm/jenkins-cli/versions/dev
         curl -T release/jcli-linux-32bit.rpm -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
@@ -49,15 +57,33 @@ jobs:
         curl -T release/jcli-linux-64bit.rpm -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/jcli-linux-64bit.rpm
+        curl -T release/jcli-linux-arm.rpm -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/jcli-linux-arm.rpm
+        curl -T release/jcli-linux-arm64.rpm -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/jcli-linux-arm64.rpm
         curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST https://api.bintray.com/content/jenkins-zh/rpm/jenkins-cli/dev/publish
 
+        echo "start to upload deb packages"
         curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X DELETE https://api.bintray.com/packages/jenkins-zh/deb/jenkins-cli/versions/dev
-        curl -T jcli-linux-32bit.deb -ulinuxsuren:$BINTRAY_TOKEN \
-          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-32bit;deb_distribution=wheezy;deb_component=main;deb_architecture=i386
-        curl -T jcli-linux-64bit.deb -ulinuxsuren:$BINTRAY_TOKEN \
-          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-64bit;deb_distribution=wheezy;deb_component=main;deb_architecture=amd64
-        curl -X POST -ulinuxsuren:$BINTRAY_TOKEN https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/publish
+        curl -T release/jcli-linux-32bit.deb -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Debian-Distribution:wheezy" -H "X-Bintray-Debian-Component:main" -H "X-Bintray-Debian-Architecture:i386" \
+          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-32bit.deb
+        curl -T release/jcli-linux-64bit.deb -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Debian-Distribution:wheezy" -H "X-Bintray-Debian-Component:main" -H "X-Bintray-Debian-Architecture:amd64" \
+          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-64bit.deb
+        curl -T release/jcli-linux-arm.deb -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Debian-Distribution:wheezy" -H "X-Bintray-Debian-Component:main" -H "X-Bintray-Debian-Architecture:amd64" \
+          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-arm.deb
+        curl -T release/jcli-linux-arm64.deb -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Debian-Distribution:wheezy" -H "X-Bintray-Debian-Component:main" -H "X-Bintray-Debian-Architecture:amd64" \
+          https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/jcli-linux-arm64.deb
+        curl -X POST -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} https://api.bintray.com/content/jenkins-zh/deb/jenkins-cli/dev/publish
 
+
+
+        echo "start to upload generic packages"
         curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X DELETE https://api.bintray.com/packages/jenkins-zh/generic/jenkins-cli/versions/dev
         curl -T release/jcli-darwin-386.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
@@ -66,24 +92,33 @@ jobs:
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-darwin-amd64.tar.gz
         curl -T release/jcli-freebsd-386.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-                  -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
-                  https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-freebsd-386.tar.gz
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-freebsd-386.tar.gz
         curl -T release/jcli-freebsd-amd64.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-                  -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
-                  https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-freebsd-amd64.tar.gz
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-freebsd-amd64.tar.gz
+        curl -T release/jcli-freebsd-arm.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-freebsd-arm.tar.gz
+        curl -T release/jcli-linux-arm64.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-arm64.tar.gz
         curl -T release/jcli-linux-386.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-                  -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
-                  https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-386.tar.gz
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-386.tar.gz
         curl -T release/jcli-linux-amd64.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-                  -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
-                  https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-amd64.tar.gz
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-amd64.tar.gz
+        curl -T release/jcli-linux-arm.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
+          -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
+          https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-linux-arm.tar.gz
         curl -T release/jcli-windows-386.zip -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-windows-386.zip
         curl -T release/jcli-windows-amd64.zip -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
           -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:dev" \
           https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/jcli-windows-amd64.zip
-        curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST -ulinuxsuren:$BINTRAY_TOKEN https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/publish
+        curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/dev/publish
 
     - name: backup
       uses: jenkins-zh/git-backup-actions@v0.0.3
