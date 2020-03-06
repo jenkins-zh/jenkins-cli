@@ -70,6 +70,24 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	return
 }
 
+// DisableJob disable a job
+func (q *JobClient) DisableJob(jobName string) (err error) {
+	path := ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/disable", path)
+
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	return
+}
+
+// EnableJob disable a job
+func (q *JobClient) EnableJob(jobName string) (err error) {
+	path := ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/enable", path)
+
+	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	return
+}
+
 // StopJob stops a job build
 func (q *JobClient) StopJob(jobName string, num int) (err error) {
 	path := ParseJobPath(jobName)

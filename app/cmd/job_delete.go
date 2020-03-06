@@ -23,7 +23,7 @@ func init() {
 }
 
 var jobDeleteCmd = &cobra.Command{
-	Use:     "delete <jobName>",
+	Use:     "delete",
 	Aliases: GetAliasesDel(),
 	Short:   i18n.T("Delete a job in your Jenkins"),
 	Long:    i18n.T("Delete a job in your Jenkins"),
