@@ -84,6 +84,7 @@ func (c *CenterDownloadOption) DownloadJenkins() (err error) {
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: c.RoundTripper,
 		},
+		Formula:      c.Formula,
 		LTS:          c.LTS,
 		Version:      c.Version,
 		Output:       c.Output,
