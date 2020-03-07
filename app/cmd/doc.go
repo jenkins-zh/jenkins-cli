@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -28,10 +29,11 @@ version: %s
 )
 
 var docCmd = &cobra.Command{
-	Use:   "doc <output dir>",
-	Short: i18n.T("Generate document for all jcl commands"),
-	Long:  i18n.T("Generate document for all jcl commands"),
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "doc",
+	Example: "doc tmp",
+	Short:   i18n.T("Generate document for all jcl commands"),
+	Long:    i18n.T("Generate document for all jcl commands"),
+	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		now := time.Now().Format(time.RFC3339)
 		prepender := func(filename string) string {
@@ -48,9 +50,10 @@ var docCmd = &cobra.Command{
 		}
 
 		outputDir := args[0]
-
-		rootCmd.DisableAutoGenTag = true
-		err = doc.GenMarkdownTreeCustom(rootCmd, outputDir, prepender, linkHandler)
+		if err = os.MkdirAll(outputDir, os.FileMode(0755)); err == nil {
+			rootCmd.DisableAutoGenTag = true
+			err = doc.GenMarkdownTreeCustom(rootCmd, outputDir, prepender, linkHandler)
+		}
 		return
 	},
 }
