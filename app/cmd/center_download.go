@@ -23,6 +23,8 @@ type CenterDownloadOption struct {
 	Output       string
 	ShowProgress bool
 
+	Formula string
+
 	RoundTripper http.RoundTripper
 }
 
