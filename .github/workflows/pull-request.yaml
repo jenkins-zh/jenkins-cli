@@ -31,11 +31,6 @@ jobs:
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make clean go-bindata-download-linux tools init build-all
 
-      - name: Test
-        run: |
-          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make test
-
 #      - name: SonarCloud Scan
 #        uses: LinuxSuRen/sonarcloud-github-action@master
 #        env:
@@ -59,3 +54,8 @@ jobs:
         with:
           name: windows
           path: bin/windows/jcli.exe
+
+      - name: Test
+        run: |
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+          make test
