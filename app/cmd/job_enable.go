@@ -20,10 +20,10 @@ func init() {
 }
 
 var jobEnabelCmd = &cobra.Command{
-	Use:     "enable",
-	Short:   i18n.T("Enable a job in your Jenkins"),
-	Long:    i18n.T("Enable a job in your Jenkins"),
-	Args:    cobra.MinimumNArgs(1),
+	Use:   "enable",
+	Short: i18n.T("Enable a job in your Jenkins"),
+	Long:  i18n.T("Enable a job in your Jenkins"),
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jobName := args[0]
 		jclient := &client.JobClient{

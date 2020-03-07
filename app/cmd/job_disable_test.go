@@ -4,11 +4,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("job disable command", func() {
