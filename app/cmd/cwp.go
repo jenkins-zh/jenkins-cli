@@ -3,13 +3,14 @@ package cmd
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -120,6 +121,10 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		if o.TmpDir != "" {
 			cwpArgs = append(cwpArgs, "-tmpDir", o.TmpDir)
+		}
+
+		if o.Version != "" {
+			cwpArgs = append(cwpArgs, "-version", o.Version)
 		}
 		err = util.Exec(binary, cwpArgs, env, o.SystemCallExec)
 	}
