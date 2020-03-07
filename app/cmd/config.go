@@ -158,13 +158,20 @@ func findSuiteByName(name string) (suite *PluginSuite) {
 }
 
 func loadDefaultConfig() (err error) {
-	var userHome string
-	userHome, err = homedir.Dir()
-	if err == nil {
-		configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	var configPath string
+	if configPath, err = getDefaultConfigPath(); err == nil {
 		if _, err = os.Stat(configPath); err == nil {
 			err = loadConfig(configPath)
 		}
+	}
+	return
+}
+
+func getDefaultConfigPath() (configPath string, err error) {
+	var userHome string
+	userHome, err = homedir.Dir()
+	if err == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
 	}
 	return
 }

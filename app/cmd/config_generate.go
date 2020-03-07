@@ -60,7 +60,14 @@ var configGenerateCmd = &cobra.Command{
 // InteractiveWithConfig be friendly for a newer
 func (o *ConfigGenerateOption) InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
 	configPath := configOptions.ConfigFileLocation
-	_, err = os.Stat(configPath)
+	if configPath == "" {
+		configPath, err = getDefaultConfigPath()
+	}
+
+	if err == nil {
+		_, err = os.Stat(configPath)
+	}
+
 	if err != nil && os.IsNotExist(err) {
 		confirm := o.Confirm("Cannot found your config file, do you want to edit it?")
 		if confirm {
