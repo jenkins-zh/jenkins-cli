@@ -135,7 +135,7 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 	}
 
 	if u.Formula == "zh" {
-		warURL = fmt.Sprintf("https://dl.bintray.com/jenkins-zh/generic/jenkins/%s/jenkins.war", version)
+		warURL = fmt.Sprintf("https://dl.bintray.com/jenkins-zh/generic/jenkins/%s/jenkins-zh.war", version)
 	} else if u.LTS {
 		warURL = fmt.Sprintf("%s/war-stable/%s/jenkins.war", strings.TrimRight(u.MirrorSite, "/"), version)
 	} else {
