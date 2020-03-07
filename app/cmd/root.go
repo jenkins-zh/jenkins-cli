@@ -94,6 +94,7 @@ func needReadConfig(cmd *cobra.Command) bool {
 		"center.start",
 		"cwp",
 		"version",
+		"completion",
 	}
 	configPath := getCmdPath(cmd)
 
