@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -66,6 +67,7 @@ func (o *ConfigGenerateOption) InteractiveWithConfig(cmd *cobra.Command, data []
 			var content string
 			content, err = o.Editor(string(data), "Edit your config file")
 			if err == nil {
+				logger.Debug("write generated config file", zap.String("path", configPath))
 				err = ioutil.WriteFile(configPath, []byte(content), 0644)
 			}
 		}
