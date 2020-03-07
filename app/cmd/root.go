@@ -91,7 +91,7 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 func needReadConfig(cmd *cobra.Command) bool {
 	ignoreConfigLoad := []string{
 		"config.generate",
-		"center.start",
+		//"center.start",
 		"cwp",
 		"version",
 		"completion",
