@@ -46,10 +46,10 @@ var healthCheckRegister = &health.CheckRegister{
 
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
-	Short: i18n.T("jcli is a tool which could help you with your multiple Jenkins"),
-	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
-Manage your Jenkins and your pipelines
-More information could found at https://jenkins-zh.cn`,
+	Short: i18n.T("Jenkins CLI written by golang which could help you with your multiple Jenkins"),
+	Long: `Jenkins CLI written by golang which could help you with your multiple Jenkins,
+
+We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
 			client.SetLogger(logger)
@@ -91,9 +91,10 @@ More information could found at https://jenkins-zh.cn`,
 func needReadConfig(cmd *cobra.Command) bool {
 	ignoreConfigLoad := []string{
 		"config.generate",
-		"center.start",
+		//"center.start", // relay on the config when find a mirror
 		"cwp",
 		"version",
+		"completion",
 	}
 	configPath := getCmdPath(cmd)
 

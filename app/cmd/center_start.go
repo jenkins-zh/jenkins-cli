@@ -37,6 +37,7 @@ type CenterStartOption struct {
 	Download bool
 	Version  string
 	LTS      bool
+	Formula  string
 
 	DryRun bool
 }
@@ -64,6 +65,8 @@ func init() {
 		i18n.T("The of version of jenkins.war"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
 		i18n.T("If you want to download Jenkins as LTS"))
+	centerStartCmd.Flags().StringVarP(&centerStartOption.Formula, "formula", "", "",
+		i18n.T("The formula of jenkins.war, only support zh currently"))
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
 		i18n.T("If you want to enable https"))
@@ -99,6 +102,7 @@ var centerStartCmd = &cobra.Command{
 			if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
 				download := &CenterDownloadOption{
 					Mirror:       "default",
+					Formula:      centerStartOption.Formula,
 					LTS:          centerStartOption.LTS,
 					Output:       jenkinsWar,
 					ShowProgress: true,

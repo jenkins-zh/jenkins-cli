@@ -23,12 +23,21 @@ Useful links:
 
 * [Jenkins Remote Access API](https://wiki.jenkins.io/display/JENKINS/Remote+access+API)
 * [Jenkins REST API overview](https://www.youtube.com/watch?v=D93t1jElt4Q) by [Cliffano Subagio](https://github.com/cliffano)
-* 
 
 ## Testing
 
 We use a BDD Testing Framework to test our project. Please make sure you're familiar
 with [ginkgo](https://github.com/onsi/ginkgo) before you get start to contribute.
+
+### Test By Manual
+
+Unit testing can help us a lot, but doing the manual test is still necessary. I highly suggest that you test it under 
+a totally fresh environment. Here is list of free resources that you can use:
+
+| Provider | Link |
+|---|---|
+| Aliyun | [https://api.aliyun.com/#/cli](https://api.aliyun.com/#/cli) |
+| Google Could | [https://ssh.cloud.google.com/cloudshell/environment/view](https://ssh.cloud.google.com/cloudshell/environment/view) |
 
 ## Pull Requests
 

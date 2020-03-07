@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -59,13 +60,21 @@ var configGenerateCmd = &cobra.Command{
 // InteractiveWithConfig be friendly for a newer
 func (o *ConfigGenerateOption) InteractiveWithConfig(cmd *cobra.Command, data []byte) (err error) {
 	configPath := configOptions.ConfigFileLocation
-	_, err = os.Stat(configPath)
+	if configPath == "" {
+		configPath, err = getDefaultConfigPath()
+	}
+
+	if err == nil {
+		_, err = os.Stat(configPath)
+	}
+
 	if err != nil && os.IsNotExist(err) {
 		confirm := o.Confirm("Cannot found your config file, do you want to edit it?")
 		if confirm {
 			var content string
 			content, err = o.Editor(string(data), "Edit your config file")
 			if err == nil {
+				logger.Debug("write generated config file", zap.String("path", configPath))
 				err = ioutil.WriteFile(configPath, []byte(content), 0644)
 			}
 		}
