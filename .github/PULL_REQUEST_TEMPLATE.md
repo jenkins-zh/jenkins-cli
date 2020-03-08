@@ -9,7 +9,10 @@
 
 - [ ] [Quality Gate Passed](https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli). Change this URL to your PR.
 - [ ] The coverage is xxx on the new lines
-- [ ] I've tested it locally
+- [ ] I've tested it by manual in the following platform
+  - [ ] MacOS
+  - [ ] Linux
+  - [ ] Windows
 
 <!--
 Put an `x` into the [ ] to show you have filled the information
