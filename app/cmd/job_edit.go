@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -17,6 +19,7 @@ type JobEditOption struct {
 	Filename string
 	Script   string
 	URL      string
+	Sample   bool
 }
 
 var jobEditOption JobEditOption
@@ -29,14 +32,19 @@ func init() {
 		i18n.T("Filename to files to use to replace pipeline"))
 	jobEditCmd.Flags().StringVarP(&jobEditOption.Script, "script", "s", "",
 		i18n.T("Script to use to replace pipeline. Use script first if you give filename at the meantime."))
+	jobEditCmd.Flags().BoolVarP(&jobEditOption.Sample, "sample", "", false,
+		i18n.T("Give it a sample Jenkinsfile if the target script is empty"))
 	jobEditOption.Stdio = GetSystemStdio()
 }
 
 var jobEditCmd = &cobra.Command{
-	Use:   "edit <jobName>",
+	Use:   "edit",
 	Short: i18n.T("Edit the job of your Jenkins"),
-	Long:  i18n.T(`Edit the job of your Jenkins. We only support to edit the pipeline job.`),
-	Args:  cobra.MinimumNArgs(1),
+	Long: i18n.T(fmt.Sprintf(`Edit the job of your Jenkins. We only support to edit the pipeline job.
+Official Pipeline syntax document is here https://jenkins.io/doc/book/pipeline/syntax/
+
+%s`, GetEditorHelpText())),
+	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 		var content string
@@ -53,6 +61,27 @@ var jobEditCmd = &cobra.Command{
 		}
 		return
 	},
+}
+
+func (j *JobEditOption) getSampleJenkinsfile() string {
+	return `pipeline {
+    agent {
+		    label 'master'
+	  }
+    stages {
+        stage('Example') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+    post { 
+        always { 
+            echo 'I will always say Hello again!'
+        }
+    }
+}
+`
 }
 
 //func getPipeline(name string) (script string, err error) {
@@ -77,6 +106,13 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 		if job != nil {
 			content = job.Script
 		}
+
+		// if the original script is empty, give it a sample script
+		if content == "" && j.Sample {
+			content = j.getSampleJenkinsfile()
+		}
+
+		j.EditFileName = fmt.Sprintf("%s.groovy", strings.ReplaceAll(name, "/", "-"))
 		script, err = j.Editor(content, "Edit your pipeline script")
 	}
 	return

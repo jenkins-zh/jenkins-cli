@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -13,7 +14,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -32,6 +32,9 @@ type CommonOption struct {
 	RoundTripper    http.RoundTripper
 
 	Stdio terminal.Stdio
+
+	// EditFileName allow editor has a better performance base on this
+	EditFileName string
 }
 
 // OutputOption represent the format of output
@@ -237,9 +240,16 @@ type Selector interface {
 
 // Editor edit a file than return the content
 func (o *CommonOption) Editor(defaultContent, message string) (content string, err error) {
+	var fileName string
+	if o.EditFileName != "" {
+		fileName = o.EditFileName
+	} else {
+		fileName = "*.sh"
+	}
+
 	prompt := &survey.Editor{
 		Message:       message,
-		FileName:      "*.sh",
+		FileName:      fileName,
 		Default:       defaultContent,
 		HideDefault:   true,
 		AppendDefault: true,
@@ -320,4 +330,11 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 // GetAliasesDel returns the aliases for delete command
 func GetAliasesDel() []string {
 	return []string{"remove", "del"}
+}
+
+// GetEditorHelpText returns the help text related a text editor
+func GetEditorHelpText() string {
+	return `notepad is the default editor of Windows, vim is the default editor of unix.
+But if the environment variable "VISUAL" or "EDITOR" exists, jcli will take it.
+For example, you can set it under unix like this: export VISUAL=vi`
 }
