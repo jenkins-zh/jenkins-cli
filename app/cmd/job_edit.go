@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -112,7 +112,7 @@ func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (scr
 			content = j.getSampleJenkinsfile()
 		}
 
-		j.EditFileName = fmt.Sprintf("%s.groovy", strings.ReplaceAll(name, "/", "-"))
+		j.EditFileName = fmt.Sprintf("Jenkinsfile.%s.groovy", base64.StdEncoding.EncodeToString([]byte(name)))
 		script, err = j.Editor(content, "Edit your pipeline script")
 	}
 	return
