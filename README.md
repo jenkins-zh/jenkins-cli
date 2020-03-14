@@ -68,6 +68,8 @@ You can find the download details [from here](http://somsubhra.com/github-releas
 
 Read the [official document](http://jcli.jenkins-zh.cn/) for more details on how to use `jcli`.
 
+Or, you can take [a live interactive course](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli) of Jenkins CLI.
+
 # Contribution
 
 If you're interested in this project. Please go through the
