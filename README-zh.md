@@ -66,6 +66,8 @@ sudo mv jcli /usr/local/bin/
 
 查阅[官方文档](http://jcli.jenkins-zh.cn/)可以了解到更多有关如何使用 `jcli` 的信息。
 
+或者，你可以选择 Jenkins CLI 的[一个在线的交互式教程](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli)。
+
 # 贡献
 
 如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](CONTRIBUTING.md)。我们欢迎任何形式的贡献。
