@@ -60,7 +60,7 @@ Official Pipeline syntax document is here https://jenkins.io/doc/book/pipeline/s
 
 		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
 			if jobEditOption.TrimSpace {
-				content = regexp.MustCompile("(^\\W+)|(\\W+$)").ReplaceAllString(content, "")
+				content = regexp.MustCompile("^\\W+|\\s+$").ReplaceAllString(content, "")
 			}
 			err = jclient.UpdatePipeline(name, content)
 		}
