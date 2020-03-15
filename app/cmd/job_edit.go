@@ -3,23 +3,23 @@ package cmd
 import (
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"net/http"
+	"regexp"
 )
 
 // JobEditOption is the option for job create command
 type JobEditOption struct {
 	CommonOption
 
-	Filename string
-	Script   string
-	URL      string
-	Sample   bool
+	Filename  string
+	Script    string
+	URL       string
+	Sample    bool
+	TrimSpace bool
 }
 
 var jobEditOption JobEditOption
@@ -34,6 +34,8 @@ func init() {
 		i18n.T("Script to use to replace pipeline. Use script first if you give filename at the meantime."))
 	jobEditCmd.Flags().BoolVarP(&jobEditOption.Sample, "sample", "", false,
 		i18n.T("Give it a sample Jenkinsfile if the target script is empty"))
+	jobEditCmd.Flags().BoolVarP(&jobEditOption.TrimSpace, "trim", "", true,
+		i18n.T("If trim the leading and tailing white space"))
 	jobEditOption.Stdio = GetSystemStdio()
 }
 
@@ -57,6 +59,9 @@ Official Pipeline syntax document is here https://jenkins.io/doc/book/pipeline/s
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
 		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
+			if jobEditOption.TrimSpace {
+				content = regexp.MustCompile("(^\\W+)|(\\W+$)").ReplaceAllString(content, "")
+			}
 			err = jclient.UpdatePipeline(name, content)
 		}
 		return
