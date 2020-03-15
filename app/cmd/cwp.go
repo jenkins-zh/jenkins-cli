@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/mitchellh/go-homedir"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
@@ -40,6 +41,8 @@ func init() {
 	cwpCmd.Flags().StringVarP(&cwpOptions.MetadataURL, "metadata-url", "",
 		"https://repo.jenkins-ci.org/list/releases/io/jenkins/tools/custom-war-packager/custom-war-packager-cli/maven-metadata.xml",
 		i18n.T("The metadata URL"))
+	cwpCmd.Flags().StringToStringVarP(&cwpOptions.ValueSet, "value-set", "", nil,
+		`The value set of config template`)
 
 	localCache := path.Join(os.TempDir(), "/", ".jenkins-cli")
 	if userHome, err := homedir.Dir(); err == nil {
@@ -68,6 +71,8 @@ type CWPOptions struct {
 	ShowProgress bool
 	MetadataURL  string
 	LocalCache   string
+
+	ValueSet map[string]string
 }
 
 var cwpOptions CWPOptions
@@ -116,7 +121,15 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		if o.ConfigPath != "" {
-			cwpArgs = append(cwpArgs, "-configPath", o.ConfigPath)
+			configPath := o.ConfigPath
+			if o.ValueSet != nil {
+				if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
+					return
+				}
+				defer os.RemoveAll(configPath)
+			}
+
+			cwpArgs = append(cwpArgs, "-configPath", configPath)
 		}
 
 		if o.TmpDir != "" {
@@ -127,6 +140,17 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			cwpArgs = append(cwpArgs, "-version", o.Version)
 		}
 		err = util.Exec(binary, cwpArgs, env, o.SystemCallExec)
+	}
+	return
+}
+
+func RenderTemplate(path string, values map[string]string) (result string, err error) {
+	var t *template.Template
+	if t, err = template.ParseFiles(path); err == nil {
+		f, _ := ioutil.TempFile("/tmp", ".yaml")
+		err = t.Execute(f, values)
+
+		result = f.Name()
 	}
 	return
 }
