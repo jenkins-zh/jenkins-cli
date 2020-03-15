@@ -144,6 +144,7 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
+// RenderTemplate render a go template to a temporary file
 func RenderTemplate(path string, values map[string]string) (result string, err error) {
 	var t *template.Template
 	if t, err = template.ParseFiles(path); err == nil {
