@@ -42,12 +42,17 @@ func init() {
 		i18n.T("If you want to show the download progress"))
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Output, "output", "o", "",
 		i18n.T("The file of output"))
+	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Formula, "formula", "", "",
+		i18n.T("The formula of jenkins.war, only support zh currently"))
 }
 
 var centerDownloadCmd = &cobra.Command{
 	Use:   "download",
-	Short: i18n.T("Download Jenkins"),
-	Long:  i18n.T(`Download Jenkins from a mirror site. You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/`),
+	Short: i18n.T("Download jenkins.war"),
+	Long: i18n.T(`Download jenkins.war from a mirror site.
+You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/
+If you want to download different formulas of jenkins.war, please visit the following project
+https://github.com/jenkins-zh/docker-zh`),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		return centerDownloadOption.DownloadJenkins()
 	},
