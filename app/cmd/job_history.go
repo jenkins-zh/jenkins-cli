@@ -5,7 +5,6 @@ import (
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -42,25 +41,8 @@ var jobHistoryCmd = &cobra.Command{
 		builds, err = jClient.GetHistory(jobName)
 		if err == nil {
 			jobHistoryOption.Writer = cmd.OutOrStdout()
-			jobHistoryOption.CellRenderMap = map[string]RenderCell{
-				"Result": ColorResult,
-			}
 			err = jobHistoryOption.OutputV2(builds)
 		}
 		return
 	},
-}
-
-// ColorResult output the result with color
-func ColorResult(cell string) string {
-	switch cell {
-	case "":
-		return ""
-	case "SUCCESS":
-		return util.ColorInfo(cell)
-	case "FAILURE":
-		return util.ColorError(cell)
-	default:
-		return util.ColorWarning(cell)
-	}
 }

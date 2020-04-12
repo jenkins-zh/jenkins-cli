@@ -75,11 +75,3 @@ fake        false
 		})
 	})
 })
-
-var _ = Describe("ColorResult test", func() {
-	It("should success", func() {
-		Expect(ColorResult("unknown")).To(ContainSubstring("unknown"))
-		Expect(ColorResult("SUCCESS")).To(ContainSubstring("SUCCESS"))
-		Expect(ColorResult("FAILURE")).To(ContainSubstring("FAILURE"))
-	})
-})
