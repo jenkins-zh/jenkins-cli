@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make clean go-bindata-download-darwin tools init release
+          make clean gen-data-darwin tools init release
 
 #      - name: SonarCloud Scan
 #        uses: LinuxSuRen/sonarcloud-github-action@master
