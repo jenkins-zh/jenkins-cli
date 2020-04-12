@@ -67,6 +67,14 @@ go-bindata-download-linux:
 gen-data-linux: go-bindata-download-linux
 	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
+go-bindata-download-darwin:
+	mkdir -p bin
+	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-darwin-amd64 -o bin/go-bindata
+	chmod u+x bin/go-bindata
+
+gen-data-darwin: go-bindata-download-darwin
+	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
+
 verify: dep
 	go vet ./...
 	golint -set_exit_status app/cmd/...
