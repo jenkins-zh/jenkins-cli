@@ -89,7 +89,7 @@ fmt:
 	go fmt ./client/...
 	go fmt ./app/...
 
-test: verify fmt
+test:
 	mkdir -p bin
 	go test ./... -v -coverprofile coverage.out
 
