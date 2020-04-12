@@ -54,9 +54,6 @@ copy-linux: linux
 tools: i18n-tools
 	go get -u golang.org/x/lint/golint
 
-dep:
-	go install github.com/gosuri/uiprogress
-
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
 # 	go get -u github.com/go-bindata/go-bindata/...
@@ -91,11 +88,11 @@ test: verify fmt
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
-	go get github.com/gosuri/uiprogress
 	go get github.com/spf13/cobra
 	go get github.com/spf13/viper
 	go get gopkg.in/yaml.v2
 	go get github.com/Pallinder/go-randomdata
+	go install github.com/gosuri/uiprogress
 
 JCLI_FILES="app/cmd/*.go"
 gettext:
