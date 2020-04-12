@@ -22,6 +22,7 @@ mock
 # goland
 .idea
 */**/.DS_Store
+.DS_Store
 
 # test files
 app/cmd/test.yaml
