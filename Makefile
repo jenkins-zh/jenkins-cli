@@ -83,7 +83,6 @@ fmt:
 
 test: verify fmt
 	mkdir -p bin
-	go vet ./...
 	go test ./... -v -coverprofile coverage.out
 
 dep:
