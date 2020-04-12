@@ -41,9 +41,7 @@ var _ = Describe("queue command", func() {
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("subcommand is required"))
-
+			Expect(err).NotTo(HaveOccurred())
 			Expect(buf.String()).To(ContainSubstring("Manage the queue of your Jenkins"))
 		})
 	})

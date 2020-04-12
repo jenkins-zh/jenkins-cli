@@ -264,8 +264,14 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
 	cmd := exec.Command(array[0], array[1:]...)
-	cmd.Stdout = writer
-	err = cmd.Run()
+	if err = cmd.Start(); err == nil {
+		if err = cmd.Wait(); err == nil {
+			var data []byte
+			if data, err = cmd.Output(); err == nil {
+				_, _ = writer.Write(data)
+			}
+		}
+	}
 	return
 }
 
