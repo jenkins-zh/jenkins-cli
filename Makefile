@@ -54,6 +54,9 @@ copy-linux: linux
 tools: i18n-tools
 	go get -u golang.org/x/lint/golint
 
+dep:
+	go install github.com/gosuri/uiprogress
+
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
 # 	go get -u github.com/go-bindata/go-bindata/...
