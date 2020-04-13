@@ -3,6 +3,7 @@ package util
 import (
 	"os/exec"
 	"runtime"
+	"strings"
 	"syscall"
 )
 
@@ -18,6 +19,7 @@ func Open(url string, browser string, cmdContext ExecContext) error {
 	case "darwin":
 		cmd = "Open"
 		if browser != "" {
+			browser = strings.ReplaceAll(browser, "-", " ")
 			args = append(args, "-a", browser)
 		}
 	default: // "linux", "freebsd", "openbsd", "netbsd"

@@ -75,7 +75,10 @@ go-bindata-download-darwin:
 gen-data-darwin: go-bindata-download-darwin
 	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
-verify: dep tools
+verify: dep tools lint
+
+
+lint:
 	go vet ./...
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...

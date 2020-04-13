@@ -305,6 +305,7 @@ type HookOption struct {
 	SkipPostHook bool
 }
 
+// Deprecated, please replace this with getCurrentJenkinsAndClient
 func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL
