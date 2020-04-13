@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -26,7 +27,8 @@ var pluginOpenCmd = &cobra.Command{
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 
 		if jenkins.URL != "" {
-			err = util.Open(fmt.Sprintf("%s/pluginManager", jenkins.URL), pluginOpenOption.ExecContext)
+			browser := os.Getenv("BROWSER")
+			err = util.Open(fmt.Sprintf("%s/pluginManager", jenkins.URL), browser, pluginOpenOption.ExecContext)
 		} else {
 			err = fmt.Errorf("no URL fond from %s", jenkins.Name)
 		}

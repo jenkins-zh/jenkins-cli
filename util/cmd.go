@@ -7,7 +7,7 @@ import (
 )
 
 // Open a URL in a browser
-func Open(url string, cmdContext ExecContext) error {
+func Open(url string, browser string, cmdContext ExecContext) error {
 	var cmd string
 	var args []string
 
@@ -17,6 +17,9 @@ func Open(url string, cmdContext ExecContext) error {
 		args = []string{"/c", "start"}
 	case "darwin":
 		cmd = "Open"
+		if browser != "" {
+			args = append(args, "-a", browser)
+		}
 	default: // "linux", "freebsd", "openbsd", "netbsd"
 		cmd = "xdg-Open"
 	}
