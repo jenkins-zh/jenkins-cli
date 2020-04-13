@@ -95,12 +95,12 @@ fmt:
 test:
 	mkdir -p bin
 	go test ./util -v -count=1
+	go test ./client -v -count=1 -coverprofile coverage.out
 	go test ./app -v -count=1
-	go test ./app/cmd -v -count=1
 	go test ./app/health -v -count=1
 	go test ./app/helper -v -count=1
 	go test ./app/i18n -v -count=1
-	go test ./client -v -count=1
+	go test ./app/cmd -v -count=1
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
