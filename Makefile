@@ -16,16 +16,16 @@ gen-mock:
 
 init: gen-mock
 
-darwin: gen-data
+darwin:
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 	rm -rf jcli && ln -s bin/darwin/$(NAME) jcli
 
-linux: gen-data
+linux:
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
 
-win: gen-data
+win:
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
@@ -67,7 +67,15 @@ go-bindata-download-linux:
 gen-data-linux: go-bindata-download-linux
 	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
-verify:
+go-bindata-download-darwin:
+	mkdir -p bin
+	curl -L https://github.com/kevinburke/go-bindata/releases/download/v3.11.0/go-bindata-darwin-amd64 -o bin/go-bindata
+	chmod u+x bin/go-bindata
+
+gen-data-darwin: go-bindata-download-darwin
+	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
+
+verify: dep tools
 	go vet ./...
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...
@@ -81,18 +89,23 @@ fmt:
 	go fmt ./client/...
 	go fmt ./app/...
 
-test: verify fmt
+test:
 	mkdir -p bin
-	go vet ./...
-	go test ./... -v -coverprofile coverage.out
+	go test ./util -v -count=1
+	go test ./app -v -count=1
+	go test ./app/cmd -v -count=1
+	go test ./app/health -v -count=1
+	go test ./app/helper -v -count=1
+	go test ./app/i18n -v -count=1
+	go test ./client -v -count=1
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
-	go get github.com/gosuri/uiprogress
 	go get github.com/spf13/cobra
 	go get github.com/spf13/viper
 	go get gopkg.in/yaml.v2
 	go get github.com/Pallinder/go-randomdata
+	go install github.com/gosuri/uiprogress
 
 JCLI_FILES="app/cmd/*.go"
 gettext:

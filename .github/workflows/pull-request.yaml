@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-18.04
+    runs-on: macos-10.15
     steps:
 
       - name: Set up Go 1.13
@@ -29,7 +29,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make clean go-bindata-download-linux tools init release
+          make clean gen-data-darwin tools release
 
 #      - name: SonarCloud Scan
 #        uses: LinuxSuRen/sonarcloud-github-action@master
