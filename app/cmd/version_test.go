@@ -54,15 +54,15 @@ var _ = Describe("version command", func() {
 			Expect(buf.String()).To(ContainSubstring("cannot found the configuration: fakeJenkins"))
 		})
 
-		It("should success", func() {
-			rootCmd.SetArgs([]string{"version", "--jenkins", "yourServer"})
-			_, err = rootCmd.ExecuteC()
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(ContainSubstring("Current Jenkins is:"))
-			Expect(buf.String()).To(ContainSubstring(`Version: 
-Commit: 
-`))
-		})
+		//		It("should success", func() {
+		//			rootCmd.SetArgs([]string{"version", "--jenkins", "yourServer"})
+		//			_, err = rootCmd.ExecuteC()
+		//			Expect(err).To(BeNil())
+		//			Expect(buf.String()).To(ContainSubstring("Current Jenkins is:"))
+		//			Expect(buf.String()).To(ContainSubstring(`Version:
+		//Commit:
+		//`))
+		//		})
 
 		It("Output changelog", func() {
 			ghClient, teardown := client.PrepareForGetJCLIAsset("v0.0.1")
