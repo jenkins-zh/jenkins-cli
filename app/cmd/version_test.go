@@ -14,16 +14,21 @@ import (
 
 var _ = Describe("version command", func() {
 	var (
-		ctrl *gomock.Controller
-		buf  *bytes.Buffer
-		err  error
+		ctrl     *gomock.Controller
+		buf      *bytes.Buffer
+		tempFile *os.File
+		err      error
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		rootCmd.SetArgs([]string{})
+
+		tempFile, err = ioutil.TempFile("", "test.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
 		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		rootOptions.ConfigFile = tempFile.Name()
 		buf = new(bytes.Buffer)
 		rootCmd.SetOutput(buf)
 

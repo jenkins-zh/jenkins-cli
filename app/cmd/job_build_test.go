@@ -19,15 +19,21 @@ var _ = Describe("job build command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		tempFile     *os.File
 		jobName      string
+		err          error
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
 		rootCmd.SetArgs([]string{})
+
+		tempFile, err = ioutil.TempFile(".", "test.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
 		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		rootOptions.ConfigFile = tempFile.Name()
 
 		jobName = "fakeJob"
 		jobBuildOption.RoundTripper = roundTripper

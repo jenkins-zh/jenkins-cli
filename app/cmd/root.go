@@ -64,13 +64,9 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 
 			logger.Debug("read config file", zap.String("path", rootOptions.ConfigFile))
 			if rootOptions.ConfigFile == "" {
-				if err = loadDefaultConfig(); err != nil {
-					configLoadErrorHandle(err)
-				}
+				err = loadDefaultConfig()
 			} else {
-				if err = loadConfig(rootOptions.ConfigFile); err != nil {
-					configLoadErrorHandle(err)
-				}
+				err = loadConfig(rootOptions.ConfigFile)
 			}
 		}
 
@@ -158,15 +154,6 @@ func init() {
 		i18n.T("The auth of proxy of connection to Jenkins"))
 
 	rootCmd.SetOut(os.Stdout)
-}
-
-func configLoadErrorHandle(err error) {
-	if os.IsNotExist(err) {
-		log.Printf("No config file found.")
-		return
-	}
-
-	log.Fatalf("Config file is invalid: %v", err)
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
