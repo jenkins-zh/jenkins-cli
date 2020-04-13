@@ -17,6 +17,7 @@ var _ = Describe("center download command", func() {
 		ctrl           *gomock.Controller
 		roundTripper   *mhttp.MockRoundTripper
 		targetFilePath string
+		tempFile       *os.File
 
 		ltsResponseBody    string
 		weeklyResponseBody string
@@ -28,8 +29,10 @@ var _ = Describe("center download command", func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
 		centerDownloadOption.RoundTripper = roundTripper
-		targetFilePath = "jenkins.war"
+		tempFile, err = ioutil.TempFile(".", "jenkins.war")
+		Expect(err).NotTo(HaveOccurred())
 
+		targetFilePath = tempFile.Name()
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
 
@@ -65,7 +68,7 @@ var _ = Describe("center download command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			rootCmd.SetArgs([]string{"center", "download", "--progress=false"})
+			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--output", targetFilePath})
 			_, err := rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
@@ -87,7 +90,7 @@ var _ = Describe("center download command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(request).Return(response, nil)
 
-			rootCmd.SetArgs([]string{"center", "download", "--lts=false", "--progress=false"})
+			rootCmd.SetArgs([]string{"center", "download", "--lts=false", "--progress=false", "--output", targetFilePath})
 			_, err := rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 

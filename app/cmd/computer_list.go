@@ -6,7 +6,6 @@ import (
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +40,7 @@ var computerListCmd = &cobra.Command{
 				"Offline": func(offline string) string {
 					switch offline {
 					case "true":
-						return util.ColorWarning("yes")
+						return "yes"
 					}
 					return "no"
 				},

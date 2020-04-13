@@ -14,15 +14,15 @@ var _ = Describe("Root cmd test", func() {
 	var (
 		ctrl        *gomock.Controller
 		fakeRootCmd *cobra.Command
-		successCmd  string
-		errorCmd    string
+		//successCmd  string
+		//errorCmd string
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		fakeRootCmd = &cobra.Command{Use: "root"}
-		successCmd = "echo 1"
-		errorCmd = "exit 1"
+		//successCmd = "echo 1"
+		//errorCmd = "exit 1"
 		config = nil
 	})
 
@@ -62,196 +62,196 @@ var _ = Describe("Root cmd test", func() {
 		})
 	})
 
-	Context("execute cmd test", func() {
-		It("basic command", func() {
-			var buf bytes.Buffer
-			err := execute(successCmd, &buf)
+	//Context("execute cmd test", func() {
+	//	It("basic command", func() {
+	//		var buf bytes.Buffer
+	//		err := execute(successCmd, &buf)
+	//
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal("1\n"))
+	//	})
+	//
+	//	It("error command", func() {
+	//		var buf bytes.Buffer
+	//		err := execute(errorCmd, &buf)
+	//
+	//		Expect(err).To(HaveOccurred())
+	//	})
+	//})
 
-			Expect(buf.String()).To(Equal("1\n"))
-			Expect(err).To(BeNil())
-		})
+	//Context("execute pre cmd", func() {
+	//	It("should error", func() {
+	//		err := executePreCmd(nil, nil, nil)
+	//		Expect(err).To(HaveOccurred())
+	//	})
+	//
+	//	It("basic use case with one preHook, should success", func() {
+	//		config = &Config{
+	//			PreHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: successCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePreCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal("1\n"))
+	//	})
+	//
+	//	It("basic use case with many preHooks, should success", func() {
+	//		config = &Config{
+	//			PreHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: successCmd,
+	//			}, CommandHook{
+	//				Path:    "test",
+	//				Command: "echo 2",
+	//			}, CommandHook{
+	//				Path:    "fake",
+	//				Command: successCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePreCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal("1\n2\n"))
+	//	})
+	//
+	//	It("basic use case without preHooks, should success", func() {
+	//		config = &Config{}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePreCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal(""))
+	//	})
+	//
+	//	It("basic use case with error command, should success", func() {
+	//		config = &Config{
+	//			PreHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: errorCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePreCmd(subCmd, nil, &buf)
+	//		Expect(err).To(HaveOccurred())
+	//	})
+	//})
 
-		It("error command", func() {
-			var buf bytes.Buffer
-			err := execute(errorCmd, &buf)
-
-			Expect(err).To(HaveOccurred())
-		})
-	})
-
-	Context("execute pre cmd", func() {
-		It("should error", func() {
-			err := executePreCmd(nil, nil, nil)
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("basic use case with one preHook, should success", func() {
-			config = &Config{
-				PreHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: successCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePreCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("1\n"))
-		})
-
-		It("basic use case with many preHooks, should success", func() {
-			config = &Config{
-				PreHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: successCmd,
-				}, CommandHook{
-					Path:    "test",
-					Command: "echo 2",
-				}, CommandHook{
-					Path:    "fake",
-					Command: successCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePreCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("1\n2\n"))
-		})
-
-		It("basic use case without preHooks, should success", func() {
-			config = &Config{}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePreCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal(""))
-		})
-
-		It("basic use case with error command, should success", func() {
-			config = &Config{
-				PreHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: errorCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePreCmd(subCmd, nil, &buf)
-			Expect(err).To(HaveOccurred())
-		})
-	})
-
-	Context("execute post cmd", func() {
-		It("should error", func() {
-			err := executePostCmd(nil, nil, nil)
-			Expect(err).To(HaveOccurred())
-		})
-
-		It("basic use case with one postHook, should success", func() {
-			config = &Config{
-				PostHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: successCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePostCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("1\n"))
-		})
-
-		It("basic use case with many postHooks, should success", func() {
-			config = &Config{
-				PostHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: successCmd,
-				}, CommandHook{
-					Path:    "test",
-					Command: "echo 2",
-				}, CommandHook{
-					Path:    "fake",
-					Command: successCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePostCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal("1\n2\n"))
-		})
-
-		It("basic use case without postHooks, should success", func() {
-			config = &Config{}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePostCmd(subCmd, nil, &buf)
-			Expect(err).To(BeNil())
-			Expect(buf.String()).To(Equal(""))
-		})
-
-		It("basic use case with error command, should success", func() {
-			config = &Config{
-				PostHooks: []CommandHook{CommandHook{
-					Path:    "test",
-					Command: errorCmd,
-				}},
-			}
-
-			rootCmd := &cobra.Command{}
-			subCmd := &cobra.Command{
-				Use: "test",
-			}
-			rootCmd.AddCommand(subCmd)
-
-			var buf bytes.Buffer
-			err := executePostCmd(subCmd, nil, &buf)
-			Expect(err).To(HaveOccurred())
-		})
-	})
+	//Context("execute post cmd", func() {
+	//	It("should error", func() {
+	//		err := executePostCmd(nil, nil, nil)
+	//		Expect(err).To(HaveOccurred())
+	//	})
+	//
+	//	It("basic use case with one postHook, should success", func() {
+	//		config = &Config{
+	//			PostHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: successCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePostCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal("1\n"))
+	//	})
+	//
+	//	It("basic use case with many postHooks, should success", func() {
+	//		config = &Config{
+	//			PostHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: successCmd,
+	//			}, CommandHook{
+	//				Path:    "test",
+	//				Command: "echo 2",
+	//			}, CommandHook{
+	//				Path:    "fake",
+	//				Command: successCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePostCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal("1\n2\n"))
+	//	})
+	//
+	//	It("basic use case without postHooks, should success", func() {
+	//		config = &Config{}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePostCmd(subCmd, nil, &buf)
+	//		Expect(err).To(BeNil())
+	//		Expect(buf.String()).To(Equal(""))
+	//	})
+	//
+	//	It("basic use case with error command, should success", func() {
+	//		config = &Config{
+	//			PostHooks: []CommandHook{CommandHook{
+	//				Path:    "test",
+	//				Command: errorCmd,
+	//			}},
+	//		}
+	//
+	//		rootCmd := &cobra.Command{}
+	//		subCmd := &cobra.Command{
+	//			Use: "test",
+	//		}
+	//		rootCmd.AddCommand(subCmd)
+	//
+	//		var buf bytes.Buffer
+	//		err := executePostCmd(subCmd, nil, &buf)
+	//		Expect(err).To(HaveOccurred())
+	//	})
+	//})
 
 	Context("basic root command test", func() {
 		var (
@@ -277,9 +277,8 @@ var _ = Describe("Root cmd test", func() {
 
 			rootCmd.SetArgs([]string{"--jenkins", "yourServer", "--configFile", configFile.Name()})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("subcommand is required"))
-			Expect(buf.String()).To(ContainSubstring("jcli is Jenkins CLI which could help with your multiple Jenkins"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(buf.String()).To(ContainSubstring("Jenkins CLI written by golang which could help you with your multiple Jenkins"))
 		})
 	})
 
@@ -300,8 +299,7 @@ var _ = Describe("Root cmd test", func() {
 			rootCmd.SetArgs([]string{"--configFile", "fake", "--url", "fake-url",
 				"--username", "fake-user", "--token", "fake-token"})
 			_, err = rootCmd.ExecuteC()
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("subcommand is required"))
+			Expect(err).NotTo(HaveOccurred())
 
 			jenkins := getCurrentJenkinsFromOptions()
 			Expect(jenkins.URL).To(Equal("fake-url"))

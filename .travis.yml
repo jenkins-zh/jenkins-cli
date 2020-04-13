@@ -17,7 +17,7 @@ addons:
 script:
   # Execute some tests
   - export PATH=${PWD}/bin:$PATH
-  - make clean go-bindata-download-linux tools init build-all test
+  - make clean gen-data-linux tools init build-all test
   # And finally run the SonarQube analysis - read the "sonar-project.properties"
   # file to see the specific configuration
   - curl -LsS https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.0.0.1744-linux.zip > sonar-scanner-cli-4.0.0.1744-linux.zip

@@ -2,15 +2,13 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/jenkins-zh/jenkins-cli/client"
-	"io/ioutil"
-	"os"
-	"testing"
-
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"io/ioutil"
+	"os"
 )
 
 var _ = Describe("user delete command", func() {
@@ -78,6 +76,3 @@ var _ = Describe("user delete command", func() {
 		})
 	})
 })
-
-func TestDeleteUser(t *testing.T) {
-}
