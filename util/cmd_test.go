@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("Test open browser", func() {
 	It("should success", func() {
-		err := Open("fake://url", FakeExecCommandSuccess)
+		err := Open("fake://url", "", FakeExecCommandSuccess)
 		Expect(err).To(BeNil())
 	})
 })

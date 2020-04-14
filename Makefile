@@ -75,7 +75,10 @@ go-bindata-download-darwin:
 gen-data-darwin: go-bindata-download-darwin
 	cd app/i18n && ../../bin/go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
-verify: dep tools
+verify: dep tools lint
+
+
+lint:
 	go vet ./...
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...
@@ -92,12 +95,12 @@ fmt:
 test:
 	mkdir -p bin
 	go test ./util -v -count=1
+	go test ./client -v -count=1 -coverprofile coverage.out
 	go test ./app -v -count=1
-	go test ./app/cmd -v -count=1
 	go test ./app/health -v -count=1
 	go test ./app/helper -v -count=1
 	go test ./app/i18n -v -count=1
-	go test ./client -v -count=1
+	go test ./app/cmd -v -count=1
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
