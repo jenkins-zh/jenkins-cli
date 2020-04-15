@@ -111,6 +111,20 @@ jcli plugin upload sample.hpi --show-progress=false`,
 
 		executePostCmd(cmd, args, cmd.OutOrStdout())
 	},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if len(args) != 0 {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		targetFiles := make([]string, 0)
+		if files, err := filepath.Glob("*.hpi"); err == nil {
+			targetFiles = append(targetFiles, files...)
+		}
+		if files, err := filepath.Glob("target/*.hpi"); err == nil {
+			targetFiles = append(targetFiles, files...)
+		}
+		return targetFiles, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
