@@ -19,8 +19,10 @@ type DocOption struct {
 }
 
 const (
+	// DocTypeMarkdown represents markdown type of doc
 	DocTypeMarkdown string = "Markdown"
-	DocTypeManPage  string = "ManPage"
+	// DocTypeManPage represents man page type of doc
+	DocTypeManPage string = "ManPage"
 )
 
 var docOption DocOption
