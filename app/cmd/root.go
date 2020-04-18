@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"

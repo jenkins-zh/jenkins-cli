@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/atotto/clipboard"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )

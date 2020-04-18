@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"go.uber.org/zap"
