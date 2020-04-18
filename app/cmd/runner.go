@@ -1,9 +1,14 @@
 package cmd
 
 import (
+
+	"fmt"
+	"go.uber.org/zap"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
-    "github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/mitchellh/go-homedir"
+
 )
 
 // RunnerOption is the wrapper of jenkinsfile runner cli
@@ -31,15 +36,24 @@ var runnerCmd = &cobra.Command{
 	Long: i18n.T(`The wrapper of jenkinsfile runner
 Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-runner`),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-	
+	 
 	//Start by downloading the mirror for the jenkinsfileRunner
-	jenkinsfileURL := "https://repo.jenkins-ci.org/list/releases/io/jenkins/jenkinsfile-runner/jenkinsfile-runner/1.0-beta-11/" 
+	jenkinsfileRunnerVersion := "jenkinsfile-runner-1.0-beta-11.jar"
+	jenkinsfileRunnerURL := fmt.Sprintf("https://repo.jenkins-ci.org/list/releases/io/jenkins/jenkinsfile-runner/jenkinsfile-runner/1.0-beta-11/%s", jenkinsfileRunnerVersion) 
+	logger.Info("Prepare to start Downloading jenkinfileRunner", zap.String("URL", jenkinsfileRunnerURL))
 	downloader:= util.HTTPDownloader{
-		URL: jenkinsfileURL,
+		URL: jenkinsfileRunnerURL,
 		ShowProgress: true,
-		TargetFilePath: "jenkinsfileRunner",
+		TargetFilePath: jenkinsfileRunnerVersion,
 	}
 	downloader.DownloadFile()
+
+	//Check if jenkins war exists
+	var userHome string
+		if userHome, err = homedir.Dir(); err != nil {
+			return
+		}
+	searchDir := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, centerDownloadOption.Version)
 	return
 	},
 }

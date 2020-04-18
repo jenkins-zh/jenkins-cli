@@ -9,25 +9,22 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
-var _ = Describe("plugin uninstall command", func() {
+var _ = Describe("Runner test command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
-		pluginName   string
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
-		jenkinsFileRunnerOption.RoundTripper = roundTripper
+		runnerOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
-		pluginName = "fake"
 	})
 
 	AfterEach(func() {
@@ -48,7 +45,6 @@ var _ = Describe("plugin uninstall command", func() {
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-			Expect(buf.String()).NotTo(Equal(""))
 		})		
 	})
 })
