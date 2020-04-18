@@ -155,6 +155,8 @@ func init() {
 		i18n.T("The auth of proxy of connection to Jenkins"))
 
 	rootCmd.SetOut(os.Stdout)
+
+	loadPlugins(rootCmd)
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
