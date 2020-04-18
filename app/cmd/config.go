@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"io/ioutil"
@@ -47,48 +48,6 @@ var configCmd = &cobra.Command{
 	Example: `  jcli config generate
   jcli config list
   jcli config edit`,
-}
-
-// JenkinsServer holds the configuration of your Jenkins
-type JenkinsServer struct {
-	Name               string `yaml:"name"`
-	URL                string `yaml:"url"`
-	UserName           string `yaml:"username"`
-	Token              string `yaml:"token"`
-	Proxy              string `yaml:"proxy"`
-	ProxyAuth          string `yaml:"proxyAuth"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Description        string `yaml:"description"`
-}
-
-// CommandHook is a hook
-type CommandHook struct {
-	Path    string `yaml:"path"`
-	Command string `yaml:"cmd"`
-}
-
-// PluginSuite define a suite of plugins
-type PluginSuite struct {
-	Name        string   `yaml:"name"`
-	Plugins     []string `yaml:"plugins"`
-	Description string   `yaml:"description"`
-}
-
-// JenkinsMirror represents the mirror of Jenkins
-type JenkinsMirror struct {
-	Name string
-	URL  string
-}
-
-// Config is a global config struct
-type Config struct {
-	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language"`
-	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks"`
-	PostHooks      []CommandHook   `yaml:"postHooks"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
-	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {

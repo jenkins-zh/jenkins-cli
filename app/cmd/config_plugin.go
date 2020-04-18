@@ -79,7 +79,7 @@ func NewConfigPluginFetchCmd() (cmd *cobra.Command) {
 
 	sshKeyFile := fmt.Sprintf("%s/.ssh/id_rsa", os.Getenv("HOME"))
 	flags.StringVarP(&pluginFetchCmd.SSHKeyFile, "ssh-key-file", "", sshKeyFile,
-		i18n.T("The password of git repository"))
+		i18n.T("SSH key file"))
 	return
 }
 
@@ -159,7 +159,6 @@ func (c *pluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		err = w.Pull(c.getPullOptions())
-
 		if err == git.NoErrAlreadyUpToDate {
 			err = nil // consider it's ok
 		}
