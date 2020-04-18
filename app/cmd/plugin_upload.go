@@ -23,6 +23,7 @@ type PluginUploadOption struct {
 	RemotePassword string
 	RemoteJenkins  string
 	ShowProgress   bool
+	FileName       string
 
 	RoundTripper http.RoundTripper
 
@@ -37,6 +38,8 @@ func init() {
 	pluginCmd.AddCommand(pluginUploadCmd)
 	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Whether show the upload progress"))
+	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.FileName, "file", "f", "",
+		i18n.T("The plugin file path which should end with .hpi"))
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
 		i18n.T("Remote plugin URL"))
 	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
@@ -50,6 +53,25 @@ func init() {
 		i18n.T("Whether skip the previous command hook"))
 	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
 		i18n.T("Whether skip the post command hook"))
+
+	if err := pluginUploadCmd.RegisterFlagCompletionFunc("file", pluginUploadOption.HPICompletion); err != nil {
+		pluginCmd.PrintErrln(err)
+	}
+}
+
+func (o *PluginUploadOption) HPICompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if len(args) != 0 {
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	}
+
+	targetFiles := make([]string, 0)
+	if files, err := filepath.Glob("*.hpi"); err == nil {
+		targetFiles = append(targetFiles, files...)
+	}
+	if files, err := filepath.Glob("target/*.hpi"); err == nil {
+		targetFiles = append(targetFiles, files...)
+	}
+	return targetFiles, cobra.ShellCompDirectiveNoFileComp
 }
 
 var pluginUploadCmd = &cobra.Command{
@@ -111,6 +133,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 
 		executePostCmd(cmd, args, cmd.OutOrStdout())
 	},
+	ValidArgsFunction: pluginUploadOption.HPICompletion,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
