@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -37,16 +38,18 @@ func init() {
 
 var configPluginCmd = &cobra.Command{
 	Use:   "plugin",
-	Short: i18n.T("plugin for jcli"),
-	Long:  i18n.T("plugin for jcli"),
+	Short: i18n.T("Manage plugins for jcli"),
+	Long: i18n.T(`Manage plugins for jcli
+If you want to submit a plugin for jcli, please see also the following project.
+https://github.com/jenkins-zh/jcli-plugins`),
 }
 
 // NewConfigPluginListCmd create a command for list all jcli plugins
 func NewConfigPluginListCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:   "list",
-		Short: "list plugins",
-		Long:  "list plugins",
+		Short: "list all installed plugins",
+		Long:  "list all installed plugins",
 		Run: func(cmd *cobra.Command, args []string) {
 			for _, plugin := range findPlugins() {
 				cmd.Println(plugin)
@@ -63,8 +66,10 @@ func NewConfigPluginFetchCmd() (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:   "fetch",
 		Short: "fetch metadata of plugins",
-		Long:  "fetch metadata of plugins",
-		RunE:  pluginFetchCmd.Run,
+		Long: `fetch metadata of plugins
+The official metadata git repository is https://github.com/jenkins-zh/jcli-plugins,
+but you can change it by giving a command parameter.`,
+		RunE: pluginFetchCmd.Run,
 	}
 
 	// add flags
@@ -90,8 +95,8 @@ func NewConfigPluginInstallCmd() (cmd *cobra.Command) {
 
 	cmd = &cobra.Command{
 		Use:   "install",
-		Short: "install a jcli plugins",
-		Long:  "install a jcli plugins",
+		Short: "install a jcli plugin",
+		Long:  "install a jcli plugin",
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  pluginInstallCmd.Run,
 	}
@@ -312,7 +317,7 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 		return
 	}
 
-	link := plugin.DownloadLink
+	link := c.getDownloadLink(plugin)
 	output := fmt.Sprintf("%s/.jenkins-cli/plugins/%s", userHome, plugin.Main)
 	logger.Info("start to download plugin",
 		zap.String("path", output), zap.String("link", link))
@@ -324,5 +329,16 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 		ShowProgress:   c.ShowProgress,
 	}
 	err = downloader.DownloadFile()
+	return
+}
+
+func (c *jcliPluginInstallCmd) getDownloadLink(plugin plugin) (link string) {
+	link = plugin.DownloadLink
+	if link == "" {
+		operationSystem := runtime.GOOS
+		arch := runtime.GOARCH
+		link = fmt.Sprintf("https://github.com/jenkins-zh/%s/releases/download/%s/%s-%s-%s.tar.gz",
+			plugin.Main, plugin.Version, plugin.Main, operationSystem, arch)
+	}
 	return
 }
