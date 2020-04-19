@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"fmt"
 	"github.com/ghodss/yaml"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
@@ -302,6 +304,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 
 	var data []byte
 	pluginsMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/%s.yaml", userHome, name)
+	logger.Info("read plugin metadata info", zap.String("path", pluginsMetadataFile))
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
@@ -318,7 +321,7 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 	}
 
 	link := c.getDownloadLink(plugin)
-	output := fmt.Sprintf("%s/.jenkins-cli/plugins/%s", userHome, plugin.Main)
+	output := fmt.Sprintf("%s/.jenkins-cli/plugins/%s.tar.gz", userHome, plugin.Main)
 	logger.Info("start to download plugin",
 		zap.String("path", output), zap.String("link", link))
 
@@ -328,7 +331,10 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 		URL:            link,
 		ShowProgress:   c.ShowProgress,
 	}
-	err = downloader.DownloadFile()
+	if err = downloader.DownloadFile(); err == nil {
+		logger.Info("start to extract files")
+		err = c.extractFiles(plugin, output)
+	}
 	return
 }
 
@@ -339,6 +345,57 @@ func (c *jcliPluginInstallCmd) getDownloadLink(plugin plugin) (link string) {
 		arch := runtime.GOARCH
 		link = fmt.Sprintf("https://github.com/jenkins-zh/%s/releases/download/%s/%s-%s-%s.tar.gz",
 			plugin.Main, plugin.Version, plugin.Main, operationSystem, arch)
+	}
+	return
+}
+
+func (c *jcliPluginInstallCmd) extractFiles(plugin plugin, tarFile string) (err error) {
+	var f *os.File
+	var gzf *gzip.Reader
+	if f, err = os.Open(tarFile); err != nil {
+		logger.Error("open file error", zap.String("path", tarFile))
+		return
+	}
+	defer f.Close()
+
+	if gzf, err = gzip.NewReader(f); err != nil {
+		logger.Error("open tar file error", zap.String("path", tarFile))
+		return
+	}
+
+	tarReader := tar.NewReader(gzf)
+	var header *tar.Header
+	for {
+		if header, err = tarReader.Next(); err == io.EOF {
+			logger.Info("extracted all files")
+			err = nil
+			break
+		} else if err != nil {
+			logger.Error("tar file reading error")
+			break
+		}
+		name := header.Name
+
+		switch header.Typeflag {
+		case tar.TypeReg:
+			if name != plugin.Main {
+				logger.Debug("ignore file", zap.String("name", name))
+				continue
+			}
+			var targetFile *os.File
+			if targetFile, err = os.OpenFile(fmt.Sprintf("%s/%s", filepath.Dir(tarFile), name),
+				os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode)); err != nil {
+				break
+			}
+			logger.Info("extracting file", zap.String("path", targetFile.Name()))
+			if _, err = io.Copy(targetFile, tarReader); err != nil {
+				break
+			}
+			targetFile.Close()
+		default:
+			logger.Debug("ignore this type from tar file",
+				zap.Int32("type", int32(header.Typeflag)), zap.String("name", name))
+		}
 	}
 	return
 }
