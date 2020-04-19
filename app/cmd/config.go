@@ -18,12 +18,18 @@ import (
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
 	ConfigFileLocation string
+	Detail             bool
 }
 
 var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+
+	// add flags
+	flags := configCmd.Flags()
+	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
+		`Show the all detail of current configuration`)
 }
 
 var configCmd = &cobra.Command{
@@ -36,7 +42,12 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			if current.Description != "" {
+			if configOptions.Detail {
+				var data []byte
+				if data, err = yaml.Marshal(current); err == nil {
+					cmd.Println(string(data))
+				}
+			} else if current.Description != "" {
 				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 			} else {
 				cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
