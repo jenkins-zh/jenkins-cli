@@ -101,6 +101,13 @@ func needReadConfig(cmd *cobra.Command) bool {
 			return false
 		}
 	}
+
+	// allow sub-commands give their decisions
+	if cmd.Annotations != nil {
+		if disable, ok := cmd.Annotations[ANNOTATION_CONFIG_LOAD]; ok {
+			return disable != "disable"
+		}
+	}
 	return true
 }
 

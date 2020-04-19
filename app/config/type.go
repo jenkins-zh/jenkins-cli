@@ -1,5 +1,10 @@
 package config
 
+const (
+	// ANNOTATION_CONFIG_LOAD annotation for config loading set
+	ANNOTATION_CONFIG_LOAD string = "config.load"
+)
+
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
 	Name               string `yaml:"name"`

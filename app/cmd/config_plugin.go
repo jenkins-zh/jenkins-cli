@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/ghodss/yaml"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
 	"go.uber.org/zap"
@@ -278,6 +279,9 @@ func loadPlugins(cmd *cobra.Command) {
 			},
 			// This passes all the flags to the subcommand.
 			DisableFlagParsing: true,
+		}
+		c.Annotations = map[string]string{
+			ANNOTATION_CONFIG_LOAD: "disable",
 		}
 		cmd.AddCommand(c)
 	}
