@@ -1,7 +1,6 @@
-package e2e_test
+package e2e
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/e2e"
 	"io"
 	"os"
 	"os/exec"
@@ -30,7 +29,7 @@ func TestMain(m *testing.M) {
 	}
 
 	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		e2e.WaitRunningUp(reader)
+		WaitRunningUp(reader)
 
 		m.Run()
 
