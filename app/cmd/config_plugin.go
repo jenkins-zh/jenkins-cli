@@ -49,21 +49,34 @@ https://github.com/jenkins-zh/jcli-plugins`),
 	},
 }
 
+type (
+	configPluginListCmd struct {
+		OutputOption
+	}
+)
+
 // NewConfigPluginListCmd create a command for list all jcli plugins
 func NewConfigPluginListCmd() (cmd *cobra.Command) {
+	configPluginListCmd := configPluginListCmd{}
+
 	cmd = &cobra.Command{
 		Use:   "list",
 		Short: "list all installed plugins",
 		Long:  "list all installed plugins",
-		Run: func(cmd *cobra.Command, args []string) {
-			for _, plugin := range findPlugins() {
-				cmd.Println(plugin)
-			}
-		},
+		RunE:  configPluginListCmd.RunE,
 		Annotations: map[string]string{
 			since: "v0.0.28",
 		},
 	}
+
+	configPluginListCmd.SetFlagWithHeaders(cmd, "Use,Version,DownloadLink")
+	return
+}
+
+// RunE is the main entry point of config plugin list command
+func (c *configPluginListCmd) RunE(cmd *cobra.Command, args []string) (err error) {
+	c.Writer = cmd.OutOrStdout()
+	err = c.OutputV2(findPlugins())
 	return
 }
 
