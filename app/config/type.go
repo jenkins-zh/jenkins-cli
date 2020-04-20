@@ -7,14 +7,15 @@ const (
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name               string `yaml:"name"`
-	URL                string `yaml:"url"`
-	UserName           string `yaml:"username"`
-	Token              string `yaml:"token"`
-	Proxy              string `yaml:"proxy"`
-	ProxyAuth          string `yaml:"proxyAuth"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Description        string `yaml:"description"`
+	Name               string            `yaml:"name"`
+	URL                string            `yaml:"url"`
+	UserName           string            `yaml:"username"`
+	Token              string            `yaml:"token"`
+	Proxy              string            `yaml:"proxy,omitempty"`
+	ProxyAuth          string            `yaml:"proxyAuth,omitempty"`
+	InsecureSkipVerify bool              `yaml:"insecureSkipVerify,omitempty"`
+	Description        string            `yaml:"description,omitempty"`
+	Data               map[string]string `yaml:"data,omitempty"`
 }
 
 // CommandHook is a hook
@@ -39,10 +40,10 @@ type JenkinsMirror struct {
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language"`
+	Language       string          `yaml:"language,omitempty"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks"`
-	PostHooks      []CommandHook   `yaml:"postHooks"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
+	PreHooks       []CommandHook   `yaml:"preHooks,omitempty"`
+	PostHooks      []CommandHook   `yaml:"postHooks,omitempty"`
+	PluginSuites   []PluginSuite   `yaml:"pluginSuites,omitempty"`
 	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
