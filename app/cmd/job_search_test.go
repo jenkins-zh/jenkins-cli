@@ -108,7 +108,7 @@ var _ = Describe("job search command check", func() {
 
 		config = &Config{
 			Current: "fake",
-			JenkinsServers: []JenkinsServer{JenkinsServer{
+			JenkinsServers: []JenkinsServer{{
 				Name:     "fake",
 				URL:      rootURL,
 				UserName: user,

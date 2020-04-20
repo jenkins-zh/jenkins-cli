@@ -167,7 +167,7 @@ var _ = Describe("job test", func() {
 
 			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
 
-			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{{
 				Name:  "name",
 				Value: "value",
 				Type:  "StringParameterDefinition",

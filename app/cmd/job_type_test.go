@@ -58,7 +58,7 @@ var _ = Describe("job type command", func() {
 
 			config = &Config{
 				Current: "fake",
-				JenkinsServers: []JenkinsServer{JenkinsServer{
+				JenkinsServers: []JenkinsServer{{
 					Name:     "fake",
 					URL:      "http://localhost:8080/jenkins",
 					UserName: "admin",

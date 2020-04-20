@@ -28,9 +28,9 @@ var _ = Describe("Table util test", func() {
 	Context("basic test", func() {
 		It("getJenkinsNames", func() {
 			config = &Config{
-				JenkinsServers: []JenkinsServer{JenkinsServer{
+				JenkinsServers: []JenkinsServer{{
 					Name: "a",
-				}, JenkinsServer{
+				}, {
 					Name: "b",
 				}},
 			}
@@ -49,7 +49,7 @@ var _ = Describe("Table util test", func() {
 			Expect(current).To(BeNil())
 
 			config.Current = "test"
-			config.JenkinsServers = []JenkinsServer{JenkinsServer{
+			config.JenkinsServers = []JenkinsServer{{
 				Name: "test",
 			}}
 			current = getCurrentJenkins()
@@ -62,7 +62,7 @@ var _ = Describe("Table util test", func() {
 			Expect(suite).To(BeNil())
 
 			pluginName := "plugin-one"
-			config.PluginSuites = []PluginSuite{PluginSuite{
+			config.PluginSuites = []PluginSuite{{
 				Name: pluginName,
 			}}
 			suite = findSuiteByName(pluginName)

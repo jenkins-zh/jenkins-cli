@@ -34,7 +34,7 @@ var _ = Describe("casc command check", func() {
 
 		config = &Config{
 			Current: "fake",
-			JenkinsServers: []JenkinsServer{JenkinsServer{
+			JenkinsServers: []JenkinsServer{{
 				Name:     "fake",
 				URL:      rootURL,
 				UserName: user,
