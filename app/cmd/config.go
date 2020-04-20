@@ -18,12 +18,18 @@ import (
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
 	ConfigFileLocation string
+	Detail             bool
 }
 
 var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+
+	// add flags
+	flags := configCmd.Flags()
+	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
+		`Show the all detail of current configuration`)
 }
 
 var configCmd = &cobra.Command{
@@ -36,7 +42,12 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			if current.Description != "" {
+			if configOptions.Detail {
+				var data []byte
+				if data, err = yaml.Marshal(current); err == nil {
+					cmd.Println(string(data))
+				}
+			} else if current.Description != "" {
 				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 			} else {
 				cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
@@ -51,14 +62,15 @@ var configCmd = &cobra.Command{
 
 // JenkinsServer holds the configuration of your Jenkins
 type JenkinsServer struct {
-	Name               string `yaml:"name"`
-	URL                string `yaml:"url"`
-	UserName           string `yaml:"username"`
-	Token              string `yaml:"token"`
-	Proxy              string `yaml:"proxy"`
-	ProxyAuth          string `yaml:"proxyAuth"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Description        string `yaml:"description"`
+	Name               string            `yaml:"name"`
+	URL                string            `yaml:"url"`
+	UserName           string            `yaml:"username"`
+	Token              string            `yaml:"token"`
+	Proxy              string            `yaml:"proxy,omitempty"`
+	ProxyAuth          string            `yaml:"proxyAuth,omitempty"`
+	InsecureSkipVerify bool              `yaml:"insecureSkipVerify"`
+	Description        string            `yaml:"description,omitempty"`
+	Data               map[string]string `yaml:"data,omitempty"`
 }
 
 // CommandHook is a hook
@@ -83,11 +95,11 @@ type JenkinsMirror struct {
 // Config is a global config struct
 type Config struct {
 	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language"`
+	Language       string          `yaml:"language,omitempty"`
 	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks"`
-	PostHooks      []CommandHook   `yaml:"postHooks"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
+	PreHooks       []CommandHook   `yaml:"preHooks,omitempty"`
+	PostHooks      []CommandHook   `yaml:"postHooks,omitempty"`
+	PluginSuites   []PluginSuite   `yaml:"pluginSuites,omitempty"`
 	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
