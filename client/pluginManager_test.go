@@ -180,7 +180,7 @@ var _ = Describe("PluginManager test", func() {
 		It("with 400, error message", func() {
 			response := PrepareForInstallPluginWithCode(roundTripper, 400, pluginMgr.URL, pluginName, "", "")
 			response.Header = map[string][]string{
-				"X-Error": []string{"X-Error"},
+				"X-Error": {"X-Error"},
 			}
 
 			err := pluginMgr.InstallPlugin([]string{pluginName})

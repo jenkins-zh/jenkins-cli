@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
@@ -15,6 +16,6 @@ var credentialCmd = &cobra.Command{
 	Short:   i18n.T("Manage the credentials of your Jenkins"),
 	Long:    i18n.T(`Manage the credentials of your Jenkins`),
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

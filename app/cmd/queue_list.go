@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 
 // QueueListOption represents the option of queue list command
 type QueueListOption struct {
-	OutputOption
+	common.OutputOption
 
 	RoundTripper http.RoundTripper
 }

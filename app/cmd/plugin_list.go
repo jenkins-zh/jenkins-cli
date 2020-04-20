@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 
 // PluginListOption option for plugin list command
 type PluginListOption struct {
-	OutputOption
+	common.OutputOption
 
 	RoundTripper http.RoundTripper
 }

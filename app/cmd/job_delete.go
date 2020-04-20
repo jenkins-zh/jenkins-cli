@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,8 +10,8 @@ import (
 
 // JobDeleteOption is the job delete option
 type JobDeleteOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.CommonOption
 }
 
 var jobDeleteOption JobDeleteOption
@@ -18,13 +19,13 @@ var jobDeleteOption JobDeleteOption
 func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
 	jobDeleteOption.SetFlag(jobDeleteCmd)
-	jobDeleteOption.BatchOption.Stdio = GetSystemStdio()
-	jobDeleteOption.CommonOption.Stdio = GetSystemStdio()
+	jobDeleteOption.BatchOption.Stdio = common.GetSystemStdio()
+	jobDeleteOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
 var jobDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: GetAliasesDel(),
+	Aliases: common.GetAliasesDel(),
 	Short:   i18n.T("Delete a job in your Jenkins"),
 	Long:    i18n.T("Delete a job in your Jenkins"),
 	Args:    cobra.MinimumNArgs(1),
