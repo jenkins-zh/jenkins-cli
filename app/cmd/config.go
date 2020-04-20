@@ -45,9 +45,8 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   i18n.T("Manage the config of jcli"),
 	Long:    i18n.T("Manage the config of jcli"),
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PreRun: func(cmd *cobra.Command, args []string) {
 		(&configOptions).Logger, _ = util.InitLogger(rootOptions.LoggerLevel)
-		return nil
 	},
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		current := getCurrentJenkins()
@@ -99,6 +98,9 @@ func getConfig() *Config {
 
 func getJenkinsNames() []string {
 	names := make([]string, 0)
+	if config == nil {
+		return names
+	}
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
 	}

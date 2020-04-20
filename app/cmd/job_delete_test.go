@@ -130,19 +130,19 @@ type EditorTest struct {
 	Expected       string
 }
 
-func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
-	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		var data []byte
-		data, err = generateSampleConfig()
-		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-
-		test.BatchOption.Stdio = stdio
-		rootOptions.ConfigFile = "test.yaml"
-		rootCmd.SetArgs(test.Args)
-		_, err = rootCmd.ExecuteC()
-		return
-	}, test.Procedure)
-}
+//func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
+//	RunTest(t, func(stdio terminal.Stdio) (err error) {
+//		var data []byte
+//		data, err = generateSampleConfig()
+//		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+//
+//		test.BatchOption.Stdio = stdio
+//		rootOptions.ConfigFile = "test.yaml"
+//		rootCmd.SetArgs(test.Args)
+//		_, err = rootCmd.ExecuteC()
+//		return
+//	}, test.Procedure)
+//}
 
 func RunPromptTest(t *testing.T, test PromptTest) {
 	var answer interface{}

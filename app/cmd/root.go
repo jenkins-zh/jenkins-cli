@@ -69,6 +69,8 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 			} else {
 				err = loadConfig(rootOptions.ConfigFile)
 			}
+		} else {
+			logger.Debug("ignore loading config", zap.String("cmd", cmd.Name()))
 		}
 
 		if err == nil {
