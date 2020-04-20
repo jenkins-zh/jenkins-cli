@@ -23,6 +23,7 @@ builds:
   ldflags:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
+    - -X github.com/jenkins-zh/jenkins-cli/app.date={{.Date}}
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
