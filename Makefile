@@ -93,6 +93,9 @@ fmt:
 	go fmt ./app/...
 	gofmt -s -w .
 
+test-slow:
+	JENKINS_VERSION=2.190.3 go test ./test -v -count=1
+
 test:
 	mkdir -p bin
 	go test ./util -v -count=1
