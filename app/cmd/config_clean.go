@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	cfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -52,7 +53,7 @@ func (o *ConfigCleanOption) Run(cmd *cobra.Command, args []string) (err error) {
 	checkResult := make(chan CheckResult, itemCount)
 
 	for _, jenkins := range config.JenkinsServers {
-		go func(target JenkinsServer) {
+		go func(target cfg.JenkinsServer) {
 			checkResult <- o.Check(target)
 		}(jenkins)
 	}
@@ -70,7 +71,7 @@ func (o *ConfigCleanOption) Run(cmd *cobra.Command, args []string) (err error) {
 
 // Check check the target JenkinsServer config
 // make a request to a Jenkins API
-func (o *ConfigCleanOption) Check(jenkins JenkinsServer) (result CheckResult) {
+func (o *ConfigCleanOption) Check(jenkins cfg.JenkinsServer) (result CheckResult) {
 	result.Name = jenkins.Name
 
 	jClient := &client.PluginManager{
