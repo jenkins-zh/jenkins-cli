@@ -53,6 +53,7 @@ var rootCmd = &cobra.Command{
 We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
+			(&configOptions).Logger = logger
 			client.SetLogger(logger)
 		} else {
 			return

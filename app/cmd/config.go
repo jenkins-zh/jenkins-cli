@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/util"
-
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -45,9 +43,6 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   i18n.T("Manage the config of jcli"),
 	Long:    i18n.T("Manage the config of jcli"),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		(&configOptions).Logger, _ = util.InitLogger(rootOptions.LoggerLevel)
-	},
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		current := getCurrentJenkins()
 		if current == nil {
