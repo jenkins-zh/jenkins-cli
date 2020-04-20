@@ -43,7 +43,8 @@ var versionCmd = &cobra.Command{
 
 		version := app.GetVersion()
 		cmd.Printf("Version: %s\n", version)
-		cmd.Printf("Commit: %s\n", app.GetCommit())
+		cmd.Printf("Last Commit: %s\n", app.GetCommit())
+		cmd.Printf("Build Date: %s\n", app.GetDate())
 
 		if rootOptions.Jenkins != "" {
 			current := getCurrentJenkinsFromOptions()
