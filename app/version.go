@@ -7,6 +7,7 @@ import (
 var (
 	version string
 	commit  string
+	date    string
 )
 
 // GetVersion returns the version
@@ -22,6 +23,11 @@ func SetVersion(ver string) {
 // GetCommit returns the commit id
 func GetCommit() string {
 	return commit
+}
+
+// GetDate returns the build date time
+func GetDate() string {
+	return date
 }
 
 // GetCombinedVersion returns the version and commit id

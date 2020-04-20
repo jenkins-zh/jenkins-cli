@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -8,8 +9,8 @@ import (
 
 // ComputerCreateOption option for config list command
 type ComputerCreateOption struct {
-	CommonOption
-	OutputOption
+	common.CommonOption
+	common.OutputOption
 }
 
 var computerCreateOption ComputerCreateOption
@@ -30,6 +31,6 @@ It can only create a JNLP agent.`),
 		return jClient.Create(args[0])
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

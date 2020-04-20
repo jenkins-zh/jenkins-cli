@@ -32,6 +32,12 @@ func (q *CoreClient) Restart() (err error) {
 	return
 }
 
+// RestartDirectly restart Jenkins directly
+func (q *CoreClient) RestartDirectly() (err error) {
+	_, err = q.RequestWithoutData("POST", "/restart", nil, nil, 503)
+	return
+}
+
 // JenkinsIdentity belongs to a Jenkins
 type JenkinsIdentity struct {
 	Fingerprint   string

@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"go.uber.org/zap"
 	"os"
+	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -14,7 +16,7 @@ import (
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	CommonOption
+	common.CommonOption
 
 	Port                      int
 	Context                   string
@@ -34,10 +36,11 @@ type CenterStartOption struct {
 	Environments []string
 	System       []string
 
-	RandomWebDir bool
 	Download     bool
 	Version      string
-  LTS          bool
+	LTS          bool
+	Formula      string
+	RandomWebDir bool
 
 	DryRun bool
 }
@@ -65,6 +68,8 @@ func init() {
 		i18n.T("The of version of jenkins.war"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
 		i18n.T("If you want to download Jenkins as LTS"))
+	centerStartCmd.Flags().StringVarP(&centerStartOption.Formula, "formula", "", "",
+		i18n.T("The formula of jenkins.war, only support zh currently"))
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
 		i18n.T("If you want to enable https"))
@@ -82,6 +87,30 @@ func init() {
 		i18n.T("If start jenkins.war in a random web dir"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
+
+	err := centerStartCmd.RegisterFlagCompletionFunc("version", func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+		var userHome string
+		var err error
+		if userHome, err = homedir.Dir(); err != nil {
+			return
+		}
+
+		var machedPathes []string
+		jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/*/jenkins.war", userHome)
+		if machedPathes, err = filepath.Glob(jenkinsWar); err != nil {
+			return
+		}
+
+		versionArray := make([]string, len(machedPathes))
+		for _, path := range machedPathes {
+			versionArray = append(versionArray, filepath.Base(filepath.Dir(path)))
+		}
+
+		return versionArray, cobra.ShellCompDirectiveDefault
+	})
+	if err != nil {
+		centerCmd.PrintErrf("register flag version failed %#v\n", err)
+	}
 }
 
 var centerStartCmd = &cobra.Command{
@@ -102,6 +131,7 @@ var centerStartCmd = &cobra.Command{
 			if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
 				download := &CenterDownloadOption{
 					Mirror:       "default",
+					Formula:      centerStartOption.Formula,
 					LTS:          centerStartOption.LTS,
 					Output:       jenkinsWar,
 					ShowProgress: true,

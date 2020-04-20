@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -13,8 +14,8 @@ import (
 
 // JobBuildOption is the job build option
 type JobBuildOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.CommonOption
 
 	Param      string
 	ParamArray []string
@@ -34,8 +35,8 @@ func init() {
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
-	jobBuildOption.BatchOption.Stdio = GetSystemStdio()
-	jobBuildOption.CommonOption.Stdio = GetSystemStdio()
+	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
+	jobBuildOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
 var jobBuildCmd = &cobra.Command{

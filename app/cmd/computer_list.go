@@ -2,18 +2,18 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
 // ComputerListOption option for config list command
 type ComputerListOption struct {
-	CommonOption
-	OutputOption
+	common.CommonOption
+	common.OutputOption
 }
 
 var computerListOption ComputerListOption
@@ -37,11 +37,11 @@ var computerListCmd = &cobra.Command{
 		var computers client.ComputerList
 		if computers, err = jClient.List(); err == nil {
 			computerListOption.Writer = cmd.OutOrStdout()
-			computerListOption.CellRenderMap = map[string]RenderCell{
+			computerListOption.CellRenderMap = map[string]common.RenderCell{
 				"Offline": func(offline string) string {
 					switch offline {
 					case "true":
-						return util.ColorWarning("yes")
+						return "yes"
 					}
 					return "no"
 				},

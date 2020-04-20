@@ -167,7 +167,7 @@ var _ = Describe("job test", func() {
 
 			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
 
-			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{{
 				Name:  "name",
 				Value: "value",
 				Type:  "StringParameterDefinition",
@@ -406,6 +406,26 @@ var _ = Describe("job test", func() {
 			log, err := jobClient.Log(jobName, -1, 0)
 			Expect(err).To(BeNil())
 			Expect(log.Text).To(Equal("fake log"))
+		})
+	})
+
+	Context("Disable or enable a job", func() {
+		It("disable a job", func() {
+			jobName := "fakeJob"
+
+			PrepareForDisableJob(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.DisableJob(jobName)
+			Expect(err).To(BeNil())
+		})
+
+		It("enable a job", func() {
+			jobName := "fakeJob"
+
+			PrepareForEnableJob(roundTripper, jobClient.URL, jobName, "", "")
+
+			err := jobClient.EnableJob(jobName)
+			Expect(err).To(BeNil())
 		})
 	})
 })

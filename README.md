@@ -22,6 +22,7 @@ developer, administrator or just a regular user, it is made for you!
 * Multiple Jenkins support
 * Plugins management (list, search, install, upload)
 * Job management (search, build, log)
+* Configuration as Code support
 * Open your Jenkins with a browser
 * Restart your Jenkins
 * Connection with proxy support
@@ -66,6 +67,19 @@ You can find the download details [from here](http://somsubhra.com/github-releas
 # Get started
 
 Read the [official document](http://jcli.jenkins-zh.cn/) for more details on how to use `jcli`.
+
+Or, you can take [a live interactive course](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli) of Jenkins CLI.
+
+# Plugins
+
+Jenkins CLI could have more features by installing a plugin for it. You can install a plugin by the following command:
+
+```
+jcli config plugin fetch
+jcli config plugin install account
+```
+
+All official plugins could be found at [here](https://github.com/jenkins-zh/jcli-plugins).
 
 # Contribution
 

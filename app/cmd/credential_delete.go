@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -11,7 +12,7 @@ import (
 
 // CredentialDeleteOption option for credential delete command
 type CredentialDeleteOption struct {
-	BatchOption
+	common.BatchOption
 
 	ID    string
 	Store string
@@ -28,12 +29,12 @@ func init() {
 	credentialDeleteCmd.Flags().StringVarP(&credentialDeleteOption.ID, "id", "", "",
 		i18n.T("The ID of Jenkins credentials"))
 	credentialDeleteOption.SetFlag(credentialDeleteCmd)
-	credentialDeleteOption.Stdio = GetSystemStdio()
+	credentialDeleteOption.Stdio = common.GetSystemStdio()
 }
 
 var credentialDeleteCmd = &cobra.Command{
 	Use:     "delete [store] [id]",
-	Aliases: GetAliasesDel(),
+	Aliases: common.GetAliasesDel(),
 	Short:   i18n.T("Delete a credential from Jenkins"),
 	Long:    i18n.T("Delete a credential from Jenkins"),
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -66,6 +67,6 @@ var credentialDeleteCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

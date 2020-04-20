@@ -6,6 +6,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
@@ -16,6 +17,7 @@ var _ = Describe("restart command", func() {
 	var (
 		ctrl         *gomock.Controller
 		roundTripper *mhttp.MockRoundTripper
+		err          error
 	)
 
 	BeforeEach(func() {
@@ -24,7 +26,13 @@ var _ = Describe("restart command", func() {
 		restartOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		rootOptions.ConfigFile = path.Join(os.TempDir(), "fake.yaml")
+
+		var data []byte
+		data, err = generateSampleConfig()
+		Expect(err).To(BeNil())
+		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+		Expect(err).To(BeNil())
 	})
 
 	AfterEach(func() {
@@ -36,11 +44,6 @@ var _ = Describe("restart command", func() {
 
 	Context("with batch mode", func() {
 		It("should success", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
 			client.PrepareRestart(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", 503)
 
 			rootCmd.SetArgs([]string{"restart", "-b"})
@@ -54,11 +57,6 @@ var _ = Describe("restart command", func() {
 		})
 
 		It("with error code, 400", func() {
-			data, err := generateSampleConfig()
-			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-			Expect(err).To(BeNil())
-
 			client.PrepareRestart(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", 400)
 
 			rootCmd.SetArgs([]string{"restart", "-b"})
@@ -68,6 +66,17 @@ var _ = Describe("restart command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("bad request, code 400"))
+		})
+
+		It("restart directly", func() {
+			client.PrepareRestartDirectly(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", 503)
+
+			rootCmd.SetArgs([]string{"restart", "-b", "--safe=false"})
+
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

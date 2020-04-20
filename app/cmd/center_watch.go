@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 
 // CenterWatchOption as the options of watch command
 type CenterWatchOption struct {
-	WatchOption
+	common.WatchOption
 	UtilNeedRestart     bool
 	UtilInstallComplete bool
 

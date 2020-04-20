@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"strconv"
 
@@ -10,8 +11,8 @@ import (
 
 // JobArtifactOption is the options of job artifact command
 type JobArtifactOption struct {
-	OutputOption
-	CommonOption
+	common.OutputOption
+	common.CommonOption
 }
 
 var jobArtifactOption JobArtifactOption
