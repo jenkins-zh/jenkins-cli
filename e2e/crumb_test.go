@@ -1,4 +1,4 @@
-package test
+package e2e_test
 
 import (
 	"github.com/stretchr/testify/assert"

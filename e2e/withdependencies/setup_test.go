@@ -1,7 +1,7 @@
 package withdependencies
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/test"
+	"github.com/jenkins-zh/jenkins-cli/e2e"
 	"io"
 	"os"
 	"os/exec"
@@ -30,18 +30,18 @@ func TestMain(m *testing.M) {
 	}
 
 	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		test.WaitRunningUp(reader)
+		e2e.WaitRunningUp(reader)
 
-		test.InstallPlugin("localization-zh-cn", GetJenkinsURL(), true)
+		e2e.InstallPlugin("localization-zh-cn", GetJenkinsURL(), true)
 
-		test.RestartAndWait(GetJenkinsURL(), reader)
+		e2e.RestartAndWait(GetJenkinsURL(), reader)
 
-		test.ExecuteCmd("center", "mirror", "--url", GetJenkinsURL())
-		test.ExecuteCmd("plugin", "check", "--url", GetJenkinsURL())
-		test.InstallPlugin("configuration-as-code", GetJenkinsURL(), true)
-		test.InstallPlugin("pipeline-restful-api", GetJenkinsURL(), true)
+		e2e.ExecuteCmd("center", "mirror", "--url", GetJenkinsURL())
+		e2e.ExecuteCmd("plugin", "check", "--url", GetJenkinsURL())
+		e2e.InstallPlugin("configuration-as-code", GetJenkinsURL(), true)
+		e2e.InstallPlugin("pipeline-restful-api", GetJenkinsURL(), true)
 
-		test.RestartAndWait(GetJenkinsURL(), reader)
+		e2e.RestartAndWait(GetJenkinsURL(), reader)
 
 		m.Run()
 

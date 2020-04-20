@@ -1,4 +1,4 @@
-package test
+package e2e_test
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestListComputers(t *testing.T) {
-	cmd := exec.Command("jcli", "computer", "list", "--url", GetJenkinsURL())
+func TestListJobType(t *testing.T) {
+	cmd := exec.Command("jcli", "job", "type", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 
