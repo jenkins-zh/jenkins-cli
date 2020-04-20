@@ -2,7 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/util"
 
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"io/ioutil"
@@ -17,6 +21,8 @@ import (
 
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
+	common.CommonOption
+
 	ConfigFileLocation string
 	Detail             bool
 }
@@ -30,6 +36,8 @@ func init() {
 	flags := configCmd.Flags()
 	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
 		`Show the all detail of current configuration`)
+
+	configCmd.AddCommand(config_plugin.NewConfigPluginCmd(&configOptions.CommonOption))
 }
 
 var configCmd = &cobra.Command{
@@ -37,6 +45,9 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   i18n.T("Manage the config of jcli"),
 	Long:    i18n.T("Manage the config of jcli"),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		(&configOptions).Logger, _ = util.InitLogger(rootOptions.LoggerLevel)
+	},
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		current := getCurrentJenkins()
 		if current == nil {
@@ -58,49 +69,6 @@ var configCmd = &cobra.Command{
 	Example: `  jcli config generate
   jcli config list
   jcli config edit`,
-}
-
-// JenkinsServer holds the configuration of your Jenkins
-type JenkinsServer struct {
-	Name               string            `yaml:"name"`
-	URL                string            `yaml:"url"`
-	UserName           string            `yaml:"username"`
-	Token              string            `yaml:"token"`
-	Proxy              string            `yaml:"proxy,omitempty"`
-	ProxyAuth          string            `yaml:"proxyAuth,omitempty"`
-	InsecureSkipVerify bool              `yaml:"insecureSkipVerify"`
-	Description        string            `yaml:"description,omitempty"`
-	Data               map[string]string `yaml:"data,omitempty"`
-}
-
-// CommandHook is a hook
-type CommandHook struct {
-	Path    string `yaml:"path"`
-	Command string `yaml:"cmd"`
-}
-
-// PluginSuite define a suite of plugins
-type PluginSuite struct {
-	Name        string   `yaml:"name"`
-	Plugins     []string `yaml:"plugins"`
-	Description string   `yaml:"description"`
-}
-
-// JenkinsMirror represents the mirror of Jenkins
-type JenkinsMirror struct {
-	Name string
-	URL  string
-}
-
-// Config is a global config struct
-type Config struct {
-	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language,omitempty"`
-	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks,omitempty"`
-	PostHooks      []CommandHook   `yaml:"postHooks,omitempty"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites,omitempty"`
-	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {
@@ -130,6 +98,9 @@ func getConfig() *Config {
 
 func getJenkinsNames() []string {
 	names := make([]string, 0)
+	if config == nil {
+		return names
+	}
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
 	}

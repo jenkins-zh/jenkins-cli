@@ -70,6 +70,17 @@ Read the [official document](http://jcli.jenkins-zh.cn/) for more details on how
 
 Or, you can take [a live interactive course](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli) of Jenkins CLI.
 
+# Plugins
+
+Jenkins CLI could have more features by installing a plugin for it. You can install a plugin by the following command:
+
+```
+jcli config plugin fetch
+jcli config plugin install account
+```
+
+All official plugins could be found at [here](https://github.com/jenkins-zh/jcli-plugins).
+
 # Contribution
 
 If you're interested in this project. Please go through the

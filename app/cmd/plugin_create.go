@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -12,7 +13,7 @@ import (
 
 // PluginCreateOptions for the plugin create command
 type PluginCreateOptions struct {
-	CommonOption
+	common.CommonOption
 
 	DebugOutput bool
 }
@@ -44,6 +45,6 @@ Plugin tutorial is here https://jenkins.io/doc/developer/tutorial/`),
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.23",
+		common.Since: "v0.0.23",
 	},
 }

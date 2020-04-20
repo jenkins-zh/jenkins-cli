@@ -28,7 +28,7 @@ mock
 app/cmd/test.yaml
 
 # language
-app/i18n/bindata.go
+#app/i18n/bindata.go
 app/i18n/jcli/zh_CN/LC_MESSAGES/jcli.mo
 app/i18n/jcli.pot
 

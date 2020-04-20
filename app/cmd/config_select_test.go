@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/AlecAivazis/survey/v2/terminal"
-	"github.com/Netflix/go-expect"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,7 +9,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"testing"
 )
 
 var _ = Describe("config select command", func() {
@@ -57,33 +54,33 @@ var _ = Describe("config select command", func() {
 	})
 })
 
-func TestConfigSelect(t *testing.T) {
-	RunEditCommandTest(t, EditCommandTest{
-		ConfirmProcedure: func(c *expect.Console) {
-			c.ExpectString("Choose a Jenkins as the current one:")
-			// filter away everything
-			c.SendLine("z")
-			// send enter (should get ignored since there are no answers)
-			c.SendLine(string(terminal.KeyEnter))
-
-			// remove the filter we just applied
-			c.SendLine(string(terminal.KeyBackspace))
-
-			// press enter
-			c.SendLine(string(terminal.KeyEnter))
-		},
-		Test: func(stdio terminal.Stdio) (err error) {
-			configFile := path.Join(os.TempDir(), "fake.yaml")
-			defer os.Remove(configFile)
-
-			var data []byte
-			data, err = generateSampleConfig()
-			err = ioutil.WriteFile(configFile, data, 0664)
-
-			configSelectOptions.CommonOption.Stdio = stdio
-			rootCmd.SetArgs([]string{"config", "select", "--configFile", configFile})
-			_, err = rootCmd.ExecuteC()
-			return
-		},
-	})
-}
+//func TestConfigSelect(t *testing.T) {
+//	RunEditCommandTest(t, EditCommandTest{
+//		ConfirmProcedure: func(c *expect.Console) {
+//			c.ExpectString("Choose a Jenkins as the current one:")
+//			// filter away everything
+//			c.SendLine("z")
+//			// send enter (should get ignored since there are no answers)
+//			c.SendLine(string(terminal.KeyEnter))
+//
+//			// remove the filter we just applied
+//			c.SendLine(string(terminal.KeyBackspace))
+//
+//			// press enter
+//			c.SendLine(string(terminal.KeyEnter))
+//		},
+//		Test: func(stdio terminal.Stdio) (err error) {
+//			configFile := path.Join(os.TempDir(), "fake.yaml")
+//			defer os.Remove(configFile)
+//
+//			var data []byte
+//			data, err = generateSampleConfig()
+//			err = ioutil.WriteFile(configFile, data, 0664)
+//
+//			configSelectOptions.CommonOption.Stdio = stdio
+//			rootCmd.SetArgs([]string{"config", "select", "--configFile", configFile})
+//			_, err = rootCmd.ExecuteC()
+//			return
+//		},
+//	})
+//}

@@ -3,15 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/AlecAivazis/survey/v2/terminal"
-	"github.com/Netflix/go-expect"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
 	"os"
 	"path"
-	"testing"
 )
 
 var _ = Describe("test open", func() {
@@ -76,34 +73,34 @@ var _ = Describe("test open", func() {
 	})
 })
 
-func TestOpenJenkins(t *testing.T) {
-	RunEditCommandTest(t, EditCommandTest{
-		ConfirmProcedure: func(c *expect.Console) {
-			c.ExpectString("Choose a Jenkins which you want to open:")
-			// filter away everything
-			c.SendLine("z")
-			// send enter (should get ignored since there are no answers)
-			c.SendLine(string(terminal.KeyEnter))
-
-			// remove the filter we just applied
-			c.SendLine(string(terminal.KeyBackspace))
-
-			// press enter
-			c.SendLine(string(terminal.KeyEnter))
-		},
-		Test: func(stdio terminal.Stdio) (err error) {
-			configFile := path.Join(os.TempDir(), "fake.yaml")
-			defer os.Remove(configFile)
-
-			var data []byte
-			data, err = generateSampleConfig()
-			err = ioutil.WriteFile(configFile, data, 0664)
-
-			openOption.ExecContext = util.FakeExecCommandSuccess
-			openOption.CommonOption.Stdio = stdio
-			rootCmd.SetArgs([]string{"open", "--interactive", "--configFile", configFile})
-			_, err = rootCmd.ExecuteC()
-			return
-		},
-	})
-}
+//func TestOpenJenkins(t *testing.T) {
+//	RunEditCommandTest(t, EditCommandTest{
+//		ConfirmProcedure: func(c *expect.Console) {
+//			c.ExpectString("Choose a Jenkins which you want to open:")
+//			// filter away everything
+//			c.SendLine("z")
+//			// send enter (should get ignored since there are no answers)
+//			c.SendLine(string(terminal.KeyEnter))
+//
+//			// remove the filter we just applied
+//			c.SendLine(string(terminal.KeyBackspace))
+//
+//			// press enter
+//			c.SendLine(string(terminal.KeyEnter))
+//		},
+//		Test: func(stdio terminal.Stdio) (err error) {
+//			configFile := path.Join(os.TempDir(), "fake.yaml")
+//			defer os.Remove(configFile)
+//
+//			var data []byte
+//			data, err = generateSampleConfig()
+//			err = ioutil.WriteFile(configFile, data, 0664)
+//
+//			openOption.ExecContext = util.FakeExecCommandSuccess
+//			openOption.CommonOption.Stdio = stdio
+//			rootCmd.SetArgs([]string{"open", "--interactive", "--configFile", configFile})
+//			_, err = rootCmd.ExecuteC()
+//			return
+//		},
+//	})
+//}

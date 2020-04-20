@@ -1,13 +1,14 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
 // JobOption is the job cmd option
 type JobOption struct {
-	OutputOption
+	common.OutputOption
 }
 
 var jobOption JobOption

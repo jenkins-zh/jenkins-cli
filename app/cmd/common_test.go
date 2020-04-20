@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"bytes"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"reflect"
@@ -10,12 +10,12 @@ import (
 
 var _ = Describe("test OutputOption", func() {
 	var (
-		outputOption cmd.OutputOption
+		outputOption common.OutputOption
 		fakeFoos     []FakeFoo
 	)
 
 	BeforeEach(func() {
-		outputOption = cmd.OutputOption{}
+		outputOption = common.OutputOption{}
 
 		fakeFoos = []FakeFoo{{
 			Name: "fake",
@@ -39,7 +39,7 @@ var _ = Describe("test OutputOption", func() {
 
 		Context("with filter", func() {
 			BeforeEach(func() {
-				outputOption = cmd.OutputOption{
+				outputOption = common.OutputOption{
 					Filter: []string{"Name=fake"},
 				}
 			})
@@ -95,7 +95,7 @@ foo-1
 
 			Context("with json format", func() {
 				BeforeEach(func() {
-					outputOption.Format = cmd.JSONOutputFormat
+					outputOption.Format = common.JSONOutputFormat
 				})
 
 				It("should get a json text", func() {
@@ -112,7 +112,7 @@ foo-1
 
 			Context("with yaml format", func() {
 				BeforeEach(func() {
-					outputOption.Format = cmd.YAMLOutputFormat
+					outputOption.Format = common.YAMLOutputFormat
 				})
 
 				It("should get a yaml text", func() {
@@ -150,7 +150,7 @@ foo-1
 
 		Context("ignore invalid filter", func() {
 			BeforeEach(func() {
-				outputOption = cmd.OutputOption{
+				outputOption = common.OutputOption{
 					Filter: []string{"Name"},
 				}
 			})

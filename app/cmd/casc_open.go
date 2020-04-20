@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -46,6 +47,6 @@ var cascOpenCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

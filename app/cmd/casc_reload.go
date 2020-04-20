@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -35,6 +36,6 @@ var cascReloadCmd = &cobra.Command{
 		return jClient.Reload()
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

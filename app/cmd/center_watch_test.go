@@ -71,7 +71,7 @@ var _ = Describe("center watch command", func() {
 			Expect(allPluginsCompleted(status)).To(Equal(false))
 
 			// all install job is completed
-			status.Jobs = []client.InstallationJob{client.InstallationJob{
+			status.Jobs = []client.InstallationJob{{
 				UpdateCenterJob: client.UpdateCenterJob{Type: "InstallationJob"},
 				Status: client.InstallationJobStatus{
 					Success: true,

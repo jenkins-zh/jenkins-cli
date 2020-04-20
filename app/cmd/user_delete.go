@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 
 // UserDeleteOption is user delete cmd option
 type UserDeleteOption struct {
-	BatchOption
+	common.BatchOption
 
 	RoundTripper http.RoundTripper
 }
@@ -22,12 +23,12 @@ func init() {
 	userCmd.AddCommand(userDeleteCmd)
 	userDeleteCmd.Flags().BoolVarP(&userDeleteOption.Batch, "batch", "b", false,
 		i18n.T("Batch mode, no need confirm"))
-	userDeleteOption.BatchOption.Stdio = GetSystemStdio()
+	userDeleteOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 
 var userDeleteCmd = &cobra.Command{
 	Use:     "delete <username>",
-	Aliases: GetAliasesDel(),
+	Aliases: common.GetAliasesDel(),
 	Short:   "Delete a user for your Jenkins",
 	Long:    `Delete a user for your Jenkins`,
 	Args:    cobra.MinimumNArgs(1),
