@@ -1,4 +1,4 @@
-package cmd
+package config_plugin
 
 import (
 	"archive/tar"
@@ -15,7 +15,6 @@ import (
 	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -31,34 +30,31 @@ import (
 	gitssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
-func init() {
-	configCmd.AddCommand(configPluginCmd)
-
-	configPluginCmd.AddCommand(NewConfigPluginListCmd(),
-		NewConfigPluginFetchCmd(),
-		NewConfigPluginInstallCmd())
-}
-
-var configPluginCmd = &cobra.Command{
-	Use:   "plugin",
-	Short: i18n.T("Manage plugins for jcli"),
-	Long: i18n.T(`Manage plugins for jcli
+// NewConfigPluginCmd create a command as root of config plugin
+func NewConfigPluginCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+	cmd = &cobra.Command{
+		Use:   "plugin",
+		Short: i18n.T("Manage plugins for jcli"),
+		Long: i18n.T(`Manage plugins for jcli
 If you want to submit a plugin for jcli, please see also the following project.
 https://github.com/jenkins-zh/jcli-plugins`),
-	Annotations: map[string]string{
-		common.Since: "v0.0.28",
-	},
+		Annotations: map[string]string{
+			common.Since: "v0.0.28",
+		},
+	}
+
+	cmd.AddCommand(NewConfigPluginListCmd(opt),
+		NewConfigPluginFetchCmd(opt),
+		NewConfigPluginInstallCmd(opt),
+		NewConfigPluginUninstallCmd(opt))
+	return
 }
 
-type (
-	configPluginListCmd struct {
-		common.OutputOption
-	}
-)
-
 // NewConfigPluginListCmd create a command for list all jcli plugins
-func NewConfigPluginListCmd() (cmd *cobra.Command) {
-	configPluginListCmd := configPluginListCmd{}
+func NewConfigPluginListCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+	configPluginListCmd := configPluginListCmd{
+		CommonOption: opt,
+	}
 
 	cmd = &cobra.Command{
 		Use:   "list",
@@ -82,8 +78,10 @@ func (c *configPluginListCmd) RunE(cmd *cobra.Command, args []string) (err error
 }
 
 // NewConfigPluginFetchCmd create a command for fetching plugin metadata
-func NewConfigPluginFetchCmd() (cmd *cobra.Command) {
-	pluginFetchCmd := pluginFetchCmd{}
+func NewConfigPluginFetchCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+	pluginFetchCmd := jcliPluginFetchCmd{
+		CommonOption: opt,
+	}
 
 	cmd = &cobra.Command{
 		Use:   "fetch",
@@ -115,8 +113,10 @@ but you can change it by giving a command parameter.`,
 }
 
 // NewConfigPluginInstallCmd create a command for fetching plugin metadata
-func NewConfigPluginInstallCmd() (cmd *cobra.Command) {
-	pluginInstallCmd := jcliPluginInstallCmd{}
+func NewConfigPluginInstallCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+	pluginInstallCmd := jcliPluginInstallCmd{
+		CommonOption: opt,
+	}
 
 	cmd = &cobra.Command{
 		Use:   "install",
@@ -136,39 +136,8 @@ func NewConfigPluginInstallCmd() (cmd *cobra.Command) {
 	return
 }
 
-type (
-	plugin struct {
-		Use          string
-		Short        string
-		Long         string
-		Main         string
-		Version      string
-		DownloadLink string `yaml:"downloadLink"`
-	}
-	pluginError struct {
-		error
-		code int
-	}
-	pluginFetchCmd struct {
-		PluginRepo string
-		Reset      bool
-
-		Username   string
-		Password   string
-		SSHKeyFile string
-
-		output io.Writer
-	}
-	jcliPluginInstallCmd struct {
-		RoundTripper http.RoundTripper
-		ShowProgress bool
-
-		output io.Writer
-	}
-)
-
 // Run is the main entry point of plugin fetch command
-func (c *pluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) {
+func (c *jcliPluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) {
 	var userHome string
 	if userHome, err = homedir.Dir(); err != nil {
 		return
@@ -203,7 +172,7 @@ func (c *pluginFetchCmd) Run(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-func (c *pluginFetchCmd) getCloneOptions() (cloneOptions *git.CloneOptions) {
+func (c *jcliPluginFetchCmd) getCloneOptions() (cloneOptions *git.CloneOptions) {
 	cloneOptions = &git.CloneOptions{
 		URL:      c.PluginRepo,
 		Progress: c.output,
@@ -212,7 +181,7 @@ func (c *pluginFetchCmd) getCloneOptions() (cloneOptions *git.CloneOptions) {
 	return
 }
 
-func (c *pluginFetchCmd) getPullOptions() (pullOptions *git.PullOptions) {
+func (c *jcliPluginFetchCmd) getPullOptions() (pullOptions *git.PullOptions) {
 	pullOptions = &git.PullOptions{
 		RemoteName: "origin",
 		Progress:   c.output,
@@ -221,7 +190,7 @@ func (c *pluginFetchCmd) getPullOptions() (pullOptions *git.PullOptions) {
 	return
 }
 
-func (c *pluginFetchCmd) getAuth() (auth transport.AuthMethod) {
+func (c *jcliPluginFetchCmd) getAuth() (auth transport.AuthMethod) {
 	if c.Username != "" {
 		auth = &githttp.BasicAuth{
 			Username: c.Username,
@@ -330,7 +299,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 
 	var data []byte
 	pluginsMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/%s.yaml", userHome, name)
-	logger.Info("read plugin metadata info", zap.String("path", pluginsMetadataFile))
+	c.Logger.Info("read plugin metadata info", zap.String("path", pluginsMetadataFile))
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := plugin{}
 		if err = yaml.Unmarshal(data, &plugin); err == nil {
@@ -353,7 +322,7 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 
 	link := c.getDownloadLink(plugin)
 	output := fmt.Sprintf("%s/.jenkins-cli/plugins/%s.tar.gz", userHome, plugin.Main)
-	logger.Info("start to download plugin",
+	c.Logger.Info("start to download plugin",
 		zap.String("path", output), zap.String("link", link))
 
 	downloader := util.HTTPDownloader{
@@ -363,7 +332,7 @@ func (c *jcliPluginInstallCmd) download(plugin plugin) (err error) {
 		ShowProgress:   c.ShowProgress,
 	}
 	if err = downloader.DownloadFile(); err == nil {
-		logger.Info("start to extract files")
+		c.Logger.Info("start to extract files")
 		err = c.extractFiles(plugin, output)
 	}
 	return
@@ -384,13 +353,13 @@ func (c *jcliPluginInstallCmd) extractFiles(plugin plugin, tarFile string) (err 
 	var f *os.File
 	var gzf *gzip.Reader
 	if f, err = os.Open(tarFile); err != nil {
-		logger.Error("open file error", zap.String("path", tarFile))
+		c.Logger.Error("open file error", zap.String("path", tarFile))
 		return
 	}
 	defer f.Close()
 
 	if gzf, err = gzip.NewReader(f); err != nil {
-		logger.Error("open tar file error", zap.String("path", tarFile))
+		c.Logger.Error("open tar file error", zap.String("path", tarFile))
 		return
 	}
 
@@ -398,11 +367,11 @@ func (c *jcliPluginInstallCmd) extractFiles(plugin plugin, tarFile string) (err 
 	var header *tar.Header
 	for {
 		if header, err = tarReader.Next(); err == io.EOF {
-			logger.Info("extracted all files")
+			c.Logger.Info("extracted all files")
 			err = nil
 			break
 		} else if err != nil {
-			logger.Error("tar file reading error")
+			c.Logger.Error("tar file reading error")
 			break
 		}
 		name := header.Name
@@ -410,7 +379,7 @@ func (c *jcliPluginInstallCmd) extractFiles(plugin plugin, tarFile string) (err 
 		switch header.Typeflag {
 		case tar.TypeReg:
 			if name != plugin.Main {
-				logger.Debug("ignore file", zap.String("name", name))
+				c.Logger.Debug("ignore file", zap.String("name", name))
 				continue
 			}
 			var targetFile *os.File
@@ -418,13 +387,13 @@ func (c *jcliPluginInstallCmd) extractFiles(plugin plugin, tarFile string) (err 
 				os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode)); err != nil {
 				break
 			}
-			logger.Info("extracting file", zap.String("path", targetFile.Name()))
+			c.Logger.Info("extracting file", zap.String("path", targetFile.Name()))
 			if _, err = io.Copy(targetFile, tarReader); err != nil {
 				break
 			}
 			targetFile.Close()
 		default:
-			logger.Debug("ignore this type from tar file",
+			c.Logger.Debug("ignore this type from tar file",
 				zap.Int32("type", int32(header.Typeflag)), zap.String("name", name))
 		}
 	}

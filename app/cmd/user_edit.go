@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 
 // UserEditOption is the user edit cmd option
 type UserEditOption struct {
-	CommonOption
+	common.CommonOption
 
 	Description string
 }
@@ -20,14 +21,14 @@ func init() {
 	userCmd.AddCommand(userEditCmd)
 	userEditCmd.Flags().StringVarP(&userEditOption.Description, "desc", "d", "",
 		i18n.T("Edit the description"))
-	userEditOption.Stdio = GetSystemStdio()
+	userEditOption.Stdio = common.GetSystemStdio()
 }
 
 var userEditCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "Edit the user of your Jenkins",
 	Long: fmt.Sprintf(`Edit the user of your Jenkins
-%s`, GetEditorHelpText()),
+%s`, common.GetEditorHelpText()),
 	RunE: func(_ *cobra.Command, _ []string) (err error) {
 		jClient := &client.UserClient{
 			JenkinsCore: client.JenkinsCore{

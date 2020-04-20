@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -16,7 +17,7 @@ import (
 
 // ComputerLaunchOption option for config list command
 type ComputerLaunchOption struct {
-	CommonOption
+	common.CommonOption
 
 	Type         string
 	ShowProgress bool

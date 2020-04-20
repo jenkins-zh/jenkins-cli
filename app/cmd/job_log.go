@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 
 // JobLogOption is the job log option
 type JobLogOption struct {
-	WatchOption
+	common.WatchOption
 	History int
 
 	LogText      string

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,8 +10,8 @@ import (
 
 // RestartOption holds the options for restart cmd
 type RestartOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.CommonOption
 
 	Safe bool
 }
@@ -22,8 +23,8 @@ func init() {
 	restartOption.SetFlag(restartCmd)
 	restartCmd.Flags().BoolVarP(&restartOption.Safe, "safe", "s", true,
 		i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then restart Jenkins"))
-	restartOption.BatchOption.Stdio = GetSystemStdio()
-	restartOption.CommonOption.Stdio = GetSystemStdio()
+	restartOption.BatchOption.Stdio = common.GetSystemStdio()
+	restartOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
 var restartCmd = &cobra.Command{

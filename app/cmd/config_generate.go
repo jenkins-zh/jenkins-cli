@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
@@ -16,9 +17,9 @@ import (
 
 // ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
-	InteractiveOption
-	CommonOption
-	BatchOption
+	common.InteractiveOption
+	common.CommonOption
+	common.BatchOption
 
 	Copy bool
 }
@@ -31,8 +32,8 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
-	configGenerateOption.CommonOption.Stdio = GetSystemStdio()
-	configGenerateOption.BatchOption.Stdio = GetSystemStdio()
+	configGenerateOption.CommonOption.Stdio = common.GetSystemStdio()
+	configGenerateOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 
 var configGenerateCmd = &cobra.Command{

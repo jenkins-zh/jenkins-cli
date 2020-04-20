@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io/ioutil"
 	"os"
 

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
@@ -15,7 +16,7 @@ import (
 
 // CenterOption is the center cmd option
 type CenterOption struct {
-	WatchOption
+	common.WatchOption
 
 	RoundTripper http.RoundTripper
 	CenterStatus string

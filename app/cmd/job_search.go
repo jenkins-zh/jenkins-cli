@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/hashicorp/go-version"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -10,8 +11,8 @@ import (
 
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
-	CommonOption
-	OutputOption
+	common.CommonOption
+	common.OutputOption
 	Name   string
 	Type   string
 	Parent string
@@ -71,7 +72,7 @@ var jobSearchCmd = &cobra.Command{
 // Check do the conditions check
 func (o *JobSearchOption) Check() (err error) {
 	opt := PluginOptions{
-		CommonOption: CommonOption{RoundTripper: o.RoundTripper},
+		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
 	}
 	const pluginName = "pipeline-restful-api"
 	const targetVersion = "0.3"

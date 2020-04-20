@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Netflix/go-expect"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -95,8 +96,8 @@ var _ = Describe("job delete command", func() {
 
 type PromptCommandTest struct {
 	Message     string
-	MsgConfirm  MsgConfirm
-	BatchOption *BatchOption
+	MsgConfirm  common.MsgConfirm
+	BatchOption *common.BatchOption
 	Procedure   func(*expect.Console)
 	Args        []string
 }
@@ -104,9 +105,9 @@ type PromptCommandTest struct {
 type EditCommandTest struct {
 	Message          string
 	DefaultContent   string
-	EditContent      EditContent
-	CommonOption     *CommonOption
-	BatchOption      *BatchOption
+	EditContent      common.EditContent
+	CommonOption     *common.CommonOption
+	BatchOption      *common.BatchOption
 	ConfirmProcedure func(*expect.Console)
 	Procedure        func(*expect.Console)
 	Test             func(stdio terminal.Stdio) (err error)
@@ -116,7 +117,7 @@ type EditCommandTest struct {
 
 type PromptTest struct {
 	Message    string
-	MsgConfirm MsgConfirm
+	MsgConfirm common.MsgConfirm
 	Procedure  func(*expect.Console)
 	Expected   interface{}
 }
@@ -124,7 +125,7 @@ type PromptTest struct {
 type EditorTest struct {
 	Message        string
 	DefaultContent string
-	EditContent    EditContent
+	EditContent    common.EditContent
 	Procedure      func(*expect.Console)
 	Expected       string
 }
@@ -146,7 +147,7 @@ func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
 func RunPromptTest(t *testing.T, test PromptTest) {
 	var answer interface{}
 	RunTest(t, func(stdio terminal.Stdio) error {
-		batch := &BatchOption{
+		batch := &common.BatchOption{
 			Batch: false,
 			Stdio: stdio,
 		}
@@ -159,7 +160,7 @@ func RunPromptTest(t *testing.T, test PromptTest) {
 func RunEditorTest(t *testing.T, test EditorTest) {
 	var content string
 	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		editor := &CommonOption{
+		editor := &common.CommonOption{
 			Stdio: stdio,
 		}
 		content, err = editor.Editor(test.DefaultContent, test.Message)

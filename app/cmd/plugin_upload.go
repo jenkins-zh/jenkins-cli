@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
@@ -27,7 +28,7 @@ type PluginUploadOption struct {
 
 	RoundTripper http.RoundTripper
 
-	HookOption
+	common.HookOption
 
 	pluginFilePath string
 }

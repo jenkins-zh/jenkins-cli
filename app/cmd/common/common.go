@@ -1,11 +1,11 @@
-package cmd
+package common
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io"
 	"net/http"
@@ -13,16 +13,13 @@ import (
 	"reflect"
 	"strings"
 
-	"go.uber.org/zap"
-
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
 const (
-	since = "since"
+	Since = "since"
 )
 
 // CommonOption contains the common options
@@ -31,6 +28,7 @@ type CommonOption struct {
 	SystemCallExec  util.SystemCallExec
 	LookPathContext util.LookPathContext
 	RoundTripper    http.RoundTripper
+	Logger          *zap.Logger
 
 	Stdio terminal.Stdio
 
@@ -92,7 +90,7 @@ func (o *OutputOption) OutputV2(obj interface{}) (err error) {
 		return
 	}
 
-	logger.Debug("start to output", zap.Any("filter", o.Filter))
+	//cmd.logger.Debug("start to output", zap.Any("filter", o.Filter))
 	obj = o.ListFilter(obj)
 
 	var data []byte
@@ -304,29 +302,6 @@ func (b *InteractiveOption) SetFlag(cmd *cobra.Command) {
 type HookOption struct {
 	SkipPreHook  bool
 	SkipPostHook bool
-}
-
-// Deprecated, please replace this with getCurrentJenkinsAndClient
-func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
-	jenkins = getCurrentJenkinsFromOptionsOrDie()
-	jclient.URL = jenkins.URL
-	jclient.UserName = jenkins.UserName
-	jclient.Token = jenkins.Token
-	jclient.Proxy = jenkins.Proxy
-	jclient.ProxyAuth = jenkins.ProxyAuth
-	return
-}
-
-func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
-	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
-		jClient.URL = jenkins.URL
-		jClient.UserName = jenkins.UserName
-		jClient.Token = jenkins.Token
-		jClient.Proxy = jenkins.Proxy
-		jClient.ProxyAuth = jenkins.ProxyAuth
-		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
-	}
-	return
 }
 
 // GetAliasesDel returns the aliases for delete command

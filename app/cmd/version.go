@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -77,6 +78,6 @@ var versionCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.26",
+		common.Since: "v0.0.26",
 	},
 }

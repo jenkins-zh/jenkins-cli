@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ import (
 
 // JobEditOption is the option for job create command
 type JobEditOption struct {
-	CommonOption
+	common.CommonOption
 
 	Filename  string
 	Script    string
@@ -36,7 +37,7 @@ func init() {
 		i18n.T("Give it a sample Jenkinsfile if the target script is empty"))
 	jobEditCmd.Flags().BoolVarP(&jobEditOption.TrimSpace, "trim", "", true,
 		i18n.T("If trim the leading and tailing white space"))
-	jobEditOption.Stdio = GetSystemStdio()
+	jobEditOption.Stdio = common.GetSystemStdio()
 }
 
 var jobEditCmd = &cobra.Command{
@@ -45,7 +46,7 @@ var jobEditCmd = &cobra.Command{
 	Long: i18n.T(fmt.Sprintf(`Edit the job of your Jenkins. We only support to edit the pipeline job.
 Official Pipeline syntax document is here https://jenkins.io/doc/book/pipeline/syntax/
 
-%s`, GetEditorHelpText())),
+%s`, common.GetEditorHelpText())),
 	Args: cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]

@@ -273,6 +273,29 @@ func execute(command string, writer io.Writer) (err error) {
 	return
 }
 
+// Deprecated, please replace this with getCurrentJenkinsAndClient
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	jenkins = getCurrentJenkinsFromOptionsOrDie()
+	jclient.URL = jenkins.URL
+	jclient.UserName = jenkins.UserName
+	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
+	}
+	return
+}
+
 const (
 	jcliBashCompletionFunc = `__plugin_name_parse_get()
 {

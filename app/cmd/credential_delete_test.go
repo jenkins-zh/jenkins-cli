@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"github.com/Netflix/go-expect"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -142,7 +143,7 @@ func TestConfirmCommands(t *testing.T) {
 
 	RunPromptTest(t, PromptTest{
 		Message:    "message",
-		MsgConfirm: &BatchOption{},
+		MsgConfirm: &common.BatchOption{},
 		Procedure: func(c *expect.Console) {
 			c.ExpectString("message")
 			c.SendLine("y")
@@ -154,7 +155,7 @@ func TestConfirmCommands(t *testing.T) {
 	RunEditorTest(t, EditorTest{
 		Message:        "message",
 		DefaultContent: "hello",
-		EditContent:    &CommonOption{},
+		EditContent:    &common.CommonOption{},
 		Procedure: func(c *expect.Console) {
 			c.ExpectString("message")
 			c.SendLine("")

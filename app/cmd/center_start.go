@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ import (
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	CommonOption
+	common.CommonOption
 
 	Port                      int
 	Context                   string

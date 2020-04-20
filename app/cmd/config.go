@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/util"
 
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -18,6 +21,8 @@ import (
 
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
+	common.CommonOption
+
 	ConfigFileLocation string
 	Detail             bool
 }
@@ -31,6 +36,8 @@ func init() {
 	flags := configCmd.Flags()
 	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
 		`Show the all detail of current configuration`)
+
+	configCmd.AddCommand(config_plugin.NewConfigPluginCmd(&configOptions.CommonOption))
 }
 
 var configCmd = &cobra.Command{
@@ -38,6 +45,10 @@ var configCmd = &cobra.Command{
 	Aliases: []string{"cfg"},
 	Short:   i18n.T("Manage the config of jcli"),
 	Long:    i18n.T("Manage the config of jcli"),
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		(&configOptions).Logger, _ = util.InitLogger(rootOptions.LoggerLevel)
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		current := getCurrentJenkins()
 		if current == nil {

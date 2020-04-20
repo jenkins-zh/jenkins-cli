@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -13,8 +14,8 @@ import (
 
 // OpenOption is the open cmd option
 type OpenOption struct {
-	CommonOption
-	InteractiveOption
+	common.CommonOption
+	common.InteractiveOption
 
 	Browser string
 
@@ -30,7 +31,7 @@ func init() {
 	openCmd.Flags().StringVarP(&openOption.Browser, "browser", "b", "",
 		i18n.T("Open Jenkins with a specific browser"))
 	openOption.SetFlag(openCmd)
-	openOption.Stdio = GetSystemStdio()
+	openOption.Stdio = common.GetSystemStdio()
 
 	err := openCmd.RegisterFlagCompletionFunc("browser", func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
 		return []string{"Google-Chrome", "Safari", "Microsoft-Edge", "Firefox"}, cobra.ShellCompDirectiveDefault
