@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"

@@ -270,7 +270,7 @@ func loadPlugins(cmd *cobra.Command) {
 					os.Stderr.Write(eerr.Stderr)
 					status := eerr.Sys().(syscall.WaitStatus)
 					return pluginError{
-						error: errors.Errorf("plugin %q exited with error"),
+						error: errors.Errorf("plugin %s exited with error", main),
 						code:  status.ExitStatus(),
 					}
 				}

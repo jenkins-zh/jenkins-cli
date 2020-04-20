@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
