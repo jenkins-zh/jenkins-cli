@@ -35,16 +35,28 @@ var _ = Describe("Runner test command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("should success", func() {
+		It("jenkins war download should succeed", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 			rootCmd.SetArgs([]string{"runner"})
-            buf := new(bytes.Buffer)
+           buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
-		})		
+		})
+
+		It("Empty file path", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+			rootCmd.SetArgs([]string{"runner", "--path=home/sladyn/sladyn.go"})
+			buf := new(bytes.Buffer)
+			rootCmd.SetOutput(buf)
+			_, err = rootCmd.ExecuteC()
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })

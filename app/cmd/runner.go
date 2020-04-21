@@ -3,11 +3,16 @@ package cmd
 import (
 
 	"fmt"
+	"log"
+	"strings"
+	"path/filepath"
 	"go.uber.org/zap"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"github.com/mitchellh/go-homedir"
+	"os"
+
 
 )
 
@@ -17,6 +22,8 @@ type RunnerOption struct {
 	CommonOption
 
 	Safe bool
+	Version string
+	WarPath string 
 }
 
 var runnerOption RunnerOption
@@ -24,8 +31,12 @@ var runnerOption RunnerOption
 func init() {
 	rootCmd.AddCommand(runnerCmd)
 	runnerOption.SetFlag(runnerCmd)
+	runnerCmd.Flags().StringVarP(&runnerOption.WarPath, "path", "p", "",
+	i18n.T("The jenkins.war path"))
 	runnerCmd.Flags().BoolVarP(&runnerOption.Safe, "safe", "s", true,
 	i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then restart Jenkins"))
+	runnerCmd.Flags().StringVarP(&runnerOption.Version, "version", "v", "2.190.3",
+		i18n.T("The of version of jenkins.war"))
 	runnerOption.BatchOption.Stdio = GetSystemStdio()
 	runnerOption.CommonOption.Stdio = GetSystemStdio()
 }
@@ -46,14 +57,39 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 		ShowProgress: true,
 		TargetFilePath: jenkinsfileRunnerVersion,
 	}
-	downloader.DownloadFile()
+	if err := downloader.DownloadFile(); err != nil {
+		//Fatal error has occured while downloading the file.
+		log.Fatal(err)
+	}
 
-	//Check if jenkins war exists
-	var userHome string
-		if userHome, err = homedir.Dir(); err != nil {
-			return
+		if runnerOption.WarPath == "" {
+			// If it does not exist download the jenkins.war
+			var userHome string
+			if userHome, err = homedir.Dir(); err != nil {
+				return err
+			}
+			jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, runnerOption.Version)
+			logger.Info("prepare to download jenkins.war as pre-requisite for jfr", zap.String("localPath", jenkinsWar))
+
+			if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
+				download := &CenterDownloadOption{
+					Mirror:       "default",
+					Output:       jenkinsWar,
+					ShowProgress: true,
+					Version:      runnerOption.Version,
+				}
+				if err = download.DownloadJenkins(); err != nil {
+					return err
+				}
+			}
 		}
-	searchDir := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, centerDownloadOption.Version)
-	return
+
+	//Check if jenkins war path exists
+	if filepath.Ext(strings.TrimSpace(runnerOption.WarPath)) != ".war" {
+		return fmt.Errorf("incorrect file path : %s", runnerOption.WarPath)
+	}
+	
+
+	return nil
 	},
 }
