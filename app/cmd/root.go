@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -52,6 +53,7 @@ var rootCmd = &cobra.Command{
 We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
+			(&configOptions).Logger = logger
 			client.SetLogger(logger)
 		} else {
 			return
@@ -68,6 +70,8 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 			} else {
 				err = loadConfig(rootOptions.ConfigFile)
 			}
+		} else {
+			logger.Debug("ignore loading config", zap.String("cmd", cmd.Name()))
 		}
 
 		if err == nil {
@@ -98,6 +102,13 @@ func needReadConfig(cmd *cobra.Command) bool {
 	for _, item := range ignoreConfigLoad {
 		if item == configPath {
 			return false
+		}
+	}
+
+	// allow sub-commands give their decisions
+	if cmd.Annotations != nil {
+		if disable, ok := cmd.Annotations[ANNOTATION_CONFIG_LOAD]; ok {
+			return disable != "disable"
 		}
 	}
 	return true
@@ -155,6 +166,8 @@ func init() {
 		i18n.T("The auth of proxy of connection to Jenkins"))
 
 	rootCmd.SetOut(os.Stdout)
+
+	loadPlugins(rootCmd)
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
@@ -259,6 +272,29 @@ func execute(command string, writer io.Writer) (err error) {
 				_, _ = writer.Write(data)
 			}
 		}
+	}
+	return
+}
+
+// Deprecated, please replace this with getCurrentJenkinsAndClient
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	jenkins = getCurrentJenkinsFromOptionsOrDie()
+	jclient.URL = jenkins.URL
+	jclient.UserName = jenkins.UserName
+	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
 }

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 
@@ -13,7 +14,7 @@ import (
 
 // JobParamOption is the job param option
 type JobParamOption struct {
-	OutputOption
+	common.OutputOption
 
 	Indent bool
 

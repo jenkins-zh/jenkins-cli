@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -10,7 +11,7 @@ import (
 
 // JobHistoryOption is the job history option
 type JobHistoryOption struct {
-	OutputOption
+	common.OutputOption
 
 	RoundTripper http.RoundTripper
 }

@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"go.uber.org/zap"
 	"os"
+	"path/filepath"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -14,7 +16,7 @@ import (
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	CommonOption
+	common.CommonOption
 
 	Port                      int
 	Context                   string
@@ -82,6 +84,30 @@ func init() {
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
+
+	err := centerStartCmd.RegisterFlagCompletionFunc("version", func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
+		var userHome string
+		var err error
+		if userHome, err = homedir.Dir(); err != nil {
+			return
+		}
+
+		var machedPathes []string
+		jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/*/jenkins.war", userHome)
+		if machedPathes, err = filepath.Glob(jenkinsWar); err != nil {
+			return
+		}
+
+		versionArray := make([]string, len(machedPathes))
+		for _, path := range machedPathes {
+			versionArray = append(versionArray, filepath.Base(filepath.Dir(path)))
+		}
+
+		return versionArray, cobra.ShellCompDirectiveDefault
+	})
+	if err != nil {
+		centerCmd.PrintErrf("register flag version failed %#v\n", err)
+	}
 }
 
 var centerStartCmd = &cobra.Command{

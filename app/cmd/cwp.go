@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"html/template"
 	"io/ioutil"
@@ -55,7 +56,7 @@ func init() {
 // CWPOptions is the option of custom-war-packager
 // see also https://github.com/jenkinsci/custom-war-packager
 type CWPOptions struct {
-	CommonOption
+	common.CommonOption
 
 	ConfigPath      string
 	Version         string
@@ -84,7 +85,7 @@ var cwpCmd = &cobra.Command{
 This's a wrapper of https://github.com/jenkinsci/custom-war-packager`),
 	RunE: cwpOptions.Run,
 	Annotations: map[string]string{
-		since: "v0.0.27",
+		common.Since: "v0.0.27",
 	},
 }
 

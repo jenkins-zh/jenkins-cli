@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -12,7 +13,7 @@ import (
 
 // CredentialListOption option for credential list command
 type CredentialListOption struct {
-	OutputOption
+	common.OutputOption
 
 	Store string
 
@@ -48,6 +49,6 @@ var credentialListCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

@@ -174,8 +174,8 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 		StatusCode: 200,
 		Request:    request,
 		Header: map[string][]string{
-			"X-More-Data": []string{"false"},
-			"X-Text-Size": []string{"8"},
+			"X-More-Data": {"false"},
+			"X-Text-Size": {"8"},
 		},
 		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
 	}

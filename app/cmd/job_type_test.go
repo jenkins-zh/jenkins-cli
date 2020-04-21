@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
@@ -57,7 +58,7 @@ var _ = Describe("job type command", func() {
 
 			config = &Config{
 				Current: "fake",
-				JenkinsServers: []JenkinsServer{JenkinsServer{
+				JenkinsServers: []JenkinsServer{{
 					Name:     "fake",
 					URL:      "http://localhost:8080/jenkins",
 					UserName: "admin",

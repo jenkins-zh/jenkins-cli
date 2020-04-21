@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
@@ -33,7 +34,7 @@ var _ = Describe("casc command check", func() {
 
 		config = &Config{
 			Current: "fake",
-			JenkinsServers: []JenkinsServer{JenkinsServer{
+			JenkinsServers: []JenkinsServer{{
 				Name:     "fake",
 				URL:      rootURL,
 				UserName: user,

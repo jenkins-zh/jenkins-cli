@@ -24,6 +24,13 @@ Useful links:
 * [Jenkins Remote Access API](https://wiki.jenkins.io/display/JENKINS/Remote+access+API)
 * [Jenkins REST API overview](https://www.youtube.com/watch?v=D93t1jElt4Q) by [Cliffano Subagio](https://github.com/cliffano)
 
+## Plugins
+
+Jenkins CLI allows you to write a plugin for it. You can follow these steps:
+
+* write a plugin project, e.g. [jcli-account-plugin](https://github.com/jenkins-zh/jcli-account-plugin)
+* submit a metadata file into [the official repository](https://github.com/jenkins-zh/jcli-plugins)
+
 ## Testing
 
 We use a BDD Testing Framework to test our project. Please make sure you're familiar
