@@ -37,19 +37,12 @@ var _ = Describe("config generate command", func() {
 		It("should success", func() {
 			Expect(cmdErr).To(BeNil())
 			Expect(buf.String()).To(Equal(`current: yourServer
-language: ""
 jenkins_servers:
 - name: yourServer
   url: http://localhost:8080/jenkins
   username: admin
   token: 111e3a2f0231198855dceaff96f20540a9
-  proxy: ""
-  proxyAuth: ""
   insecureSkipVerify: true
-  description: ""
-preHooks: []
-postHooks: []
-pluginSuites: []
 mirrors:
 - name: default
   url: http://mirrors.jenkins.io/

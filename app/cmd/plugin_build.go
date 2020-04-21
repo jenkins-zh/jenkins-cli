@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -12,7 +13,7 @@ import (
 
 // PluginBuildOptions for the plugin build command
 type PluginBuildOptions struct {
-	CommonOption
+	common.CommonOption
 
 	DebugOutput bool
 }
@@ -44,6 +45,6 @@ The default behaviour is "mvn clean package -DskipTests -Dmaven.test.skip"`),
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.27",
+		common.Since: "v0.0.27",
 	},
 }

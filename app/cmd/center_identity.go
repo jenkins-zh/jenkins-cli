@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -10,7 +11,7 @@ import (
 
 // CenterIdentityOption option for upgrade Jenkins
 type CenterIdentityOption struct {
-	CommonOption
+	common.CommonOption
 }
 
 var centerIdentityOption CenterIdentityOption

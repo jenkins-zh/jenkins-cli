@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 	"strings"
 
@@ -17,7 +18,7 @@ import (
 
 // PluginSearchOption is the plugin search option
 type PluginSearchOption struct {
-	OutputOption
+	common.OutputOption
 
 	RoundTripper http.RoundTripper
 }

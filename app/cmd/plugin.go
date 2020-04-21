@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
-	CommonOption
+	common.CommonOption
 
 	Suite string
 }

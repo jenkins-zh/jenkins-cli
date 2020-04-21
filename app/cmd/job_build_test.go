@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"testing"
-
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 )
 
 var _ = Describe("job build command", func() {
@@ -185,6 +183,6 @@ var _ = Describe("job build command", func() {
 //	})
 //}
 
-func RunEditCommandTest(t *testing.T, test EditCommandTest) {
-	RunTest(t, test.Test, test.ConfirmProcedure, test.Procedure)
-}
+//func RunEditCommandTest(t *testing.T, test EditCommandTest) {
+//	RunTest(t, test.Test, test.ConfirmProcedure, test.Procedure)
+//}

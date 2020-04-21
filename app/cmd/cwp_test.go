@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
@@ -26,7 +27,7 @@ var _ = Describe("cwp command test", func() {
 		localCache = os.TempDir()
 		roundTripper := mhttp.NewMockRoundTripper(ctrl)
 		cwpOptions = CWPOptions{
-			CommonOption: CommonOption{RoundTripper: roundTripper},
+			CommonOption: common.CommonOption{RoundTripper: roundTripper},
 			MetadataURL:  "http://localhost/maven-metadata.xml",
 			LocalCache:   localCache,
 		}
@@ -61,7 +62,7 @@ func TestDownload(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: CommonOption{RoundTripper: roundTripper},
+		CommonOption: common.CommonOption{RoundTripper: roundTripper},
 		MetadataURL:  "http://localhost/maven-metadata.xml",
 		LocalCache:   tmpDir,
 	}
@@ -84,7 +85,7 @@ func TestGetLatest(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: CommonOption{RoundTripper: roundTripper},
+		CommonOption: common.CommonOption{RoundTripper: roundTripper},
 		MetadataURL:  "http://localhost/maven-metadata.xml",
 	}
 	prepareMavenMetadataRequest(roundTripper)
