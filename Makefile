@@ -94,7 +94,7 @@ fmt:
 	gofmt -s -w .
 
 test-slow:
-	JENKINS_VERSION=2.190.3 go test ./e2e -v -count=1
+	JENKINS_VERSION=2.190.3 go test ./e2e/... -v -count=1
 
 test:
 	mkdir -p bin
