@@ -41,7 +41,7 @@ var _ = Describe("Runner test command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 			rootCmd.SetArgs([]string{"runner"})
-           buf := new(bytes.Buffer)
+			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
