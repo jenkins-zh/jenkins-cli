@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
@@ -150,7 +151,14 @@ var centerStartCmd = &cobra.Command{
 			env := os.Environ()
 
 			if centerStartOption.RandomWebDir {
-				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version))
+				randomWebDir := fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version)
+				defer func(logger helper.Printer, randomWebDir string) {
+					if err := os.RemoveAll(randomWebDir); err != nil {
+						logger.PrintErr(fmt.Sprintf("remove random web dir [%s] of Jenkins failed, %#v", randomWebDir, err))
+					}
+				}(cmd, randomWebDir)
+
+				env = append(env, randomWebDir)
 			} else {
 				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
 			}

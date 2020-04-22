@@ -15,6 +15,9 @@ func GetJenkinsURL() string {
 
 func TestMain(m *testing.M) {
 	version := os.Getenv("JENKINS_VERSION")
+	if err := os.Setenv("JCLI_CONFIG_LOAD", "false"); err != nil {
+		panic(err)
+	}
 	if version == "" {
 		return
 	}
