@@ -42,13 +42,17 @@ func init() {
 }
 
 var openCmd = &cobra.Command{
-	Use:     "open",
-	Short:   i18n.T("Open your Jenkins with a browser"),
-	Long:    i18n.T(`Open your Jenkins with a browser`),
-	Example: `jcli open -n [config name]`,
+	Use:   "open",
+	Short: i18n.T("Open your Jenkins with a browser"),
+	Long:  i18n.T(`Open your Jenkins with a browser`),
+	Example: `jcli open -n [config name]
+Open Jenkins with a specific browser is useful in some use cases. For example, one browser has a proxy setting.
+There are two ways to achieve this:
+jcli open --browser "Google-Chrome"
+JCLI_BROWSER="Google Chrome" jcli open`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		if openOption.Browser == "" {
-			openOption.Browser = os.Getenv("BROWSER")
+			openOption.Browser = os.Getenv("JCLI_BROWSER")
 		}
 	},
 	RunE: openOption.run,
@@ -99,7 +103,6 @@ func (o *OpenOption) run(_ *cobra.Command, args []string) (err error) {
 // parseName the string expect likes name or name.external
 func (o *OpenOption) parseName(configName string) (jenkins, external string) {
 	array := strings.SplitN(configName, ".", 2)
-	fmt.Println(array)
 	if len(array) > 0 {
 		jenkins = array[0]
 	}

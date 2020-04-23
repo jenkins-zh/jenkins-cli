@@ -30,7 +30,7 @@ var pluginOpenCmd = &cobra.Command{
 	Long:  `Open update center server in browser`,
 	PreRun: func(_ *cobra.Command, _ []string) {
 		if pluginOpenOption.Browser == "" {
-			pluginOpenOption.Browser = os.Getenv("BROWSER")
+			pluginOpenOption.Browser = os.Getenv("JCLI_BROWSER")
 		}
 	},
 	RunE: func(_ *cobra.Command, _ []string) (err error) {
