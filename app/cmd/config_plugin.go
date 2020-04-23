@@ -339,7 +339,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	if err == nil {
-		cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s.yaml", userHome, name)
+		cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins/%s.yaml", userHome, name)
 		err = ioutil.WriteFile(cachedMetadataFile, data, 0664)
 	}
 	return
