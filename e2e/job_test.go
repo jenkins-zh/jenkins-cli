@@ -10,6 +10,7 @@ import (
 
 func TestListJobType(t *testing.T) {
 	cmd := exec.Command("jcli", "job", "type", "--url", GetJenkinsURL())
+	fmt.Println(cmd.String())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
 

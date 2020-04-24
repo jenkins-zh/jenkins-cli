@@ -1,6 +1,8 @@
 package e2e
 
 import (
+	"fmt"
+	"github.com/phayes/freeport"
 	"io"
 	"os"
 	"os/exec"
@@ -14,20 +16,33 @@ func GetJenkinsURL() string {
 }
 
 func TestMain(m *testing.M) {
+	var err error
+
 	version := os.Getenv("JENKINS_VERSION")
-	if err := os.Setenv("JCLI_CONFIG_LOAD", "false"); err != nil {
+	os.Setenv("PATH", ".:"+os.Getenv("PATH"))
+
+	javaHome := os.Getenv("JCLI_JAVA_HOME")
+	if javaHome != "" {
+		os.Setenv("PATH", javaHome+"/bin:"+os.Getenv("PATH"))
+	}
+	if err = os.Setenv("JCLI_CONFIG_LOAD", "false"); err != nil {
 		panic(err)
 	}
 	if version == "" {
 		return
 	}
 
-	jenkinsURL = "http://localhost:8080"
+	var port int
+	if port, err = freeport.GetFreePort(); err != nil {
+		fmt.Println("get free port error", err)
+		panic(err)
+	}
+	jenkinsURL = fmt.Sprintf("http://localhost:%d", port)
 
-	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--version", version)
+	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--port", fmt.Sprintf("%d", port), "--version", version)
+	fmt.Println(cmd.String())
 	cmdStderrPipe, _ := cmd.StderrPipe()
-	err := cmd.Start()
-	if err != nil {
+	if err = cmd.Start(); err != nil {
 		panic(err)
 	}
 

@@ -1,7 +1,9 @@
 package withdependencies
 
 import (
+	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/e2e"
+	"github.com/phayes/freeport"
 	"io"
 	"os"
 	"os/exec"
@@ -14,17 +16,33 @@ func GetJenkinsURL() string {
 	return jenkinsURL
 }
 func TestMain(m *testing.M) {
+	var err error
+
 	version := os.Getenv("JENKINS_VERSION")
+	os.Setenv("PATH", ".:"+os.Getenv("PATH"))
+
+	javaHome := os.Getenv("JCLI_JAVA_HOME")
+	if javaHome != "" {
+		os.Setenv("PATH", javaHome+"/bin:"+os.Getenv("PATH"))
+	}
+	if err = os.Setenv("JCLI_CONFIG_LOAD", "false"); err != nil {
+		panic(err)
+	}
 	if version == "" {
 		return
 	}
 
-	jenkinsURL = "http://localhost:9090"
+	var port int
+	if port, err = freeport.GetFreePort(); err != nil {
+		fmt.Println("get free port error", err)
+		panic(err)
+	}
+	jenkinsURL = fmt.Sprintf("http://localhost:%d", port)
 
-	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false",
-		"--version", version, "--port", "9090")
+	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--port", fmt.Sprintf("%d", port), "--version", version)
+	fmt.Println(cmd.String())
 	cmdStderrPipe, _ := cmd.StderrPipe()
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		panic(err)
 	}
