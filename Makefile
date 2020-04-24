@@ -5,7 +5,9 @@ BUILD_TARGET = build
 COMMIT := $(shell git rev-parse --short HEAD)
 # CHANGE_LOG := $(shell echo -n "$(shell hub release show $(shell hub release --include-drafts -L 1))" | base64)
 VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
-BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
+BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) \
+	-X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT) \
+	-X github.com/jenkins-zh/jenkins-cli/app.date=$(shell date +'%Y-%m-%d')"
 COVERED_MAIN_SRC_FILE=./main
 PATH  := $(PATH):$(PWD)/bin
 
