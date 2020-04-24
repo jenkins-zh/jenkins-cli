@@ -49,7 +49,7 @@ sudo mv jcli /usr/local/bin/
 
 ## Windows
 
-You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz). 
+You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-amd64.zip). 
 Download the tar file and copy the uncompressed `jcli` directory into your system path.
 
 ## Other package managers
