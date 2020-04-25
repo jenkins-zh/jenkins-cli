@@ -21,7 +21,7 @@ func PrepareGetUser(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd 
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"fullName":"admin","description":"fake-description"}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)

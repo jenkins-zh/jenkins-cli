@@ -80,7 +80,7 @@ var _ = Describe("computer launch command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(fakeJar)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			secret := "fake-secret"
 			client.PrepareForComputerAgentSecretRequest(roundTripper,

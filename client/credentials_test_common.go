@@ -23,7 +23,7 @@ func PrepareForGetCredentialList(roundTripper *mhttp.MockRoundTripper, rootURL, 
 		Body:       ioutil.NopCloser(bytes.NewBufferString(PrepareForCredentialListJSON())),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}

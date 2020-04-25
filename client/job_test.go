@@ -71,7 +71,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -83,7 +83,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Build(jobName)
 			Expect(err).To(BeNil())
@@ -100,7 +100,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -112,7 +112,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Build(jobName)
 			Expect(err).To(HaveOccurred())
@@ -134,7 +134,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			result, err := jobClient.GetBuild(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -189,7 +189,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -201,7 +201,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.StopJob(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -219,7 +219,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -231,7 +231,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.StopJob(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -252,7 +252,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			result, err := jobClient.GetJob(jobName)
 			Expect(err).To(BeNil())
@@ -271,7 +271,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			_, err := jobClient.GetJobTypeCategories()
 			Expect(err).To(BeNil())
@@ -335,7 +335,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -347,7 +347,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Delete(jobName)
 			Expect(err).To(BeNil())
