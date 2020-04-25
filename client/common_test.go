@@ -110,9 +110,8 @@ var _ = Describe("common test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(requestCrumb).Return(responseCrumb, nil)
 
-			crumb, err := jenkinsCore.GetCrumb()
-			Expect(crumb).To(BeNil())
-			Expect(err).To(BeNil())
+			_, err := jenkinsCore.GetCrumb()
+			Expect(err).To(HaveOccurred())
 		})
 
 		It("with crumb setting", func() {
