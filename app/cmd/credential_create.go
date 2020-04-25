@@ -50,7 +50,7 @@ func init() {
 }
 
 var credentialCreateCmd = &cobra.Command{
-	Use:   "create [store] [id]",
+	Use:   "create",
 	Short: i18n.T("Create a credential from Jenkins"),
 	Long:  i18n.T("Create a credential from Jenkins"),
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {

@@ -32,7 +32,7 @@ var cascOpenCmd = &cobra.Command{
 	Long:  i18n.T("Open Configuration as Code page in browser"),
 	PreRun: func(_ *cobra.Command, _ []string) {
 		if cascOpenOption.Browser == "" {
-			cascOpenOption.Browser = os.Getenv("BROWSER")
+			cascOpenOption.Browser = os.Getenv("JCLI_BROWSER")
 		}
 	},
 	RunE: func(_ *cobra.Command, _ []string) (err error) {
