@@ -29,6 +29,7 @@ func init() {
 		i18n.T("Clean the config items when timeout with API request"))
 }
 
+// CheckResult is the result of checking
 type CheckResult struct {
 	Name       string
 	StatusCode int
@@ -59,7 +60,7 @@ func (o *ConfigCleanOption) Run(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	checkResultList := make([]CheckResult, itemCount)
-	for i, _ := range config.JenkinsServers {
+	for i := range config.JenkinsServers {
 		checkResultList[i] = <-checkResult
 	}
 
@@ -108,9 +109,7 @@ func (o *ConfigCleanOption) CleanByCondition(resultList []CheckResult) (err erro
 
 	for _, result := range resultList {
 		if o.CleanTimeout && result.Timeout {
-			if err = removeJenkins(result.Name); err != nil {
-				return
-			} else {
+			if err = removeJenkins(result.Name); err == nil {
 				o.Logger.Printf("removed invalid item %s due to timeout reason\n", result.Name)
 			}
 		} else {
