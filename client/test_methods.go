@@ -29,7 +29,7 @@ func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, roo
 		}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
@@ -99,7 +99,7 @@ func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, ro
 			}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
@@ -234,7 +234,7 @@ func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	PrepareForGetIssuer(roundTripper, rootURL, user, passwd)
 
 	if user != "" && passwd != "" {
@@ -274,7 +274,7 @@ func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd
 		  }`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)
@@ -355,7 +355,7 @@ func PrepareForRequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL
 		}
 		`)),
 	}
-	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	roundTripper.EXPECT().RoundTrip(NewRequestMatcher(requestCenter)).Return(responseCenter, nil)
 	return
 }
 
@@ -381,7 +381,7 @@ func PrepareForNoAvailablePlugins(roundTripper *mhttp.MockRoundTripper, rootURL 
 		}
 		`)),
 	}
-	roundTripper.EXPECT().RoundTrip(requestCenter).Return(responseCenter, nil)
+	roundTripper.EXPECT().RoundTrip(NewRequestMatcher(requestCenter)).Return(responseCenter, nil)
 	return
 }
 
@@ -436,7 +436,7 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"type":null,"displayName":null,"script":"script","sandbox":true}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)

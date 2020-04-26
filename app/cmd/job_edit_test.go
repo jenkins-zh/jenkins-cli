@@ -107,7 +107,7 @@ var _ = Describe("job edit command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(script)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(remoteJenkinsfileReq).Return(remoteJenkinsfileResponse, nil)
+				RoundTrip(client.NewRequestMatcher(remoteJenkinsfileReq)).Return(remoteJenkinsfileResponse, nil)
 
 			rootCmd.SetArgs([]string{"job", "edit", jobName, "--filename", "", "--script", "", "--url", remoteJenkinsfileURL})
 

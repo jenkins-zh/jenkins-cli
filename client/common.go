@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -26,6 +27,7 @@ func SetLanguage(lan string) {
 // JenkinsCore core information of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
+	Timeout            time.Duration
 	URL                string
 	InsecureSkipVerify bool
 	UserName           string
@@ -58,7 +60,16 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		}
 		roundTripper = tr
 	}
-	client = &http.Client{Transport: roundTripper}
+
+	// make sure have a default timeout here
+	if j.Timeout <= 0 {
+		j.Timeout = 5
+	}
+
+	client = &http.Client{
+		Transport: roundTripper,
+		Timeout:   j.Timeout * time.Second,
+	}
 	return
 }
 

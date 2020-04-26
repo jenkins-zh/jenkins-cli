@@ -90,7 +90,7 @@ var _ = Describe("PluginManager test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			_, err := pluginMgr.GetAvailablePlugins()
 			Expect(err).To(HaveOccurred())

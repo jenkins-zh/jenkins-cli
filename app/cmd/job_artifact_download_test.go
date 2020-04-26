@@ -74,7 +74,7 @@ var _ = Describe("job artifact download command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
