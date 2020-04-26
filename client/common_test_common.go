@@ -19,7 +19,7 @@ func PrepareForGetIssuer(roundTripper *mhttp.MockRoundTripper, rootURL, user, pa
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`{"CrumbRequestField":"CrumbRequestField","Crumb":"Crumb"}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}

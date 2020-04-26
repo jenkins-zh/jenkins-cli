@@ -57,7 +57,7 @@ var _ = Describe("center watch command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"center", "watch"})
 			_, err = rootCmd.ExecuteC()

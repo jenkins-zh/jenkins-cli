@@ -19,7 +19,7 @@ func PrepareGetStatus(roundTripper *mhttp.MockRoundTripper, rootURL, user, passw
 	}
 	response.Header.Add("X-Jenkins", "version")
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)

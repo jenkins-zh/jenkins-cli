@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
@@ -103,7 +104,7 @@ func prepareDownloadFileRequest(url, content string, roundTripper *mhttp.MockRou
 		Body:       ioutil.NopCloser(bytes.NewBufferString(content)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 }
 
 func prepareMavenMetadataRequest(roundTripper *mhttp.MockRoundTripper) {
@@ -114,7 +115,7 @@ func prepareMavenMetadataRequest(roundTripper *mhttp.MockRoundTripper) {
 		Body:       ioutil.NopCloser(bytes.NewBufferString(getMavenMetadataSample())),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 }
 
 func getMavenMetadataSample() string {
