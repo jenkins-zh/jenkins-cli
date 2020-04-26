@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 
 // UserOption is the user cmd option
 type UserOption struct {
-	OutputOption
+	common.OutputOption
 
 	RoundTripper http.RoundTripper
 }

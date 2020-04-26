@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,7 +17,7 @@ import (
 
 // JobInputOption is the job delete option
 type JobInputOption struct {
-	BatchOption
+	common.BatchOption
 
 	Action string
 
@@ -29,7 +30,7 @@ func init() {
 	jobCmd.AddCommand(jobInputCmd)
 	jobInputCmd.Flags().StringVarP(&jobInputOption.Action, "action", "", "",
 		i18n.T("The action whether you want to process or abort."))
-	jobInputOption.Stdio = GetSystemStdio()
+	jobInputOption.Stdio = common.GetSystemStdio()
 }
 
 var jobInputCmd = &cobra.Command{

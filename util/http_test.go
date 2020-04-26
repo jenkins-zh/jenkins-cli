@@ -66,7 +66,7 @@ var _ = Describe("http test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip((request)).Return(response, nil)
 			err := downloader.DownloadFile()
 			Expect(err).To(BeNil())
 
@@ -97,7 +97,7 @@ var _ = Describe("http test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip((request)).Return(response, nil)
 			err := downloader.DownloadFile()
 			Expect(err).To(BeNil())
 
@@ -126,7 +126,7 @@ var _ = Describe("http test", func() {
 			request, _ := http.NewRequest("GET", "", nil)
 			response := &http.Response{}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, fmt.Errorf("fake error"))
+				RoundTrip((request)).Return(response, fmt.Errorf("fake error"))
 			err := downloader.DownloadFile()
 			Expect(err).To(HaveOccurred())
 		})
@@ -145,7 +145,7 @@ var _ = Describe("http test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip((request)).Return(response, nil)
 			err := downloader.DownloadFile()
 			Expect(err).To(HaveOccurred())
 
@@ -176,7 +176,7 @@ var _ = Describe("http test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip((request)).Return(response, nil)
 			err := downloader.DownloadFile()
 			Expect(err).To(BeNil())
 		})

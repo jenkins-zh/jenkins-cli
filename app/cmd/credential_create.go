@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -49,7 +50,7 @@ func init() {
 }
 
 var credentialCreateCmd = &cobra.Command{
-	Use:   "create [store] [id]",
+	Use:   "create",
 	Short: i18n.T("Create a credential from Jenkins"),
 	Long:  i18n.T("Create a credential from Jenkins"),
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
@@ -97,6 +98,6 @@ var credentialCreateCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }

@@ -18,6 +18,8 @@ type UpdateCenterManager struct {
 	Version string
 	Output  string
 
+	Formula string
+
 	ShowProgress bool
 }
 
@@ -132,7 +134,9 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 		version = "latest"
 	}
 
-	if u.LTS {
+	if u.Formula != "" {
+		warURL = fmt.Sprintf("https://dl.bintray.com/jenkins-zh/generic/jenkins/%s/jenkins-%s.war", version, u.Formula)
+	} else if u.LTS {
 		warURL = fmt.Sprintf("%s/war-stable/%s/jenkins.war", strings.TrimRight(u.MirrorSite, "/"), version)
 	} else {
 		warURL = fmt.Sprintf("%s/war/%s/jenkins.war", strings.TrimRight(u.MirrorSite, "/"), version)

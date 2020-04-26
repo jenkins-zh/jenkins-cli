@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"

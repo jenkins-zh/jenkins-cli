@@ -1,18 +1,19 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
 // ConfigSelectOptions is the option for select a config
 type ConfigSelectOptions struct {
-	CommonOption
+	common.CommonOption
 }
 
 func init() {
 	configCmd.AddCommand(configSelectCmd)
-	configSelectOptions.Stdio = GetSystemStdio()
+	configSelectOptions.Stdio = common.GetSystemStdio()
 }
 
 var configSelectOptions ConfigSelectOptions

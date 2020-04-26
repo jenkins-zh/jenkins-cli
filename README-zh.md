@@ -21,6 +21,7 @@ Jenkins CLI 可以帮忙你轻松地管理 Jenkins。不管你是一名插件开
 * 支持多 Jenkins 实例管理
 * 插件管理（查看列表、搜索、安装、上传）
 * 任务管理（搜索、构建触发、日志查看）
+* 支持配置即管理
 * 在浏览器中打开你的 Jenkins
 * 重启你的 Jenkins
 * 支持通过代理连接
@@ -47,7 +48,7 @@ sudo mv jcli /usr/local/bin/
 
 ## Windows
 
-你只要[点击这里](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-386.tar.gz)就可以下载到最新版本的压缩包。之后，把解压后的文件 `jcli` 拷贝到你的系统目录下即可。
+你只要[点击这里](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-amd64.zip)就可以下载到最新版本的压缩包。之后，把解压后的文件 `jcli` 拷贝到你的系统目录下即可。
 
 ## 其他包管理器
 
@@ -64,6 +65,19 @@ sudo mv jcli /usr/local/bin/
 # 入门
 
 查阅[官方文档](http://jcli.jenkins-zh.cn/)可以了解到更多有关如何使用 `jcli` 的信息。
+
+或者，你可以选择 Jenkins CLI 的[一个在线的交互式教程](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli)。
+
+# 插件
+
+通过安装插件可以增强 Jenkins CLI 的功能。按照下面的命令就可以安装一个插件：
+
+```
+jcli config plugin fetch
+jcli config plugin install account
+```
+
+所有官方的插件，都可以在[这里](https://github.com/jenkins-zh/jcli-plugins)找到。
 
 # 贡献
 

@@ -22,7 +22,7 @@ func PrepareShowTrend(roundTripper *mhttp.MockRoundTripper, keyword string) (
 		`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
@@ -64,7 +64,7 @@ func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) (response *http
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
@@ -91,6 +91,6 @@ func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 		`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }

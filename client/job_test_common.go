@@ -25,7 +25,7 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 "abortUrl":"/job/test/5/input/Eff7d5dba32b4da32d9a67a519434d3f/abort","redirectApprovalUrl":"/job/test/5/input/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
@@ -95,7 +95,7 @@ func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, us
 				}`, jobName))),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -155,7 +155,7 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 				`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -174,13 +174,13 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 		StatusCode: 200,
 		Request:    request,
 		Header: map[string][]string{
-			"X-More-Data": []string{"false"},
-			"X-Text-Size": []string{"8"},
+			"X-More-Data": {"false"},
+			"X-Text-Size": {"8"},
 		},
 		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -196,7 +196,7 @@ func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, u
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{"name":"fake","displayName":"fake","description":null,"type":"WorkflowJob","shortURL":"job/fake/","url":"job/fake/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
@@ -212,8 +212,40 @@ func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
+}
+
+// PrepareForDisableJob only for test
+func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/disable", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
+	//response := &http.Response{
+	//	StatusCode: 200,
+	//	Request:    request,
+	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
+	//}
+	//roundTripper.EXPECT().
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+	//if user != "" && token != "" {
+	//	request.SetBasicAuth(user, token)
+	//}
+}
+
+// PrepareForEnableJob only for test
+func PrepareForEnableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/enable", rootURL, name), nil)
+	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
+	//response := &http.Response{
+	//	StatusCode: 200,
+	//	Request:    request,
+	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
+	//}
+	//roundTripper.EXPECT().
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
+	//if user != "" && token != "" {
+	//	request.SetBasicAuth(user, token)
+	//}
 }

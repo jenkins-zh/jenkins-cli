@@ -16,6 +16,14 @@ func PrepareRestart(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwor
 	return
 }
 
+// PrepareRestartDirectly only for test
+func PrepareRestartDirectly(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, statusCode int) {
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/restart", rootURL), nil)
+	response := PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+	response.StatusCode = statusCode
+	return
+}
+
 // PrepareForGetIdentity only for test
 func PrepareForGetIdentity(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/instance", rootURL), nil)
@@ -26,7 +34,7 @@ func PrepareForGetIdentity(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 {"fingerprint":"fingerprint","publicKey":"publicKey","systemMessage":"systemMessage"}`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)

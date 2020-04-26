@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"strconv"
 
 	"github.com/gosuri/uiprogress"
@@ -109,6 +110,11 @@ func (h *HTTPDownloader) DownloadFile() error {
 			}
 		}
 	}
+
+	if err := os.MkdirAll(path.Dir(filepath), os.FileMode(0755)); err != nil {
+		return err
+	}
+
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {

@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
-
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"io/ioutil"
@@ -17,13 +19,23 @@ import (
 
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
+	common.CommonOption
+
 	ConfigFileLocation string
+	Detail             bool
 }
 
 var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+
+	// add flags
+	flags := configCmd.Flags()
+	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
+		`Show the all detail of current configuration`)
+
+	configCmd.AddCommand(config_plugin.NewConfigPluginCmd(&configOptions.CommonOption))
 }
 
 var configCmd = &cobra.Command{
@@ -36,7 +48,12 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			if current.Description != "" {
+			if configOptions.Detail {
+				var data []byte
+				if data, err = yaml.Marshal(current); err == nil {
+					cmd.Println(string(data))
+				}
+			} else if current.Description != "" {
 				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 			} else {
 				cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
@@ -47,48 +64,6 @@ var configCmd = &cobra.Command{
 	Example: `  jcli config generate
   jcli config list
   jcli config edit`,
-}
-
-// JenkinsServer holds the configuration of your Jenkins
-type JenkinsServer struct {
-	Name               string `yaml:"name"`
-	URL                string `yaml:"url"`
-	UserName           string `yaml:"username"`
-	Token              string `yaml:"token"`
-	Proxy              string `yaml:"proxy"`
-	ProxyAuth          string `yaml:"proxyAuth"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Description        string `yaml:"description"`
-}
-
-// CommandHook is a hook
-type CommandHook struct {
-	Path    string `yaml:"path"`
-	Command string `yaml:"cmd"`
-}
-
-// PluginSuite define a suite of plugins
-type PluginSuite struct {
-	Name        string   `yaml:"name"`
-	Plugins     []string `yaml:"plugins"`
-	Description string   `yaml:"description"`
-}
-
-// JenkinsMirror represents the mirror of Jenkins
-type JenkinsMirror struct {
-	Name string
-	URL  string
-}
-
-// Config is a global config struct
-type Config struct {
-	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language"`
-	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks"`
-	PostHooks      []CommandHook   `yaml:"postHooks"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
-	Mirrors        []JenkinsMirror `yaml:"mirrors"`
 }
 
 func setCurrentJenkins(name string) {
@@ -118,6 +93,9 @@ func getConfig() *Config {
 
 func getJenkinsNames() []string {
 	names := make([]string, 0)
+	if config == nil {
+		return names
+	}
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
 	}
@@ -158,13 +136,20 @@ func findSuiteByName(name string) (suite *PluginSuite) {
 }
 
 func loadDefaultConfig() (err error) {
-	var userHome string
-	userHome, err = homedir.Dir()
-	if err == nil {
-		configPath := fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
+	var configPath string
+	if configPath, err = getDefaultConfigPath(); err == nil {
 		if _, err = os.Stat(configPath); err == nil {
 			err = loadConfig(configPath)
 		}
+	}
+	return
+}
+
+func getDefaultConfigPath() (configPath string, err error) {
+	var userHome string
+	userHome, err = homedir.Dir()
+	if err == nil {
+		configPath = fmt.Sprintf("%s/.jenkins-cli.yaml", userHome)
 	}
 	return
 }

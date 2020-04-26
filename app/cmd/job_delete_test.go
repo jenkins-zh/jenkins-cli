@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Netflix/go-expect"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -66,7 +68,7 @@ var _ = Describe("job delete command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -79,7 +81,7 @@ var _ = Describe("job delete command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "delete", jobName, "-b", "true"})
 
@@ -95,8 +97,8 @@ var _ = Describe("job delete command", func() {
 
 type PromptCommandTest struct {
 	Message     string
-	MsgConfirm  MsgConfirm
-	BatchOption *BatchOption
+	MsgConfirm  common.MsgConfirm
+	BatchOption *common.BatchOption
 	Procedure   func(*expect.Console)
 	Args        []string
 }
@@ -104,9 +106,9 @@ type PromptCommandTest struct {
 type EditCommandTest struct {
 	Message          string
 	DefaultContent   string
-	EditContent      EditContent
-	CommonOption     *CommonOption
-	BatchOption      *BatchOption
+	EditContent      common.EditContent
+	CommonOption     *common.CommonOption
+	BatchOption      *common.BatchOption
 	ConfirmProcedure func(*expect.Console)
 	Procedure        func(*expect.Console)
 	Test             func(stdio terminal.Stdio) (err error)
@@ -116,7 +118,7 @@ type EditCommandTest struct {
 
 type PromptTest struct {
 	Message    string
-	MsgConfirm MsgConfirm
+	MsgConfirm common.MsgConfirm
 	Procedure  func(*expect.Console)
 	Expected   interface{}
 }
@@ -124,29 +126,29 @@ type PromptTest struct {
 type EditorTest struct {
 	Message        string
 	DefaultContent string
-	EditContent    EditContent
+	EditContent    common.EditContent
 	Procedure      func(*expect.Console)
 	Expected       string
 }
 
-func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
-	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		var data []byte
-		data, err = generateSampleConfig()
-		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
-
-		test.BatchOption.Stdio = stdio
-		rootOptions.ConfigFile = "test.yaml"
-		rootCmd.SetArgs(test.Args)
-		_, err = rootCmd.ExecuteC()
-		return
-	}, test.Procedure)
-}
+//func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
+//	RunTest(t, func(stdio terminal.Stdio) (err error) {
+//		var data []byte
+//		data, err = generateSampleConfig()
+//		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+//
+//		test.BatchOption.Stdio = stdio
+//		rootOptions.ConfigFile = "test.yaml"
+//		rootCmd.SetArgs(test.Args)
+//		_, err = rootCmd.ExecuteC()
+//		return
+//	}, test.Procedure)
+//}
 
 func RunPromptTest(t *testing.T, test PromptTest) {
 	var answer interface{}
 	RunTest(t, func(stdio terminal.Stdio) error {
-		batch := &BatchOption{
+		batch := &common.BatchOption{
 			Batch: false,
 			Stdio: stdio,
 		}
@@ -159,7 +161,7 @@ func RunPromptTest(t *testing.T, test PromptTest) {
 func RunEditorTest(t *testing.T, test EditorTest) {
 	var content string
 	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		editor := &CommonOption{
+		editor := &common.CommonOption{
 			Stdio: stdio,
 		}
 		content, err = editor.Editor(test.DefaultContent, test.Message)

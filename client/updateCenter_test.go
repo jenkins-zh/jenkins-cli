@@ -51,7 +51,7 @@ var _ = Describe("update center test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(responseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 			err := manager.DownloadJenkins()
 			Expect(err).To(BeNil())
 
@@ -79,7 +79,7 @@ var _ = Describe("update center test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			request, _ := http.NewRequest("POST", "/updateCenter/upgrade", nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
@@ -90,7 +90,7 @@ var _ = Describe("update center test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			err := manager.Upgrade()
 			Expect(err).To(BeNil())
@@ -112,7 +112,7 @@ var _ = Describe("update center test", func() {
 			`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			status, err := manager.Status()
 			Expect(err).To(BeNil())
@@ -218,7 +218,7 @@ var _ = Describe("update center test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCenter).Return(responseCenter, nil)
+				RoundTrip(NewRequestMatcher(requestCenter)).Return(responseCenter, nil)
 
 			plugins, err := manager.GetSite()
 			Expect(err).To(BeNil())

@@ -32,6 +32,12 @@ func (q *CoreClient) Restart() (err error) {
 	return
 }
 
+// RestartDirectly restart Jenkins directly
+func (q *CoreClient) RestartDirectly() (err error) {
+	_, err = q.RequestWithoutData("POST", "/restart", nil, nil, 503)
+	return
+}
+
 // Shutdown puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins
 func (q *CoreClient) Shutdown(safe bool) (err error) {
 	if safe {

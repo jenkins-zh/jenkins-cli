@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -53,7 +54,7 @@ var _ = Describe("center upgrade command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			request, _ := http.NewRequest("POST", "http://localhost:8080/jenkins/updateCenter/upgrade", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -65,7 +66,7 @@ var _ = Describe("center upgrade command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"center", "upgrade"})
 			_, err = rootCmd.ExecuteC()

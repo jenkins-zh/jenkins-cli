@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -11,7 +14,7 @@ import (
 
 // JobLogOption is the job log option
 type JobLogOption struct {
-	WatchOption
+	common.WatchOption
 	History int
 
 	LogText      string
@@ -34,11 +37,26 @@ func init() {
 }
 
 var jobLogCmd = &cobra.Command{
-	Use:   "log <jobName> [buildID]",
+	Use:   "log",
 	Short: i18n.T("Print the job's log of your Jenkins"),
 	Long: i18n.T(`Print the job's log of your Jenkins
 It'll print the log text of the last build if you don't give the build id.`),
 	Args: cobra.MinimumNArgs(1),
+	Example: `jcli job log <jobName> [buildID]
+jcli job log <jobName> --history 1
+jcli job log <jobName> --watch`,
+	PreRunE: func(_ *cobra.Command, args []string) (err error) {
+		if len(args) >= 2 && jobLogOption.History == -1 {
+			var history int
+			historyStr := args[1]
+			if history, err = strconv.Atoi(historyStr); err == nil {
+				jobLogOption.History = history
+			} else {
+				err = fmt.Errorf("job history must be a number instead of '%s'", historyStr)
+			}
+		}
+		return
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
@@ -53,10 +71,13 @@ It'll print the log text of the last build if you don't give the build id.`),
 		var jobBuild *client.JobBuild
 		var err error
 		for {
-			if jobBuild, err = jclient.GetBuild(name, -1); err == nil {
+			if jobBuild, err = jclient.GetBuild(name, jobLogOption.History); err == nil {
 				jobLogOption.LastBuildID = jobBuild.Number
 				jobLogOption.LastBuildURL = jobBuild.URL
+			} else {
+				break
 			}
+
 			if lastBuildID != jobLogOption.LastBuildID {
 				lastBuildID = jobLogOption.LastBuildID
 				cmd.Println("Current build number:", jobLogOption.LastBuildID)

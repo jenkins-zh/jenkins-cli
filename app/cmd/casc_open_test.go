@@ -10,14 +10,21 @@ import (
 
 var _ = Describe("casc open test", func() {
 	var (
-		err error
+		err      error
+		tempFile *os.File
 	)
 
 	BeforeEach(func() {
 		cascOpenOption.ExecContext = util.FakeExecCommandSuccess
 		data, err := generateSampleConfig()
 		Expect(err).To(BeNil())
-		rootOptions.ConfigFile = "test.yaml"
+
+		tempFile, err = ioutil.TempFile(".", "test.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		rootOptions.Jenkins = ""
+		rootOptions.ConfigFile = tempFile.Name()
+
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())
 	})

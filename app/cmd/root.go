@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -25,6 +26,7 @@ var logger *zap.Logger
 // RootOptions is a global option for whole cli
 type RootOptions struct {
 	ConfigFile string
+	ConfigLoad bool
 	Jenkins    string
 	Debug      bool
 
@@ -34,6 +36,7 @@ type RootOptions struct {
 	InsecureSkipVerify bool
 	Proxy              string
 	ProxyAuth          string
+	ProxyDisable       bool
 
 	Doctor bool
 
@@ -46,32 +49,32 @@ var healthCheckRegister = &health.CheckRegister{
 
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
-	Short: i18n.T("jcli is a tool which could help you with your multiple Jenkins"),
-	Long: `jcli is Jenkins CLI which could help with your multiple Jenkins,
-Manage your Jenkins and your pipelines
-More information could found at https://jenkins-zh.cn`,
+	Short: i18n.T("Jenkins CLI written by golang which could help you with your multiple Jenkins"),
+	Long: `Jenkins CLI written by golang which could help you with your multiple Jenkins,
+
+We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
+			(&configOptions).Logger = logger
 			client.SetLogger(logger)
 		} else {
 			return
 		}
 
-		if needReadConfig(cmd) {
+		rootOptions.ConfigLoad = !("false" == os.Getenv("JCLI_CONFIG_LOAD"))
+		if rootOptions.ConfigLoad && needReadConfig(cmd) {
 			if rootOptions.ConfigFile == "" {
 				rootOptions.ConfigFile = os.Getenv("JCLI_CONFIG")
 			}
 
 			logger.Debug("read config file", zap.String("path", rootOptions.ConfigFile))
 			if rootOptions.ConfigFile == "" {
-				if err = loadDefaultConfig(); err != nil {
-					configLoadErrorHandle(err)
-				}
+				err = loadDefaultConfig()
 			} else {
-				if err = loadConfig(rootOptions.ConfigFile); err != nil {
-					configLoadErrorHandle(err)
-				}
+				err = loadConfig(rootOptions.ConfigFile)
 			}
+		} else {
+			logger.Debug("ignore loading config", zap.String("cmd", cmd.Name()))
 		}
 
 		if err == nil {
@@ -91,14 +94,24 @@ More information could found at https://jenkins-zh.cn`,
 func needReadConfig(cmd *cobra.Command) bool {
 	ignoreConfigLoad := []string{
 		"config.generate",
-		"center.start",
+		//"center.start", // relay on the config when find a mirror
+		"cwp",
 		"version",
+		"completion",
+		"doc",
 	}
 	configPath := getCmdPath(cmd)
 
 	for _, item := range ignoreConfigLoad {
 		if item == configPath {
 			return false
+		}
+	}
+
+	// allow sub-commands give their decisions
+	if cmd.Annotations != nil {
+		if disable, ok := cmd.Annotations[ANNOTATION_CONFIG_LOAD]; ok {
+			return disable != "disable"
 		}
 	}
 	return true
@@ -134,6 +147,8 @@ var rootOptions RootOptions
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "",
 		i18n.T("An alternative config file"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ConfigLoad, "config-load", "", true,
+		i18n.T("If load a default config file"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
 		i18n.T("Select a Jenkins server for this time"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
@@ -154,17 +169,12 @@ func init() {
 		i18n.T("The proxy of connection to Jenkins"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.ProxyAuth, "proxy-auth", "", "",
 		i18n.T("The auth of proxy of connection to Jenkins"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ProxyDisable, "proxy-disable", "", false,
+		i18n.T("Disable proxy setting"))
 
 	rootCmd.SetOut(os.Stdout)
-}
 
-func configLoadErrorHandle(err error) {
-	if os.IsNotExist(err) {
-		log.Printf("No config file found.")
-		return
-	}
-
-	log.Fatalf("Config file is invalid: %v", err)
+	loadPlugins(rootCmd)
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
@@ -192,6 +202,19 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 
 		if rootOptions.Token != "" {
 			jenkinsServer.Token = rootOptions.Token
+		}
+
+		if rootOptions.Proxy != "" {
+			jenkinsServer.Proxy = rootOptions.Proxy
+		}
+
+		if rootOptions.ProxyAuth != "" {
+			jenkinsServer.ProxyAuth = rootOptions.ProxyAuth
+		}
+
+		if rootOptions.ProxyDisable {
+			jenkinsServer.Proxy = ""
+			jenkinsServer.ProxyAuth = ""
 		}
 	}
 	return
@@ -262,8 +285,37 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
 	cmd := exec.Command(array[0], array[1:]...)
-	cmd.Stdout = writer
-	err = cmd.Run()
+	if err = cmd.Start(); err == nil {
+		if err = cmd.Wait(); err == nil {
+			var data []byte
+			if data, err = cmd.Output(); err == nil {
+				_, _ = writer.Write(data)
+			}
+		}
+	}
+	return
+}
+
+// Deprecated, please replace this with getCurrentJenkinsAndClient
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	jenkins = getCurrentJenkinsFromOptionsOrDie()
+	jclient.URL = jenkins.URL
+	jclient.UserName = jenkins.UserName
+	jclient.Token = jenkins.Token
+	jclient.Proxy = jenkins.Proxy
+	jclient.ProxyAuth = jenkins.ProxyAuth
+	return
+}
+
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
+	}
 	return
 }
 

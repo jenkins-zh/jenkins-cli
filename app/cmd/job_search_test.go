@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -107,7 +108,7 @@ var _ = Describe("job search command check", func() {
 
 		config = &Config{
 			Current: "fake",
-			JenkinsServers: []JenkinsServer{JenkinsServer{
+			JenkinsServers: []JenkinsServer{{
 				Name:     "fake",
 				URL:      rootURL,
 				UserName: user,

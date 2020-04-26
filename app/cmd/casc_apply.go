@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -31,10 +32,10 @@ var cascApplyCmd = &cobra.Command{
 				RoundTripper: cascApplyOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 		return jClient.Apply()
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: "v0.0.24",
 	},
 }
