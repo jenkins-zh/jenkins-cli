@@ -62,7 +62,7 @@ var _ = Describe("job build command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -75,7 +75,7 @@ var _ = Describe("job build command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "build", jobName, "-b", "true"})
 			_, err = rootCmd.ExecuteC()
@@ -169,7 +169,7 @@ var _ = Describe("job build command", func() {
 //				`)),
 //			}
 //			roundTripper.EXPECT().
-//				RoundTrip(request).Return(response, nil)
+//				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 //
 //			client.PrepareForBuildWithParams(roundTripper, url, jobName, user, token)
 //

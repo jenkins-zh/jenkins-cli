@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
@@ -36,10 +37,11 @@ type CenterStartOption struct {
 	Environments []string
 	System       []string
 
-	Download bool
-	Version  string
-	LTS      bool
-	Formula  string
+	Download     bool
+	Version      string
+	LTS          bool
+	Formula      string
+	RandomWebDir bool
 
 	DryRun bool
 }
@@ -82,6 +84,8 @@ func init() {
 	centerStartCmd.Flags().IntVarP(&centerStartOption.ConcurrentIndexing, "concurrent-indexing", "", -1,
 		i18n.T("Concurrent indexing limit, take this value only it is bigger than -1"))
 
+	centerStartCmd.Flags().BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
+		i18n.T("If start jenkins.war in a random web dir"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
 
@@ -145,7 +149,19 @@ var centerStartCmd = &cobra.Command{
 		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 		if err == nil {
 			env := os.Environ()
-			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+
+			if centerStartOption.RandomWebDir {
+				randomWebDir := fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version)
+				defer func(logger helper.Printer, randomWebDir string) {
+					if err := os.RemoveAll(randomWebDir); err != nil {
+						logger.PrintErr(fmt.Sprintf("remove random web dir [%s] of Jenkins failed, %#v", randomWebDir, err))
+					}
+				}(cmd, randomWebDir)
+
+				env = append(env, randomWebDir)
+			} else {
+				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+			}
 
 			if centerStartOption.Environments != nil {
 				for _, item := range centerStartOption.Environments {
@@ -157,7 +173,8 @@ var centerStartCmd = &cobra.Command{
 			jenkinsWarArgs = centerStartOption.setSystemProperty(jenkinsWarArgs)
 			jenkinsWarArgs = append(jenkinsWarArgs, "-jar", jenkinsWar)
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpPort=%d", centerStartOption.Port))
-			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin")
+			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin")
+			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.roles.admin=admin")
 			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
 
 			if centerStartOption.HTTPSEnable {

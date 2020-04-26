@@ -21,7 +21,7 @@ func PrepareForComputerListRequest(roundTripper *mhttp.MockRoundTripper, rootURL
 		Body:       ioutil.NopCloser(bytes.NewBufferString(PrepareForComputerList())),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -48,7 +48,7 @@ func PrepareForComputerLogRequestWithCode(roundTripper *mhttp.MockRoundTripper, 
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`fake-log`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}

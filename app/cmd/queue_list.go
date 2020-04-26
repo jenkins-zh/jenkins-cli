@@ -34,7 +34,7 @@ var queueListCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var jobQueue *client.JobQueue
 		if jobQueue, err = jClient.Get(); err == nil {

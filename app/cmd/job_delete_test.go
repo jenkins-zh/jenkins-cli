@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Netflix/go-expect"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -67,7 +68,7 @@ var _ = Describe("job delete command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
@@ -80,7 +81,7 @@ var _ = Describe("job delete command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "delete", jobName, "-b", "true"})
 
