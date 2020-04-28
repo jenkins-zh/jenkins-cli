@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -120,11 +121,12 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 			return fmt.Errorf("invalid file type. kindly provide a jenkinsfile")
 		}
 
-		//TO-DO
-		/*
-			a) Build JFR using mvn clean package
-			b) Run jfr using arguments
-		*/
+		fmt.Println("We are Definitely reaching here")
+		command := exec.Command("java", "-jar", jenkinsfileRunnerVersion, "-w", runnerOption.WarPath, "-p", runnerOption.PluginPath, "-f", runnerOption.JenkinsfilePath)
+		command.Dir = fmt.Sprintf("%s/.jenkins-cli/cache/%s", userHome, runnerOption.WarVersion)
+		out, err := command.Output()
+		fmt.Println("Reaching her", string(out))
+		logger.Info(string(out))
 
 		return nil
 	},
