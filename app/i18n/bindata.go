@@ -215,11 +215,11 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"jcli": {nil, map[string]*bintree{
-		"zh_CN": {nil, map[string]*bintree{
-			"LC_MESSAGES": {nil, map[string]*bintree{
-				"jcli.mo": {jcliZh_cnLc_messagesJcliMo, map[string]*bintree{}},
-				"jcli.po": {jcliZh_cnLc_messagesJcliPo, map[string]*bintree{}},
+	"jcli": &bintree{nil, map[string]*bintree{
+		"zh_CN": &bintree{nil, map[string]*bintree{
+			"LC_MESSAGES": &bintree{nil, map[string]*bintree{
+				"jcli.mo": &bintree{jcliZh_cnLc_messagesJcliMo, map[string]*bintree{}},
+				"jcli.po": &bintree{jcliZh_cnLc_messagesJcliPo, map[string]*bintree{}},
 			}},
 		}},
 	}},
