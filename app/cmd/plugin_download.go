@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"net/http"
+
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 // PluginDownloadOption is the option for plugin download command
@@ -13,6 +14,7 @@ type PluginDownloadOption struct {
 	SkipOptional   bool
 	UseMirror      bool
 	ShowProgress   bool
+	DownloadDir    string
 
 	RoundTripper http.RoundTripper
 }
@@ -29,22 +31,26 @@ func init() {
 		i18n.T("If you want to download plugin from a mirror site"))
 	pluginDownloadCmd.Flags().BoolVarP(&pluginDownloadOption.ShowProgress, "show-progress", "", true,
 		i18n.T("If you want to show the progress of download a plugin"))
+	pluginDownloadCmd.Flags().StringVarP(&pluginDownloadOption.DownloadDir, "download-dir", "", "",
+		i18n.T("The directory which you want to download to"))
 }
 
 var pluginDownloadCmd = &cobra.Command{
-	Use:   "download <keyword>",
-	Short: i18n.T("Download the plugins"),
-	Long:  i18n.T(`Download the plugins which contain the target plugin and its dependencies`),
-	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:     "download",
+	Short:   i18n.T("Download the plugins"),
+	Long:    i18n.T(`Download the plugins which contain the target plugin and its dependencies`),
+	Args:    cobra.MinimumNArgs(1),
+	Example: "download localization-zh-cn",
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jClient := &client.PluginAPI{
 			SkipDependency: pluginDownloadOption.SkipDependency,
 			SkipOptional:   pluginDownloadOption.SkipOptional,
 			UseMirror:      pluginDownloadOption.UseMirror,
 			ShowProgress:   pluginDownloadOption.ShowProgress,
 			MirrorURL:      getDefaultMirror(),
+			DownloadDir:    pluginDownloadOption.DownloadDir,
 			RoundTripper:   pluginDownloadOption.RoundTripper,
 		}
-		jClient.DownloadPlugins(args)
+		return jClient.DownloadPlugins(args)
 	},
 }

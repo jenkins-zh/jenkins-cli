@@ -26,6 +26,7 @@ var logger *zap.Logger
 // RootOptions is a global option for whole cli
 type RootOptions struct {
 	ConfigFile string
+	ConfigLoad bool
 	Jenkins    string
 	Debug      bool
 
@@ -35,6 +36,7 @@ type RootOptions struct {
 	InsecureSkipVerify bool
 	Proxy              string
 	ProxyAuth          string
+	ProxyDisable       bool
 
 	Doctor bool
 
@@ -59,7 +61,8 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 			return
 		}
 
-		if needReadConfig(cmd) {
+		rootOptions.ConfigLoad = !("false" == os.Getenv("JCLI_CONFIG_LOAD"))
+		if rootOptions.ConfigLoad && needReadConfig(cmd) {
 			if rootOptions.ConfigFile == "" {
 				rootOptions.ConfigFile = os.Getenv("JCLI_CONFIG")
 			}
@@ -144,6 +147,8 @@ var rootOptions RootOptions
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.ConfigFile, "configFile", "", "",
 		i18n.T("An alternative config file"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ConfigLoad, "config-load", "", true,
+		i18n.T("If load a default config file"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Jenkins, "jenkins", "j", "",
 		i18n.T("Select a Jenkins server for this time"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.Debug, "debug", "", false, "Print the output into debug.html")
@@ -164,6 +169,8 @@ func init() {
 		i18n.T("The proxy of connection to Jenkins"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.ProxyAuth, "proxy-auth", "", "",
 		i18n.T("The auth of proxy of connection to Jenkins"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ProxyDisable, "proxy-disable", "", false,
+		i18n.T("Disable proxy setting"))
 
 	rootCmd.SetOut(os.Stdout)
 
@@ -195,6 +202,19 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 
 		if rootOptions.Token != "" {
 			jenkinsServer.Token = rootOptions.Token
+		}
+
+		if rootOptions.Proxy != "" {
+			jenkinsServer.Proxy = rootOptions.Proxy
+		}
+
+		if rootOptions.ProxyAuth != "" {
+			jenkinsServer.ProxyAuth = rootOptions.ProxyAuth
+		}
+
+		if rootOptions.ProxyDisable {
+			jenkinsServer.Proxy = ""
+			jenkinsServer.ProxyAuth = ""
 		}
 	}
 	return

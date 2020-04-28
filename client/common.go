@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -26,6 +27,7 @@ func SetLanguage(lan string) {
 // JenkinsCore core information of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
+	Timeout            time.Duration
 	URL                string
 	InsecureSkipVerify bool
 	UserName           string
@@ -58,7 +60,16 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		}
 		roundTripper = tr
 	}
-	client = &http.Client{Transport: roundTripper}
+
+	// make sure have a default timeout here
+	if j.Timeout <= 0 {
+		j.Timeout = 5
+	}
+
+	client = &http.Client{
+		Transport: roundTripper,
+		Timeout:   j.Timeout * time.Second,
+	}
 	return
 }
 
@@ -66,6 +77,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	if j.ProxyAuth != "" {
 		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
+		logger.Debug("setting proxy for HTTP request", zap.String("header", basicAuth))
 		request.Header.Add("Proxy-Authorization", basicAuth)
 	}
 }
@@ -116,11 +128,11 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
+			err = fmt.Errorf("crumb is disabled")
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}
 	}
-
 	return
 }
 
@@ -222,10 +234,14 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 func (j *JenkinsCore) Request(method, api string, headers map[string]string, payload io.Reader) (
 	statusCode int, data []byte, err error) {
 	var (
-		req      *http.Request
-		response *http.Response
+		req        *http.Request
+		response   *http.Response
+		requestURL string
 	)
-	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
+
+	requestURL = fmt.Sprintf("%s%s", j.URL, api)
+	logger.Debug("send HTTP request", zap.String("URL", requestURL), zap.String("method", method))
+	if req, err = http.NewRequest(method, requestURL, payload); err != nil {
 		return
 	}
 	if language != "" {

@@ -25,7 +25,7 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 "abortUrl":"/job/test/5/input/Eff7d5dba32b4da32d9a67a519434d3f/abort","redirectApprovalUrl":"/job/test/5/input/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
@@ -95,7 +95,7 @@ func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, us
 				}`, jobName))),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -155,7 +155,7 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 				`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -180,7 +180,7 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -196,7 +196,7 @@ func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, u
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{"name":"fake","displayName":"fake","description":null,"type":"WorkflowJob","shortURL":"job/fake/","url":"job/fake/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
@@ -212,7 +212,7 @@ func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
@@ -228,7 +228,7 @@ func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, u
 	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
 	//}
 	//roundTripper.EXPECT().
-	//	RoundTrip(request).Return(response, nil)
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	//if user != "" && token != "" {
 	//	request.SetBasicAuth(user, token)
 	//}
@@ -244,7 +244,7 @@ func PrepareForEnableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, us
 	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
 	//}
 	//roundTripper.EXPECT().
-	//	RoundTrip(request).Return(response, nil)
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	//if user != "" && token != "" {
 	//	request.SetBasicAuth(user, token)
 	//}

@@ -55,7 +55,7 @@ var _ = Describe("common test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			statusCode, data, err := jenkinsCore.Request(method, api, headers, payload)
 			Expect(err).To(BeNil())
@@ -75,7 +75,7 @@ var _ = Describe("common test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jenkinsCore.URL, "/crumbIssuer/api/json"), payload)
 			responseCrumb := &http.Response{
@@ -87,7 +87,7 @@ var _ = Describe("common test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			headers = make(map[string]string, 1)
 			headers["fake"] = "fake"
@@ -108,11 +108,10 @@ var _ = Describe("common test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
-			crumb, err := jenkinsCore.GetCrumb()
-			Expect(crumb).To(BeNil())
-			Expect(err).To(BeNil())
+			_, err := jenkinsCore.GetCrumb()
+			Expect(err).To(HaveOccurred())
 		})
 
 		It("with crumb setting", func() {
@@ -134,7 +133,7 @@ var _ = Describe("common test", func() {
 			//	Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			//}
 			//roundTripper.EXPECT().
-			//	RoundTrip(requestCrumb).Return(responseCrumb, nil)
+			//	RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 			PrepareForGetIssuerWith500(roundTripper, jenkinsCore.URL, "", "")
 
 			_, err := jenkinsCore.GetCrumb()
@@ -160,7 +159,7 @@ var _ = Describe("common test", func() {
 			}
 			request.Header.Set("Accept-Language", "zh-CN")
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			SetLanguage("zh-CN")
 			statusCode, data, err := jenkinsCore.Request("GET", "/view/all/itemCategories?depth=3", nil, nil)
@@ -200,7 +199,7 @@ var _ = Describe("common test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 			err := jenkinsCore.CrumbHandle(requestCrumb)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("unexpected status code: 500"))

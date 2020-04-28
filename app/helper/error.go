@@ -10,6 +10,8 @@ import (
 // Printer for print the info
 type Printer interface {
 	PrintErr(i ...interface{})
+	Println(i ...interface{})
+	Printf(format string, i ...interface{})
 }
 
 // CheckErr print a friendly error message

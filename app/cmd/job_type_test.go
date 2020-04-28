@@ -54,7 +54,7 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"_class":"jenkins.model.item_category.Categories","categories":[{"description":"description","id":"standalone-projects","items":[{"displayName":"Freestyle project","iconFilePathPattern":"static/da605e5f/images/:size/freestyleproject.png","description":"description","iconClassName":"icon-freestyle-project","class":"hudson.model.FreeStyleProject","order":1}],"minToShow":1,"name":"Nested Projects","order":1}]}`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			config = &Config{
 				Current: "fake",
@@ -93,7 +93,7 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"job", "type"})
 
@@ -120,7 +120,7 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"job", "type"})
 
@@ -165,7 +165,7 @@ var _ = Describe("job type command", func() {
 				}`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
