@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
@@ -10,13 +11,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
 // RunnerOption is the wrapper of jenkinsfile runner cli
 type RunnerOption struct {
+	common.BatchOption
+	common.CommonOption
 	RoundTripper http.RoundTripper
 
 	Safe            bool
@@ -25,6 +27,7 @@ type RunnerOption struct {
 	PluginPath      string
 	JenkinsfilePath string
 	JfrVersion      string
+	LTS             bool
 }
 
 var runnerOption RunnerOption
@@ -40,10 +43,12 @@ func init() {
 		i18n.T("The of version of jenkins.war"))
 	runnerCmd.Flags().StringVarP(&runnerOption.PluginPath, "plugin-path", "p", "",
 		i18n.T("The path to plugins.txt"))
-	runnerCmd.Flags().StringVarP(&runnerOption.JenkinsfilePath, "jenkinsfile-path", "j", "",
+	runnerCmd.Flags().StringVarP(&runnerOption.JenkinsfilePath, "jenkinsfile-path", "z", "",
 		i18n.T("The path to jenkinsfile"))
 	runnerCmd.Flags().StringVarP(&runnerOption.JfrVersion, "jfr-version", "f", "1.0-beta-11",
 		i18n.T("The path to jenkinsfile"))
+	runnerCmd.Flags().BoolVarP(&runnerOption.LTS, "lts", "", true,
+		i18n.T("If you want to download Jenkins as LTS"))
 }
 
 var runnerCmd = &cobra.Command{
@@ -74,7 +79,6 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 
 		if runnerOption.WarPath == "" {
 			// If it does not exist download the jenkins.war
-
 			jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, runnerOption.WarVersion)
 			logger.Info("prepare to download jenkins.war as pre-requisite for jfr", zap.String("localPath", jenkinsWar))
 
@@ -83,6 +87,7 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 					Mirror:       "default",
 					Output:       jenkinsWar,
 					ShowProgress: true,
+					LTS:          runnerOption.LTS,
 					Version:      runnerOption.WarVersion,
 				}
 				if err = download.DownloadJenkins(); err != nil {
@@ -92,7 +97,7 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 		}
 
 		//Check if jenkins war path exists
-		if filepath.Ext(strings.TrimSpace(runnerOption.WarPath)) != ".war" {
+		if runnerOption.WarPath != "" && filepath.Ext(strings.TrimSpace(runnerOption.WarPath)) != ".war" {
 			return fmt.Errorf("incorrect file path : %s", runnerOption.WarPath)
 		}
 
@@ -102,7 +107,7 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 		}
 
 		//Check if the plugin file has a valid extension
-		if filepath.Ext(strings.TrimSpace(runnerOption.WarPath)) != ".txt" {
+		if filepath.Ext(strings.TrimSpace(runnerOption.PluginPath)) != ".txt" {
 			return fmt.Errorf("incorrect file type it should be a txt file : %s", runnerOption.PluginPath)
 		}
 
@@ -117,8 +122,8 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 
 		//TO-DO
 		/*
-		a) Build JFR using mvn clean package
-		b) Run jfr using arguments
+			a) Build JFR using mvn clean package
+			b) Run jfr using arguments
 		*/
 
 		return nil

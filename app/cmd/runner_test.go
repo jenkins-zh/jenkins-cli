@@ -35,12 +35,12 @@ var _ = Describe("Runner test command", func() {
 	})
 
 	Context("basic cases", func() {
-		It("jenkins war download should succeed", func() {
+		It("should pass", func() {
 			data, err := generateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
-			rootCmd.SetArgs([]string{"runner"})
+			rootCmd.SetArgs([]string{"runner", "--plugin-path=home/sladyn/plugin.txt", "--jenkinsfile-path=home/sladyn/Jenkinsfile"})
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
 			_, err = rootCmd.ExecuteC()
@@ -58,5 +58,6 @@ var _ = Describe("Runner test command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).To(HaveOccurred())
 		})
+
 	})
 })
