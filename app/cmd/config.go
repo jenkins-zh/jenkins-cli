@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	cfg "github.com/jenkins-zh/jenkins-cli/app/cmd/config"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -23,6 +25,7 @@ type ConfigOptions struct {
 
 	ConfigFileLocation string
 	Detail             bool
+	Decrypt            bool
 }
 
 var configOptions ConfigOptions
@@ -32,8 +35,10 @@ func init() {
 
 	// add flags
 	flags := configCmd.Flags()
-	flags.BoolVarP(&configOptions.Detail, "detail", "", false,
+	flags.BoolVarP(&configOptions.Detail, "detail", "d", false,
 		`Show the all detail of current configuration`)
+	flags.BoolVarP(&configOptions.Decrypt, "decrypt", "", false,
+		`Decrypt the credential field`)
 
 	configCmd.AddCommand(config_plugin.NewConfigPluginCmd(&configOptions.CommonOption))
 }
@@ -48,6 +53,12 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
+			if configOptions.Decrypt && current.Token == keyring.PlaceHolder {
+				keyring.LoadTokenFromKeyring(&Config{
+					JenkinsServers: []JenkinsServer{*current},
+				})
+			}
+
 			if configOptions.Detail {
 				var data []byte
 				if data, err = yaml.Marshal(current); err == nil {
@@ -63,7 +74,8 @@ var configCmd = &cobra.Command{
 	},
 	Example: `  jcli config generate
   jcli config list
-  jcli config edit`,
+  jcli config edit
+`,
 }
 
 func setCurrentJenkins(name string) {
@@ -160,6 +172,8 @@ func loadConfig(path string) (err error) {
 	var content []byte
 	if content, err = ioutil.ReadFile(path); err == nil {
 		err = yaml.Unmarshal([]byte(content), &config)
+
+		keyring.LoadTokenFromKeyring(config)
 	}
 	return
 }
@@ -204,6 +218,8 @@ func saveConfig() (err error) {
 	if rootOptions.ConfigFile != "" {
 		configPath = rootOptions.ConfigFile
 	}
+
+	keyring.SaveTokenToKeyring(config)
 
 	if data, err = yaml.Marshal(&config); err == nil {
 		err = ioutil.WriteFile(configPath, data, 0644)
