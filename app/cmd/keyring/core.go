@@ -9,7 +9,7 @@ import (
 const (
 	// PlaceHolder is the replacer of original credential
 	PlaceHolder = "******"
-
+	// KeyTokenPrefix is the prefix of keyring service
 	KeyTokenPrefix = "jcli-config-token"
 )
 

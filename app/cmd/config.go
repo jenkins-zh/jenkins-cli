@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	cfg "github.com/jenkins-zh/jenkins-cli/app/cmd/config"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
