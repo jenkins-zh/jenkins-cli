@@ -52,16 +52,20 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			if configOptions.Decrypt && current.Token == keyring.PlaceHolder {
-				keyring.LoadTokenFromKeyring(&Config{
+			if !configOptions.Decrypt {
+				current.Token = keyring.PlaceHolder
+			} else {
+				jenkinsCfg := &Config{
 					JenkinsServers: []JenkinsServer{*current},
-				})
+				}
+				keyring.LoadTokenFromKeyring(jenkinsCfg)
+				current = &(jenkinsCfg.JenkinsServers[0])
 			}
 
 			if configOptions.Detail {
 				var data []byte
 				if data, err = yaml.Marshal(current); err == nil {
-					cmd.Println(string(data))
+					cmd.Print(string(data))
 				}
 			} else if current.Description != "" {
 				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)

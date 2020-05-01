@@ -24,9 +24,7 @@ func SaveTokenToKeyring(config *config.Config) {
 			continue
 		}
 
-		if err := keyring.Set(fmt.Sprintf("%s-%s", KeyTokenPrefix, item.Name), item.UserName, token); err != nil {
-			fmt.Println(err)
-		} else {
+		if err := keyring.Set(fmt.Sprintf("%s-%s", KeyTokenPrefix, item.Name), item.UserName, token); err == nil {
 			(&item).Token = PlaceHolder
 			config.JenkinsServers[i] = item
 		}
@@ -36,9 +34,7 @@ func SaveTokenToKeyring(config *config.Config) {
 // LoadTokenFromKeyring load token from keyring
 func LoadTokenFromKeyring(config *config.Config) {
 	for i, item := range config.JenkinsServers {
-		if token, err := keyring.Get(fmt.Sprintf("%s-%s", KeyTokenPrefix, item.Name), item.UserName); err != nil {
-			fmt.Println(err)
-		} else {
+		if token, err := keyring.Get(fmt.Sprintf("%s-%s", KeyTokenPrefix, item.Name), item.UserName); err == nil {
 			(&item).Token = token
 			config.JenkinsServers[i] = item
 		}
