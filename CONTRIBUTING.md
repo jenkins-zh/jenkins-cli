@@ -46,6 +46,13 @@ a totally fresh environment. Here is list of free resources that you can use:
 | Aliyun | [https://api.aliyun.com/#/cli](https://api.aliyun.com/#/cli) |
 | Google Could | [https://ssh.cloud.google.com/cloudshell/environment/view](https://ssh.cloud.google.com/cloudshell/environment/view) |
 
+For some cases, you need to make sure it works well in different operation system. Setup a virtual machine is a good practice.
+
+| vm | description |
+|---|---|
+| [multipass](https://github.com/canonical/multipass) | Multipass is a lightweight VM manager for Linux, Windows and macOS |
+| [VirtualBox](https://www.virtualbox.org/) | VirtualBox is a powerful x86 and AMD64/Intel64 virtualization product for enterprise as well as home use. |
+
 ## Pull Requests
 
 Before you get started, please fork this project into your GitHub account. Then
