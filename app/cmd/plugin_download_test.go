@@ -56,9 +56,8 @@ var _ = Describe("plugin download command", func() {
 			Expect(buf.String()).To(Equal(""))
 
 			_, err = os.Stat("fake.hpi")
-			Expect(err).To(BeNil())
-
 			defer os.Remove("fake.hpi")
+			Expect(err).To(BeNil())
 		})
 	})
 })
