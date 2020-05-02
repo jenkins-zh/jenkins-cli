@@ -17,8 +17,6 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13.x
-    - name: Gen Bindata
-      run: make gen-data-linux
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v1
       with:
