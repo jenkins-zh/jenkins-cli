@@ -16,7 +16,7 @@ var _ = Describe("casc open test", func() {
 
 	BeforeEach(func() {
 		cascOpenOption.ExecContext = util.FakeExecCommandSuccess
-		data, err := generateSampleConfig()
+		data, err := GenerateSampleConfig()
 		Expect(err).To(BeNil())
 
 		tempFile, err = ioutil.TempFile(".", "test.yaml")

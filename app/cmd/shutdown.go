@@ -12,25 +12,11 @@ import (
 type ShutdownOption struct {
 	common.BatchOption
 	common.CommonOption
+	RootOptions *RootOptions
 
 	Safe          bool
 	Prepare       bool
 	CancelPrepare bool
-}
-
-var shutdownOption ShutdownOption
-
-func init() {
-	rootCmd.AddCommand(shutdownCmd)
-	shutdownOption.SetFlag(shutdownCmd)
-	shutdownCmd.Flags().BoolVarP(&shutdownOption.Safe, "safe", "s", true,
-		i18n.T(SafeShutdown))
-	shutdownCmd.Flags().BoolVarP(&shutdownOption.Prepare, "prepare", "", false,
-		i18n.T("Put Jenkins in a Quiet mode, in preparation for a restart. In that mode Jenkins don’t start any build"))
-	shutdownCmd.Flags().BoolVarP(&shutdownOption.CancelPrepare, "prepare-cancel", "", false,
-		i18n.T(" Cancel the effect of the “quiet-down” command"))
-	shutdownOption.BatchOption.Stdio = common.GetSystemStdio()
-	shutdownOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
 const (
@@ -38,31 +24,54 @@ const (
 	SafeShutdown = "Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins"
 )
 
-var shutdownCmd = &cobra.Command{
-	Use:   "shutdown",
-	Short: i18n.T(SafeShutdown),
-	Long:  i18n.T(SafeShutdown),
-	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jenkins := getCurrentJenkinsFromOptions()
-		if !shutdownOption.Confirm(fmt.Sprintf("Are you sure to shutdown Jenkins %s?", jenkins.URL)) {
-			return
-		}
+// NewShutdownCmd create the shutdown command
+func NewShutdownCmd(rootOpt *RootOptions) (cmd *cobra.Command) {
+	shutdownOption := &ShutdownOption{
+		RootOptions: rootOpt,
+	}
+	cmd = &cobra.Command{
+		Use:   "shutdown",
+		Short: i18n.T(SafeShutdown),
+		Long:  i18n.T(SafeShutdown),
+		RunE:  shutdownOption.runE,
+	}
+	shutdownOption.init(cmd)
+	return
+}
 
-		jClient := &client.CoreClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: shutdownOption.RoundTripper,
-				Debug:        rootOptions.Debug,
-			},
-		}
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-
-		if shutdownOption.CancelPrepare {
-			err = jClient.PrepareShutdown(true)
-		} else if shutdownOption.Prepare {
-			err = jClient.PrepareShutdown(false)
-		} else {
-			err = jClient.Shutdown(shutdownOption.Safe)
-		}
+func (o *ShutdownOption) runE(cmd *cobra.Command, _ []string) (err error) {
+	jenkins := getCurrentJenkinsFromOptions()
+	if !o.Confirm(fmt.Sprintf("Are you sure to shutdown Jenkins %s?", jenkins.URL)) {
 		return
-	},
+	}
+
+	jClient := &client.CoreClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: o.RootOptions.CommonOption.RoundTripper,
+			Debug:        o.RootOptions.Debug,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+
+	if o.CancelPrepare {
+		err = jClient.PrepareShutdown(true)
+	} else if o.Prepare {
+		err = jClient.PrepareShutdown(false)
+	} else {
+		err = jClient.Shutdown(o.Safe)
+	}
+	return
+}
+
+func (o *ShutdownOption) init(shutdownCmd *cobra.Command) {
+	rootCmd.AddCommand(shutdownCmd)
+	o.SetFlag(shutdownCmd)
+	shutdownCmd.Flags().BoolVarP(&o.Safe, "safe", "s", true,
+		i18n.T(SafeShutdown))
+	shutdownCmd.Flags().BoolVarP(&o.Prepare, "prepare", "", false,
+		i18n.T("Put Jenkins in a Quiet mode, in preparation for a restart. In that mode Jenkins don’t start any build"))
+	shutdownCmd.Flags().BoolVarP(&o.CancelPrepare, "prepare-cancel", "", false,
+		i18n.T(" Cancel the effect of the “quiet-down” command"))
+	o.BatchOption.Stdio = common.GetSystemStdio()
+	o.CommonOption.Stdio = common.GetSystemStdio()
 }

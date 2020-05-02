@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io"
 	"log"
 	"os"
@@ -42,6 +43,8 @@ type RootOptions struct {
 	Doctor    bool
 	StartTime time.Time
 	EndTime   time.Time
+
+	CommonOption *common.CommonOption
 
 	LoggerLevel string
 }
@@ -188,6 +191,19 @@ func init() {
 	rootCmd.SetOut(os.Stdout)
 
 	loadPlugins(rootCmd)
+
+	// add sub-commands
+	NewShutdownCmd(&rootOptions)
+}
+
+// GetRootOptions returns the root options
+func GetRootOptions() *RootOptions {
+	return &rootOptions
+}
+
+// GetRootCommand returns the root cmd
+func GetRootCommand() *cobra.Command {
+	return rootCmd
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {

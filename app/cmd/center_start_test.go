@@ -17,7 +17,7 @@ var _ = Describe("center start command", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		configFile = file.Name()
-		data, err := generateSampleConfig()
+		data, err := GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(configFile, data, 0664)
 		Expect(err).To(BeNil())

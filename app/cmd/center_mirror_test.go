@@ -42,7 +42,7 @@ var _ = Describe("center mirror command", func() {
 
 	Context("basic cases", func() {
 		It("enable mirror site", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -57,7 +57,7 @@ var _ = Describe("center mirror command", func() {
 		})
 
 		It("disable mirror site", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

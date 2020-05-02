@@ -51,7 +51,7 @@ var _ = Describe("job delete command", func() {
 		})
 
 		It("should success, with batch mode", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -134,7 +134,7 @@ type EditorTest struct {
 //func RunPromptCommandTest(t *testing.T, test PromptCommandTest) {
 //	RunTest(t, func(stdio terminal.Stdio) (err error) {
 //		var data []byte
-//		data, err = generateSampleConfig()
+//		data, err = GenerateSampleConfig()
 //		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 //
 //		test.BatchOption.Stdio = stdio

@@ -48,7 +48,7 @@ var _ = Describe("plugin install command", func() {
 
 	Context("basic cases", func() {
 		It("install one plugin", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -66,7 +66,7 @@ var _ = Describe("plugin install command", func() {
 		})
 
 		It("unknow suite", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

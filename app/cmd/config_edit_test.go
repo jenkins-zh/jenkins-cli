@@ -12,7 +12,7 @@ package cmd
 //		},
 //		Test: func(stdio terminal.Stdio) (err error) {
 //			rootOptions.ConfigFile = "test.yaml"
-//			data, err := generateSampleConfig()
+//			data, err := GenerateSampleConfig()
 //			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 //
 //			rootCmd.SetArgs([]string{"config", "edit"})
