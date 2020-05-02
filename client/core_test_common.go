@@ -24,6 +24,30 @@ func PrepareRestartDirectly(roundTripper *mhttp.MockRoundTripper, rootURL, user,
 	return
 }
 
+// PrepareForShutdown only for test
+func PrepareForShutdown(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, safe bool) {
+	var request *http.Request
+	if safe {
+		request, _ = http.NewRequest("POST", fmt.Sprintf("%s/safeExit", rootURL), nil)
+	} else {
+		request, _ = http.NewRequest("POST", fmt.Sprintf("%s/exit", rootURL), nil)
+	}
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+	return
+}
+
+// PrepareForCancelShutdown only for test
+func PrepareForCancelShutdown(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string, cancel bool) {
+	var request *http.Request
+	if cancel {
+		request, _ = http.NewRequest("POST", fmt.Sprintf("%s/cancelQuietDown", rootURL), nil)
+	} else {
+		request, _ = http.NewRequest("POST", fmt.Sprintf("%s/quietDown", rootURL), nil)
+	}
+	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
+	return
+}
+
 // PrepareForGetIdentity only for test
 func PrepareForGetIdentity(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/instance", rootURL), nil)
