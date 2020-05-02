@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -9,8 +10,8 @@ import (
 
 // ShutdownOption holds the options for shutdown cmd
 type ShutdownOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.CommonOption
 
 	Safe          bool
 	Prepare       bool
@@ -28,8 +29,8 @@ func init() {
 		i18n.T("Put Jenkins in a Quiet mode, in preparation for a restart. In that mode Jenkins don’t start any build"))
 	shutdownCmd.Flags().BoolVarP(&shutdownOption.CancelPrepare, "prepare-cancel", "", false,
 		i18n.T(" Cancel the effect of the “quiet-down” command"))
-	shutdownOption.BatchOption.Stdio = GetSystemStdio()
-	shutdownOption.CommonOption.Stdio = GetSystemStdio()
+	shutdownOption.BatchOption.Stdio = common.GetSystemStdio()
+	shutdownOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
 var shutdownCmd = &cobra.Command{
