@@ -24,7 +24,7 @@ func init() {
 	rootCmd.AddCommand(shutdownCmd)
 	shutdownOption.SetFlag(shutdownCmd)
 	shutdownCmd.Flags().BoolVarP(&shutdownOption.Safe, "safe", "s", true,
-		i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins"))
+		i18n.T(SafeShutdown))
 	shutdownCmd.Flags().BoolVarP(&shutdownOption.Prepare, "prepare", "", false,
 		i18n.T("Put Jenkins in a Quiet mode, in preparation for a restart. In that mode Jenkins don’t start any build"))
 	shutdownCmd.Flags().BoolVarP(&shutdownOption.CancelPrepare, "prepare-cancel", "", false,
@@ -33,10 +33,15 @@ func init() {
 	shutdownOption.CommonOption.Stdio = common.GetSystemStdio()
 }
 
+const (
+	// SafeShutdown the text about shutdown safely
+	SafeShutdown = "Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins"
+)
+
 var shutdownCmd = &cobra.Command{
 	Use:   "shutdown",
-	Short: i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins"),
-	Long:  i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins"),
+	Short: i18n.T(SafeShutdown),
+	Long:  i18n.T(SafeShutdown),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptions()
 		if !shutdownOption.Confirm(fmt.Sprintf("Are you sure to shutdown Jenkins %s?", jenkins.URL)) {
