@@ -44,3 +44,11 @@ Want to try the latest features? Download the developing version of different pl
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/linux/jcli . && docker rm -v $jcli_id`
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/darwin/jcli . && docker rm -v $jcli_id`
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/windows/jcli.exe . && docker rm -v $jcli_id`
+
+## Out-of-date
+
+Below distributions are out-of-date. If you want to maintain them, please let us know.
+
+* [GoFish](https://gofi.sh/) users can use `gofish install jcli`
+* [Chocolatey](https://chocolatey.org/packages/jcli) users can use `choco install jcli`
+* [Snapcraft](https://snapcraft.io/jcli) users can use `sudo snap install jcli`
