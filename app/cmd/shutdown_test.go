@@ -1,8 +1,7 @@
-package cmd_test
+package cmd
 
 import (
 	"bytes"
-	. "github.com/jenkins-zh/jenkins-cli/app/cmd"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"

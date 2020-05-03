@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	_ "github.com/Netflix/go-expect"
-	_ "github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	//"github.com/Netflix/go-expect"
+	//"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io/ioutil"
 	"os"
 
