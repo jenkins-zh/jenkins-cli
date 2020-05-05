@@ -12,8 +12,8 @@ grade: devel
 parts:
   jcli:
     plugin: dump
-    #source: https://github.com/jenkins-zh/jenkins-cli/releases/download/v0.0.26/jcli-linux-amd64.tar.gz
-    #source-type: tar
+    source: https://cdn.jsdelivr.net/gh/jenkins-zh/jcli-repo/jcli-linux-amd64.tar.gz
+    source-type: tar
 apps:
   jcli:
     command: jcli

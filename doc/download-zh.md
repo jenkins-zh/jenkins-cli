@@ -44,3 +44,11 @@ echo "deb https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/linux/jcli . && docker rm -v $jcli_id`
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/darwin/jcli . && docker rm -v $jcli_id`
 - `jcli_id=$(docker create jenkinszh/jcli:dev) && sudo docker cp $jcli_id:/bin/windows/jcli.exe . && docker rm -v $jcli_id`
+
+## 过时的
+
+下面的发型版不会及时更新，如果您有兴趣帮忙维护它们的话，请告诉我们，谢谢。
+
+* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
+* [Chocolatey](https://chocolatey.org/packages/jcli) 的用户可以使用命令 `choco install jcli` 来安装
+* [Snapcraft](https://snapcraft.io/jcli) 的用户可以使用命令 `sudo snap install jcli` 来安装
