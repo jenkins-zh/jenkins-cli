@@ -23,9 +23,10 @@ require (
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.0.0
+	github.com/spf13/viper v1.6.3 // indirect
+	go.uber.org/zap v1.15.0
 	github.com/stretchr/testify v1.5.1
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
-	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.2.8
