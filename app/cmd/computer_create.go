@@ -31,6 +31,6 @@ It can only create a JNLP agent.`),
 		return jClient.Create(args[0])
 	},
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

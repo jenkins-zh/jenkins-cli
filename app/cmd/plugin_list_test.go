@@ -37,7 +37,7 @@ var _ = Describe("plugin list command", func() {
 
 	Context("basic cases", func() {
 		It("no plugin in the list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -56,7 +56,7 @@ var _ = Describe("plugin list command", func() {
 		})
 
 		It("one plugin in the list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -77,7 +77,7 @@ fake      1.0     true
 		})
 
 		It("one plugin in the list without headers", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -97,7 +97,7 @@ fake      1.0     true
 		})
 
 		It("one plugin output with json format", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -117,7 +117,7 @@ fake      1.0     true
 		})
 
 		It("one plugin output with yaml format", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -137,7 +137,7 @@ fake      1.0     true
 		})
 
 		It("one plugin output with not support format", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

@@ -16,6 +16,6 @@ var credentialCmd = &cobra.Command{
 	Short:   i18n.T("Manage the credentials of your Jenkins"),
 	Long:    i18n.T(`Manage the credentials of your Jenkins`),
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

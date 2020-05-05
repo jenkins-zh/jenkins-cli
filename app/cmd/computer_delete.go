@@ -30,6 +30,6 @@ var computerDeleteCmd = &cobra.Command{
 		return jClient.Delete(args[0])
 	},
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

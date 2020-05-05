@@ -37,7 +37,7 @@ var _ = Describe("plugin search command", func() {
 
 	Context("basic cases", func() {
 		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -55,7 +55,7 @@ var _ = Describe("plugin search command", func() {
 		})
 
 		It("many plugins in the list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -84,7 +84,7 @@ var _ = Describe("plugin search command", func() {
 		})
 
 		It("should success, empty updateCenter list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -112,7 +112,7 @@ var _ = Describe("plugin search command", func() {
 		})
 
 		It("should success, null updateCenter and 500 installed list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

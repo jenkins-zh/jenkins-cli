@@ -41,7 +41,7 @@ var _ = Describe("job search command", func() {
 		})
 
 		It("should success, search with one result item", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -65,7 +65,7 @@ fake fake        WorkflowJob job/fake/
 		})
 
 		It("should success, search without keyword", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

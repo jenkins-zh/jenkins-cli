@@ -33,6 +33,6 @@ var cascCmd = &cobra.Command{
 	Short: i18n.T("Configuration as Code"),
 	Long:  i18n.T("Configuration as Code"),
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

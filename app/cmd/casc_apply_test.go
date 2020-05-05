@@ -42,7 +42,7 @@ var _ = Describe("casc apply command", func() {
 
 	Context("basic cases", func() {
 		It("should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

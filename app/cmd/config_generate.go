@@ -43,7 +43,7 @@ var configGenerateCmd = &cobra.Command{
 	Long:    i18n.T("Generate a sample config file for you"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		if err == nil {
 			if configGenerateOption.Interactive {
 				err = configGenerateOption.InteractiveWithConfig(cmd, data)
@@ -124,7 +124,8 @@ func getSampleConfig() (sampleConfig Config) {
 	return
 }
 
-func generateSampleConfig() ([]byte, error) {
+// GenerateSampleConfig returns a sample config
+func GenerateSampleConfig() ([]byte, error) {
 	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
 }
