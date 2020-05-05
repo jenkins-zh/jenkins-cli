@@ -14,7 +14,7 @@ package cmd
 //			configFile := path.Join(os.TempDir(), "fake.yaml")
 //			defer os.Remove(configFile)
 //
-//			data, err := generateSampleConfig()
+//			data, err := GenerateSampleConfig()
 //			err = ioutil.WriteFile(configFile, data, 0664)
 //
 //			var (

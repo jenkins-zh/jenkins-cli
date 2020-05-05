@@ -40,7 +40,7 @@ var _ = Describe("job type command", func() {
 
 	Context("basic cases", func() {
 		It("GetCategories", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -79,7 +79,7 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -106,7 +106,7 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -133,7 +133,7 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, one item", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

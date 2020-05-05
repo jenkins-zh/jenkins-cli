@@ -22,7 +22,7 @@ var _ = Describe("test open", func() {
 	BeforeEach(func() {
 		configFile = path.Join(os.TempDir(), "fake.yaml")
 
-		data, err := generateSampleConfig()
+		data, err := GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(configFile, data, 0664)
 		Expect(err).To(BeNil())
@@ -93,7 +93,7 @@ var _ = Describe("test open", func() {
 //			defer os.Remove(configFile)
 //
 //			var data []byte
-//			data, err = generateSampleConfig()
+//			data, err = GenerateSampleConfig()
 //			err = ioutil.WriteFile(configFile, data, 0664)
 //
 //			openOption.ExecContext = util.FakeExecCommandSuccess

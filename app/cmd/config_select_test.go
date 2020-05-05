@@ -74,7 +74,7 @@ var _ = Describe("config select command", func() {
 //			defer os.Remove(configFile)
 //
 //			var data []byte
-//			data, err = generateSampleConfig()
+//			data, err = GenerateSampleConfig()
 //			err = ioutil.WriteFile(configFile, data, 0664)
 //
 //			configSelectOptions.CommonOption.Stdio = stdio

@@ -49,6 +49,6 @@ var credentialListCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

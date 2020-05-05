@@ -63,9 +63,8 @@ var _ = Describe("plugin api test", func() {
 			pluginAPI.DownloadPlugins(names)
 
 			_, err := os.Stat("fake.hpi")
-			Expect(err).To(BeNil())
-
 			defer os.Remove("fake.hpi")
+			Expect(err).To(BeNil())
 		})
 
 		It("use mirror", func() {
@@ -78,9 +77,8 @@ var _ = Describe("plugin api test", func() {
 			pluginAPI.DownloadPlugins(names)
 
 			_, err := os.Stat("fake.hpi")
-			Expect(err).To(BeNil())
-
 			defer os.Remove("fake.hpi")
+			Expect(err).To(BeNil())
 		})
 
 		It("with dependency which is not optional", func() {

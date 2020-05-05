@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"bytes"
-	_ "github.com/Netflix/go-expect"
-	_ "github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	//"github.com/Netflix/go-expect"
+	//"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io/ioutil"
 	"os"
 
@@ -54,7 +54,7 @@ var _ = Describe("credential delete command", func() {
 
 		BeforeEach(func() {
 			var data []byte
-			data, err = generateSampleConfig()
+			data, err = GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

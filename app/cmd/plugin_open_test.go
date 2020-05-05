@@ -17,7 +17,7 @@ var _ = Describe("plugin open test", func() {
 
 	BeforeEach(func() {
 		pluginOpenOption.ExecContext = util.FakeExecCommandSuccess
-		data, err := generateSampleConfig()
+		data, err := GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		rootOptions.ConfigFile = "test.yaml"
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)

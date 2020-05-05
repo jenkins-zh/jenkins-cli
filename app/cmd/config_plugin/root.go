@@ -39,7 +39,7 @@ func NewConfigPluginCmd(opt *common.CommonOption) (cmd *cobra.Command) {
 If you want to submit a plugin for jcli, please see also the following project.
 https://github.com/jenkins-zh/jcli-plugins`),
 		Annotations: map[string]string{
-			common.Since: "v0.0.28",
+			common.Since: common.VersionSince0028,
 		},
 	}
 
@@ -62,7 +62,7 @@ func NewConfigPluginListCmd(opt *common.CommonOption) (cmd *cobra.Command) {
 		Long:  "list all installed plugins",
 		RunE:  configPluginListCmd.RunE,
 		Annotations: map[string]string{
-			common.Since: "v0.0.28",
+			common.Since: common.VersionSince0028,
 		},
 	}
 
@@ -91,7 +91,7 @@ The official metadata git repository is https://github.com/jenkins-zh/jcli-plugi
 but you can change it by giving a command parameter.`,
 		RunE: pluginFetchCmd.Run,
 		Annotations: map[string]string{
-			common.Since: "v0.0.28",
+			common.Since: common.VersionSince0028,
 		},
 	}
 
@@ -125,7 +125,7 @@ func NewConfigPluginInstallCmd(opt *common.CommonOption) (cmd *cobra.Command) {
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  pluginInstallCmd.Run,
 		Annotations: map[string]string{
-			common.Since: "v0.0.28",
+			common.Since: common.VersionSince0028,
 		},
 	}
 
