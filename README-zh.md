@@ -83,6 +83,10 @@ jcli config plugin install account
 感谢 JetBrains 为我们提供了开源许可证。  
 [![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
+# 相关的项目
+有一些相关的项目你可能会比较感兴趣：
+* [jenni](https://github.com/m-sureshraj/jenni) 是一个 Jenkins 个人助手
+
 # 点赞数趋势图
 
 [![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)

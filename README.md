@@ -86,6 +86,10 @@ If you're interested in this project. Please go through the
 Thanks to JetBrains for giving us the open source licence.  
 [![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
+# Similar Projects
+There're a few similar projects that you might be interested in:
+* [jenni](https://github.com/m-sureshraj/jenni) is a Jenkins Personal Assistant
+
 # Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
