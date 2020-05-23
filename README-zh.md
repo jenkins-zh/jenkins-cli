@@ -54,10 +54,7 @@ sudo mv jcli /usr/local/bin/
 
 这里还有一些其他的包管理器：
 
-* [GoFish](https://gofi.sh/) 的用户可以使用命令 `gofish install jcli` 来安装
 * [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
-* [Chocolatey](https://chocolatey.org/packages/jcli) 的用户可以使用命令 `choco install jcli` 来安装
-* [Snapcraft](https://snapcraft.io/jcli) 的用户可以使用命令 `sudo snap install jcli` 来安装
 
 了解更多[如何下载 jcli](doc/download-zh.md).
 你可以从[这里](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli)获取下载的统计信息。
@@ -85,6 +82,10 @@ jcli config plugin install account
 
 感谢 JetBrains 为我们提供了开源许可证。  
 [![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+
+# 相关的项目
+有一些相关的项目你可能会比较感兴趣：
+* [jenni](https://github.com/m-sureshraj/jenni) 是一个 Jenkins 个人助手
 
 # 点赞数趋势图
 

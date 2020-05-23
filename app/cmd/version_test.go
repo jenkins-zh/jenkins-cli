@@ -33,7 +33,7 @@ var _ = Describe("version command", func() {
 		rootCmd.SetOutput(buf)
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())

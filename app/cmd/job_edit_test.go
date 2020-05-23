@@ -48,7 +48,7 @@ var _ = Describe("job edit command", func() {
 
 	Context("basic cases", func() {
 		It("edit with script param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -67,7 +67,7 @@ var _ = Describe("job edit command", func() {
 		})
 
 		It("edit with file param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -91,7 +91,7 @@ var _ = Describe("job edit command", func() {
 		})
 
 		It("edit with url param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

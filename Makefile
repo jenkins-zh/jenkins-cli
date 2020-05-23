@@ -116,13 +116,15 @@ test-slow:
 
 test:
 	mkdir -p bin
-	go test ./util -v -count=1
-	go test ./client -v -count=1 -coverprofile coverage.out
-	go test ./app -v -count=1
-	go test ./app/health -v -count=1
-	go test ./app/helper -v -count=1
-	go test ./app/i18n -v -count=1
+	go test ./util ./client ./app/ ./app/health ./app/helper ./app/i18n ./app/cmd/common -v -count=1 -coverprofile coverage.out
 	go test ./app/cmd -v -count=1
+#	go test ./util -v -count=1
+#	go test ./client -v -count=1 -coverprofile coverage.out
+#	go test ./app -v -count=1
+#	go test ./app/health -v -count=1
+#	go test ./app/helper -v -count=1
+#	go test ./app/i18n -v -count=1
+#	go test ./app/cmd -v -count=1
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
@@ -141,12 +143,3 @@ gen-data:
 
 image:
 	docker build . -t jenkinszh/jcli
-
-image-win:
-	docker build . -t jenkinszh/jcli:win -f Dockerfile-win
-
-image-darwin:
-	docker build . -t jenkinszh/jcli:darwin -f Dockerfile-darwin
-
-image-dev:
-	docker build . -t jenkinszh/jcli:dev -f Docker-dev

@@ -16,7 +16,7 @@ var _ = Describe("plugin create test", func() {
 	BeforeEach(func() {
 		pluginCreateOptions.SystemCallExec = util.FakeSystemCallExecSuccess
 		pluginCreateOptions.LookPathContext = util.FakeLookPath
-		data, err := generateSampleConfig()
+		data, err := GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		rootOptions.ConfigFile = "test.yaml"
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)

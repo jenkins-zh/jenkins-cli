@@ -44,7 +44,7 @@ var _ = Describe("job artifact download command", func() {
 
 	Context("basic cases", func() {
 		It("invalid build id", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -59,7 +59,7 @@ var _ = Describe("job artifact download command", func() {
 		})
 
 		It("should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -96,7 +96,7 @@ var _ = Describe("job artifact download command", func() {
 		})
 
 		It("should success, fake artifact id", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

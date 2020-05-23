@@ -36,6 +36,6 @@ var cascApplyCmd = &cobra.Command{
 		return jClient.Apply()
 	},
 	Annotations: map[string]string{
-		common.Since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

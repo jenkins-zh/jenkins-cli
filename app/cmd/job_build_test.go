@@ -47,7 +47,7 @@ var _ = Describe("job build command", func() {
 
 	Context("basic cases", func() {
 		It("should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -90,7 +90,7 @@ var _ = Describe("job build command", func() {
 		})
 
 		It("with --param-entry", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -126,7 +126,7 @@ var _ = Describe("job build command", func() {
 //		Test: func(stdio terminal.Stdio) (err error) {
 //			var data []byte
 //			rootOptions.ConfigFile = "test.yaml"
-//			data, err = generateSampleConfig()
+//			data, err = GenerateSampleConfig()
 //			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 //
 //			ctrl := gomock.NewController(t)

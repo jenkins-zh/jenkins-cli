@@ -1,8 +1,7 @@
-package cmd_test
+package common
 
 import (
 	"bytes"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"reflect"
@@ -10,12 +9,12 @@ import (
 
 var _ = Describe("test OutputOption", func() {
 	var (
-		outputOption common.OutputOption
+		outputOption OutputOption
 		fakeFoos     []FakeFoo
 	)
 
 	BeforeEach(func() {
-		outputOption = common.OutputOption{}
+		outputOption = OutputOption{}
 
 		fakeFoos = []FakeFoo{{
 			Name: "fake",
@@ -39,7 +38,7 @@ var _ = Describe("test OutputOption", func() {
 
 		Context("with filter", func() {
 			BeforeEach(func() {
-				outputOption = common.OutputOption{
+				outputOption = OutputOption{
 					Filter: []string{"Name=fake"},
 				}
 			})
@@ -95,7 +94,7 @@ foo-1
 
 			Context("with json format", func() {
 				BeforeEach(func() {
-					outputOption.Format = common.JSONOutputFormat
+					outputOption.Format = JSONOutputFormat
 				})
 
 				It("should get a json text", func() {
@@ -112,7 +111,7 @@ foo-1
 
 			Context("with yaml format", func() {
 				BeforeEach(func() {
-					outputOption.Format = common.YAMLOutputFormat
+					outputOption.Format = YAMLOutputFormat
 				})
 
 				It("should get a yaml text", func() {
@@ -150,7 +149,7 @@ foo-1
 
 		Context("ignore invalid filter", func() {
 			BeforeEach(func() {
-				outputOption = common.OutputOption{
+				outputOption = OutputOption{
 					Filter: []string{"Name"},
 				}
 			})

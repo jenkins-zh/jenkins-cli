@@ -23,7 +23,7 @@ func NewConfigPluginUninstallCmd(opt *common.CommonOption) (cmd *cobra.Command) 
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  jcliPluginUninstallCmd.RunE,
 		Annotations: map[string]string{
-			common.Since: "v0.0.28",
+			common.Since: common.VersionSince0028,
 		},
 	}
 	return

@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
@@ -38,7 +40,11 @@ type RootOptions struct {
 	ProxyAuth          string
 	ProxyDisable       bool
 
-	Doctor bool
+	Doctor    bool
+	StartTime time.Time
+	EndTime   time.Time
+
+	CommonOption *common.CommonOption
 
 	LoggerLevel string
 }
@@ -54,6 +60,7 @@ var rootCmd = &cobra.Command{
 
 We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {
+		rootOptions.StartTime = time.Now()
 		if logger, err = util.InitLogger(rootOptions.LoggerLevel); err == nil {
 			(&configOptions).Logger = logger
 			client.SetLogger(logger)
@@ -87,6 +94,15 @@ We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/iss
 			err = rootOptions.RunDiagnose(cmd)
 		}
 		return
+	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		cmdPath := getCmdPath(cmd)
+
+		// calculate the time
+		rootOptions.EndTime = time.Now()
+
+		logger.Debug("done with command", zap.String("command", cmdPath),
+			zap.Float64("duration", rootOptions.EndTime.Sub(rootOptions.StartTime).Seconds()))
 	},
 	BashCompletionFunction: jcliBashCompletionFunc,
 }
@@ -175,6 +191,19 @@ func init() {
 	rootCmd.SetOut(os.Stdout)
 
 	loadPlugins(rootCmd)
+
+	// add sub-commands
+	NewShutdownCmd(&rootOptions)
+}
+
+// GetRootOptions returns the root options
+func GetRootOptions() *RootOptions {
+	return &rootOptions
+}
+
+// GetRootCommand returns the root cmd
+func GetRootCommand() *cobra.Command {
+	return rootCmd
 }
 
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {

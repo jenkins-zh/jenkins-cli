@@ -30,7 +30,7 @@ var _ = Describe("job stop command", func() {
 		rootOptions.ConfigFile = "test.yaml"
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())
@@ -84,7 +84,7 @@ var _ = Describe("job stop command", func() {
 		})
 
 		It("stop the last build, with batch mode", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

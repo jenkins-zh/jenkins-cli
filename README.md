@@ -56,10 +56,7 @@ Download the tar file and copy the uncompressed `jcli` directory into your syste
 
 Here are other package managers:
 
-* [GoFish](https://gofi.sh/) users can use `gofish install jcli`
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
-* [Chocolatey](https://chocolatey.org/packages/jcli) users can use `choco install jcli`
-* [Snapcraft](https://snapcraft.io/jcli) users can use `sudo snap install jcli`
 
 See more about [how to download jcli](doc/download.md).
 You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
@@ -88,6 +85,10 @@ If you're interested in this project. Please go through the
 
 Thanks to JetBrains for giving us the open source licence.  
 [![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
+
+# Similar Projects
+There're a few similar projects that you might be interested in:
+* [jenni](https://github.com/m-sureshraj/jenni) is a Jenkins Personal Assistant
 
 # Stargazers over time
 

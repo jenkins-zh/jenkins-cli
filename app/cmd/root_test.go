@@ -270,7 +270,7 @@ var _ = Describe("Root cmd test", func() {
 
 			defer os.Remove(configFile.Name())
 
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(configFile.Name(), data, 0664)
 			Expect(err).To(BeNil())

@@ -46,7 +46,7 @@ var _ = Describe("job input command", func() {
 
 	Context("basic cases", func() {
 		It("no params, will error", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -62,7 +62,7 @@ var _ = Describe("job input command", func() {
 		})
 
 		It("should success, abort without inputs", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -102,7 +102,7 @@ var _ = Describe("job input command", func() {
 		})
 
 		It("should success, process without inputs", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

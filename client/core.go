@@ -38,6 +38,26 @@ func (q *CoreClient) RestartDirectly() (err error) {
 	return
 }
 
+// Shutdown puts Jenkins into the quiet mode, wait for existing builds to be completed, and then shut down Jenkins
+func (q *CoreClient) Shutdown(safe bool) (err error) {
+	if safe {
+		_, err = q.RequestWithoutData("POST", "/safeExit", nil, nil, 200)
+	} else {
+		_, err = q.RequestWithoutData("POST", "/exit", nil, nil, 200)
+	}
+	return
+}
+
+// PrepareShutdown Put Jenkins in a Quiet mode, in preparation for a restart. In that mode Jenkins don’t start any build
+func (q *CoreClient) PrepareShutdown(cancel bool) (err error) {
+	if cancel {
+		_, err = q.RequestWithoutData("POST", "/cancelQuietDown", nil, nil, 200)
+	} else {
+		_, err = q.RequestWithoutData("POST", "/quietDown", nil, nil, 200)
+	}
+	return
+}
+
 // JenkinsIdentity belongs to a Jenkins
 type JenkinsIdentity struct {
 	Fingerprint   string

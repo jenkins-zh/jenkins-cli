@@ -44,7 +44,7 @@ var _ = Describe("job log command", func() {
 
 	Context("basic cases, need RoundTripper", func() {
 		It("output the last build log", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
