@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"moul.io/http2curl"
 	"net/http"
 	"time"
 
@@ -227,6 +228,10 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 	}
 
 	client := j.GetClient()
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
+	}
 	return client.Do(req)
 }
 
@@ -253,6 +258,10 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 
 	for k, v := range headers {
 		req.Header.Add(k, v)
+	}
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
 	}
 
 	client := j.GetClient()
