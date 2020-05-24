@@ -22,8 +22,8 @@ require (
 	github.com/onsi/gomega v1.9.0
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/cobra v1.0.0
-	github.com/spf13/viper v1.6.3 // indirect
 	github.com/stretchr/testify v1.5.1
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.15.0
