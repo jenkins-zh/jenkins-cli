@@ -18,8 +18,8 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/ginkgo v1.12.0
-	github.com/onsi/gomega v1.9.0
+	github.com/onsi/ginkgo v1.12.2
+	github.com/onsi/gomega v1.10.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
 	github.com/smartystreets/goconvey v1.6.4 // indirect
@@ -29,6 +29,6 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59
 	gopkg.in/src-d/go-git.v4 v4.13.1
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 	moul.io/http2curl v1.0.0
 )
