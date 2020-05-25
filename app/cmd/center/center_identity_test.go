@@ -1,8 +1,9 @@
-package cmd
+package center
 
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -27,12 +28,12 @@ var _ = Describe("center identity command", func() {
 		centerIdentityOption.RoundTripper = roundTripper
 		targetFilePath = "jenkins.war"
 
-		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		cmd.rootOptions.Jenkins = ""
+		cmd.rootOptions.ConfigFile = "test.yaml"
 	})
 
 	AfterEach(func() {
-		rootCmd.SetArgs([]string{})
+		cmd.rootCmd.SetArgs([]string{})
 		err = os.Remove(targetFilePath)
 		ctrl.Finish()
 	})
@@ -40,18 +41,18 @@ var _ = Describe("center identity command", func() {
 	Context("basic cases", func() {
 		It("should not error", func() {
 			var data []byte
-			data, err = GenerateSampleConfig()
+			data, err = cmd.GenerateSampleConfig()
 			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			err = ioutil.WriteFile(cmd.rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
 			client.PrepareForGetIdentity(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9")
 
 			buf := new(bytes.Buffer)
-			rootCmd.SetOut(buf)
-			rootCmd.SetArgs([]string{"center", "identity"})
-			_, err = rootCmd.ExecuteC()
+			cmd.rootCmd.SetOut(buf)
+			cmd.rootCmd.SetArgs([]string{"center", "identity"})
+			_, err = cmd.rootCmd.ExecuteC()
 			Expect(err).NotTo(HaveOccurred())
 			Expect(buf.String()).To(Equal(`{
  "Fingerprint": "fingerprint",

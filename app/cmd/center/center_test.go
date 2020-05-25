@@ -1,7 +1,8 @@
-package cmd
+package center
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"io/ioutil"
 	"net/http"
@@ -23,25 +24,25 @@ var _ = Describe("center command", func() {
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
-		rootCmd.SetArgs([]string{})
-		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		cmd.rootCmd.SetArgs([]string{})
+		cmd.rootOptions.Jenkins = ""
+		cmd.rootOptions.ConfigFile = "test.yaml"
 
 		centerOption.RoundTripper = roundTripper
 	})
 
 	AfterEach(func() {
-		rootCmd.SetArgs([]string{})
-		os.Remove(rootOptions.ConfigFile)
-		rootOptions.ConfigFile = ""
+		cmd.rootCmd.SetArgs([]string{})
+		os.Remove(cmd.rootOptions.ConfigFile)
+		cmd.rootOptions.ConfigFile = ""
 		ctrl.Finish()
 	})
 
 	Context("basic cases", func() {
 		It("should success", func() {
-			data, err := GenerateSampleConfig()
+			data, err := cmd.GenerateSampleConfig()
 			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			err = ioutil.WriteFile(cmd.rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
 			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/api/json", nil)
@@ -70,8 +71,8 @@ var _ = Describe("center command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			rootCmd.SetArgs([]string{"center"})
-			_, err = rootCmd.ExecuteC()
+			cmd.rootCmd.SetArgs([]string{"center"})
+			_, err = cmd.rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 		})
 	})

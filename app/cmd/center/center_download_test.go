@@ -1,8 +1,9 @@
-package cmd
+package center
 
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -34,24 +35,24 @@ var _ = Describe("center download command", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		targetFilePath = tempFile.Name()
-		rootOptions.Jenkins = ""
-		rootOptions.ConfigFile = "test.yaml"
+		cmd.rootOptions.Jenkins = ""
+		cmd.rootOptions.ConfigFile = "test.yaml"
 
 		ltsResponseBody = "lts"
 		weeklyResponseBody = "weekly"
 	})
 
 	AfterEach(func() {
-		rootCmd.SetArgs([]string{})
+		cmd.rootCmd.SetArgs([]string{})
 		err = os.Remove(targetFilePath)
 		ctrl.Finish()
 	})
 
 	Context("basic cases", func() {
 		BeforeEach(func() {
-			data, err := GenerateSampleConfig()
+			data, err := cmd.GenerateSampleConfig()
 			Expect(err).To(BeNil())
-			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			err = ioutil.WriteFile(cmd.rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 		})
 
@@ -69,8 +70,8 @@ var _ = Describe("center download command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--output", targetFilePath})
-			_, err := rootCmd.ExecuteC()
+			cmd.rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--output", targetFilePath})
+			_, err := cmd.rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
 			_, err = os.Stat(targetFilePath)
@@ -91,8 +92,8 @@ var _ = Describe("center download command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			rootCmd.SetArgs([]string{"center", "download", "--lts=false", "--progress=false", "--output", targetFilePath})
-			_, err := rootCmd.ExecuteC()
+			cmd.rootCmd.SetArgs([]string{"center", "download", "--lts=false", "--progress=false", "--output", targetFilePath})
+			_, err := cmd.rootCmd.ExecuteC()
 			Expect(err).To(BeNil())
 
 			_, err = os.Stat(targetFilePath)
@@ -105,10 +106,10 @@ var _ = Describe("center download command", func() {
 
 		It("no mirror found", func() {
 			buf := new(bytes.Buffer)
-			rootCmd.SetOut(buf)
+			cmd.rootCmd.SetOut(buf)
 
-			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})
-			_, err := rootCmd.ExecuteC()
+			cmd.rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--mirror", "fake"})
+			_, err := cmd.rootCmd.ExecuteC()
 			Expect(err).To(HaveOccurred())
 			Expect(buf.String()).To(ContainSubstring("cannot found Jenkins mirror by: fake"))
 		})

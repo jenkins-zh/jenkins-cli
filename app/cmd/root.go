@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/center"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io"
 	"log"
@@ -194,6 +195,7 @@ func init() {
 
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
+	rootCmd.AddCommand(center.NewCenterCmd(&rootOptions, &rootOptions))
 }
 
 // GetRootOptions returns the root options
@@ -206,6 +208,19 @@ func GetRootCommand() *cobra.Command {
 	return rootCmd
 }
 
+func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
+	return getCurrentJenkinsFromOptions()
+}
+
+func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
+	return getCurrentJenkinsAndClient(jClient)
+}
+
+func (o *RootOptions) GetMirror(name string) string {
+	return getMirror(name)
+}
+
+// Deprecated
 func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
 
@@ -336,6 +351,7 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *Jenk
 	return
 }
 
+// Deprecated
 func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
 	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL

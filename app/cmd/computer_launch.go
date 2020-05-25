@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/center"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -90,7 +91,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 	var secret string
 	if secret, err = o.ComputerClient.GetSecret(name); err == nil {
 		var binary string
-		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
+		binary, err = util.LookPath("java", center.centerStartOption.LookPathContext)
 		if err == nil {
 			env := os.Environ()
 			agentArgs := []string{"java", "-jar", computerLaunchOption.Output,
