@@ -3,7 +3,9 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io/ioutil"
+	"moul.io/http2curl"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -200,6 +202,11 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 		Text:      "",
 		NextStart: int64(0),
 	}
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
+	}
+
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte
