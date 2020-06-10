@@ -129,7 +129,7 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
-			err = fmt.Errorf("crumb is disabled")
+			//err = fmt.Errorf("crumb is disabled")
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}

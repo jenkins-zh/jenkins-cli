@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"log"
@@ -30,7 +29,7 @@ type PluginUploadOption struct {
 
 	common.HookOption
 
-	pluginFilePath string
+	pluginFilePathArray []string
 }
 
 var pluginUploadOption PluginUploadOption
@@ -99,9 +98,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 				}
 			}
 
-			pluginUploadOption.pluginFilePath = fmt.Sprintf("%s.hpi", file.Name())
+			pluginUploadOption.pluginFilePathArray = []string{fmt.Sprintf("%s.hpi", file.Name())}
 			downloader := util.HTTPDownloader{
-				TargetFilePath: pluginUploadOption.pluginFilePath,
+				TargetFilePath: pluginUploadOption.pluginFilePathArray[0],
 				URL:            pluginUploadOption.Remote,
 				UserName:       pluginUploadOption.RemoteUser,
 				Password:       pluginUploadOption.RemotePassword,
@@ -122,9 +121,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			dirName = strings.Replace(dirName, "-plugin", "", -1)
 			path += fmt.Sprintf("/target/%s.hpi", dirName)
 
-			pluginUploadOption.pluginFilePath = path
+			pluginUploadOption.pluginFilePathArray = []string{path}
 		} else {
-			pluginUploadOption.pluginFilePath = args[0]
+			pluginUploadOption.pluginFilePathArray = args
 		}
 	},
 	PostRun: func(cmd *cobra.Command, args []string) {
@@ -135,7 +134,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 		executePostCmd(cmd, args, cmd.OutOrStdout())
 	},
 	ValidArgsFunction: pluginUploadOption.HPICompletion,
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: pluginUploadOption.RoundTripper,
@@ -147,10 +146,14 @@ jcli plugin upload sample.hpi --show-progress=false`,
 		jclient.Debug = rootOptions.Debug
 
 		if pluginUploadOption.Remote != "" {
-			defer os.Remove(pluginUploadOption.pluginFilePath)
+			defer os.Remove(pluginUploadOption.pluginFilePathArray[0])
 		}
 
-		err := jclient.Upload(pluginUploadOption.pluginFilePath)
-		helper.CheckErr(cmd, err)
+		for _, item := range pluginUploadOption.pluginFilePathArray {
+			if err = jclient.Upload(item); err != nil {
+				break
+			}
+		}
+		return
 	},
 }

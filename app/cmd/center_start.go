@@ -49,6 +49,8 @@ type CenterStartOption struct {
 var centerStartOption CenterStartOption
 
 func init() {
+	jenkinsVersion := util.GetEnvOrDefault("JCLI_JENKINS_VERSION", "2.190.3")
+
 	centerCmd.AddCommand(centerStartCmd)
 	centerStartCmd.Flags().IntVarP(&centerStartOption.Port, "port", "", 8080,
 		i18n.T("Port of Jenkins"))
@@ -65,7 +67,7 @@ func init() {
 
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", "2.190.3",
+	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
 		i18n.T("The of version of jenkins.war"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
 		i18n.T("If you want to download Jenkins as LTS"))
