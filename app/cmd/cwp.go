@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"reflect"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -123,12 +124,10 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 
 		if o.ConfigPath != "" {
 			configPath := o.ConfigPath
-			if o.ValueSet != nil {
-				if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
-					return
-				}
-				defer os.RemoveAll(configPath)
+			if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
+				return
 			}
+			defer os.RemoveAll(configPath)
 
 			cwpArgs = append(cwpArgs, "-configPath", configPath)
 		}
@@ -148,7 +147,27 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 // RenderTemplate render a go template to a temporary file
 func RenderTemplate(path string, values map[string]string) (result string, err error) {
 	var t *template.Template
-	if t, err = template.ParseFiles(path); err == nil {
+	tmp := template.New(path).Funcs(template.FuncMap{
+		"default": func(arg interface{}, value interface{}) interface{} {
+			v := reflect.ValueOf(value)
+			switch v.Kind() {
+			case reflect.String, reflect.Slice, reflect.Array, reflect.Map:
+				if v.Len() == 0 {
+					return arg
+				}
+			case reflect.Bool:
+				if !v.Bool() {
+					return arg
+				}
+			default:
+				return value
+			}
+
+			return value
+		},
+	})
+
+	if t, err = tmp.ParseFiles(path); err == nil {
 		f, _ := ioutil.TempFile("/tmp", ".yaml")
 		err = t.Execute(f, values)
 
