@@ -4,16 +4,15 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
-	"reflect"
-
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
-	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -145,33 +144,26 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 }
 
 // RenderTemplate render a go template to a temporary file
-func RenderTemplate(path string, values map[string]string) (result string, err error) {
+func RenderTemplate(filepath string, values map[string]string) (result string, err error) {
 	var t *template.Template
-	tmp := template.New(path).Funcs(template.FuncMap{
+	tmp := template.New(path.Base(filepath)).Funcs(template.FuncMap{
 		"default": func(arg interface{}, value interface{}) interface{} {
-			v := reflect.ValueOf(value)
-			switch v.Kind() {
-			case reflect.String, reflect.Slice, reflect.Array, reflect.Map:
-				if v.Len() == 0 {
-					return arg
-				}
-			case reflect.Bool:
-				if !v.Bool() {
-					return arg
-				}
-			default:
+			if value == nil {
+				return arg
+			} else {
 				return value
 			}
-
-			return value
 		},
 	})
 
-	if t, err = tmp.ParseFiles(path); err == nil {
+	if t, err = tmp.ParseFiles(filepath); err == nil {
+		logger.Debug("parse template done", zap.String("path", filepath))
 		f, _ := ioutil.TempFile("/tmp", ".yaml")
 		err = t.Execute(f, values)
 
 		result = f.Name()
+	} else {
+		logger.Error("error when parsing template file", zap.Error(err))
 	}
 	return
 }
