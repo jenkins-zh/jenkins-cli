@@ -150,9 +150,8 @@ func RenderTemplate(filepath string, values map[string]string) (result string, e
 		"default": func(arg interface{}, value interface{}) interface{} {
 			if value == nil {
 				return arg
-			} else {
-				return value
 			}
+			return value
 		},
 	})
 
