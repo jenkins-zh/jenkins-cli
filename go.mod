@@ -13,7 +13,7 @@ require (
 	github.com/google/go-github/v29 v29.0.3
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
-	github.com/hashicorp/go-version v1.2.0
+	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
