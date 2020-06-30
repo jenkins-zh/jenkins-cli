@@ -3,11 +3,10 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"strings"
 
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
 )
@@ -19,6 +18,8 @@ type JobBuildOption struct {
 
 	Param      string
 	ParamArray []string
+
+	ParamFilePathArray []string
 }
 
 var jobBuildOption JobBuildOption
@@ -35,6 +36,9 @@ func init() {
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
+	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamFilePathArray, "param-file", nil,
+		i18n.T("Parameters of the job which is file path, for example: --param-file name=filename"))
+
 	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
 	jobBuildOption.CommonOption.Stdio = common.GetSystemStdio()
 }
@@ -45,8 +49,8 @@ var jobBuildCmd = &cobra.Command{
 	Long: i18n.T(`Build the job of your Jenkins.
 You need to give the parameters if your pipeline has them. Learn more about it from https://jenkins.io/doc/book/pipeline/syntax/#parameters.`),
 	Args: cobra.MinimumNArgs(1),
-	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-		if jobBuildOption.ParamArray == nil {
+	PreRunE: func(_ *cobra.Command, _ []string) (err error) {
+		if jobBuildOption.ParamArray == nil && jobBuildOption.ParamFilePathArray == nil {
 			return
 		}
 
@@ -67,13 +71,23 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 			}
 		}
 
+		for _, filepathEntry := range jobBuildOption.ParamFilePathArray {
+			if filepathArray := strings.SplitN(filepathEntry, "=", 2); len(filepathArray) == 2 {
+				paramDefs = append(paramDefs, client.ParameterDefinition{
+					Name:     filepathArray[0],
+					Filepath: filepathArray[1],
+					Type:     client.FileParameterDefinition,
+				})
+			}
+		}
+
 		var data []byte
 		if data, err = json.Marshal(paramDefs); err == nil {
 			jobBuildOption.Param = string(data)
 		}
 		return
 	},
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
+	RunE: func(_ *cobra.Command, args []string) (err error) {
 		name := args[0]
 
 		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {

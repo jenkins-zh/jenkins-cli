@@ -3,14 +3,15 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
+
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"net/http"
-	"os"
 )
 
 var _ = Describe("job build command", func() {
@@ -102,6 +103,22 @@ var _ = Describe("job build command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).NotTo(HaveOccurred())
 		})
+
+		/* FIXME: fix the test case
+		It("with --param-file", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			client.PrepareForBuildWithParams(roundTripper, "http://localhost:8080/jenkins", jobName,
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"job", "build", jobName, "--param-file", "sample=/tmp/sample.txt", "-b", "true", "--param", ""})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		*/
 	})
 })
 

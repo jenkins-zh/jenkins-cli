@@ -1,18 +1,27 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
+	"io"
 	"io/ioutil"
-	"moul.io/http2curl"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
+	"go.uber.org/zap"
+	"moul.io/http2curl"
+
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
+
+// FileParameterDefinition is the definition for file parameter
+const FileParameterDefinition = "FileParameterDefinition"
 
 // JobClient is client for operate jobs
 type JobClient struct {
@@ -55,20 +64,55 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/build", path)
 
+	fileParameters := make([]ParameterDefinition, 0, len(parameters))
+	for _, parameter := range parameters {
+		if parameter.Type == FileParameterDefinition {
+			fileParameters = append(fileParameters, parameter)
+		}
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	defer writer.Close()
+
+	// upload file
+	for _, parameter := range fileParameters {
+		var file *os.File
+		file, err = os.Open(parameter.Filepath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		var fWriter io.Writer
+		fWriter, err = writer.CreateFormFile(parameter.Filepath, filepath.Base(parameter.Filepath))
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(fWriter, file)
+	}
+
 	var paramJSON []byte
 	if len(parameters) == 1 {
 		paramJSON, err = json.Marshal(parameters[0])
 	} else {
 		paramJSON, err = json.Marshal(parameters)
 	}
-
-	if err == nil {
-		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
-		payload := strings.NewReader(formData.Encode())
-
-		_, err = q.RequestWithoutData("POST", api,
-			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
+	if err != nil {
+		return err
 	}
+
+	if err = writer.WriteField("json", fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))); err != nil {
+		return err
+	}
+
+	if err = writer.Close(); err != nil {
+		return err
+	}
+
+	_, err = q.RequestWithoutData("POST", api,
+		map[string]string{util.ContentType: writer.FormDataContentType()}, body, 201)
+
 	return
 }
 
@@ -377,6 +421,7 @@ type ParameterDefinition struct {
 	Name                  string `json:"name"`
 	Type                  string
 	Value                 string `json:"value"`
+	Filepath              string `json:"file"`
 	DefaultParameterValue DefaultParameterValue
 }
 
