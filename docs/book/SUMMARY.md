@@ -1,7 +1,6 @@
 # Table of contents
 
 * [Introduction](README.md)
-* [Quick start](...md)
 * [download](download.md)
 
 ## advanced
@@ -10,7 +9,6 @@
 
 ## 中文 <a id="zh"></a>
 
-* [快速开始](zh/readme-zh.md)
 * [下载](zh/download.md)
 * [用户](zh/user.md)
 * [自动补全](zh/completion.md)
