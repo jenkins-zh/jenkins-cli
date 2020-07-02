@@ -17,5 +17,5 @@
 
 ## 中文
 
-* [中文](zhong-wen/zh.md)
+* [中文](../../README-zh.md)
 
