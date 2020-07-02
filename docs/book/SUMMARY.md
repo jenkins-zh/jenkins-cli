@@ -1,6 +1,6 @@
 # Table of contents
 
-* [jcli Document](README.md)
+* [Quick start](../../README.md)
 * [download-zh](download-zh.md)
 * [download](download.md)
 * [自动补全](completion.md)
@@ -16,6 +16,6 @@
 
 ## 中文
 
-* [中文](../../README-zh.md)
+* [快速开始](../../README-zh.md)
 * [用户](zh/user.md)
 
