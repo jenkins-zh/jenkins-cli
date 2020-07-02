@@ -5,6 +5,6 @@ instead of the default one. You can do it by add an environment variable `JCLI_C
 
 For example, put the following config into your shell profile:
 
-```shell script
+```
 JCLI_CONFIG=/var/yourPath/jenkins-cli.yaml
 ```
