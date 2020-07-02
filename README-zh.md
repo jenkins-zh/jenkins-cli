@@ -74,7 +74,7 @@ jcli config plugin install account
 如果你对该项目感兴趣，请首先仔细阅读我们的[贡献指南](https://github.com/jenkins-zh/jenkins-cli/tree/e83af606f648040665b8b2955c1c2414bb68c1db/CONTRIBUTING.md)。我们欢迎任何形式的贡献。
 
 感谢 JetBrains 为我们提供了开源许可证。  
-[![goland.svg](docs/book/.gitbook/assets/goland (2).svg)](https://www.jetbrains.com/?from=jenkins-cli)
+[![goland.svg](docs/book/.gitbook/assets/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
 ## 相关的项目
 

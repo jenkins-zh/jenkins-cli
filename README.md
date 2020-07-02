@@ -74,7 +74,7 @@ All official plugins could be found at [here](https://github.com/jenkins-zh/jcli
 If you're interested in this project. Please go through the [contribution guide](https://github.com/jenkins-zh/jenkins-cli/tree/cb3d358df4699db11b681eb0ab9adffbfb8a7bd4/CONTRIBUTING.md). Any contributions are welcome.
 
 Thanks to JetBrains for giving us the open source licence.  
-[![goland.svg](docs/book/.gitbook/assets/goland (2).svg)](https://www.jetbrains.com/?from=jenkins-cli)
+[![goland.svg](docs/book/.gitbook/assets/goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
 
 ## Similar Projects
 
