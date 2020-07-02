@@ -50,7 +50,7 @@ Here are other package managers:
 
 * [Scoop](https://scoop.sh/) users can use `scoop install jcli`
 
-See more about [how to download jcli](docs/book/download.md). You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
+See more about [how to download jcli](docs/book/en/download.md). You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
 
 ## Get started
 
