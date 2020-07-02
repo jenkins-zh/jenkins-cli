@@ -1,15 +1,16 @@
 # Table of contents
 
-* [Quick start](../../README.md)
+* [Introduction](README.md)
+* [Quick start](...md)
 * [download](download.md)
 
 ## advanced
 
 * [Setup config file](advanced/setup-config-path.md)
 
-## 中文
+## 中文 <a id="zh"></a>
 
-* [快速开始](../../README-zh.md)
+* [快速开始](zh/readme-zh.md)
 * [下载](zh/download.md)
 * [用户](zh/user.md)
 * [自动补全](zh/completion.md)
