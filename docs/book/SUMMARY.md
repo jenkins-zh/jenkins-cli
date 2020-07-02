@@ -3,13 +3,13 @@
 * [jcli Document](README.md)
 * [download-zh](download-zh.md)
 * [download](download.md)
-* [completion](completion.md)
-* [credential](credential.md)
-* [doctor](doctor.md)
-* [job](job.md)
-* [plugin](plugin.md)
-* [proxy](proxy.md)
-* [user](user.md)
+* [自动补全](completion.md)
+* [凭据](credential.md)
+* [诊断](doctor.md)
+* [任务](job.md)
+* [插件](plugin.md)
+* [代理设置](proxy.md)
+* [用户](user.md)
 
 ## advanced
 

@@ -1,13 +1,13 @@
 ---
-title: "自动补全"
+title: 自动补全
 weight: 102
 ---
 
-## 基于 zsh 安装自动补全
+# 自动补全
 
 如果你已经在 mac 或 linux 上使用的是 `oh-my-zsh`，你可以尝试以下步骤：
 
-```
+```text
 # cd ~/.oh-my-zsh/plugins
 // 创建 incr 文件夹
 # mkdir incr
@@ -21,3 +21,4 @@ weight: 102
 ```
 
 接下来，就可以使用 jcli 的自动补全功能了，而且你可能发现不仅仅只有 jcli 可以自动补全，很多命令都可以自动补全了
+

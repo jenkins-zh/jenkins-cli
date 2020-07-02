@@ -1,9 +1,9 @@
 ---
-title: "任务"
+title: 任务
 weight: 80
 ---
 
-## 任务管理
+# 任务
 
 使用如下的命令可以搜索 Jenkins 任务：
 
@@ -17,7 +17,7 @@ weight: 80
 
 `jcli job log "jobName" -w`
 
-### 搜索任务
+## 搜索任务
 
 要查找特定类型的 Jenkins 任务，可以通过过滤对应字段的值来实现。下面，给出一个查找参数化任务的例子：
 
@@ -25,7 +25,7 @@ weight: 80
 
 其中 `--filter` 支持任意字段，它是以是否包含指定字符串进行判断的。
 
-### 显示指定列
+## 显示指定列
 
 当以表格形式输出，希望能输出指定的字段为列时，我们可以通过下面的方式实现：
 
@@ -36,3 +36,4 @@ weight: 80
 如果不希望输出表头，可以增加参数：`--no-headers`
 
 `jcli job search --columns Name,URL,Parameterized --no-headers`
+

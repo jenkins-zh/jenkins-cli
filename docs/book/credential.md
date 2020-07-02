@@ -1,8 +1,10 @@
 ---
-title: "凭据"
+title: 凭据
 weight: 101
 since: v0.0.24
 ---
+
+# 凭据
 
 通过 `jcli` 可以在 Jenkins 上创建凭据（Credentials），下面介绍使用方法。
 
@@ -10,7 +12,7 @@ since: v0.0.24
 
 Jenkins 中的凭据有多种类型，下面的命令会创建一个用户名和密码类型的凭据：
 
-```
+```text
 jcli credential create --credential-username your-username \
 --credential-password your-password --desc your-credential-remark
 ```
@@ -28,3 +30,4 @@ jcli credential create --credential-username your-username \
 我们可以根据 Jenkins 凭据的唯一标示来删除：
 
 `jcli credential delete --id b0b0f865-f0c0-477c-a5ba-9fae88477f9e`
+
