@@ -4,7 +4,7 @@
 
 ## How to get it
 
-Read [here](../../README.md) to get know about how to install `jcli`.
+Read [here](https://github.com/jenkins-zh/jenkins-cli/tree/d86331cfb97bfc683dea8b04589cb18b3f499ff8/README.md) to get know about how to install `jcli`.
 
 ## Configuration
 
@@ -44,7 +44,7 @@ Once you triggered a job, then you can watch the log output by `jcli job log "zj
 
 Jenkins might be stay in behind a firewall. So we cannot connect it directly. You can give `jcli` a proxy setting. It's also very simple to support a proxy setting. You just need to execute: `jcli config edit`. Then find the item which you want to add a proxy. Like the below demo:
 
-```
+```text
 - name: dev
   url: http://192.168.1.10
   username: admin
@@ -52,3 +52,4 @@ Jenkins might be stay in behind a firewall. So we cannot connect it directly. Yo
   proxy: http://192.168.10.10:47586
   proxyAuth: username:password
 ```
+
