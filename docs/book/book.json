@@ -1,0 +1,16 @@
+{
+  "pluginsConfig": {
+    "sharing": {
+      "facebook": true,
+      "twitter": true,
+      "google": false,
+      "weibo": false,
+      "instapaper": false,
+      "vk": false,
+      "all": [
+        "facebook", "google", "twitter",
+        "weibo", "instapaper"
+      ]
+    }
+  }
+}
