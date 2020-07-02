@@ -1,103 +1,54 @@
-[简体中文](https://github.com/jenkins-zh/jenkins-cli/blob/master/README-zh.md)
+# jcli Document
 
-# Jenkins CLI
+`jcli` was written by [golang](https://github.com/golang) which could provide you a easy way to manage your Jenkins. Unlike the [build-in cli](https://jenkins.io/doc/book/managing/cli/), `jcli` allows you manage multiple servers.
 
-[![Go Report Card][go-report-card-badge]][go-report-card-url]
-[![Quality Gate Status][sonar-badge]][sonar-link]
-[![GoDoc][godoc-badge]][godoc-url]
-![Sonar Coverage](https://img.shields.io/sonar/coverage/jenkins-zh_jenkins-cli?server=https%3A%2F%2Fsonarcloud.io)
-[![Travis](https://img.shields.io/travis/jenkins-zh/jenkins-cli.svg?logo=travis&label=build&logoColor=white)](https://travis-ci.org/jenkins-zh/jenkins-cli)
-[![Contributors](https://img.shields.io/github/contributors/jenkins-zh/jenkins-cli.svg)](https://github.com/jenkins-zh/jenkins-cli/graphs/contributors)
-[![GitHub release](https://img.shields.io/github/release/jenkins-zh/jenkins-cli.svg?label=release)](https://github.com/jenkins-zh/jenkins-cli/releases/latest)
-![GitHub All Releases](https://img.shields.io/github/downloads/jenkins-zh/jenkins-cli/total)
-[![Docker Pulls](https://img.shields.io/docker/pulls/jenkinszh/jcli.svg)](https://hub.docker.com/r/jenkinszh/jcli/tags)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/jenkins-zh/jenkins-cli)
-[![Gitter](https://badges.gitter.im/jenkinsci/jenkins-cli.svg)](https://gitter.im/jenkinsci/jenkins-cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![HitCount](http://hits.dwyl.com/jenkins-zh/jenkins-cli.svg)](http://hits.dwyl.com/jenkins-zh/jenkins-cli)
+## How to get it
 
-Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a plugin
-developer, administrator or just a regular user, it is made for you!
+Read [here](../../README.md) to get know about how to install `jcli`.
 
-# Features
+## Configuration
 
-* Multiple Jenkins support
-* Plugins management (list, search, install, upload)
-* Job management (search, build, log)
-* Configuration as Code support
-* Open your Jenkins with a browser
-* Restart your Jenkins
-* Connection with proxy support
+Once you'v installed `jcli`. You should provide a config file for it. Please execute cmd `jcli config generate`, this will help you to edit the config file `~/.jenkins-cli.yaml`. According to your Jenkins configuration to modify this file.
 
-# Get it
+If you want to modify your config file of `jcli`. You just need to execute `jcli config edit`.
 
-We support Mac, Linux and Windows for now.
+It's simple to add another Jenkins config item. Here's a sample cmd: `jcli config add -n yourJenkinsName --url http://localhost:8080/jenkins --token replacethesampletoken`.
 
-## Mac
+## Plugin Management
 
-You can use `brew` to install jcli.
-```
-brew tap jenkins-zh/jcli
-brew install jcli
-```
+`jcli` allows you to search, download, install, uninstall or upload a plugin.
 
-## Linux
+First, please search a plugin by a keyword if you want to install it. You can get a plugin list by execute `jcli plugin search zh-cn`. You can install it with the plugin name.
 
-To install `jcli` on your Linux OS, execute the following command:
-```
-curl -L https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-linux-amd64.tar.gz|tar xzv
-sudo mv jcli /usr/local/bin/
-```
+For example, you can install the Simplified Chinese Localization plugin by `jcli plugin install localization-zh-cn`.
 
-## Windows
+### Download Plugins
 
-You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-amd64.zip). 
-Download the tar file and copy the uncompressed `jcli` directory into your system path.
+Some times, Jenkins just cannot connect with the offical Update Center. We can use the `download` sub-cmd to download all the plugins which're you need, then upload them. This command will take care of the dependencies of the plugin.
 
-## Other package managers
+You can try it:
 
-Here are other package managers:
+`jcli plugin download localization-zh-cn`
 
-* [Scoop](https://scoop.sh/) users can use `scoop install jcli`
+## Job Management
 
-See more about [how to download jcli](doc/download.md).
-You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
+You can search a job list using a keyword, like this: `jcli job search input`.
 
-# Get started
+It's very simple to trigger a job. We have the batch mode and interactive mode. This command will finish immediately.
 
-Read the [official document](http://jcli.jenkins-zh.cn/) for more details on how to use `jcli`.
+`jcli job build "folderName jobName" -b`
 
-Or, you can take [a live interactive course](https://www.katacoda.com/jenkins-zh/scenarios/course-jcli) of Jenkins CLI.
+Once you triggered a job, then you can watch the log output by `jcli job log "zjproject zjproject-inputstep55" -w`. This command will always output the log of the last build.
 
-# Plugins
+## Proxy Support
 
-Jenkins CLI could have more features by installing a plugin for it. You can install a plugin by the following command:
+Jenkins might be stay in behind a firewall. So we cannot connect it directly. You can give `jcli` a proxy setting. It's also very simple to support a proxy setting. You just need to execute: `jcli config edit`. Then find the item which you want to add a proxy. Like the below demo:
 
 ```
-jcli config plugin fetch
-jcli config plugin install account
+- name: dev
+  url: http://192.168.1.10
+  username: admin
+  token: 11132c9ae4b20edbe56ac3e09cb5a3c8c2
+  proxy: http://192.168.10.10:47586
+  proxyAuth: username:password
 ```
-
-All official plugins could be found at [here](https://github.com/jenkins-zh/jcli-plugins).
-
-# Contribution
-
-If you're interested in this project. Please go through the
-[contribution guide](CONTRIBUTING.md). Any contributions are welcome.
-
-Thanks to JetBrains for giving us the open source licence.  
-[![goland.svg](./goland.svg)](https://www.jetbrains.com/?from=jenkins-cli)
-
-# Similar Projects
-There're a few similar projects that you might be interested in:
-* [jenni](https://github.com/m-sureshraj/jenni) is a Jenkins Personal Assistant
-
-# Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
-
-[go-report-card-url]: https://goreportcard.com/report/jenkins-zh/jenkins-cli
-[go-report-card-badge]: https://goreportcard.com/badge/jenkins-zh/jenkins-cli
-[sonar-badge]: https://sonarcloud.io/api/project_badges/measure?project=jenkins-zh_jenkins-cli&metric=alert_status
-[sonar-link]: https://sonarcloud.io/dashboard?id=jenkins-zh_jenkins-cli
-[godoc-url]: https://godoc.org/github.com/jenkins-zh/jenkins-cli
-[godoc-badge]: http://img.shields.io/badge/godoc-reference-5272B4.svg?style=flat-square
