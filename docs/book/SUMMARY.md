@@ -9,7 +9,6 @@
 * [任务](job.md)
 * [插件](plugin.md)
 * [代理设置](proxy.md)
-* [用户](user.md)
 
 ## advanced
 
@@ -18,4 +17,5 @@
 ## 中文
 
 * [中文](../../README-zh.md)
+* [用户](zh/user.md)
 
