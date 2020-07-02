@@ -57,7 +57,7 @@ sudo mv jcli /usr/local/bin/
 
 * [Scoop](https://scoop.sh/) 的用户可以使用命令 `scoop install jcli` 来安装
 
-了解更多[如何下载 jcli](docs/book/download-zh.md).
+了解更多[如何下载 jcli](docs/book/zh/download-zh.md).
 你可以从[这里](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli)获取下载的统计信息。
 
 # 入门
