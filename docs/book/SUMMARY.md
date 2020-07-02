@@ -15,3 +15,7 @@
 
 * [Setup config file](advanced/setup-config-path.md)
 
+## 中文
+
+* [中文](zhong-wen/zh.md)
+
