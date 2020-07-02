@@ -6,5 +6,5 @@
 
 ## advanced
 
-* [Advanced Topic](advanced/setup-config-path.md)
+* [Setup config file](advanced/setup-config-path.md)
 
