@@ -123,7 +123,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
 				if len(proxyAuth) == 2 {
-					env = append(env, fmt.Sprintf("http_proxy=%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
+					env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
 				}
 			}
 
