@@ -19,6 +19,7 @@
 * [任务](zh/job.md)
 * [插件](zh/plugin.md)
 * [节点](zh/agent.md)
+* [打开浏览器](zh/open.md)
 * [下载](zh/download.md)
 * [凭据](zh/credential.md)
 * [自动补全](zh/completion.md)
