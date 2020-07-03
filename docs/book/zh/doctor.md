@@ -10,7 +10,7 @@ since: v0.0.24
 
 ## 插件依赖
 
-就像命令 `jcli job search` 要依赖插件 `[pipeline-restful-api](https://plugins.jenkins.io/pipeline-restful-api)` 一样，其他部分插件也有类似的依赖。有的情况下，还对插件的版本有要求。
+例如，命令 `jcli job search` 要依赖插件 [pipeline-restful-api](https://plugins.jenkins.io/pipeline-restful-api)。其他部分插件也有类似的依赖。有的情况下，还对插件的版本有要求。
 
 在执行命令时，如果发现无法使用，可以尝试使用诊断参数来检查是否缺少依赖：
 
