@@ -26,6 +26,7 @@
 * [用户](zh/user.md)
 * [诊断](zh/doctor.md)
 * [代理设置](zh/proxy.md)
+* [命令钩子](zh/hooks.md)
 
 ## advanced
 
