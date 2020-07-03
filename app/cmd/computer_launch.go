@@ -29,14 +29,15 @@ type ComputerLaunchOption struct {
 }
 
 const (
-	AGENT_JNLP = "jnlp"
+	// AgentJNLP is the agent type of jnlp
+	AgentJNLP = "jnlp"
 )
 
 var computerLaunchOption ComputerLaunchOption
 
 func init() {
 	computerCmd.AddCommand(computerLaunchCmd)
-	computerLaunchCmd.Flags().StringVarP(&computerLaunchOption.Type, "type", "", AGENT_JNLP,
+	computerLaunchCmd.Flags().StringVarP(&computerLaunchOption.Type, "type", "", AgentJNLP,
 		i18n.T("The type of agent, include jnlp"))
 	computerLaunchCmd.Flags().BoolVarP(&computerLaunchOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading agent.jar"))
@@ -56,7 +57,7 @@ jcli agent launch agent-name --type jnlp`,
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
 			GetComputerClient(computerLaunchOption.CommonOption)
 
-		if computerLaunchOption.Type != AGENT_JNLP {
+		if computerLaunchOption.Type != AgentJNLP {
 			return
 		}
 
@@ -87,7 +88,7 @@ jcli agent launch agent-name --type jnlp`,
 		switch computerLaunchOption.Type {
 		case "":
 			err = computerLaunchOption.Launch(name)
-		case AGENT_JNLP:
+		case AgentJNLP:
 			err = computerLaunchOption.LaunchJnlp(name)
 		default:
 			err = fmt.Errorf("unsupported agent type %s", computerLaunchOption.Type)
