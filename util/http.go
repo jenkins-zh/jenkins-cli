@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"moul.io/http2curl"
 	"net/http"
 	"net/url"
 	"os"
@@ -79,14 +80,24 @@ func (h *HTTPDownloader) DownloadFile() error {
 		trp := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: h.InsecureSkipVerify},
 		}
-		tr = trp
 		if err = SetProxy(h.Proxy, h.ProxyAuth, trp); err != nil {
 			return err
 		}
+
+		if h.Proxy != "" {
+			basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(h.ProxyAuth))
+			req.Header.Add("Proxy-Authorization", basicAuth)
+		}
+		tr = trp
 	}
 	client := &http.Client{Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
+	var resp *http.Response
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		fmt.Printf("HTTP request as curl %s\n", curlCmd.String())
+	}
+
+	if resp, err = client.Do(req); err != nil {
 		return err
 	}
 

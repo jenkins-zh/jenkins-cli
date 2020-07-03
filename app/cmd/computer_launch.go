@@ -8,7 +8,9 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"go.uber.org/zap"
 	"io/ioutil"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
@@ -28,14 +30,20 @@ type ComputerLaunchOption struct {
 	Output         string
 }
 
+const (
+	AGENT_JNLP = "jnlp"
+)
+
 var computerLaunchOption ComputerLaunchOption
 
 func init() {
 	computerCmd.AddCommand(computerLaunchCmd)
-	computerLaunchCmd.Flags().StringVarP(&computerLaunchOption.Type, "type", "", "",
+	computerLaunchCmd.Flags().StringVarP(&computerLaunchOption.Type, "type", "", AGENT_JNLP,
 		i18n.T("The type of agent, include jnlp"))
 	computerLaunchCmd.Flags().BoolVarP(&computerLaunchOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading agent.jar"))
+
+	healthCheckRegister.Register(getCmdPath(computerLaunchCmd), &computerLaunchOption)
 }
 
 var computerLaunchCmd = &cobra.Command{
@@ -50,17 +58,24 @@ jcli agent launch agent-name --type jnlp`,
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
 			GetComputerClient(computerLaunchOption.CommonOption)
 
-		if computerLaunchOption.Type != "jnlp" {
+		if computerLaunchOption.Type != AGENT_JNLP {
 			return
 		}
 
 		var f *os.File
 		if f, err = ioutil.TempFile("/tmp", "agent.jar"); err == nil {
 			computerLaunchOption.Output = f.Name()
+			agentURL := fmt.Sprintf("%s/jnlpJars/agent.jar", computerLaunchOption.ComputerClient.URL)
+			logger.Debug("start to download agent.jar", zap.String("url", agentURL))
+			logger.Debug("proxy setting", zap.String("sever", computerLaunchOption.CurrentJenkins.Proxy),
+				zap.String("auth", computerLaunchOption.CurrentJenkins.ProxyAuth))
+
 			downloader := util.HTTPDownloader{
 				RoundTripper:   computerLaunchOption.RoundTripper,
 				TargetFilePath: computerLaunchOption.Output,
-				URL:            fmt.Sprintf("%s/jnlpJars/agent.jar", computerLaunchOption.ComputerClient.URL),
+				URL:            agentURL,
+				Proxy:          computerLaunchOption.CurrentJenkins.Proxy,
+				ProxyAuth:      computerLaunchOption.CurrentJenkins.ProxyAuth,
 				ShowProgress:   computerLaunchOption.ShowProgress,
 			}
 			err = downloader.DownloadFile()
@@ -69,11 +84,15 @@ jcli agent launch agent-name --type jnlp`,
 	},
 	RunE: func(_ *cobra.Command, args []string) (err error) {
 		name := args[0]
+		logger.Info("prepare to start agent", zap.String("name", name), zap.String("type", computerLaunchOption.Type))
+
 		switch computerLaunchOption.Type {
 		case "":
 			err = computerLaunchOption.Launch(name)
-		case "jnlp":
+		case AGENT_JNLP:
 			err = computerLaunchOption.LaunchJnlp(name)
+		default:
+			err = fmt.Errorf("unsupported agent type %s", computerLaunchOption.Type)
 		}
 		return
 	},
@@ -89,6 +108,8 @@ func (o *ComputerLaunchOption) Launch(name string) (err error) {
 func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 	var secret string
 	if secret, err = o.ComputerClient.GetSecret(name); err == nil {
+		logger.Info("get agent secret", zap.String("value", secret))
+
 		var binary string
 		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 		if err == nil {
@@ -97,10 +118,28 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 				"-jnlpUrl", fmt.Sprintf("%s/computer/%s/slave-agent.jnlp", o.ComputerClient.URL, name),
 				"-secret", secret, "-workDir", "/tmp"}
 
+			if o.CurrentJenkins.ProxyAuth != "" {
+				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
+
+				proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
+				if len(proxyAuth) == 2 {
+					env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
+				}
+			}
+
 			logger.Debug("start a jnlp agent", zap.Any("command", agentArgs))
 
 			err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 		}
 	}
+	return
+}
+
+// Check do the health check of casc cmd
+func (o *ComputerLaunchOption) Check() (err error) {
+	opt := PluginOptions{
+		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
+	}
+	_, err = opt.FindPlugin("pipeline-restful-api")
 	return
 }
