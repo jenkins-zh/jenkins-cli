@@ -13,15 +13,16 @@ Jenkins 的最佳实践是让 master 只做调度任务，其他的构建等任�
 * [JNLP](https://docs.oracle.com/javase/tutorial/deployment/deploymentInDepth/jnlp.html)
 * [WMI](https://en.wikipedia.org/wiki/Windows_Management_Instrumentation)
 
-##
-
 查看节点列表：`jcli agent list`
 
 ## 静态节点
 
 ```
 jcli agent create macos
+jcli agent launch macos
 ```
+
+当前，只支持 JNLP 类型的节点创建。另外，对于需要通过 HTTP 代理才能链接到 Jenkins 的话，暂时不支持。
 
 ## 删除节点
 
