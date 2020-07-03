@@ -4,17 +4,15 @@ import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
-
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-
-	"github.com/spf13/cobra"
 )
 
 // ComputerLaunchOption option for config list command
@@ -119,15 +117,16 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 				"-secret", secret, "-workDir", "/tmp"}
 
 			if o.CurrentJenkins.ProxyAuth != "" {
-				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
-
 				proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
+				agentArgs = append(agentArgs, "-proxyCredentials", o.CurrentJenkins.ProxyAuth)
+
+				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
 				if len(proxyAuth) == 2 {
-					env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
+					env = append(env, fmt.Sprintf("http_proxy=%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
 				}
 			}
 
-			logger.Debug("start a jnlp agent", zap.Any("command", agentArgs))
+			logger.Debug("start a jnlp agent", zap.Any("command", strings.Join(agentArgs, " ")))
 
 			err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 		}
