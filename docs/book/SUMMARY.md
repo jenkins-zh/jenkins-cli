@@ -15,6 +15,7 @@
 
 ## 中文 <a id="zh"></a>
 
+* [介绍](zh/README.md)
 * [任务](zh/job.md)
 * [插件](zh/plugin.md)
 * [节点](zh/agent.md)
