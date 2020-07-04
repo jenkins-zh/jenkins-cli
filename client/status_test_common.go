@@ -10,7 +10,7 @@ import (
 
 //PrepareGetStatus only for test
 func PrepareGetStatus(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/api/json", rootURL), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/json", rootURL), nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Header:     http.Header{},

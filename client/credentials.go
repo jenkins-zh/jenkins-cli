@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -18,14 +19,14 @@ type CredentialsManager struct {
 // GetList returns the credential list
 func (c *CredentialsManager) GetList(store string) (credentialList CredentialList, err error) {
 	api := fmt.Sprintf("/credentials/store/%s/domain/_/api/json?pretty=true&depth=1", store)
-	err = c.RequestWithData("GET", api, nil, nil, 200, &credentialList)
+	err = c.RequestWithData(http.MethodGet, api, nil, nil, 200, &credentialList)
 	return
 }
 
 // Delete removes a credential by id from a store
 func (c *CredentialsManager) Delete(store, id string) (err error) {
 	api := fmt.Sprintf("/credentials/store/%s/domain/_/credential/%s/doDelete", store, id)
-	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = c.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -39,7 +40,7 @@ func (c *CredentialsManager) Create(store, credential string) (err error) {
 	formData.Add("json", fmt.Sprintf(`{"credentials": %s}`, credential))
 	payload := strings.NewReader(formData.Encode())
 
-	_, err = c.RequestWithoutData("POST", api,
+	_, err = c.RequestWithoutData(http.MethodPost, api,
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }

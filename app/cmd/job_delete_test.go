@@ -57,7 +57,7 @@ var _ = Describe("job delete command", func() {
 			Expect(err).To(BeNil())
 
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/doDelete", jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8080/jenkins/job/%s/doDelete", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			request.Header.Add(util.ContentType, util.ApplicationForm)
@@ -70,7 +70,7 @@ var _ = Describe("job delete command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,

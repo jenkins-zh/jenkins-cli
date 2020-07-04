@@ -60,7 +60,7 @@ var _ = Describe("center download command", func() {
 		})
 
 		It("download the lts Jenkins", func() {
-			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war-stable/latest/jenkins.war", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://mirrors.jenkins.io/war-stable/latest/jenkins.war", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,
@@ -82,7 +82,7 @@ var _ = Describe("center download command", func() {
 		})
 
 		It("download the weekly Jenkins", func() {
-			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,

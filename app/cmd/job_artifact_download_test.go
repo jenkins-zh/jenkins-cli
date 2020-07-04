@@ -66,7 +66,7 @@ var _ = Describe("job artifact download command", func() {
 
 			client.PrepareGetArtifacts(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", jobName, buildID)
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/job/pipeline/1/artifact/a.log", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/job/pipeline/1/artifact/a.log", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,

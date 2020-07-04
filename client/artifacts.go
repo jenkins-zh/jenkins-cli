@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // Artifact represents the artifacts from Jenkins build
@@ -27,6 +28,6 @@ func (q *ArtifactClient) List(jobName string, buildID int) (artifacts []Artifact
 	} else {
 		api = fmt.Sprintf("%s/%d/wfapi/artifacts", path, buildID)
 	}
-	err = q.RequestWithData("GET", api, nil, nil, 200, &artifacts)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &artifacts)
 	return
 }

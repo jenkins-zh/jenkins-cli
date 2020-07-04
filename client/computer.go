@@ -16,7 +16,7 @@ type ComputerClient struct {
 
 // List get the computer list
 func (c *ComputerClient) List() (computers ComputerList, err error) {
-	err = c.RequestWithData("GET", "/computer/api/json",
+	err = c.RequestWithData(http.MethodGet, "/computer/api/json",
 		nil, nil, 200, &computers)
 	return
 }
@@ -24,14 +24,14 @@ func (c *ComputerClient) List() (computers ComputerList, err error) {
 // Launch starts up a agent
 func (c *ComputerClient) Launch(name string) (err error) {
 	api := fmt.Sprintf("/computer/%s/launchSlaveAgent", name)
-	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = c.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
 // Delete removes a agent from Jenkins
 func (c *ComputerClient) Delete(name string) (err error) {
 	api := fmt.Sprintf("/computer/%s/doDelete", name)
-	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = c.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -39,7 +39,7 @@ func (c *ComputerClient) Delete(name string) (err error) {
 func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
 	api := fmt.Sprintf("/instance/agentSecret?name=%s", name)
 	var response *http.Response
-	if response, err = c.RequestWithResponse("POST", api, nil, nil); err == nil {
+	if response, err = c.RequestWithResponse(http.MethodPost, api, nil, nil); err == nil {
 		var data []byte
 		if data, err = ioutil.ReadAll(response.Body); err == nil {
 			secret = string(data)
@@ -52,7 +52,7 @@ func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
 func (c *ComputerClient) GetLog(name string) (log string, err error) {
 	var response *http.Response
 	api := fmt.Sprintf("/computer/%s/logText/progressiveText", name)
-	if response, err = c.RequestWithResponse("GET", api, nil, nil); err == nil {
+	if response, err = c.RequestWithResponse(http.MethodGet, api, nil, nil); err == nil {
 		statusCode := response.StatusCode
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code %d", statusCode)
@@ -74,10 +74,10 @@ func (c *ComputerClient) Create(name string) (err error) {
 		"mode": {"hudson.slaves.DumbSlave"},
 	}
 	payload := strings.NewReader(formData.Encode())
-	if _, err = c.RequestWithoutData("POST", "/computer/createItem",
+	if _, err = c.RequestWithoutData(http.MethodPost, "/computer/createItem",
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200); err == nil {
 		payload = GetPayloadForCreateAgent(name)
-		_, err = c.RequestWithoutData("POST", "/computer/doCreateItem",
+		_, err = c.RequestWithoutData(http.MethodPost, "/computer/doCreateItem",
 			map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	}
 	return

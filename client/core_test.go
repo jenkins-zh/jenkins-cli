@@ -35,7 +35,7 @@ var _ = Describe("core test", func() {
 		ctrl.Finish()
 	})
 
-	Context("Get", func() {
+	Context("Get data", func() {
 		It("should success", func() {
 			PrepareRestart(roundTripper, coreClient.URL, username, password, 503)
 

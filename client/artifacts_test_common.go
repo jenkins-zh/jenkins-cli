@@ -19,7 +19,7 @@ func PrepareGetArtifacts(roundTripper *mhttp.MockRoundTripper, rootURL, user, pa
 	} else {
 		api = fmt.Sprintf("%s/%d/wfapi/artifacts", path, buildID)
 	}
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, api), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", rootURL, api), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,

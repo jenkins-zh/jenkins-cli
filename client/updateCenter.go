@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -101,13 +102,13 @@ type CenterPlugin struct {
 
 // Status returns the status of Jenkins
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
-	err = u.RequestWithData("GET", "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
+	err = u.RequestWithData(http.MethodGet, "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
 	return
 }
 
 // Upgrade the Jenkins core
 func (u *UpdateCenterManager) Upgrade() (err error) {
-	_, err = u.RequestWithoutData("POST", "/updateCenter/upgrade",
+	_, err = u.RequestWithoutData(http.MethodPost, "/updateCenter/upgrade",
 		nil, nil, 200)
 	return
 }
@@ -146,7 +147,7 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 
 // GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
-	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
+	err = u.RequestWithData(http.MethodGet, "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
 	return
 }
 
@@ -157,7 +158,7 @@ func (u *UpdateCenterManager) ChangeUpdateCenterSite(name, updateCenterURL strin
 	payload := strings.NewReader(formData.Encode())
 
 	api := "/pluginManager/siteConfigure"
-	_, err = u.RequestWithoutData("POST", api,
+	_, err = u.RequestWithoutData(http.MethodPost, api,
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
@@ -169,7 +170,7 @@ func (u *UpdateCenterManager) SetMirrorCertificate(enable bool) (err error) {
 		api = "/update-center-mirror/remove"
 	}
 
-	_, err = u.RequestWithoutData("POST", api,
+	_, err = u.RequestWithoutData(http.MethodPost, api,
 		map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }

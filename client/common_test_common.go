@@ -12,7 +12,7 @@ import (
 // PrepareForGetIssuer only for test
 func PrepareForGetIssuer(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, "/crumbIssuer/api/json"), nil)
+	request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", rootURL, "/crumbIssuer/api/json"), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"moul.io/http2curl"
 	"net/http"
 	"net/url"
 	"os"
@@ -65,7 +64,7 @@ func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
 func (h *HTTPDownloader) DownloadFile() error {
 	filepath, downloadURL, showProgress := h.TargetFilePath, h.URL, h.ShowProgress
 	// Get the data
-	req, err := http.NewRequest("GET", downloadURL, nil)
+	req, err := http.NewRequest(http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return err
 	}
@@ -92,10 +91,6 @@ func (h *HTTPDownloader) DownloadFile() error {
 	}
 	client := &http.Client{Transport: tr}
 	var resp *http.Response
-
-	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
-		fmt.Printf("HTTP request as curl %s\n", curlCmd.String())
-	}
 
 	if resp, err = client.Do(req); err != nil {
 		return err

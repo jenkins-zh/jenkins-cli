@@ -73,7 +73,7 @@ var _ = Describe("computer launch command", func() {
 			computerLaunchOption.SystemCallExec = util.FakeSystemCallExecSuccess
 			computerLaunchOption.LookPathContext = util.FakeLookPath
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/jnlpJars/agent.jar", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/jnlpJars/agent.jar", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,

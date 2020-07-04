@@ -100,7 +100,7 @@ var _ = Describe("job edit command", func() {
 			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, "sample", username, token)
 
 			remoteJenkinsfileURL := "http://test"
-			remoteJenkinsfileReq, _ := http.NewRequest("GET", remoteJenkinsfileURL, nil)
+			remoteJenkinsfileReq, _ := http.NewRequest(http.MethodGet, remoteJenkinsfileURL, nil)
 			remoteJenkinsfileResponse := &http.Response{
 				StatusCode: 200,
 				Request:    remoteJenkinsfileReq,

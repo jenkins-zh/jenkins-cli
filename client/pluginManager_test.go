@@ -82,7 +82,7 @@ var _ = Describe("PluginManager test", func() {
 		})
 
 		It("response with 500", func() {
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
+			request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/pluginManager/plugins", pluginMgr.URL), nil)
 			response := &http.Response{
 				StatusCode: 500,
 				Proto:      "HTTP/1.1",

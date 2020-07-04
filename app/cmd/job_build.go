@@ -66,7 +66,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				paramDefs = append(paramDefs, client.ParameterDefinition{
 					Name:  entryArray[0],
 					Value: entryArray[1],
-					Type:  "StringParameterDefinition",
+					Type:  client.StringParameterDefinition,
 				})
 			}
 		}

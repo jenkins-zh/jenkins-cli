@@ -15,7 +15,7 @@ func PrepareForGetJCLIAsset(ver string) (client *github.Client, teardown func())
 	client, mux, _, teardown = setup()
 
 	mux.HandleFunc("/repos/jenkins-zh/jenkins-cli/releases", func(w http.ResponseWriter, r *http.Request) {
-		//testMethod(t, r, "GET")
+		//testMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, fmt.Sprintf(`[{"id":3, "body":"body", "tag_name":"%s"}]`, ver))
 	})
 	return
@@ -28,7 +28,7 @@ func PrepareForGetReleaseAssetByTagName() (client *github.Client, teardown func(
 	client, mux, _, teardown = setup()
 
 	mux.HandleFunc("/repos/jenkins-zh/jenkins-cli/releases", func(w http.ResponseWriter, r *http.Request) {
-		//testMethod(t, r, "GET")
+		//testMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, `[{"id":3, "body":"body", "tag_name":"tagName"}]`)
 	})
 	return
@@ -41,7 +41,7 @@ func PrepareForGetLatestJCLIAsset() (client *github.Client, teardown func()) {
 	client, mux, _, teardown = setup()
 
 	mux.HandleFunc("/repos/jenkins-zh/jenkins-cli/releases/latest", func(w http.ResponseWriter, r *http.Request) {
-		//testMethod(t, r, "GET")
+		//testMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, `{"id":3, "body":"body", "tag_name":"tagName"}`)
 	})
 	return
@@ -54,7 +54,7 @@ func PrepareForGetLatestReleaseAsset() (client *github.Client, teardown func()) 
 	client, mux, _, teardown = setup()
 
 	mux.HandleFunc("/repos/o/r/releases/latest", func(w http.ResponseWriter, r *http.Request) {
-		//testMethod(t, r, "GET")
+		//testMethod(t, r, http.MethodGet)
 		fmt.Fprint(w, `{"id":3, "body":"body", "tag_name":"tagName"}`)
 	})
 	return

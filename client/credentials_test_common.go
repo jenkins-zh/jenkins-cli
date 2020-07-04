@@ -16,7 +16,7 @@ import (
 // PrepareForGetCredentialList only for test
 func PrepareForGetCredentialList(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, store string) {
 	api := fmt.Sprintf("%s/credentials/store/%s/domain/_/api/json?pretty=true&depth=1", rootURL, store)
-	request, _ := http.NewRequest("GET", api, nil)
+	request, _ := http.NewRequest(http.MethodGet, api, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -32,7 +32,7 @@ func PrepareForGetCredentialList(roundTripper *mhttp.MockRoundTripper, rootURL, 
 // PrepareForDeleteCredential only for test
 func PrepareForDeleteCredential(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, store, id string) {
 	api := fmt.Sprintf("%s/credentials/store/%s/domain/_/credential/%s/doDelete", rootURL, store, id)
-	request, _ := http.NewRequest("POST", api, nil)
+	request, _ := http.NewRequest(http.MethodPost, api, nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
@@ -44,7 +44,7 @@ func PrepareForCreateCredential(roundTripper *mhttp.MockRoundTripper, rootURL, u
 	formData.Add("json", fmt.Sprintf(`{"credentials": %s}`, credential))
 	payload := strings.NewReader(formData.Encode())
 
-	request, _ := http.NewRequest("POST", api, payload)
+	request, _ := http.NewRequest(http.MethodPost, api, payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
