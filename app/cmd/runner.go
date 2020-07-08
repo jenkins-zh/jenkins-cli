@@ -8,10 +8,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -66,16 +64,18 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 		//Start by downloading the mirror for the jenkinsfileRunner
 		jenkinsfileRunnerVersion := fmt.Sprintf("jenkinsfile-runner-%s.jar", runnerOption.JfrVersion)
 		jenkinsfileRunnerTargetPath := fmt.Sprintf("%s/.jenkins-cli/cache/%s/%s", userHome, runnerOption.WarVersion, jenkinsfileRunnerVersion)
-		jenkinsfileRunnerURL := fmt.Sprintf("https://repo.jenkins-ci.org/list/releases/io/jenkins/jenkinsfile-runner/jenkinsfile-runner/1.0-beta-11/%s", jenkinsfileRunnerVersion)
+		jenkinsfileRunnerURL := fmt.Sprintf("https://repo.jenkins-ci.org/list/releases/io/jenkins/jenkinsfile-runner/jenkinsfile-runner/%s/%s", runnerOption.JfrVersion, jenkinsfileRunnerVersion)
 		logger.Info("Prepare to start Downloading jenkinfileRunner", zap.String("URL", jenkinsfileRunnerURL))
-		downloader := util.HTTPDownloader{
-			URL:            jenkinsfileRunnerURL,
-			ShowProgress:   true,
-			TargetFilePath: jenkinsfileRunnerTargetPath,
-		}
-		if err := downloader.DownloadFile(); err != nil {
-			//Fatal error has occured while downloading the file.
-			log.Fatal(err)
+
+		if _, fErr := os.Stat(jenkinsfileRunnerTargetPath); fErr != nil && os.IsNotExist(fErr) {
+			downloader := util.HTTPDownloader{
+				URL:            jenkinsfileRunnerURL,
+				ShowProgress:   true,
+				TargetFilePath: jenkinsfileRunnerTargetPath,
+			}
+			if err = downloader.DownloadFile(); err != nil {
+				return
+			}
 		}
 
 		if runnerOption.WarPath == "" {
@@ -121,13 +121,14 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 			return fmt.Errorf("invalid file type. kindly provide a jenkinsfile")
 		}
 
-		fmt.Println("We are Definitely reaching here")
-		command := exec.Command("java", "-jar", jenkinsfileRunnerVersion, "-w", runnerOption.WarPath, "-p", runnerOption.PluginPath, "-f", runnerOption.JenkinsfilePath)
-		command.Dir = fmt.Sprintf("%s/.jenkins-cli/cache/%s", userHome, runnerOption.WarVersion)
-		out, err := command.Output()
-		fmt.Println("Reaching her", string(out))
-		logger.Info(string(out))
+		var binary string
+		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
+		if err == nil {
+			jenkinsWarArgs := []string{"java", "-jar", jenkinsfileRunnerTargetPath, "-w", runnerOption.WarPath, "-p", runnerOption.PluginPath, "-f", runnerOption.JenkinsfilePath}
+			env := os.Environ()
+			err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
+		}
 
-		return nil
+		return
 	},
 }
