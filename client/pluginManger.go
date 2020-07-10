@@ -230,17 +230,16 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 		return
 	}
 
-	p.AuthHandle(request)
+	if err = p.AuthHandle(request); err != nil {
+		return
+	}
 
-	client := p.GetClient()
+	jcli := p.GetClient()
 	var response *http.Response
-	if response, err = client.Do(request); err != nil {
+	if response, err = jcli.Do(request); err != nil {
 		return
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
-		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile(debugLogFile, data, 0664)
-		}
 	}
 	return err
 }

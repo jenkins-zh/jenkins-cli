@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
 	"log"
@@ -11,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -25,6 +25,8 @@ type PluginUploadOption struct {
 	RemoteJenkins  string
 	ShowProgress   bool
 	FileName       string
+	// Timeout is the timeout when upload the plugin
+	Timeout int64
 
 	RoundTripper http.RoundTripper
 
@@ -37,23 +39,28 @@ var pluginUploadOption PluginUploadOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUploadCmd)
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
+	flags := pluginUploadCmd.Flags()
+
+	flags.BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Whether show the upload progress"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.FileName, "file", "f", "",
+	flags.StringVarP(&pluginUploadOption.FileName, "file", "f", "",
 		i18n.T("The plugin file path which should end with .hpi"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
+	flags.StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
 		i18n.T("Remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
+	flags.StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
 		i18n.T("User of remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "",
+	flags.StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "",
 		i18n.T("Password of remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "",
+	flags.StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "",
 		i18n.T("Remote Jenkins which will find from config list"))
 
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false,
+	flags.BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false,
 		i18n.T("Whether skip the previous command hook"))
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
+	flags.BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
 		i18n.T("Whether skip the post command hook"))
+
+	flags.Int64VarP(&pluginUploadOption.Timeout, "timeout", "", 120,
+		"Timeout in second when upload the plugin")
 
 	if err := pluginUploadCmd.RegisterFlagCompletionFunc("file", pluginUploadOption.HPICompletion); err != nil {
 		pluginCmd.PrintErrln(err)
@@ -135,22 +142,22 @@ jcli plugin upload sample.hpi --show-progress=false`,
 		executePostCmd(cmd, args, cmd.OutOrStdout())
 	},
 	ValidArgsFunction: pluginUploadOption.HPICompletion,
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: pluginUploadOption.RoundTripper,
 				Output:       cmd.OutOrStdout(),
+				Timeout:      time.Duration(pluginUploadOption.Timeout) * time.Second,
 			},
 			ShowProgress: pluginUploadOption.ShowProgress,
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
-		jclient.Debug = rootOptions.Debug
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if pluginUploadOption.Remote != "" {
 			defer os.Remove(pluginUploadOption.pluginFilePath)
 		}
 
-		err := jclient.Upload(pluginUploadOption.pluginFilePath)
-		helper.CheckErr(cmd, err)
+		err = jclient.Upload(pluginUploadOption.pluginFilePath)
+		return
 	},
 }
