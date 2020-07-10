@@ -76,8 +76,8 @@ brews:
       (zsh_completion/"_jcli").write output
 
       (Pathname.pwd/"man").mkpath
-      system "jcli", "doc", "--doc-type", "ManPage", "doc-man"
-      man1.install Dir["doc-man/*.1"]
+      system "#{bin}/jcli", "doc", "--doc-type", "ManPage", "man"
+      man1.install Dir["man/*.1"]
 
       prefix.install_metafiles
 nfpms:
