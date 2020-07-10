@@ -75,6 +75,10 @@ brews:
       output = Utils.popen_read("#{bin}/jcli completion --type zsh")
       (zsh_completion/"_jcli").write output
 
+      (Pathname.pwd/"man").mkpath
+      system "#{bin}/jcli", "doc", "--doc-type", "ManPage", "man"
+      man1.install Dir["man/*.1"]
+
       prefix.install_metafiles
 nfpms:
   - file_name_template: "{{ .Binary }}-{{.Os}}-{{.Arch}}"
