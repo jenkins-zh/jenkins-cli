@@ -64,7 +64,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 
 	// make sure have a default timeout here
 	if j.Timeout <= 0 {
-		j.Timeout = 5
+		j.Timeout = 15
 	}
 
 	client = &http.Client{
