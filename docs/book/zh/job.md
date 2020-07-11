@@ -49,6 +49,8 @@ pipeline {
 
 如果希望能快速地给出一个流水线的样例的话，当在流水线脚本为空时，可以执行命令：`jcli job edit test --sample`
 
+如果希望编辑流水线并保存退出后，直接触发的话，可以使用对应的参数来实现：`jcli job edit test --build`
+
 ## 禁用
 
 禁用任务：`jcli job disable job/test/`
