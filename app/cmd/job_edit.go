@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2019 Zhao Xiaojie
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 package cmd
 
 import (
@@ -21,22 +45,29 @@ type JobEditOption struct {
 	URL       string
 	Sample    bool
 	TrimSpace bool
+	// Build flag indicates if trigger the Jenkins job after the action of edit
+	Build bool
 }
 
 var jobEditOption JobEditOption
 
 func init() {
 	jobCmd.AddCommand(jobEditCmd)
-	jobEditCmd.Flags().StringVarP(&jobEditOption.URL, "url", "", "",
+
+	flags := jobEditCmd.Flags()
+	flags.StringVarP(&jobEditOption.URL, "url", "", "",
 		i18n.T("URL of the Jenkinsfile to files to use to replace pipeline"))
-	jobEditCmd.Flags().StringVarP(&jobEditOption.Filename, "filename", "f", "",
+	flags.StringVarP(&jobEditOption.Filename, "filename", "f", "",
 		i18n.T("Filename to files to use to replace pipeline"))
-	jobEditCmd.Flags().StringVarP(&jobEditOption.Script, "script", "s", "",
+	flags.StringVarP(&jobEditOption.Script, "script", "s", "",
 		i18n.T("Script to use to replace pipeline. Use script first if you give filename at the meantime."))
-	jobEditCmd.Flags().BoolVarP(&jobEditOption.Sample, "sample", "", false,
+	flags.BoolVarP(&jobEditOption.Sample, "sample", "", false,
 		i18n.T("Give it a sample Jenkinsfile if the target script is empty"))
-	jobEditCmd.Flags().BoolVarP(&jobEditOption.TrimSpace, "trim", "", true,
+	flags.BoolVarP(&jobEditOption.TrimSpace, "trim", "", true,
 		i18n.T("If trim the leading and tailing white space"))
+	flags.BoolVarP(&jobEditOption.Build, "build", "b", false,
+		i18n.T("Indicates if trigger the Jenkins job after the action of edit"))
+
 	jobEditOption.Stdio = common.GetSystemStdio()
 }
 
@@ -57,13 +88,18 @@ Official Pipeline syntax document is here https://jenkins.io/doc/book/pipeline/s
 				RoundTripper: jobEditOption.RoundTripper,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if content, err = jobEditOption.getPipeline(jclient, name); err == nil {
 			if jobEditOption.TrimSpace {
 				content = regexp.MustCompile("^\\W+|\\s+$").ReplaceAllString(content, "")
 			}
 			err = jclient.UpdatePipeline(name, content)
+		}
+
+		// just trigger the Jenkins job when edit it successfully
+		if err == nil && jobEditOption.Build {
+			err = jclient.Build(name)
 		}
 		return
 	},
@@ -74,12 +110,34 @@ func (j *JobEditOption) getSampleJenkinsfile() string {
     agent {
 		    label 'master'
 	  }
+    options {
+        timeout(time: 1, unit: 'HOURS') 
+    }
+    environment { 
+        NAME = 'jack'
+    }
     stages {
         stage('Example') {
             steps {
                 echo 'Hello World'
+                echo env.NAME
             }
         }
+        stage('Parallel Stage') {
+            failFast true
+            parallel {
+                stage('Brother A') {
+                    steps {
+                        echo "On Brother A"
+                    }
+                }
+                stage('Brother B') {
+                    steps {
+                        echo "On Brother B"
+                    }
+                }
+            }
+		}
     }
     post { 
         always { 
