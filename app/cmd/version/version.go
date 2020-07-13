@@ -16,7 +16,7 @@ type VersionOption struct {
 	Changelog  bool
 	ShowLatest bool
 
-	GitHubClient *github.Client
+	GitHubClient     *github.Client
 	JenkinsClient    common.JenkinsClient
 	JenkinsConfigMgr common.JenkinsConfigMgr
 }
@@ -26,11 +26,11 @@ func NewVersionCmd(client common.JenkinsClient, jenkinsConfigMgr common.JenkinsC
 	opt := &VersionOption{}
 
 	cmd = &cobra.Command{
-		Use:   "version",
-		Short: "Print the user of your Jenkins",
-		Long:  `Print the user of your Jenkins`,
+		Use:    "version",
+		Short:  "Print the version of Jenkins CLI",
+		Long:   `Print the version of Jenkins CLI`,
 		PreRun: opt.PreRun,
-		RunE: opt.RunE,
+		RunE:   opt.RunE,
 		Annotations: map[string]string{
 			common.Since: "v0.0.26",
 		},
@@ -50,12 +50,14 @@ func (o *VersionOption) addFlags(flags *pflag.FlagSet) {
 		i18n.T("Output the latest version"))
 }
 
+// PreRun is the pre-check of current command
 func (o *VersionOption) PreRun(cmd *cobra.Command, _ []string) {
 	if o.GitHubClient == nil {
 		o.GitHubClient = github.NewClient(nil)
 	}
 }
 
+// RunE is the main point of current command
 func (o *VersionOption) RunE(cmd *cobra.Command, _ []string) (err error) {
 	cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 

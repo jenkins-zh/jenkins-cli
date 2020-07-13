@@ -4,8 +4,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
+	"github.com/google/go-github/v29/github"
+	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -24,7 +27,7 @@ func NewSelfUpgradeCmd(client common.JenkinsClient, jenkinsConfigMgr common.Jenk
 		Use:   "upgrade",
 		Short: "Upgrade jcli it self",
 		Long:  `Upgrade jcli it self`,
-		RunE: opt.RunE,
+		RunE:  opt.RunE,
 		Annotations: map[string]string{
 			common.Since: "v0.0.26",
 		},
@@ -38,20 +41,47 @@ func (o *SelfUpgradeOption) addFlags(flags *pflag.FlagSet) {
 		i18n.T("If you want to show the progress of download Jenkins CLI"))
 }
 
+// RunE is the main point of current command
 func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) {
 	var version string
 	if len(args) > 0 {
 		version = args[0]
 	}
 
-	switch(version) {
-	case "", "dev":
+	// try to understand the version from user input
+	switch version {
+	case "dev":
 		version = "master"
+	case "":
+		o.GitHubClient = github.NewClient(nil)
+		ghClient := &client.GitHubReleaseClient{
+			Client: o.GitHubClient,
+		}
+		if asset, assetErr := ghClient.GetLatestJCLIAsset(); assetErr == nil && asset != nil {
+			version = asset.TagName
+		} else {
+			err = fmt.Errorf("cannot get the latest version, error: %s", assetErr)
+			return
+		}
 	}
 
-	output := "jcli.tar.gz"
+	// version review
+	currentVersion := app.GetVersion()
+	if currentVersion == version {
+		cmd.Println("no need to upgrade Jenkins CLI")
+		return
+	} else {
+		cmd.Println(fmt.Sprintf("prepare to upgrade to %s", version))
+	}
+
+	// download the tar file of Jenkins CLI
+	tmpDir := os.TempDir()
+	output := fmt.Sprintf("%s/jcli.tar.gz", tmpDir)
 	fileURL := fmt.Sprintf("https://cdn.jsdelivr.net/gh/jenkins-zh/jcli-repo@%s/jcli-%s-amd64.tar.gz",
 		version, runtime.GOOS)
+	defer func() {
+		_ = os.RemoveAll(output)
+	}()
 
 	downloader := util.HTTPDownloader{
 		RoundTripper:   o.RoundTripper,
@@ -59,18 +89,27 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		URL:            fileURL,
 		ShowProgress:   o.ShowProgress,
 	}
-	err = downloader.DownloadFile()
+	if err = downloader.DownloadFile(); err != nil {
+		err = fmt.Errorf("cannot download Jenkins CLI from %s, error: %v", fileURL, err)
+		return
+	}
 
 	// copy binary file into system path
 	var targetPath string
 	if targetPath, err = exec.LookPath("jcli"); err != nil {
+		err = fmt.Errorf("cannot find Jenkins CLI from system path, error: %v", err)
 		return
 	}
 
 	if err = o.extractFiles(output); err == nil {
+		sourceFile := fmt.Sprintf("%s/jcli", filepath.Dir(output))
 		targetF, _ := os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0644)
-		sourceF, _ := os.Open("jcli")
-		_, err = io.Copy(targetF, sourceF)
+		sourceF, _ := os.Open(sourceFile)
+		if _, err = io.Copy(targetF, sourceF); err != nil {
+			err = fmt.Errorf("cannot copy Jenkins CLI from %s to %s, error: %v", sourceFile, targetPath, err)
+		}
+	} else {
+		err = fmt.Errorf("cannot extract Jenkins CLI from tar file, error: %v", err)
 	}
 	return
 }
@@ -81,7 +120,9 @@ func (c *SelfUpgradeOption) extractFiles(tarFile string) (err error) {
 	if f, err = os.Open(tarFile); err != nil {
 		return
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	if gzf, err = gzip.NewReader(f); err != nil {
 		return
@@ -111,7 +152,7 @@ func (c *SelfUpgradeOption) extractFiles(tarFile string) (err error) {
 			if _, err = io.Copy(targetFile, tarReader); err != nil {
 				break
 			}
-			targetFile.Close()
+			_ = targetFile.Close()
 		}
 	}
 	return
