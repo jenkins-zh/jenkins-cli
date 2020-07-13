@@ -25,9 +25,11 @@ func NewSelfUpgradeCmd(client common.JenkinsClient, jenkinsConfigMgr common.Jenk
 
 	cmd = &cobra.Command{
 		Use:   "upgrade",
-		Short: "Upgrade jcli it self",
-		Long:  `Upgrade jcli it self`,
-		RunE:  opt.RunE,
+		Short: "Upgrade jcli itself",
+		Long: `Upgrade jcli itself
+You can use any exists version to upgrade jcli itself. If there's no argument given, it will upgrade to the latest release.
+You can upgrade to the latest developing version, please use it like: jcli version upgrade dev'`,
+		RunE: opt.RunE,
 		Annotations: map[string]string{
 			common.Since: "v0.0.26",
 		},
