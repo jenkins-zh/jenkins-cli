@@ -16,6 +16,7 @@ import (
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -194,6 +195,7 @@ func init() {
 
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
+	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
 }
 
 // GetRootOptions returns the root options
@@ -346,6 +348,18 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
+}
+
+func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
+	return getCurrentJenkinsFromOptions()
+}
+
+func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
+	return getCurrentJenkinsAndClient(jClient)
+}
+
+func (o *RootOptions) GetMirror(name string) string {
+	return getMirror(name)
 }
 
 const (

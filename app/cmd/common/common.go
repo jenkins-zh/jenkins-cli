@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/jenkins-zh/jenkins-cli/app/config"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -314,4 +316,13 @@ func GetEditorHelpText() string {
 	return `notepad is the default editor of Windows, vim is the default editor of unix.
 But if the environment variable "VISUAL" or "EDITOR" exists, jcli will take it.
 For example, you can set it under unix like this: export VISUAL=vi`
+}
+
+type JenkinsClient interface {
+	GetCurrentJenkinsFromOptions() (jenkinsServer *config.JenkinsServer)
+	GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *config.JenkinsServer
+}
+
+type JenkinsConfigMgr interface {
+	GetMirror(string) string
 }
