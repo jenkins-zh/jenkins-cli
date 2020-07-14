@@ -55,7 +55,7 @@ changelog:
 brews:
   -
     name: jcli
-    github:
+    tap:
       owner: jenkins-zh
       name: homebrew-jcli
     folder: Formula

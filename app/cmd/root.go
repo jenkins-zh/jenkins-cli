@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io"
 	"log"
@@ -14,6 +15,7 @@ import (
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
+	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 
@@ -192,8 +194,16 @@ func init() {
 
 	loadPlugins(rootCmd)
 
+	if rootOptions.GetGitHubClient() == nil {
+		rootOptions.SetGitHubClient(github.NewClient(nil))
+		fmt.Println("setup a new gh client")
+	} else {
+		fmt.Println(rootOptions.GetGitHubClient())
+	}
+
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
+	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
 }
 
 // GetRootOptions returns the root options
@@ -346,6 +356,37 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
+}
+
+// GetCurrentJenkinsFromOptions returns the current Jenkins
+func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
+	return getCurrentJenkinsFromOptions()
+}
+
+// GetCurrentJenkinsAndClient returns the current Jenkins
+func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
+	return getCurrentJenkinsAndClient(jClient)
+}
+
+// GetMirror returns the mirror
+func (o *RootOptions) GetMirror(name string) string {
+	return getMirror(name)
+}
+
+// GetGitHubClient returns the GitHub client
+func (o *RootOptions) GetGitHubClient() *github.Client {
+	if o.CommonOption != nil {
+		return o.CommonOption.GitHubClient
+	}
+	return nil
+}
+
+// SetGitHubClient set the GitHub client
+func (o *RootOptions) SetGitHubClient(gitHubClient *github.Client) {
+	if o.CommonOption == nil {
+		o.CommonOption = &common.CommonOption{}
+	}
+	o.CommonOption.GitHubClient = gitHubClient
 }
 
 const (

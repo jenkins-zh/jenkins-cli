@@ -24,7 +24,7 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN_SECRETS }}
-    - name: Backup Dev Version
+    - name: Backup Release Version
       run: |
         jcli_ver=$(hub tag --list | sort -V | tail -n 1)
         git clone https://github.com/jenkins-zh/jcli-repo
