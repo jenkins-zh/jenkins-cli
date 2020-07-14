@@ -358,18 +358,22 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 	return
 }
 
+// GetCurrentJenkinsFromOptions returns the current Jenkins
 func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
 	return getCurrentJenkinsFromOptions()
 }
 
+// GetCurrentJenkinsAndClient returns the current Jenkins
 func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
 	return getCurrentJenkinsAndClient(jClient)
 }
 
+// GetMirror returns the mirror
 func (o *RootOptions) GetMirror(name string) string {
 	return getMirror(name)
 }
 
+// GetGitHubClient returns the GitHub client
 func (o *RootOptions) GetGitHubClient() *github.Client {
 	if o.CommonOption != nil {
 		return o.CommonOption.GitHubClient
@@ -377,6 +381,7 @@ func (o *RootOptions) GetGitHubClient() *github.Client {
 	return nil
 }
 
+// SetGitHubClient set the GitHub client
 func (o *RootOptions) SetGitHubClient(gitHubClient *github.Client) {
 	if o.CommonOption == nil {
 		o.CommonOption = &common.CommonOption{}

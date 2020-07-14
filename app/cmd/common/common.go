@@ -320,11 +320,13 @@ But if the environment variable "VISUAL" or "EDITOR" exists, jcli will take it.
 For example, you can set it under unix like this: export VISUAL=vi`
 }
 
+// JenkinsClient is the interface of get Jenkins client
 type JenkinsClient interface {
 	GetCurrentJenkinsFromOptions() (jenkinsServer *config.JenkinsServer)
 	GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *config.JenkinsServer
 }
 
+// JenkinsConfigMgr is the interface of getting configuration
 type JenkinsConfigMgr interface {
 	GetMirror(string) string
 
