@@ -12,7 +12,7 @@ import (
 
 // NewVersionCmd create a command for version
 func NewVersionCmd(client common.JenkinsClient, jenkinsConfigMgr common.JenkinsConfigMgr) (cmd *cobra.Command) {
-	opt := &VersionOption{
+	opt := &VersionPrintOption{
 		JenkinsConfigMgr: jenkinsConfigMgr,
 	}
 
@@ -33,7 +33,7 @@ func NewVersionCmd(client common.JenkinsClient, jenkinsConfigMgr common.JenkinsC
 	return
 }
 
-func (o *VersionOption) addFlags(flags *pflag.FlagSet) {
+func (o *VersionPrintOption) addFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&o.Changelog, "changelog", "", false,
 		i18n.T("Output the changelog of current version"))
 	flags.BoolVarP(&o.ShowLatest, "show-latest", "", false,
@@ -41,7 +41,7 @@ func (o *VersionOption) addFlags(flags *pflag.FlagSet) {
 }
 
 // RunE is the main point of current command
-func (o *VersionOption) RunE(cmd *cobra.Command, _ []string) (err error) {
+func (o *VersionPrintOption) RunE(cmd *cobra.Command, _ []string) (err error) {
 	cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
 
 	version := app.GetVersion()

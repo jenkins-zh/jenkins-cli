@@ -72,9 +72,8 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 	if currentVersion == version {
 		cmd.Println("no need to upgrade Jenkins CLI")
 		return
-	} else {
-		cmd.Println(fmt.Sprintf("prepare to upgrade to %s", version))
 	}
+	cmd.Println(fmt.Sprintf("prepare to upgrade to %s", version))
 
 	// download the tar file of Jenkins CLI
 	tmpDir := os.TempDir()
@@ -116,7 +115,7 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 	return
 }
 
-func (c *SelfUpgradeOption) extractFiles(tarFile string) (err error) {
+func (o *SelfUpgradeOption) extractFiles(tarFile string) (err error) {
 	var f *os.File
 	var gzf *gzip.Reader
 	if f, err = os.Open(tarFile); err != nil {
