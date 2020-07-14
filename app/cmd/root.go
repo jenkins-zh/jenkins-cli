@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"io"
 	"log"
@@ -14,9 +15,9 @@ import (
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
+	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
-	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -193,6 +194,13 @@ func init() {
 
 	loadPlugins(rootCmd)
 
+	if rootOptions.GetGitHubClient() == nil {
+		rootOptions.SetGitHubClient(github.NewClient(nil))
+		fmt.Println("setup a new gh client")
+	} else {
+		fmt.Println(rootOptions.GetGitHubClient())
+	}
+
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
 	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
@@ -360,6 +368,20 @@ func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *J
 
 func (o *RootOptions) GetMirror(name string) string {
 	return getMirror(name)
+}
+
+func (o *RootOptions) GetGitHubClient() *github.Client {
+	if o.CommonOption != nil {
+		return o.CommonOption.GitHubClient
+	}
+	return nil
+}
+
+func (o *RootOptions) SetGitHubClient(gitHubClient *github.Client) {
+	if o.CommonOption == nil {
+		o.CommonOption = &common.CommonOption{}
+	}
+	o.CommonOption.GitHubClient = gitHubClient
 }
 
 const (

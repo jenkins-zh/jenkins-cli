@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/config"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 	"io"
@@ -14,10 +18,6 @@ import (
 	"os"
 	"reflect"
 	"strings"
-
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/util"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -31,6 +31,8 @@ type CommonOption struct {
 	LookPathContext util.LookPathContext
 	RoundTripper    http.RoundTripper
 	Logger          *zap.Logger
+
+	GitHubClient *github.Client
 
 	Stdio terminal.Stdio
 
@@ -325,4 +327,7 @@ type JenkinsClient interface {
 
 type JenkinsConfigMgr interface {
 	GetMirror(string) string
+
+	GetGitHubClient() *github.Client
+	SetGitHubClient(gitHubClient *github.Client)
 }

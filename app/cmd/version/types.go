@@ -1,9 +1,19 @@
-package cmd
+package version
 
 import (
 	"github.com/google/go-github/v29/github"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 )
+
+// VersionOption is the version option
+type VersionOption struct {
+	Changelog  bool
+	ShowLatest bool
+
+	JenkinsClient    common.JenkinsClient
+	JenkinsConfigMgr common.JenkinsConfigMgr
+}
 
 // SelfUpgradeOption is the option for self upgrade command
 type SelfUpgradeOption struct {

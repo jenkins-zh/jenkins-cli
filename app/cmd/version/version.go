@@ -1,7 +1,6 @@
-package cmd
+package version
 
 import (
-	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -11,26 +10,17 @@ import (
 	"strings"
 )
 
-// VersionOption is the version option
-type VersionOption struct {
-	Changelog  bool
-	ShowLatest bool
-
-	GitHubClient     *github.Client
-	JenkinsClient    common.JenkinsClient
-	JenkinsConfigMgr common.JenkinsConfigMgr
-}
-
 // NewVersionCmd create a command for version
 func NewVersionCmd(client common.JenkinsClient, jenkinsConfigMgr common.JenkinsConfigMgr) (cmd *cobra.Command) {
-	opt := &VersionOption{}
+	opt := &VersionOption{
+		JenkinsConfigMgr: jenkinsConfigMgr,
+	}
 
 	cmd = &cobra.Command{
-		Use:    "version",
-		Short:  "Print the version of Jenkins CLI",
-		Long:   `Print the version of Jenkins CLI`,
-		PreRun: opt.PreRun,
-		RunE:   opt.RunE,
+		Use:   "version",
+		Short: "Print the version of Jenkins CLI",
+		Long:  `Print the version of Jenkins CLI`,
+		RunE:  opt.RunE,
 		Annotations: map[string]string{
 			common.Since: "v0.0.26",
 		},
@@ -50,13 +40,6 @@ func (o *VersionOption) addFlags(flags *pflag.FlagSet) {
 		i18n.T("Output the latest version"))
 }
 
-// PreRun is the pre-check of current command
-func (o *VersionOption) PreRun(cmd *cobra.Command, _ []string) {
-	if o.GitHubClient == nil {
-		o.GitHubClient = github.NewClient(nil)
-	}
-}
-
 // RunE is the main point of current command
 func (o *VersionOption) RunE(cmd *cobra.Command, _ []string) (err error) {
 	cmd.Println(i18n.T("Jenkins CLI (jcli) manage your Jenkins"))
@@ -71,7 +54,7 @@ func (o *VersionOption) RunE(cmd *cobra.Command, _ []string) (err error) {
 	}
 
 	ghClient := &client.GitHubReleaseClient{
-		Client: o.GitHubClient,
+		Client: o.JenkinsConfigMgr.GetGitHubClient(),
 	}
 	var asset *client.ReleaseAsset
 	if o.Changelog {
