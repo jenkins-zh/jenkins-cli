@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// VersionPrintOption is the version option
-type VersionPrintOption struct {
+// PrintOption is the version option
+type PrintOption struct {
 	Changelog  bool
 	ShowLatest bool
 
