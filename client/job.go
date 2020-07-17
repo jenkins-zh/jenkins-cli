@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	// FileParameterDefinition is the definition for string parameter
+	// StringParameterDefinition is the definition for string parameter
 	StringParameterDefinition = "StringParameterDefinition"
 	// FileParameterDefinition is the definition for file parameter
 	FileParameterDefinition = "FileParameterDefinition"
