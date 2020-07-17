@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -32,7 +33,7 @@ type TokenData struct {
 // Get returns a user's detail
 func (q *UserClient) Get() (status *User, err error) {
 	api := fmt.Sprintf("/user/%s/api/json", q.UserName)
-	err = q.RequestWithData("GET", api, nil, nil, 200, &status)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &status)
 	return
 }
 
@@ -41,13 +42,13 @@ func (q *UserClient) EditDesc(description string) (err error) {
 	formData := url.Values{}
 	formData.Add("description", description)
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	return
 }
 
 // Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
-	_, err = q.RequestWithoutData("POST", fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
 	return
 }
 
@@ -85,7 +86,7 @@ func (q *UserClient) Create(username, password string) (user *UserForCreate, err
 	}
 
 	payload, user = genSimpleUserAsPayload(username, password)
-	code, err = q.RequestWithoutData("POST", "/securityRealm/createAccountByAdmin",
+	code, err = q.RequestWithoutData(http.MethodPost, "/securityRealm/createAccountByAdmin",
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
@@ -109,7 +110,7 @@ func (q *UserClient) CreateToken(targetUser, newTokenName string) (status *Token
 	formData.Add("newTokenName", newTokenName)
 	payload := strings.NewReader(formData.Encode())
 
-	err = q.RequestWithData("POST", api,
+	err = q.RequestWithData(http.MethodPost, api,
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200, &status)
 	return
 }

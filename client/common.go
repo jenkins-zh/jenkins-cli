@@ -97,7 +97,7 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 	j.ProxyHandle(request)
 
 	// all post request to Jenkins must be has the crumb
-	if request.Method == "POST" {
+	if request.Method == http.MethodPost {
 		err = j.CrumbHandle(request)
 	}
 	return
@@ -124,7 +124,7 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 		data       []byte
 	)
 
-	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
+	if statusCode, data, err = j.Request(http.MethodGet, "/crumbIssuer/api/json", nil, nil); err == nil {
 		if statusCode == 200 {
 			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {

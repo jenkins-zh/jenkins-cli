@@ -64,7 +64,7 @@ func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
 func (h *HTTPDownloader) DownloadFile() error {
 	filepath, downloadURL, showProgress := h.TargetFilePath, h.URL, h.ShowProgress
 	// Get the data
-	req, err := http.NewRequest("GET", downloadURL, nil)
+	req, err := http.NewRequest(http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return err
 	}
@@ -79,14 +79,20 @@ func (h *HTTPDownloader) DownloadFile() error {
 		trp := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: h.InsecureSkipVerify},
 		}
-		tr = trp
 		if err = SetProxy(h.Proxy, h.ProxyAuth, trp); err != nil {
 			return err
 		}
+
+		if h.Proxy != "" {
+			basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(h.ProxyAuth))
+			req.Header.Add("Proxy-Authorization", basicAuth)
+		}
+		tr = trp
 	}
 	client := &http.Client{Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
+	var resp *http.Response
+
+	if resp, err = client.Do(req); err != nil {
 		return err
 	}
 

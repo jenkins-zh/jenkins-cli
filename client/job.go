@@ -20,8 +20,12 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
-// FileParameterDefinition is the definition for file parameter
-const FileParameterDefinition = "FileParameterDefinition"
+const (
+	// StringParameterDefinition is the definition for string parameter
+	StringParameterDefinition = "StringParameterDefinition"
+	// FileParameterDefinition is the definition for file parameter
+	FileParameterDefinition = "FileParameterDefinition"
+)
 
 // JobClient is client for operate jobs
 type JobClient struct {
@@ -32,7 +36,7 @@ type JobClient struct {
 
 // Search find a set of jobs by name
 func (q *JobClient) Search(name, kind string, start, limit int) (items []JenkinsItem, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d&parent=%s",
+	err = q.RequestWithData(http.MethodGet, fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d&parent=%s",
 		name, kind, start, limit, q.Parent),
 		nil, nil, 200, &items)
 	return
@@ -41,7 +45,7 @@ func (q *JobClient) Search(name, kind string, start, limit int) (items []Jenkins
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
 	path := ParseJobPath(jobName)
-	_, err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("%s/build", path), nil, nil, 201)
 	return
 }
 
@@ -64,55 +68,61 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/build", path)
 
-	fileParameters := make([]ParameterDefinition, 0, len(parameters))
-	for _, parameter := range parameters {
-		if parameter.Type == FileParameterDefinition {
-			fileParameters = append(fileParameters, parameter)
-		}
-	}
-
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	defer writer.Close()
 
-	// upload file
-	for _, parameter := range fileParameters {
-		var file *os.File
-		file, err = os.Open(parameter.Filepath)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
+	hasFileParam := false
+	stringParameters := make([]ParameterDefinition, 0, len(parameters))
+	for _, parameter := range parameters {
+		if parameter.Type == FileParameterDefinition {
+			hasFileParam = true
+			var file *os.File
+			file, err = os.Open(parameter.Filepath)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
 
-		var fWriter io.Writer
-		fWriter, err = writer.CreateFormFile(parameter.Filepath, filepath.Base(parameter.Filepath))
-		if err != nil {
-			return err
+			var fWriter io.Writer
+			fWriter, err = writer.CreateFormFile(parameter.Filepath, filepath.Base(parameter.Filepath))
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(fWriter, file)
+		} else {
+			stringParameters = append(stringParameters, parameter)
 		}
-		_, err = io.Copy(fWriter, file)
 	}
 
 	var paramJSON []byte
-	if len(parameters) == 1 {
-		paramJSON, err = json.Marshal(parameters[0])
+	if len(stringParameters) == 1 {
+		paramJSON, err = json.Marshal(stringParameters[0])
 	} else {
-		paramJSON, err = json.Marshal(parameters)
+		paramJSON, err = json.Marshal(stringParameters)
 	}
 	if err != nil {
-		return err
+		return
 	}
 
-	if err = writer.WriteField("json", fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))); err != nil {
-		return err
+	if hasFileParam {
+		if err = writer.WriteField("json", fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))); err != nil {
+			return
+		}
+
+		if err = writer.Close(); err != nil {
+			return
+		}
+
+		_, err = q.RequestWithoutData(http.MethodPost, api,
+			map[string]string{util.ContentType: writer.FormDataContentType()}, body, 201)
+	} else {
+		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
+		payload := strings.NewReader(formData.Encode())
+
+		_, err = q.RequestWithoutData(http.MethodPost, api,
+			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
 	}
-
-	if err = writer.Close(); err != nil {
-		return err
-	}
-
-	_, err = q.RequestWithoutData("POST", api,
-		map[string]string{util.ContentType: writer.FormDataContentType()}, body, 201)
-
 	return
 }
 
@@ -121,7 +131,7 @@ func (q *JobClient) DisableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/disable", path)
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -130,7 +140,7 @@ func (q *JobClient) EnableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/enable", path)
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -145,7 +155,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 		api = fmt.Sprintf("%s/%d/stop", path, num)
 	}
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -196,7 +206,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -286,7 +296,7 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 	payload := strings.NewReader(formData.Encode())
 
 	var code int
-	code, err = q.RequestWithoutData("POST", "/view/all/createItem",
+	code, err = q.RequestWithoutData(http.MethodPost, "/view/all/createItem",
 		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
@@ -306,7 +316,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 		util.ContentType: util.ApplicationForm,
 	}
 
-	if statusCode, _, err = q.Request("POST", api, header, nil); err == nil {
+	if statusCode, _, err = q.Request(http.MethodPost, api, header, nil); err == nil {
 		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}
@@ -350,7 +360,7 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 	paramData, _ := json.Marshal(request)
 
 	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 
 	return
 }

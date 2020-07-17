@@ -62,7 +62,7 @@ var _ = Describe("job test", func() {
 	Context("Build", func() {
 		It("trigger a simple job without a folder", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 201,
@@ -91,7 +91,7 @@ var _ = Describe("job test", func() {
 
 		It("trigger a simple job with an error", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 500,
@@ -162,7 +162,7 @@ var _ = Describe("job test", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("with params", func() {
+		FIt("with params", func() {
 			jobName := "fake"
 
 			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
@@ -170,7 +170,7 @@ var _ = Describe("job test", func() {
 			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{{
 				Name:  "name",
 				Value: "value",
-				Type:  "StringParameterDefinition",
+				Type:  StringParameterDefinition,
 			}})
 			Expect(err).To(BeNil())
 		})
@@ -180,7 +180,7 @@ var _ = Describe("job test", func() {
 		It("stop a job build without a folder", func() {
 			jobName := "fakeJob"
 			buildID := 1
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/%d/stop", jobClient.URL, jobName, buildID), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/%d/stop", jobClient.URL, jobName, buildID), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 200,
@@ -210,7 +210,7 @@ var _ = Describe("job test", func() {
 		It("stop the last job build without a folder", func() {
 			jobName := "fakeJob"
 			buildID := -1
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 200,
@@ -325,7 +325,7 @@ var _ = Describe("job test", func() {
 	Context("Delete", func() {
 		It("delete a job", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.Header.Add(util.ContentType, util.ApplicationForm)
 			response := &http.Response{
