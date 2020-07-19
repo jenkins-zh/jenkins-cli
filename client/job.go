@@ -49,6 +49,25 @@ func (q *JobClient) Build(jobName string) (err error) {
 	return
 }
 
+// BuildAndReturn trigger a job then returns the build info
+func (q *JobClient) BuildAndReturn(jobName, cause string, timeout, delay int) (err error) {
+	path := ParseJobPath(jobName)
+
+	api := fmt.Sprintf("%s/restFul/build?1=1", path)
+	if timeout >= 0 {
+		api += fmt.Sprintf("&timeout=%d", timeout)
+	}
+	if delay >= 0 {
+		api += fmt.Sprintf("&delay=%d", delay)
+	}
+	if cause != "" {
+		api += fmt.Sprintf("&identifyCause=%s", cause)
+	}
+
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 201)
+	return
+}
+
 // GetBuild get build information of a job
 func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
 	path := ParseJobPath(jobName)
