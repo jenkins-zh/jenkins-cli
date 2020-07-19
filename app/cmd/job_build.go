@@ -20,6 +20,11 @@ type JobBuildOption struct {
 	ParamArray []string
 
 	ParamFilePathArray []string
+
+	Wait     bool
+	WaitTime int
+	Delay    int
+	Cause    string
 }
 
 var jobBuildOption JobBuildOption
@@ -38,6 +43,14 @@ func init() {
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamFilePathArray, "param-file", nil,
 		i18n.T("Parameters of the job which is file path, for example: --param-file name=filename"))
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Wait, "wait", "", false,
+		i18n.T("If you want to wait for the build ID from Jenkins. You need to install plugin pipeline-restful-api first"))
+	jobBuildCmd.Flags().IntVarP(&jobBuildOption.WaitTime, "wait-timeout", "", 30,
+		i18n.T("The timeout of seconds when you wait for the build ID"))
+	jobBuildCmd.Flags().IntVarP(&jobBuildOption.Delay, "delay", "", 0,
+		i18n.T("Delay when trigger a Jenkins job"))
+	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Cause, "cause", "", "triggered by jcli",
+		i18n.T("The cause of a job build"))
 
 	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
 	jobBuildOption.CommonOption.Stdio = common.GetSystemStdio()
@@ -136,6 +149,8 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 		if err == nil {
 			if hasParam {
 				err = jclient.BuildWithParams(name, paramDefs)
+			} else if jobBuildOption.Wait {
+				err = jclient.BuildAndReturn(name, jobBuildOption.Cause, jobBuildOption.WaitTime, jobBuildOption.Delay)
 			} else {
 				err = jclient.Build(name)
 			}

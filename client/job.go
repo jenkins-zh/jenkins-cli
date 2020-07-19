@@ -64,7 +64,7 @@ func (q *JobClient) BuildAndReturn(jobName, cause string, timeout, delay int) (e
 		api += fmt.Sprintf("&identifyCause=%s", cause)
 	}
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 201)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
