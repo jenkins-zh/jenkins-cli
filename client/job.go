@@ -49,6 +49,38 @@ func (q *JobClient) Build(jobName string) (err error) {
 	return
 }
 
+// IdentityBuild is the build which carry the identity cause
+type IdentityBuild struct {
+	Build JobBuild
+	Cause IdentityCause
+}
+
+// IdentityCause carray a identity cause
+type IdentityCause struct {
+	UUID string  `json:"uuid"`
+	ShortDescription string `json:"shortDescription"`
+	Message string
+}
+
+// BuildAndReturn trigger a job then returns the build info
+func (q *JobClient) BuildAndReturn(jobName, cause string, timeout, delay int) (build IdentityBuild, err error) {
+	path := ParseJobPath(jobName)
+
+	api := fmt.Sprintf("%s/restFul/build?1=1", path)
+	if timeout >= 0 {
+		api += fmt.Sprintf("&timeout=%d", timeout)
+	}
+	if delay >= 0 {
+		api += fmt.Sprintf("&delay=%d", delay)
+	}
+	if cause != "" {
+		api += fmt.Sprintf("&identifyCause=%s", cause)
+	}
+
+	err = q.RequestWithData(http.MethodPost, api, nil, nil, 200, &build)
+	return
+}
+
 // GetBuild get build information of a job
 func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) {
 	path := ParseJobPath(jobName)

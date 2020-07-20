@@ -21,6 +21,11 @@ weight: 80
 
 `jcli job build "jobName" -b`
 
+当你需要触发任务构建，并等待对应任务的构建号的话，可以使用下面的命令
+（依赖插件[pipeline-restful-api-plugin](https://github.com/jenkinsci/pipeline-restful-api-plugin)）：
+
+`jcli job build job/test -b --wait`
+
 ## 交互式输入
 
 执行到 Jenkins 流水线中的 `input` 指令时，会有交互式输入的提示。下面是一个样例：

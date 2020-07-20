@@ -196,7 +196,6 @@ func init() {
 
 	if rootOptions.GetGitHubClient() == nil {
 		rootOptions.SetGitHubClient(github.NewClient(nil))
-		fmt.Println("setup a new gh client")
 	} else {
 		fmt.Println(rootOptions.GetGitHubClient())
 	}
