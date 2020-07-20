@@ -15,6 +15,7 @@ import (
 type JobBuildOption struct {
 	common.BatchOption
 	common.CommonOption
+	common.OutputOption
 
 	Param      string
 	ParamArray []string
@@ -36,7 +37,7 @@ func ResetJobBuildOption() {
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
-	jobBuildOption.SetFlag(jobBuildCmd)
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
 	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "",
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
@@ -52,6 +53,7 @@ func init() {
 	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Cause, "cause", "", "triggered by jcli",
 		i18n.T("The cause of a job build"))
 
+	jobBuildOption.SetFlagWithHeaders(jobBuildCmd, "Number,URL")
 	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
 	jobBuildOption.CommonOption.Stdio = common.GetSystemStdio()
 }
@@ -100,7 +102,7 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 		}
 		return
 	},
-	RunE: func(_ *cobra.Command, args []string) (err error) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 
 		if !jobBuildOption.Confirm(fmt.Sprintf("Are you sure to build job %s", name)) {
@@ -150,7 +152,11 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 			if hasParam {
 				err = jclient.BuildWithParams(name, paramDefs)
 			} else if jobBuildOption.Wait {
-				err = jclient.BuildAndReturn(name, jobBuildOption.Cause, jobBuildOption.WaitTime, jobBuildOption.Delay)
+				var build client.IdentityBuild
+				if build, err = jclient.BuildAndReturn(name, jobBuildOption.Cause, jobBuildOption.WaitTime, jobBuildOption.Delay); err == nil {
+					jobBuildOption.Writer = cmd.OutOrStdout()
+					err = jobBuildOption.OutputV2([1]client.SimpleJobBuild{build.Build.SimpleJobBuild})
+				}
 			} else {
 				err = jclient.Build(name)
 			}
