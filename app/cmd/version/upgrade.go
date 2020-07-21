@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,6 +51,17 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		version = args[0]
 	}
 
+	// copy binary file into system path
+	var targetPath string
+	if targetPath, err = exec.LookPath("jcli"); err != nil {
+		err = fmt.Errorf("cannot find Jenkins CLI from system path, error: %v", err)
+		return
+	}
+	var targetF *os.File
+	if targetF, err = os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0644); err != nil {
+		return
+	}
+
 	// try to understand the version from user input
 	switch version {
 	case "dev":
@@ -84,6 +96,11 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		_ = os.RemoveAll(output)
 	}()
 
+	// make sure we count the download action
+	go func() {
+		o.downloadCount(version, runtime.GOOS)
+	}()
+
 	downloader := util.HTTPDownloader{
 		RoundTripper:   o.RoundTripper,
 		TargetFilePath: output,
@@ -95,16 +112,8 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		return
 	}
 
-	// copy binary file into system path
-	var targetPath string
-	if targetPath, err = exec.LookPath("jcli"); err != nil {
-		err = fmt.Errorf("cannot find Jenkins CLI from system path, error: %v", err)
-		return
-	}
-
 	if err = o.extractFiles(output); err == nil {
 		sourceFile := fmt.Sprintf("%s/jcli", filepath.Dir(output))
-		targetF, _ := os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0644)
 		sourceF, _ := os.Open(sourceFile)
 		if _, err = io.Copy(targetF, sourceF); err != nil {
 			err = fmt.Errorf("cannot copy Jenkins CLI from %s to %s, error: %v", sourceFile, targetPath, err)
@@ -113,6 +122,26 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		err = fmt.Errorf("cannot extract Jenkins CLI from tar file, error: %v", err)
 	}
 	return
+}
+
+func (o *SelfUpgradeOption) downloadCount(version string, arch string) {
+	countURL := fmt.Sprintf("https: //github.com/jenkins-zh/jenkins-cli/releases/download/v%s/jcli-%s-amd64.tar.gz",
+		version, arch)
+
+	if tempDir, err := ioutil.TempDir(".", "download-count"); err == nil {
+		tempFile := tempDir + "/jcli.tar.gz"
+		defer func() {
+			_ = os.RemoveAll(tempDir)
+		}()
+
+		downloader := util.HTTPDownloader{
+			RoundTripper:   o.RoundTripper,
+			TargetFilePath: tempFile,
+			URL:            countURL,
+		}
+		// we don't care about the result, just for counting
+		_ = downloader.DownloadFile()
+	}
 }
 
 func (o *SelfUpgradeOption) extractFiles(tarFile string) (err error) {
