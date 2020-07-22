@@ -59,6 +59,19 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 	}
 	var targetF *os.File
 	if targetF, err = os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0644); err != nil {
+		argsx := []string{"jcli", "version", "upgrade"}
+		argsx = append(argsx, args...)
+		cmd := exec.Command("sudo", argsx...)
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
+
+		var out []byte
+		out, err = cmd.Output()
+		if err != nil {
+			fmt.Println("Err", err)
+		} else {
+			fmt.Println("OUT:", string(out))
+		}
 		return
 	}
 
