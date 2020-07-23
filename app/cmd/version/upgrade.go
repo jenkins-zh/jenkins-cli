@@ -18,6 +18,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"syscall"
 )
 
 // NewSelfUpgradeCmd create a command for self upgrade
@@ -42,6 +43,8 @@ You can upgrade to the latest developing version, please use it like: jcli versi
 func (o *SelfUpgradeOption) addFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&o.ShowProgress, "show-progress", "", true,
 		i18n.T("If you want to show the progress of download Jenkins CLI"))
+	flags.BoolVarP(&o.Privilege, "privilege", "", true,
+		i18n.T("Try to take the privilege from system if there's no write permission on jcli"))
 }
 
 // RunE is the main point of current command
@@ -59,18 +62,17 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 	}
 	var targetF *os.File
 	if targetF, err = os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0644); err != nil {
-		argsx := []string{"jcli", "version", "upgrade"}
-		argsx = append(argsx, args...)
-		cmd := exec.Command("sudo", argsx...)
-		cmd.Stderr = os.Stderr
-		cmd.Stdin = os.Stdin
+		if !o.Privilege {
+			return
+		}
 
-		var out []byte
-		out, err = cmd.Output()
-		if err != nil {
-			fmt.Println("Err", err)
-		} else {
-			fmt.Println("OUT:", string(out))
+		var sudo string
+		if sudo, err = exec.LookPath("sudo"); err == nil {
+			sudoArgs := []string{"sudo", "jcli", "version", "upgrade", "--privilege=false"}
+			sudoArgs = append(sudoArgs, args...)
+
+			env := os.Environ()
+			err = syscall.Exec(sudo, sudoArgs, env)
 		}
 		return
 	}

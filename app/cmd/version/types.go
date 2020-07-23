@@ -18,6 +18,7 @@ type PrintOption struct {
 // SelfUpgradeOption is the option for self upgrade command
 type SelfUpgradeOption struct {
 	ShowProgress bool
+	Privilege bool
 
 	GitHubClient *github.Client
 	RoundTripper http.RoundTripper
