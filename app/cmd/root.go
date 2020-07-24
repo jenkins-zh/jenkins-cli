@@ -326,14 +326,7 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 
 func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
-
-	execCommand(array[0], array[1:], writer)
-	//var binary string
-	//if binary, err = exec.LookPath(array[0]); err == nil {
-	//	env := os.Environ()
-	//
-	//	err = syscall.Exec(binary, array, env)
-	//}
+	err = execCommand(array[0], array[1:], writer)
 	return
 }
 
@@ -343,48 +336,42 @@ const (
 	GB18030 = "GB18030"
 )
 
-//封装一个函数来执行命令
-func execCommand(commandName string, params []string, writer io.Writer) bool {
-	//执行命令
+func execCommand(commandName string, params []string, writer io.Writer) (err error) {
 	cmd := exec.Command(commandName,params...)
 
-	stdout, err := cmd.StdoutPipe()
-	errReader,errr := cmd.StderrPipe()
-
-	if errr != nil{
-		fmt.Println("err:"+errr.Error())
+	var stdout io.ReadCloser
+	var stderr io.ReadCloser
+	if stdout, err = cmd.StdoutPipe(); err != nil {
+		return
+	}
+	if stderr, err = cmd.StderrPipe(); err != nil {
+		return
 	}
 
-	//开启错误处理
-	go handlerErr(errReader)
-
-	if err != nil {
-		fmt.Println(err)
-		return false
+	go handlerErr(stderr, writer)
+	if err = cmd.Start(); err != nil {
+		return
 	}
-
-	cmd.Start()
 	in := bufio.NewScanner(stdout)
 	for in.Scan() {
 		cmdRe := ConvertByte2String(in.Bytes(),"GB18030")
-		writer.Write([]byte(cmdRe + "\n"))
+		if _, err = writer.Write([]byte(cmdRe + "\n")); err != nil {
+			return
+		}
 	}
 
-	cmd.Wait()
-	cmd.Wait()
-	return true
+	err = cmd.Wait()
+	return
 }
 
-//开启一个协程来错误
-func handlerErr(errReader io.ReadCloser){
+func handlerErr(errReader io.ReadCloser, writer io.Writer){
 	in := bufio.NewScanner(errReader)
 	for in.Scan() {
 		cmdRe:=ConvertByte2String(in.Bytes(),"GB18030")
-		fmt.Errorf(cmdRe)
+		_, _ = writer.Write([]byte(cmdRe + "\n"))
 	}
 }
 
-//对字符进行转码
 func ConvertByte2String(byte []byte, charset string) string {
 	var str string
 	switch charset {
