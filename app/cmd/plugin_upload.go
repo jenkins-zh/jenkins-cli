@@ -5,7 +5,6 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -90,14 +89,16 @@ var pluginUploadCmd = &cobra.Command{
 	Example: `  jcli plugin upload --remote https://server/sample.hpi
 jcli plugin upload sample.hpi
 jcli plugin upload sample.hpi --show-progress=false`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if pluginUploadOption.Remote != "" {
-			file, err := ioutil.TempFile(".", "jcli-plugin")
-			if err != nil {
-				log.Fatal(err)
+			var file *os.File
+			if file, err = ioutil.TempFile(".", "jcli-plugin"); err != nil {
+				return
 			}
 
-			defer os.Remove(file.Name())
+			defer func() {
+				_= os.Remove(file.Name())
+			}()
 
 			if pluginUploadOption.RemoteJenkins != "" {
 				if jenkins := findJenkinsByName(pluginUploadOption.RemoteJenkins); jenkins != nil {
@@ -116,12 +117,12 @@ jcli plugin upload sample.hpi --show-progress=false`,
 				Debug:          rootOptions.Debug,
 			}
 
-			if err := downloader.DownloadFile(); err != nil {
-				log.Fatal(err)
-			}
+			err = downloader.DownloadFile()
 		} else if len(args) == 0 {
 			if !pluginUploadOption.SkipPreHook {
-				executePreCmd(cmd, args, os.Stdout)
+				if err = executePreCmd(cmd, args, os.Stdout); err != nil {
+					return
+				}
 			}
 
 			path, _ := os.Getwd()
@@ -133,13 +134,15 @@ jcli plugin upload sample.hpi --show-progress=false`,
 		} else {
 			pluginUploadOption.pluginFilePath = args[0]
 		}
+		return
 	},
-	PostRun: func(cmd *cobra.Command, args []string) {
+	PostRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if pluginUploadOption.SkipPostHook {
 			return
 		}
 
-		executePostCmd(cmd, args, cmd.OutOrStdout())
+		err = executePostCmd(cmd, args, cmd.OutOrStdout())
+		return
 	},
 	ValidArgsFunction: pluginUploadOption.HPICompletion,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
@@ -154,7 +157,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if pluginUploadOption.Remote != "" {
-			defer os.Remove(pluginUploadOption.pluginFilePath)
+			defer func() {
+				_ = os.Remove(pluginUploadOption.pluginFilePath)
+			}()
 		}
 
 		err = jclient.Upload(pluginUploadOption.pluginFilePath)

@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"golang.org/x/text/encoding/simplifiedchinese"
 	"io"
 	"log"
 	"os"
@@ -293,6 +295,7 @@ func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error)
 			continue
 		}
 
+		logger.Debug("execute pre-cmd", zap.String("command", hook.Command))
 		if err = execute(hook.Command, writer); err != nil {
 			return
 		}
@@ -313,6 +316,7 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 			continue
 		}
 
+		logger.Debug("execute post-cmd", zap.String("command", hook.Command))
 		if err = execute(hook.Command, writer); err != nil {
 			return
 		}
@@ -322,16 +326,77 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 
 func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
-	cmd := exec.Command(array[0], array[1:]...)
-	if err = cmd.Start(); err == nil {
-		if err = cmd.Wait(); err == nil {
-			var data []byte
-			if data, err = cmd.Output(); err == nil {
-				_, _ = writer.Write(data)
-			}
-		}
-	}
+
+	execCommand(array[0], array[1:], writer)
+	//var binary string
+	//if binary, err = exec.LookPath(array[0]); err == nil {
+	//	env := os.Environ()
+	//
+	//	err = syscall.Exec(binary, array, env)
+	//}
 	return
+}
+
+
+const (
+	UTF8    = "UTF-8"
+	GB18030 = "GB18030"
+)
+
+//封装一个函数来执行命令
+func execCommand(commandName string, params []string, writer io.Writer) bool {
+	//执行命令
+	cmd := exec.Command(commandName,params...)
+
+	stdout, err := cmd.StdoutPipe()
+	errReader,errr := cmd.StderrPipe()
+
+	if errr != nil{
+		fmt.Println("err:"+errr.Error())
+	}
+
+	//开启错误处理
+	go handlerErr(errReader)
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	cmd.Start()
+	in := bufio.NewScanner(stdout)
+	for in.Scan() {
+		cmdRe := ConvertByte2String(in.Bytes(),"GB18030")
+		writer.Write([]byte(cmdRe + "\n"))
+	}
+
+	cmd.Wait()
+	cmd.Wait()
+	return true
+}
+
+//开启一个协程来错误
+func handlerErr(errReader io.ReadCloser){
+	in := bufio.NewScanner(errReader)
+	for in.Scan() {
+		cmdRe:=ConvertByte2String(in.Bytes(),"GB18030")
+		fmt.Errorf(cmdRe)
+	}
+}
+
+//对字符进行转码
+func ConvertByte2String(byte []byte, charset string) string {
+	var str string
+	switch charset {
+	case GB18030:
+		var decodeBytes,_=simplifiedchinese.GB18030.NewDecoder().Bytes(byte)
+		str= string(decodeBytes)
+	case UTF8:
+		fallthrough
+	default:
+		str = string(byte)
+	}
+	return str
 }
 
 // Deprecated, please replace this with getCurrentJenkinsAndClient
