@@ -97,7 +97,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			}
 
 			defer func() {
-				_= os.Remove(file.Name())
+				_ = os.Remove(file.Name())
 			}()
 
 			if pluginUploadOption.RemoteJenkins != "" {

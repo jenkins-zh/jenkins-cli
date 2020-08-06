@@ -57,9 +57,9 @@ type IdentityBuild struct {
 
 // IdentityCause carray a identity cause
 type IdentityCause struct {
-	UUID string  `json:"uuid"`
+	UUID             string `json:"uuid"`
 	ShortDescription string `json:"shortDescription"`
-	Message string
+	Message          string
 }
 
 // BuildAndReturn trigger a job then returns the build info

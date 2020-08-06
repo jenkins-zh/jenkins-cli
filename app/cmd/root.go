@@ -330,14 +330,13 @@ func execute(command string, writer io.Writer) (err error) {
 	return
 }
 
-
 const (
 	UTF8    = "UTF-8"
 	GB18030 = "GB18030"
 )
 
 func execCommand(commandName string, params []string, writer io.Writer) (err error) {
-	cmd := exec.Command(commandName,params...)
+	cmd := exec.Command(commandName, params...)
 
 	var stdout io.ReadCloser
 	var stderr io.ReadCloser
@@ -354,11 +353,7 @@ func execCommand(commandName string, params []string, writer io.Writer) (err err
 	}
 	in := bufio.NewScanner(stdout)
 	for in.Scan() {
-		cmdRe := 
-		
-		
-		
-		(in.Bytes(),"GB18030")
+		cmdRe := ConvertByte2String(in.Bytes(), "GB18030")
 		if _, err = writer.Write([]byte(cmdRe + "\n")); err != nil {
 			return
 		}
@@ -368,10 +363,10 @@ func execCommand(commandName string, params []string, writer io.Writer) (err err
 	return
 }
 
-func handlerErr(errReader io.ReadCloser, writer io.Writer){
+func handlerErr(errReader io.ReadCloser, writer io.Writer) {
 	in := bufio.NewScanner(errReader)
 	for in.Scan() {
-		cmdRe:=ConvertByte2String(in.Bytes(),"GB18030")
+		cmdRe := ConvertByte2String(in.Bytes(), "GB18030")
 		_, _ = writer.Write([]byte(cmdRe + "\n"))
 	}
 }
@@ -381,8 +376,8 @@ func ConvertByte2String(byte []byte, charset string) string {
 	var str string
 	switch charset {
 	case GB18030:
-		var decodeBytes,_=simplifiedchinese.GB18030.NewDecoder().Bytes(byte)
-		str= string(decodeBytes)
+		var decodeBytes, _ = simplifiedchinese.GB18030.NewDecoder().Bytes(byte)
+		str = string(decodeBytes)
 	case UTF8:
 		fallthrough
 	default:
