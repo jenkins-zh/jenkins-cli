@@ -354,7 +354,11 @@ func execCommand(commandName string, params []string, writer io.Writer) (err err
 	}
 	in := bufio.NewScanner(stdout)
 	for in.Scan() {
-		cmdRe := ConvertByte2String(in.Bytes(),"GB18030")
+		cmdRe := 
+		
+		
+		
+		(in.Bytes(),"GB18030")
 		if _, err = writer.Write([]byte(cmdRe + "\n")); err != nil {
 			return
 		}
@@ -372,6 +376,7 @@ func handlerErr(errReader io.ReadCloser, writer io.Writer){
 	}
 }
 
+// ConvertByte2String convert byte to string
 func ConvertByte2String(byte []byte, charset string) string {
 	var str string
 	switch charset {
