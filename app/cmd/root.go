@@ -43,6 +43,7 @@ type RootOptions struct {
 	Proxy              string
 	ProxyAuth          string
 	ProxyDisable       bool
+	Timeout int64
 
 	Doctor    bool
 	StartTime time.Time
@@ -191,6 +192,8 @@ func init() {
 		i18n.T("The auth of proxy of connection to Jenkins"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ProxyDisable, "proxy-disable", "", false,
 		i18n.T("Disable proxy setting"))
+	rootCmd.PersistentFlags().Int64VarP(&rootOptions.Timeout, "timeout", "", 30,
+		"Timeout in second setting for http request")
 
 	rootCmd.SetOut(os.Stdout)
 
