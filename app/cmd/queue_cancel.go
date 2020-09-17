@@ -24,7 +24,8 @@ func init() {
 }
 
 var queueCancelCmd = &cobra.Command{
-	Use:   "cancel <id>",
+	Use:   "cancel",
+	Example: "jcli queue cancel 234",
 	Short: i18n.T("Cancel the queue items of your Jenkins"),
 	Long:  i18n.T("Cancel the queue items of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
