@@ -15,6 +15,7 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
+	github.com/jenkins-zh/jenkins-formulas v0.0.4
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
