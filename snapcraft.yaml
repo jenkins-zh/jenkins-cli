@@ -11,9 +11,12 @@ grade: devel
 
 parts:
   jcli:
-    plugin: dump
-    source: https://cdn.jsdelivr.net/gh/jenkins-zh/jcli-repo/jcli-linux-amd64.tar.gz
-    source-type: tar
+    plugin: go
+    go-importpath: github.com/jenkins-zh/jenkins-cli
+    source: .
+    source-type: git
+    build-pakcages:
+      - gcc
 apps:
   jcli:
     command: jcli
