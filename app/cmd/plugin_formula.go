@@ -9,12 +9,17 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"net/http"
+	"strings"
 )
 
 // PluginFormulaOption option for plugin formula command
 type PluginFormulaOption struct {
 	common.OutputOption
 
+	// OnlyRelease indicated that we only output the release version of plugins
+	OnlyRelease bool
+	// DockerBuild indicated if build docker image
+	DockerBuild  bool
 	RoundTripper http.RoundTripper
 }
 
@@ -22,6 +27,10 @@ var pluginFormulaOption PluginFormulaOption
 
 func init() {
 	pluginCmd.AddCommand(pluginFormulaCmd)
+	pluginFormulaCmd.Flags().BoolVarP(&pluginFormulaOption.OnlyRelease, "only-release", "", true,
+		`Indicated that we only output the release version of plugins`)
+	pluginFormulaCmd.Flags().BoolVarP(&pluginFormulaOption.DockerBuild, "docker-build", "", false,
+		`Indicated if build docker image`)
 
 	healthCheckRegister.Register(getCmdPath(pluginFormulaCmd), &pluginFormulaOption)
 }
@@ -40,6 +49,8 @@ var pluginFormulaCmd = &cobra.Command{
 	Short: i18n.T("Print a formula which contains all plugins come from current Jenkins server"),
 	Long: i18n.T(`Print a formula which contains all plugins come from current Jenkins server
 Want to know more about what's a Jenkins formula? Please visit https://github.com/jenkins-zh/jenkins-formulas'`),
+	Example: `Once you generate the formula file by: jcli plugin formula > test.yaml
+than you can package the Jenkins distribution by: jcli cwp --config-path test.yaml`,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jClient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
@@ -70,8 +81,8 @@ Want to know more about what's a Jenkins formula? Please visit https://github.co
 			},
 			BuildSettings: jenkinsFormula.BuildSettings{
 				Docker: jenkinsFormula.BuildDockerSetting{
-					Build: true,
-					Base:  "jenkins/jenkins:lts",
+					Build: pluginFormulaOption.DockerBuild,
+					Base:  fmt.Sprintf("jenkins/jenkins:%s", status.Version),
 					Tag:   "jenkins/jenkins-formula:v0.0.1",
 				},
 			},
@@ -84,6 +95,10 @@ Want to know more about what's a Jenkins formula? Please visit https://github.co
 			},
 		}
 		if err = jClient.GetPluginsFormula(&formula.Plugins); err == nil {
+			if pluginFormulaOption.OnlyRelease {
+				formula.Plugins = removeSnapshotPlugins(formula.Plugins)
+			}
+
 			var data []byte
 			if data, err = yaml.Marshal(formula); err == nil {
 				_, _ = cmd.OutOrStdout().Write(data)
@@ -94,4 +109,17 @@ Want to know more about what's a Jenkins formula? Please visit https://github.co
 	Annotations: map[string]string{
 		common.Since: common.VersionSince0031,
 	},
+}
+
+func removeSnapshotPlugins(plugins []jenkinsFormula.Plugin) (result []jenkinsFormula.Plugin) {
+	result = make([]jenkinsFormula.Plugin, 0)
+
+	for i := range plugins {
+		if strings.Contains(plugins[i].Source.Version, "SNAPSHOT") {
+			continue
+		}
+
+		result = append(result, plugins[i])
+	}
+	return
 }
