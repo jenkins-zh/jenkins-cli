@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ type PluginFormulaOption struct {
 	OnlyRelease bool
 	// DockerBuild indicated if build docker image
 	DockerBuild  bool
+	SortPlugins  bool
 	RoundTripper http.RoundTripper
 }
 
@@ -27,10 +29,13 @@ var pluginFormulaOption PluginFormulaOption
 
 func init() {
 	pluginCmd.AddCommand(pluginFormulaCmd)
-	pluginFormulaCmd.Flags().BoolVarP(&pluginFormulaOption.OnlyRelease, "only-release", "", true,
+	flags := pluginFormulaCmd.Flags()
+	flags.BoolVarP(&pluginFormulaOption.OnlyRelease, "only-release", "", true,
 		`Indicated that we only output the release version of plugins`)
-	pluginFormulaCmd.Flags().BoolVarP(&pluginFormulaOption.DockerBuild, "docker-build", "", false,
+	flags.BoolVarP(&pluginFormulaOption.DockerBuild, "docker-build", "", false,
 		`Indicated if build docker image`)
+	flags.BoolVarP(&pluginFormulaOption.SortPlugins, "sort-plugins", "", true,
+		`Indicated if sort the plugins by name`)
 
 	healthCheckRegister.Register(getCmdPath(pluginFormulaCmd), &pluginFormulaOption)
 }
@@ -99,6 +104,10 @@ than you can package the Jenkins distribution by: jcli cwp --config-path test.ya
 				formula.Plugins = removeSnapshotPlugins(formula.Plugins)
 			}
 
+			if pluginFormulaOption.SortPlugins {
+				formula.Plugins = sortPlugins(formula.Plugins)
+			}
+
 			var data []byte
 			if data, err = yaml.Marshal(formula); err == nil {
 				_, _ = cmd.OutOrStdout().Write(data)
@@ -109,6 +118,19 @@ than you can package the Jenkins distribution by: jcli cwp --config-path test.ya
 	Annotations: map[string]string{
 		common.Since: common.VersionSince0031,
 	},
+}
+
+func sortPlugins(plugins []jenkinsFormula.Plugin) []jenkinsFormula.Plugin {
+	sort.SliceStable(plugins, func(i, j int) bool {
+		if strings.Compare(plugins[i].GroupId, plugins[j].GroupId) > 0 {
+			return true
+		}
+		if strings.Compare(plugins[i].ArtifactId, plugins[j].ArtifactId) > 0 {
+			return true
+		}
+		return false
+	})
+	return plugins
 }
 
 func removeSnapshotPlugins(plugins []jenkinsFormula.Plugin) (result []jenkinsFormula.Plugin) {
