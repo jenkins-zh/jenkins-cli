@@ -245,7 +245,6 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		requestURL string
 	)
 
-	fmt.Println(j.URL, api)
 	var jenkinsHost *url.URL
 	if jenkinsHost, err = url.Parse(j.URL); err == nil {
 		jenkinsHost, err = jenkinsHost.Parse(api)
