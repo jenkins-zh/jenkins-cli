@@ -11,6 +11,7 @@ import (
 	"log"
 	"moul.io/http2curl"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
@@ -244,7 +245,18 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 		requestURL string
 	)
 
-	requestURL = fmt.Sprintf("%s%s", j.URL, api)
+	fmt.Println(j.URL, api)
+	var jenkinsHost *url.URL
+	if jenkinsHost, err = url.Parse(j.URL); err == nil {
+		jenkinsHost, err = jenkinsHost.Parse(api)
+	}
+
+	if err != nil {
+		err = fmt.Errorf("cannot parse the URL of Jenkins, error is %v", err)
+		return
+	}
+
+	requestURL = jenkinsHost.String()
 	logger.Debug("send HTTP request", zap.String("URL", requestURL), zap.String("method", method))
 	if req, err = http.NewRequest(method, requestURL, payload); err != nil {
 		return
