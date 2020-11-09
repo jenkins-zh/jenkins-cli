@@ -42,13 +42,20 @@ sudo mv jcli /usr/local/bin/
 
 ### Windows
 
-You can find the latest version [here](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-amd64.zip). Download the tar file and copy the uncompressed `jcli` directory into your system path.
+You can install `jcli` via [scoop](https://scoop.sh/) or [choco](https://chocolatey.org/packages/jcli/). 
+
+Or you can also find the latest version from the [release page](https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-windows-amd64.zip). 
+Download the zip file and copy the uncompressed `jcli` directory into your system path.
 
 ### Other package managers
 
 Here are other package managers:
 
-* [Scoop](https://scoop.sh/) users can use `scoop install jcli`
+| Install | Upgrade | Uninstall | Platform |
+|---|---|---|---|
+| `scoop install jcli` | | | `Windows` |
+| `choco install jcli` | `choco upgrade jcli` | `choco uninstall jcli` | `Windows` |
+| `snap install jcli` | `snap refresh jcli` | `snap remove jcli` | `Linux` |
 
 See more about [how to download jcli](docs/book/en/download.md). You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
 
