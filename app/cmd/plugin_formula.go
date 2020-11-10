@@ -105,7 +105,7 @@ than you can package the Jenkins distribution by: jcli cwp --config-path test.ya
 			}
 
 			if pluginFormulaOption.SortPlugins {
-				formula.Plugins = sortPlugins(formula.Plugins)
+				formula.Plugins = SortPlugins(formula.Plugins)
 			}
 
 			var data []byte
@@ -120,12 +120,13 @@ than you can package the Jenkins distribution by: jcli cwp --config-path test.ya
 	},
 }
 
-func sortPlugins(plugins []jenkinsFormula.Plugin) []jenkinsFormula.Plugin {
+// SortPlugins sort the plugins by asc
+func SortPlugins(plugins []jenkinsFormula.Plugin) []jenkinsFormula.Plugin {
 	sort.SliceStable(plugins, func(i, j int) bool {
-		if strings.Compare(plugins[i].GroupId, plugins[j].GroupId) > 0 {
+		if strings.Compare(plugins[j].GroupId, plugins[i].GroupId) > 0 {
 			return true
 		}
-		if strings.Compare(plugins[i].ArtifactId, plugins[j].ArtifactId) > 0 {
+		if strings.Compare(plugins[j].ArtifactId, plugins[i].ArtifactId) > 0 {
 			return true
 		}
 		return false
