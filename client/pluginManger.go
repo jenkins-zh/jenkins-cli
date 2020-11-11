@@ -101,6 +101,13 @@ func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, 
 	return
 }
 
+// GetPluginsFormula get the plugin list with Jenkins formula format
+func (p *PluginManager) GetPluginsFormula(data interface{}) (err error) {
+	api := "jcliPluginManager/pluginList"
+	err = p.RequestWithData(http.MethodGet, api, nil, nil, 200, data)
+	return
+}
+
 // FindInstalledPlugin find the exist plugin by name
 func (p *PluginManager) FindInstalledPlugin(name string) (targetPlugin *InstalledPlugin, err error) {
 	var plugins *InstalledPluginList
