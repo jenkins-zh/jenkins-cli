@@ -3,9 +3,11 @@ package cmd
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	jenkinsFormula "github.com/jenkins-zh/jenkins-formulas/pkg/common"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -37,6 +39,8 @@ func init() {
 	cwpCmd.Flags().StringVarP(&cwpOptions.Version, "version", "", "1.0-SNAPSHOT",
 		i18n.T("Version of WAR to be set."))
 
+	cwpCmd.Flags().BoolVarP(&cwpOptions.PrintVersion, "print-version", "", false,
+		i18n.T("Print the version of war.source and exit"))
 	cwpCmd.Flags().BoolVarP(&cwpOptions.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading files"))
 	cwpCmd.Flags().StringVarP(&cwpOptions.MetadataURL, "metadata-url", "",
@@ -72,6 +76,7 @@ type CWPOptions struct {
 	ShowProgress bool
 	MetadataURL  string
 	LocalCache   string
+	PrintVersion bool
 
 	ValueSet map[string]string
 }
@@ -91,8 +96,31 @@ This's a wrapper of https://github.com/jenkinsci/custom-war-packager`),
 	},
 }
 
+func (o *CWPOptions) isPrintVersion(cmd *cobra.Command) (ok bool, err error) {
+	if !o.PrintVersion {
+		return
+	}
+
+	ok = true
+	var data []byte
+	if data, err = ioutil.ReadFile(o.ConfigPath); err != nil {
+		return
+	}
+
+	cwp := &jenkinsFormula.CustomWarPackage{}
+	if err = yaml.Unmarshal(data, cwp); err == nil {
+		cmd.Println(cwp.War.Source.Version)
+	}
+	return
+}
+
 // Run is the main logic of cwp cmd
 func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
+	var ok bool
+	if ok, err = o.isPrintVersion(cmd); ok || err != nil {
+		return
+	}
+
 	localCWP := o.getLocalCWP()
 	_, err = os.Stat(localCWP)
 	if os.IsNotExist(err) {
@@ -123,15 +151,14 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 			cwpArgs = append(cwpArgs, "--installArtifacts")
 		}
 
-		if o.ConfigPath != "" {
-			configPath := o.ConfigPath
-			if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
-				return
-			}
-			defer os.RemoveAll(configPath)
-
-			cwpArgs = append(cwpArgs, "-configPath", configPath)
+		configPath := o.ConfigPath
+		if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
+			return
 		}
+		defer func() {
+			_ = os.RemoveAll(configPath)
+		}()
+		cwpArgs = append(cwpArgs, "-configPath", configPath)
 
 		if o.TmpDir != "" {
 			cwpArgs = append(cwpArgs, "-tmpDir", o.TmpDir)
