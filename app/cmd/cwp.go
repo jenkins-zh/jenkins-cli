@@ -83,7 +83,9 @@ var cwpCmd = &cobra.Command{
 	Short: i18n.T("Custom Jenkins WAR packager for Jenkins"),
 	Long: i18n.T(`Custom Jenkins WAR packager for Jenkins
 This's a wrapper of https://github.com/jenkinsci/custom-war-packager`),
-	RunE: cwpOptions.Run,
+	PreRunE: common.ExistsRegularFile("config-path"),
+	RunE:    cwpOptions.Run,
+	Example: `jcli cwp --config-path test.yaml`,
 	Annotations: map[string]string{
 		common.Since: "v0.0.27",
 	},
@@ -138,6 +140,7 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		if o.Version != "" {
 			cwpArgs = append(cwpArgs, "-version", o.Version)
 		}
+
 		err = util.Exec(binary, cwpArgs, env, o.SystemCallExec)
 	}
 	return
