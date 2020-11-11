@@ -161,8 +161,8 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
-github.com/jenkins-zh/jenkins-formulas v0.0.4 h1:GbfhZB9O0HESb19afvXGatI5EkwBnjHLQHsN48dwGtw=
-github.com/jenkins-zh/jenkins-formulas v0.0.4/go.mod h1:zS8fm8u5L6FcjZM0QznXsLV9T2UtSVK+hT6Sm76iUZ4=
+github.com/jenkins-zh/jenkins-formulas v0.0.5 h1:6d/WoZCSdjTMRry1wHRe2rrf6zQHlfXmaPbp0Bi3I6w=
+github.com/jenkins-zh/jenkins-formulas v0.0.5/go.mod h1:zS8fm8u5L6FcjZM0QznXsLV9T2UtSVK+hT6Sm76iUZ4=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
