@@ -15,6 +15,8 @@ require (
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
+	github.com/jenkins-zh/jenkins-formulas v0.0.5
+	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -22,7 +24,6 @@ require (
 	github.com/onsi/gomega v1.10.3
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/errors v0.9.1
-	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.6.1

@@ -36,7 +36,7 @@ var _ = Describe("Runner test command", func() {
 
 	Context("basic cases", func() {
 		It("should pass", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -48,7 +48,7 @@ var _ = Describe("Runner test command", func() {
 		})
 
 		It("Empty file path", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

@@ -71,7 +71,7 @@ jobs:
           name: windows
           path: bin/windows/jcli.exe
 
-      - name: Test
-        run: |
-          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make test
+#      - name: Test
+#        run: |
+#          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+#          make test

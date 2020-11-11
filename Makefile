@@ -26,6 +26,7 @@ darwin:
 linux:
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
+	rm -rf jcli && ln -s bin/linux/$(NAME) jcli
 
 win:
 	go get github.com/inconshreveable/mousetrap
