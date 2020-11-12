@@ -43,9 +43,10 @@ type CenterStartOption struct {
 	Formula      string
 	RandomWebDir bool
 
-	Mode   string
-	Image  string
-	DryRun bool
+	Mode          string
+	Image         string
+	ContainerUser string
+	DryRun        bool
 }
 
 var centerStartOption CenterStartOption
@@ -91,6 +92,8 @@ func init() {
 		i18n.T("Which mode do you want to run. Supported mode contains: java, docker"))
 	flags.StringVarP(&centerStartOption.Image, "image", "", "jenkins/jenkins",
 		i18n.T("Which docker image do you want to run. It works only the mode is docker"))
+	flags.StringVarP(&centerStartOption.ContainerUser, "c-user", "", "jenkins/jenkins",
+		i18n.T("Container Username or UID (format: <name|uid>[:<group|gid>])"))
 
 	flags.BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
 		i18n.T("If start jenkins.war in a random web dir"))
@@ -153,6 +156,10 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		dockerArgs := []string{"docker", "run"}
 		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s/.jenkins-cli/cache/%s/web:/var/jenkins_home", userHome, centerStartOption.Version))
 		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:8080", centerStartOption.Port))
+
+		if centerStartOption.ContainerUser != "" {
+			dockerArgs = append(dockerArgs, "-u", centerStartOption.ContainerUser)
+		}
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
 		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 	}
