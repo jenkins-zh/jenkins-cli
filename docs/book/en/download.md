@@ -24,6 +24,7 @@ Add deb source repo by the following command:
 
 ```
 echo "deb [trusted=yes] https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/apt/sources.list
+sudo apt update
 ```
 
 then you can install it by: `sudo apt-get install jcli`
