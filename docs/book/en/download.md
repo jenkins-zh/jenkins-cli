@@ -12,16 +12,17 @@ Get all versions from [here](https://dl.bintray.com/jenkins-zh/generic/jenkins-c
 
 Add YUM source repo by the following command:
 
-\`\`\`shell script wget [https://bintray.com/jenkins-zh/rpm/rpm](https://bintray.com/jenkins-zh/rpm/rpm) -O /etc/yum.repos.d/bintray-jcli.repo
+```
+wget [https://bintray.com/jenkins-zh/rpm/rpm](https://bintray.com/jenkins-zh/rpm/rpm) -O /etc/yum.repos.d/bintray-jcli.repo
+```
 
-```text
 then you can install it by: `yum install jcli`
 
 ## Debian
 
 Add deb source repo by the following command:
 
-```shell script
+```
 echo "deb https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/apt/sources.list
 ```
 
