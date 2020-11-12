@@ -23,7 +23,7 @@ then you can install it by: `yum install jcli`
 Add deb source repo by the following command:
 
 ```
-echo "deb https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/apt/sources.list
+echo "deb [trusted=yes] https://dl.bintray.com/jenkins-zh/deb wheezy main" | sudo tee -a /etc/apt/sources.list
 ```
 
 then you can install it by: `sudo apt-get install jcli`
