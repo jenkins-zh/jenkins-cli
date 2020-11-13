@@ -92,7 +92,7 @@ func init() {
 		i18n.T("Which mode do you want to run. Supported mode contains: java, docker"))
 	flags.StringVarP(&centerStartOption.Image, "image", "", "jenkins/jenkins",
 		i18n.T("Which docker image do you want to run. It works only the mode is docker"))
-	flags.StringVarP(&centerStartOption.ContainerUser, "c-user", "", "jenkins/jenkins",
+	flags.StringVarP(&centerStartOption.ContainerUser, "c-user", "", "",
 		i18n.T("Container Username or UID (format: <name|uid>[:<group|gid>])"))
 
 	flags.BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
