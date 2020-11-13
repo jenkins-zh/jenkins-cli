@@ -189,24 +189,30 @@ func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) 
 
 // installPluginWithVersion install a plugin by name & version
 func (p *PluginManager) installPluginWithVersion(name string) (err error) {
+	pluginName := "%s.hpi"
+	defer os.Remove(fmt.Sprintf(pluginName, name))
+
+	if err = p.DownloadPluginWithVersion(name); err == nil {
+		err = p.Upload(fmt.Sprintf(pluginName, name))
+	}
+	return
+}
+
+// DownloadPluginWithVersion downloads a plugin with name and version
+func (p *PluginManager) DownloadPluginWithVersion(nameWithVer string) error {
 	pluginAPI := PluginAPI{
 		RoundTripper: p.RoundTripper,
 		UseMirror:    p.UseMirror,
 		MirrorURL:    p.MirrorURL,
 		ShowProgress: p.ShowProgress,
 	}
-	pluginName := "%s.hpi"
-	pluginVersion := strings.Split(name, "@")
 
-	defer os.Remove(fmt.Sprintf(pluginName, name))
-	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
-		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+	pluginVersion := strings.Split(nameWithVer, "@")
+	name := pluginVersion[0]
+	version := pluginVersion[1]
+	url := fmt.Sprintf("https://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi", name, version, name)
 
-	url = pluginAPI.getMirrorURL(url)
-	if err = pluginAPI.download(url, name); err == nil {
-		err = p.Upload(fmt.Sprintf(pluginName, name))
-	}
-	return
+	return pluginAPI.download(pluginAPI.getMirrorURL(url), name)
 }
 
 // UninstallPlugin uninstall a plugin by name
