@@ -13,7 +13,17 @@ Get all versions from [here](https://dl.bintray.com/jenkins-zh/generic/jenkins-c
 Add YUM source repo by the following command:
 
 ```
-wget [https://bintray.com/jenkins-zh/rpm/rpm](https://bintray.com/jenkins-zh/rpm/rpm) -O /etc/yum.repos.d/bintray-jcli.repo
+cat > bintray-jenkins-zh-rpm.repo <<EOF
+#bintraybintray-jenkins-zh-rpm - packages by jenkins-zh from Bintray
+[bintraybintray-jenkins-zh-rpm]
+name=bintray-jenkins-zh-rpm
+baseurl=https://dl.bintray.com/jenkins-zh/rpm
+gpgcheck=0
+repo_gpgcheck=0
+enabled=1
+EOF
+sudo mv bintray-jenkins-zh-rpm.repo /etc/yum.repos.d/
+sudo yum update
 ```
 
 then you can install it by: `yum install jcli`

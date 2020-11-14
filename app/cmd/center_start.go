@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -43,7 +44,10 @@ type CenterStartOption struct {
 	Formula      string
 	RandomWebDir bool
 
-	DryRun bool
+	Mode          string
+	Image         string
+	ContainerUser string
+	DryRun        bool
 }
 
 var centerStartOption CenterStartOption
@@ -52,43 +56,51 @@ func init() {
 	jenkinsVersion := util.GetEnvOrDefault("JCLI_JENKINS_VERSION", "2.249.1")
 
 	centerCmd.AddCommand(centerStartCmd)
-	centerStartCmd.Flags().IntVarP(&centerStartOption.Port, "port", "", 8080,
+	flags := centerStartCmd.Flags()
+	flags.IntVarP(&centerStartOption.Port, "port", "", 8080,
 		i18n.T("Port of Jenkins"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.Context, "context", "", "/",
+	flags.StringVarP(&centerStartOption.Context, "context", "", "/",
 		i18n.T("Web context of Jenkins server"))
-	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.Environments, "env", "", nil,
+	flags.StringArrayVarP(&centerStartOption.Environments, "env", "", nil,
 		i18n.T("Environments for the Jenkins which as key-value format"))
-	centerStartCmd.Flags().StringArrayVarP(&centerStartOption.System, "sys", "", nil,
+	flags.StringArrayVarP(&centerStartOption.System, "sys", "", nil,
 		i18n.T("System property key-value"))
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
+	flags.BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.AdminCanGenerateNewTokens, "admin-can-generate-new-tokens", "", false,
+	flags.BoolVarP(&centerStartOption.AdminCanGenerateNewTokens, "admin-can-generate-new-tokens", "", false,
 		i18n.T("If enabled, the users with administer permissions can generate new tokens for other users"))
 
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
+	flags.BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
+	flags.StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
 		i18n.T("The of version of jenkins.war. You can give it another default value by setting env JCLI_JENKINS_VERSION"))
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
+	flags.BoolVarP(&centerStartOption.LTS, "lts", "", true,
 		i18n.T("If you want to download Jenkins as LTS"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.Formula, "formula", "", "",
+	flags.StringVarP(&centerStartOption.Formula, "formula", "", "",
 		i18n.T("The formula of jenkins.war, only support zh currently"))
 
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
+	flags.BoolVarP(&centerStartOption.HTTPSEnable, "https-enable", "", false,
 		i18n.T("If you want to enable https"))
-	centerStartCmd.Flags().IntVarP(&centerStartOption.HTTPSPort, "https-port", "", 8083,
+	flags.IntVarP(&centerStartOption.HTTPSPort, "https-port", "", 8083,
 		i18n.T("The port of https protocol"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.HTTPSCertificate, "https-cert", "", "",
+	flags.StringVarP(&centerStartOption.HTTPSCertificate, "https-cert", "", "",
 		i18n.T("Certificate file path for https"))
-	centerStartCmd.Flags().StringVarP(&centerStartOption.HTTPSPrivateKey, "https-private", "", "",
+	flags.StringVarP(&centerStartOption.HTTPSPrivateKey, "https-private", "", "",
 		i18n.T("Private key file path for https"))
 
-	centerStartCmd.Flags().IntVarP(&centerStartOption.ConcurrentIndexing, "concurrent-indexing", "", -1,
+	flags.IntVarP(&centerStartOption.ConcurrentIndexing, "concurrent-indexing", "", -1,
 		i18n.T("Concurrent indexing limit, take this value only it is bigger than -1"))
 
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
+	flags.StringVarP(&centerStartOption.Mode, "mode", "m", "java",
+		i18n.T("Which mode do you want to run. Supported mode contains: java, docker"))
+	flags.StringVarP(&centerStartOption.Image, "image", "", "jenkins/jenkins",
+		i18n.T("Which docker image do you want to run. It works only the mode is docker"))
+	flags.StringVarP(&centerStartOption.ContainerUser, "c-user", "", "",
+		i18n.T("Container Username or UID (format: <name|uid>[:<group|gid>])"))
+
+	flags.BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
 		i18n.T("If start jenkins.war in a random web dir"))
-	centerStartCmd.Flags().BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
+	flags.BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
 
 	err := centerStartCmd.RegisterFlagCompletionFunc("version", func(cmd *cobra.Command, args []string, toComplete string) (strings []string, directive cobra.ShellCompDirective) {
@@ -120,75 +132,121 @@ var centerStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: i18n.T("Start Jenkins server from a cache directory"),
 	Long:  i18n.T("Start Jenkins server from a cache directory"),
-	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		var userHome string
-		if userHome, err = homedir.Dir(); err != nil {
-			return
-		}
+	RunE:  centerStartOption.run,
+}
 
-		jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, centerStartOption.Version)
+func (c *CenterStartOption) run(cmd *cobra.Command, _ []string) (err error) {
+	switch c.Mode {
+	case "java":
+		err = c.createJavaArgs(cmd)
+	case "docker":
+		err = c.createDockerArgs(cmd)
+	}
+	return
+}
 
-		logger.Info("prepare to download jenkins.war", zap.String("localPath", jenkinsWar))
-
-		if !centerStartOption.DryRun {
-			if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
-				download := &CenterDownloadOption{
-					Mirror:       "default",
-					Formula:      centerStartOption.Formula,
-					LTS:          centerStartOption.LTS,
-					Output:       jenkinsWar,
-					ShowProgress: true,
-					Version:      centerStartOption.Version,
-				}
-
-				if err = download.DownloadJenkins(); err != nil {
-					return
-				}
-			}
-		}
-
-		var binary string
-		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
-		if err == nil {
-			env := os.Environ()
-
-			if centerStartOption.RandomWebDir {
-				randomWebDir := fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version)
-				defer func(logger helper.Printer, randomWebDir string) {
-					if err := os.RemoveAll(randomWebDir); err != nil {
-						logger.PrintErr(fmt.Sprintf("remove random web dir [%s] of Jenkins failed, %#v", randomWebDir, err))
-					}
-				}(cmd, randomWebDir)
-
-				env = append(env, randomWebDir)
-			} else {
-				env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
-			}
-
-			if centerStartOption.Environments != nil {
-				for _, item := range centerStartOption.Environments {
-					env = append(env, item)
-				}
-			}
-
-			jenkinsWarArgs := []string{"java"}
-			jenkinsWarArgs = centerStartOption.setSystemProperty(jenkinsWarArgs)
-			jenkinsWarArgs = append(jenkinsWarArgs, "-jar", jenkinsWar)
-			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpPort=%d", centerStartOption.Port))
-			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin")
-			jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.roles.admin=admin")
-			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
-
-			if centerStartOption.HTTPSEnable {
-				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsPort=%d", centerStartOption.HTTPSPort))
-				jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsCertificate=%s", centerStartOption.HTTPSCertificate),
-					fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
-			}
-
-			err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
-		}
+func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
+	var userHome string
+	if userHome, err = homedir.Dir(); err != nil {
 		return
-	},
+	}
+
+	var binary string
+	binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
+	if err == nil {
+		env := os.Environ()
+
+		dockerArgs := []string{"docker", "run"}
+		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s/.jenkins-cli/cache/%s/web:/var/jenkins_home", userHome, centerStartOption.Version))
+		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:8080", centerStartOption.Port))
+
+		if centerStartOption.ContainerUser != "" {
+			dockerArgs = append(dockerArgs, "-u", centerStartOption.ContainerUser)
+		}
+
+		javaOpts := ""
+		args := make([]string, 0)
+		args = c.setSystemProperty(args)
+		for _, arg := range args {
+			javaOpts += " " + arg
+		}
+		if strings.TrimSpace(javaOpts) != "" {
+			dockerArgs = append(dockerArgs, "-e", fmt.Sprintf("JAVA_OPTS=%s", strings.TrimSpace(javaOpts)))
+		}
+
+		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
+		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
+	}
+	return
+}
+
+func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
+	var userHome string
+	if userHome, err = homedir.Dir(); err != nil {
+		return
+	}
+	jenkinsWar := fmt.Sprintf("%s/.jenkins-cli/cache/%s/jenkins.war", userHome, centerStartOption.Version)
+
+	logger.Info("prepare to download jenkins.war", zap.String("localPath", jenkinsWar))
+
+	if !centerStartOption.DryRun {
+		if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
+			download := &CenterDownloadOption{
+				Mirror:       "default",
+				Formula:      centerStartOption.Formula,
+				LTS:          centerStartOption.LTS,
+				Output:       jenkinsWar,
+				ShowProgress: true,
+				Version:      centerStartOption.Version,
+			}
+
+			if err = download.DownloadJenkins(); err != nil {
+				return
+			}
+		}
+	}
+
+	var binary string
+	binary, err = util.LookPath("java", centerStartOption.LookPathContext)
+	if err == nil {
+		env := os.Environ()
+
+		if centerStartOption.RandomWebDir {
+			randomWebDir := fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version)
+			defer func(logger helper.Printer, randomWebDir string) {
+				if err := os.RemoveAll(randomWebDir); err != nil {
+					logger.PrintErr(fmt.Sprintf("remove random web dir [%s] of Jenkins failed, %#v", randomWebDir, err))
+				}
+			}(cmd, randomWebDir)
+
+			env = append(env, randomWebDir)
+		} else {
+			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+		}
+
+		if centerStartOption.Environments != nil {
+			for _, item := range centerStartOption.Environments {
+				env = append(env, item)
+			}
+		}
+
+		jenkinsWarArgs := []string{"java"}
+		jenkinsWarArgs = centerStartOption.setSystemProperty(jenkinsWarArgs)
+		jenkinsWarArgs = append(jenkinsWarArgs, "-jar", jenkinsWar)
+		jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpPort=%d", centerStartOption.Port))
+		jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.passwd.admin=admin")
+		jenkinsWarArgs = append(jenkinsWarArgs, "--argumentsRealm.roles.admin=admin")
+		jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
+
+		if centerStartOption.HTTPSEnable {
+			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsPort=%d", centerStartOption.HTTPSPort))
+			jenkinsWarArgs = append(jenkinsWarArgs, fmt.Sprintf("--httpsCertificate=%s", centerStartOption.HTTPSCertificate),
+				fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
+		}
+
+		err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
+	}
+	return
 }
 
 func (c *CenterStartOption) setSystemProperty(jenkinsWarArgs []string) []string {
