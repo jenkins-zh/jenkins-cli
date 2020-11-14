@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -162,6 +163,17 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		if centerStartOption.ContainerUser != "" {
 			dockerArgs = append(dockerArgs, "-u", centerStartOption.ContainerUser)
 		}
+
+		javaOpts := ""
+		args := make([]string, 0)
+		args = c.setSystemProperty(args)
+		for _, arg := range args {
+			javaOpts += " " + arg
+		}
+		if strings.TrimSpace(javaOpts) != "" {
+			dockerArgs = append(dockerArgs, "-e", fmt.Sprintf("JAVA_OPTS=%s", strings.TrimSpace(javaOpts)))
+		}
+
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
 		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 	}
