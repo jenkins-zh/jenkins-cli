@@ -1,12 +1,13 @@
 name: Backup Git repository
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - master
 
 jobs:
-  backup:
+  BackupBinary:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.13
@@ -46,7 +47,10 @@ jobs:
           git config --local user.name "rick" && git add . && \
           git commit -m 'Auto commit by rick bot' && \
           git push https://linuxsuren:${{ secrets.GITHUB_SECRETS }}@github.com/jenkins-zh/jcli-repo.git
-
+  BackupGit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
     - name: backup
       uses: jenkins-zh/git-backup-actions@v0.0.3
       env:
