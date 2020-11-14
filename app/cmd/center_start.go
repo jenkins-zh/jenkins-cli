@@ -49,7 +49,7 @@ type CenterStartOption struct {
 var centerStartOption CenterStartOption
 
 func init() {
-	jenkinsVersion := util.GetEnvOrDefault("JCLI_JENKINS_VERSION", "2.190.3")
+	jenkinsVersion := util.GetEnvOrDefault("JCLI_JENKINS_VERSION", "2.249.1")
 
 	centerCmd.AddCommand(centerStartCmd)
 	centerStartCmd.Flags().IntVarP(&centerStartOption.Port, "port", "", 8080,
