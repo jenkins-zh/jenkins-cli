@@ -68,7 +68,7 @@ func init() {
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
-		i18n.T("The of version of jenkins.war"))
+		i18n.T("The of version of jenkins.war. You can give it another default value by setting env JCLI_JENKINS_VERSION"))
 	centerStartCmd.Flags().BoolVarP(&centerStartOption.LTS, "lts", "", true,
 		i18n.T("If you want to download Jenkins as LTS"))
 	centerStartCmd.Flags().StringVarP(&centerStartOption.Formula, "formula", "", "",
