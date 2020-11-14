@@ -60,6 +60,27 @@ func SetProxy(proxy, proxyAuth string, tr *http.Transport) (err error) {
 	return
 }
 
+func (h *HTTPDownloader) fetchProxyFromEnv(scheme string) {
+	allProxy := os.Getenv("all_proxy")
+	httpProxy := os.Getenv("http_proxy")
+	httpsProxy := os.Getenv("https_proxy")
+
+	if allProxy != "" {
+		h.Proxy = allProxy
+	} else {
+		switch scheme {
+		case "http":
+			if httpProxy != "" {
+				h.Proxy = httpProxy
+			}
+		case "https":
+			if httpsProxy != "" {
+				h.Proxy = httpsProxy
+			}
+		}
+	}
+}
+
 // DownloadFile download a file with the progress
 func (h *HTTPDownloader) DownloadFile() error {
 	filepath, downloadURL, showProgress := h.TargetFilePath, h.URL, h.ShowProgress
@@ -79,6 +100,7 @@ func (h *HTTPDownloader) DownloadFile() error {
 		trp := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: h.InsecureSkipVerify},
 		}
+		h.fetchProxyFromEnv(req.URL.Scheme)
 		if err = SetProxy(h.Proxy, h.ProxyAuth, trp); err != nil {
 			return err
 		}

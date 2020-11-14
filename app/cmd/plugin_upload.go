@@ -31,7 +31,7 @@ type PluginUploadOption struct {
 
 	common.HookOption
 
-	pluginFilePath string
+	pluginFilePathArray []string
 }
 
 var pluginUploadOption PluginUploadOption
@@ -107,9 +107,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 				}
 			}
 
-			pluginUploadOption.pluginFilePath = fmt.Sprintf("%s.hpi", file.Name())
+			pluginUploadOption.pluginFilePathArray = []string{fmt.Sprintf("%s.hpi", file.Name())}
 			downloader := util.HTTPDownloader{
-				TargetFilePath: pluginUploadOption.pluginFilePath,
+				TargetFilePath: pluginUploadOption.pluginFilePathArray[0],
 				URL:            pluginUploadOption.Remote,
 				UserName:       pluginUploadOption.RemoteUser,
 				Password:       pluginUploadOption.RemotePassword,
@@ -130,9 +130,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			dirName = strings.Replace(dirName, "-plugin", "", -1)
 			path += fmt.Sprintf("/target/%s.hpi", dirName)
 
-			pluginUploadOption.pluginFilePath = path
+			pluginUploadOption.pluginFilePathArray = []string{path}
 		} else {
-			pluginUploadOption.pluginFilePath = args[0]
+			pluginUploadOption.pluginFilePathArray = args
 		}
 		return
 	},
@@ -158,11 +158,15 @@ jcli plugin upload sample.hpi --show-progress=false`,
 
 		if pluginUploadOption.Remote != "" {
 			defer func() {
-				_ = os.Remove(pluginUploadOption.pluginFilePath)
+				_ = os.Remove(pluginUploadOption.pluginFilePathArray[0])
 			}()
 		}
 
-		err = jclient.Upload(pluginUploadOption.pluginFilePath)
+		for _, item := range pluginUploadOption.pluginFilePathArray {
+			if err = jclient.Upload(item); err != nil {
+				break
+			}
+		}
 		return
 	},
 }
