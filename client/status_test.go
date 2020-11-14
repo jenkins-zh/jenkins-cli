@@ -32,7 +32,7 @@ var _ = Describe("status test", func() {
 		ctrl.Finish()
 	})
 
-	Context("Get", func() {
+	Context("Get status", func() {
 		It("should success", func() {
 			statusClient.UserName = username
 			statusClient.Token = password

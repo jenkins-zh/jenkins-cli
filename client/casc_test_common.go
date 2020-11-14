@@ -8,14 +8,14 @@ import (
 
 // PrepareForSASCReload only for test
 func PrepareForSASCReload(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
-	request, _ := http.NewRequest("POST",
+	request, _ := http.NewRequest(http.MethodPost,
 		fmt.Sprintf("%s/configuration-as-code/reload", rootURL), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
 // PrepareForSASCApply only for test
 func PrepareForSASCApply(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
-	request, _ := http.NewRequest("POST",
+	request, _ := http.NewRequest(http.MethodPost,
 		fmt.Sprintf("%s/configuration-as-code/apply", rootURL), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
@@ -23,7 +23,7 @@ func PrepareForSASCApply(roundTripper *mhttp.MockRoundTripper, rootURL, user, pa
 // PrepareForSASCExport only for test
 func PrepareForSASCExport(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) (
 	response *http.Response) {
-	request, _ := http.NewRequest("POST",
+	request, _ := http.NewRequest(http.MethodPost,
 		fmt.Sprintf("%s/configuration-as-code/export", rootURL), nil)
 	response = PrepareCommonPost(request, "sample", roundTripper, user, password, rootURL)
 	return
@@ -38,7 +38,7 @@ func PrepareForSASCExportWithCode(roundTripper *mhttp.MockRoundTripper, rootURL,
 // PrepareForSASCSchema only for test
 func PrepareForSASCSchema(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) (
 	response *http.Response) {
-	request, _ := http.NewRequest("POST",
+	request, _ := http.NewRequest(http.MethodPost,
 		fmt.Sprintf("%s/configuration-as-code/schema", rootURL), nil)
 	response = PrepareCommonPost(request, "sample", roundTripper, user, password, rootURL)
 	return

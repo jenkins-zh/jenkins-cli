@@ -19,7 +19,7 @@ import (
 // PrepareForEmptyAvaiablePluginList only for test
 func PrepareForEmptyAvaiablePluginList(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
+	request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/pluginManager/plugins", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -87,9 +87,9 @@ func PrepareForManyAvaiablePlugin(roundTripper *mhttp.MockRoundTripper, rootURL 
 func PrepareForEmptyInstalledPluginList(roundTripper *mhttp.MockRoundTripper, rootURL string, depth int) (
 	request *http.Request, response *http.Response) {
 	if depth > 1 {
-		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth), nil)
+		request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/pluginManager/api/json?depth=%d", rootURL, depth), nil)
 	} else {
-		request, _ = http.NewRequest("GET", fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
+		request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/pluginManager/api/json?depth=1", rootURL), nil)
 	}
 	response = &http.Response{
 		StatusCode: 200,
@@ -181,7 +181,7 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 
 	io.Copy(part, tmpfile)
 
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/uploadPlugin", rootURL), nil)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pluginManager/uploadPlugin", rootURL), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 	response = &http.Response{
@@ -200,7 +200,7 @@ func PrepareForUploadPlugin(roundTripper *mhttp.MockRoundTripper, rootURL string
 // PrepareForUninstallPlugin only for test
 func PrepareForUninstallPlugin(roundTripper *mhttp.MockRoundTripper, rootURL, pluginName string) (
 	request *http.Request, response *http.Response, requestCrumb *http.Request, responseCrumb *http.Response) {
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/plugin/%s/doUninstall", rootURL, pluginName), nil)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pluginManager/plugin/%s/doUninstall", rootURL, pluginName), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response = &http.Response{
 		StatusCode: 200,
@@ -225,7 +225,7 @@ func PrepareForUninstallPluginWith500(roundTripper *mhttp.MockRoundTripper, root
 
 // PrepareCancelQueue only for test
 func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/queue/cancelItem?id=1", rootURL), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/queue/cancelItem?id=1", rootURL), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response := &http.Response{
 		StatusCode: 200,
@@ -244,7 +244,7 @@ func PrepareCancelQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, pas
 
 // PrepareGetQueue only for test
 func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/queue/api/json", rootURL), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/queue/api/json", rootURL), nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Header:     map[string][]string{},
@@ -284,7 +284,7 @@ func PrepareGetQueue(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd
 // PrepareForRequestUpdateCenter only for the test case
 func PrepareForRequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	requestCenter *http.Request, responseCenter *http.Response) {
-	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	requestCenter, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
 	responseCenter = &http.Response{
 		StatusCode: 200,
 		Request:    requestCenter,
@@ -362,7 +362,7 @@ func PrepareForRequestUpdateCenter(roundTripper *mhttp.MockRoundTripper, rootURL
 // PrepareForNoAvailablePlugins only for the test case
 func PrepareForNoAvailablePlugins(roundTripper *mhttp.MockRoundTripper, rootURL string) (
 	requestCenter *http.Request, responseCenter *http.Response) {
-	requestCenter, _ = http.NewRequest("GET", fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
+	requestCenter, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/updateCenter/site/default/api/json?pretty=true&depth=2", rootURL), nil)
 	responseCenter = &http.Response{
 		StatusCode: 200,
 		Request:    requestCenter,
@@ -406,7 +406,7 @@ func PrepareForInstallPluginWithVersion(roundTripper *mhttp.MockRoundTripper, ro
 // PrepareForInstallPluginWithCode only for test
 func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
 	statusCode int, rootURL, pluginName, user, passwd string) (response *http.Response) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/pluginManager/install?plugin.%s=", rootURL, pluginName), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pluginManager/install?plugin.%s=", rootURL, pluginName), nil)
 	request.Header.Add("CrumbRequestField", "Crumb")
 	response = &http.Response{
 		StatusCode: statusCode,
@@ -429,7 +429,7 @@ func PrepareForInstallPluginWithCode(roundTripper *mhttp.MockRoundTripper,
 // PrepareForPipelineJob only for test
 func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, passwd string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/job/test/restFul", rootURL), nil)
+	request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/test/restFul", rootURL), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -448,7 +448,7 @@ func PrepareForPipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, user, 
 func PrepareForUpdatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, script, user, password string) {
 	formData := url.Values{}
 	formData.Add("script", script)
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/test/restFul/update?%s", rootURL, formData.Encode()), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/test/restFul/update?%s", rootURL, formData.Encode()), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
@@ -464,7 +464,7 @@ func PrepareForCreatePipelineJob(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	}
 	payload := strings.NewReader(formData.Encode())
 
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/view/all/createItem", rootURL), payload)
 	request.Header.Add(util.ContentType, util.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return

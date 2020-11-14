@@ -44,7 +44,7 @@ var _ = Describe("center command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,
@@ -57,7 +57,7 @@ var _ = Describe("center command", func() {
 			roundTripper.EXPECT().
 				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/updateCenter/api/json?pretty=false&depth=1", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/updateCenter/api/json?pretty=false&depth=1", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,

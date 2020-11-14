@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"golang.org/x/text/encoding/simplifiedchinese"
 	"io"
 	"log"
 	"os"
@@ -14,6 +17,7 @@ import (
 	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
+	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 
@@ -39,6 +43,7 @@ type RootOptions struct {
 	Proxy              string
 	ProxyAuth          string
 	ProxyDisable       bool
+	Timeout int64
 
 	Doctor    bool
 	StartTime time.Time
@@ -187,13 +192,22 @@ func init() {
 		i18n.T("The auth of proxy of connection to Jenkins"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOptions.ProxyDisable, "proxy-disable", "", false,
 		i18n.T("Disable proxy setting"))
+	rootCmd.PersistentFlags().Int64VarP(&rootOptions.Timeout, "timeout", "", 30,
+		"Timeout in second setting for http request")
 
 	rootCmd.SetOut(os.Stdout)
 
 	loadPlugins(rootCmd)
 
+	if rootOptions.GetGitHubClient() == nil {
+		rootOptions.SetGitHubClient(github.NewClient(nil))
+	} else {
+		fmt.Println(rootOptions.GetGitHubClient())
+	}
+
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
+	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
 }
 
 // GetRootOptions returns the root options
@@ -284,6 +298,7 @@ func executePreCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error)
 			continue
 		}
 
+		logger.Debug("execute pre-cmd", zap.String("command", hook.Command))
 		if err = execute(hook.Command, writer); err != nil {
 			return
 		}
@@ -304,6 +319,7 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 			continue
 		}
 
+		logger.Debug("execute post-cmd", zap.String("command", hook.Command))
 		if err = execute(hook.Command, writer); err != nil {
 			return
 		}
@@ -313,16 +329,64 @@ func executePostCmd(cmd *cobra.Command, _ []string, writer io.Writer) (err error
 
 func execute(command string, writer io.Writer) (err error) {
 	array := strings.Split(command, " ")
-	cmd := exec.Command(array[0], array[1:]...)
-	if err = cmd.Start(); err == nil {
-		if err = cmd.Wait(); err == nil {
-			var data []byte
-			if data, err = cmd.Output(); err == nil {
-				_, _ = writer.Write(data)
-			}
+	err = execCommand(array[0], array[1:], writer)
+	return
+}
+
+const (
+	UTF8    = "UTF-8"
+	GB18030 = "GB18030"
+)
+
+func execCommand(commandName string, params []string, writer io.Writer) (err error) {
+	cmd := exec.Command(commandName, params...)
+
+	var stdout io.ReadCloser
+	var stderr io.ReadCloser
+	if stdout, err = cmd.StdoutPipe(); err != nil {
+		return
+	}
+	if stderr, err = cmd.StderrPipe(); err != nil {
+		return
+	}
+
+	go handlerErr(stderr, writer)
+	if err = cmd.Start(); err != nil {
+		return
+	}
+	in := bufio.NewScanner(stdout)
+	for in.Scan() {
+		cmdRe := ConvertByte2String(in.Bytes(), "GB18030")
+		if _, err = writer.Write([]byte(cmdRe + "\n")); err != nil {
+			return
 		}
 	}
+
+	err = cmd.Wait()
 	return
+}
+
+func handlerErr(errReader io.ReadCloser, writer io.Writer) {
+	in := bufio.NewScanner(errReader)
+	for in.Scan() {
+		cmdRe := ConvertByte2String(in.Bytes(), "GB18030")
+		_, _ = writer.Write([]byte(cmdRe + "\n"))
+	}
+}
+
+// ConvertByte2String convert byte to string
+func ConvertByte2String(byte []byte, charset string) string {
+	var str string
+	switch charset {
+	case GB18030:
+		var decodeBytes, _ = simplifiedchinese.GB18030.NewDecoder().Bytes(byte)
+		str = string(decodeBytes)
+	case UTF8:
+		fallthrough
+	default:
+		str = string(byte)
+	}
+	return str
 }
 
 // Deprecated, please replace this with getCurrentJenkinsAndClient
@@ -346,6 +410,37 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	}
 	return
+}
+
+// GetCurrentJenkinsFromOptions returns the current Jenkins
+func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
+	return getCurrentJenkinsFromOptions()
+}
+
+// GetCurrentJenkinsAndClient returns the current Jenkins
+func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
+	return getCurrentJenkinsAndClient(jClient)
+}
+
+// GetMirror returns the mirror
+func (o *RootOptions) GetMirror(name string) string {
+	return getMirror(name)
+}
+
+// GetGitHubClient returns the GitHub client
+func (o *RootOptions) GetGitHubClient() *github.Client {
+	if o.CommonOption != nil {
+		return o.CommonOption.GitHubClient
+	}
+	return nil
+}
+
+// SetGitHubClient set the GitHub client
+func (o *RootOptions) SetGitHubClient(gitHubClient *github.Client) {
+	if o.CommonOption == nil {
+		o.CommonOption = &common.CommonOption{}
+	}
+	o.CommonOption.GitHubClient = gitHubClient
 }
 
 const (

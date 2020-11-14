@@ -97,7 +97,7 @@ func TestGetLatest(t *testing.T) {
 }
 
 func prepareDownloadFileRequest(url, content string, roundTripper *mhttp.MockRoundTripper) {
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -108,7 +108,7 @@ func prepareDownloadFileRequest(url, content string, roundTripper *mhttp.MockRou
 }
 
 func prepareMavenMetadataRequest(roundTripper *mhttp.MockRoundTripper) {
-	request, _ := http.NewRequest("GET", "http://localhost/maven-metadata.xml", nil)
+	request, _ := http.NewRequest(http.MethodGet, "http://localhost/maven-metadata.xml", nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,

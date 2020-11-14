@@ -45,7 +45,7 @@ var _ = Describe("job type command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -84,7 +84,7 @@ var _ = Describe("job type command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -111,7 +111,7 @@ var _ = Describe("job type command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -138,7 +138,7 @@ var _ = Describe("job type command", func() {
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,

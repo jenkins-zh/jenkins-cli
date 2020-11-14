@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"net/http"
 )
 
 // QueueClient is the client of queue
@@ -11,7 +12,7 @@ type QueueClient struct {
 
 // Get returns the job queue
 func (q *QueueClient) Get() (status *JobQueue, err error) {
-	err = q.RequestWithData("GET", "/queue/api/json", nil, nil, 200, &status)
+	err = q.RequestWithData(http.MethodGet, "/queue/api/json", nil, nil, 200, &status)
 	return
 }
 
@@ -19,7 +20,7 @@ func (q *QueueClient) Get() (status *JobQueue, err error) {
 func (q *QueueClient) Cancel(id int) (err error) {
 	api := fmt.Sprintf("/queue/cancelItem?id=%d", id)
 	var statusCode int
-	if statusCode, err = q.RequestWithoutData("POST", api, nil, nil, 302); err != nil &&
+	if statusCode, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 302); err != nil &&
 		(statusCode == 200 ||
 			statusCode == 404) { // 404 should be an error, but no idea why it can be triggered successful
 		err = nil

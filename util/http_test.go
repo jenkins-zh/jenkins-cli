@@ -57,7 +57,7 @@ var _ = Describe("http test", func() {
 
 	Context("DownloadFile", func() {
 		It("no progress indication", func() {
-			request, _ := http.NewRequest("GET", "", nil)
+			request, _ := http.NewRequest(http.MethodGet, "", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -87,7 +87,7 @@ var _ = Describe("http test", func() {
 				Password:       "Password",
 			}
 
-			request, _ := http.NewRequest("GET", "", nil)
+			request, _ := http.NewRequest(http.MethodGet, "", nil)
 			request.SetBasicAuth(downloader.UserName, downloader.Password)
 			response := &http.Response{
 				StatusCode: 200,
@@ -123,7 +123,7 @@ var _ = Describe("http test", func() {
 				RoundTripper: roundTripper,
 			}
 
-			request, _ := http.NewRequest("GET", "", nil)
+			request, _ := http.NewRequest(http.MethodGet, "", nil)
 			response := &http.Response{}
 			roundTripper.EXPECT().
 				RoundTrip((request)).Return(response, fmt.Errorf("fake error"))
@@ -137,7 +137,7 @@ var _ = Describe("http test", func() {
 				Debug:        true,
 			}
 
-			request, _ := http.NewRequest("GET", "", nil)
+			request, _ := http.NewRequest(http.MethodGet, "", nil)
 			response := &http.Response{
 				StatusCode: 400,
 				Proto:      "HTTP/1.1",
@@ -168,7 +168,7 @@ var _ = Describe("http test", func() {
 				TargetFilePath: targetFilePath,
 			}
 
-			request, _ := http.NewRequest("GET", "", nil)
+			request, _ := http.NewRequest(http.MethodGet, "", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

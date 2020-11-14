@@ -1,5 +1,7 @@
 package client
 
+import "net/http"
+
 // CASCManager is the client of configuration as code
 type CASCManager struct {
 	JenkinsCore
@@ -12,7 +14,7 @@ func (c *CASCManager) Export() (config string, err error) {
 		statusCode int
 	)
 
-	if statusCode, data, err = c.Request("POST", "/configuration-as-code/export",
+	if statusCode, data, err = c.Request(http.MethodPost, "/configuration-as-code/export",
 		nil, nil); err == nil &&
 		statusCode != 200 {
 		err = c.ErrorHandle(statusCode, data)
@@ -28,7 +30,7 @@ func (c *CASCManager) Schema() (schema string, err error) {
 		statusCode int
 	)
 
-	if statusCode, data, err = c.Request("POST", "/configuration-as-code/schema",
+	if statusCode, data, err = c.Request(http.MethodPost, "/configuration-as-code/schema",
 		nil, nil); err == nil &&
 		statusCode != 200 {
 		err = c.ErrorHandle(statusCode, data)
@@ -39,14 +41,14 @@ func (c *CASCManager) Schema() (schema string, err error) {
 
 // Reload reload the config of configuration-as-code
 func (c *CASCManager) Reload() (err error) {
-	_, err = c.RequestWithoutData("POST", "/configuration-as-code/reload",
+	_, err = c.RequestWithoutData(http.MethodPost, "/configuration-as-code/reload",
 		nil, nil, 200)
 	return
 }
 
 // Apply apply the config of configuration-as-code
 func (c *CASCManager) Apply() (err error) {
-	_, err = c.RequestWithoutData("POST", "/configuration-as-code/apply",
+	_, err = c.RequestWithoutData(http.MethodPost, "/configuration-as-code/apply",
 		nil, nil, 200)
 	return
 }

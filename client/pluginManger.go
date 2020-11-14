@@ -78,7 +78,7 @@ var debugLogFile = "debug.html"
 func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 	api := "/pluginManager/checkUpdatesServer"
 	var response *http.Response
-	response, err = p.RequestWithResponseHeader("POST", api, nil, nil, nil)
+	response, err = p.RequestWithResponseHeader(http.MethodPost, api, nil, nil, nil)
 	if err == nil {
 		p.handleCheck(handle)(response)
 	}
@@ -87,17 +87,24 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 
 // GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	err = p.RequestWithData("GET", "/pluginManager/plugins", nil, nil, 200, &pluginList)
+	err = p.RequestWithData(http.MethodGet, "/pluginManager/plugins", nil, nil, 200, &pluginList)
 	return
 }
 
 // GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, err error) {
 	if depth > 1 {
-		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
+		err = p.RequestWithData(http.MethodGet, fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
 	} else {
-		err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+		err = p.RequestWithData(http.MethodGet, "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	}
+	return
+}
+
+// GetPluginsFormula get the plugin list with Jenkins formula format
+func (p *PluginManager) GetPluginsFormula(data interface{}) (err error) {
+	api := "jcliPluginManager/pluginList"
+	err = p.RequestWithData(http.MethodGet, api, nil, nil, 200, data)
 	return
 }
 
@@ -158,7 +165,7 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 func (p *PluginManager) installPluginsWithoutVersion(plugins string) (err error) {
 	api := fmt.Sprintf("/pluginManager/install?%s", plugins)
 	var response *http.Response
-	response, err = p.RequestWithResponse("POST", api, nil, nil)
+	response, err = p.RequestWithResponse(http.MethodPost, api, nil, nil)
 	if response != nil && response.StatusCode == 400 {
 		if errMsg, ok := response.Header["X-Error"]; ok {
 			for _, msg := range errMsg {
@@ -210,7 +217,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		data       []byte
 	)
 
-	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
+	if statusCode, data, err = p.Request(http.MethodPost, api, nil, nil); err == nil {
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if p.Debug {
@@ -230,17 +237,16 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 		return
 	}
 
-	p.AuthHandle(request)
+	if err = p.AuthHandle(request); err != nil {
+		return
+	}
 
-	client := p.GetClient()
+	jcli := p.GetClient()
 	var response *http.Response
-	if response, err = client.Do(request); err != nil {
+	if response, err = jcli.Do(request); err != nil {
 		return
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
-		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile(debugLogFile, data, 0664)
-		}
 	}
 	return err
 }
@@ -297,9 +303,9 @@ func (p *PluginManager) newfileUploadRequest(uri string, params map[string]strin
 			Title:  "Uploading",
 		}
 		progressWriter.Init()
-		req, err = http.NewRequest("POST", uri, progressWriter)
+		req, err = http.NewRequest(http.MethodPost, uri, progressWriter)
 	} else {
-		req, err = http.NewRequest("POST", uri, bytesBuffer)
+		req, err = http.NewRequest(http.MethodPost, uri, bytesBuffer)
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
