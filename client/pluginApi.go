@@ -138,7 +138,6 @@ func (d *PluginAPI) DownloadPlugins(names []string) (err error) {
 				UseMirror:    d.UseMirror,
 				MirrorURL:    d.MirrorURL,
 			}
-			fmt.Println("mirror url", d.MirrorURL)
 			if err = jclient.DownloadPluginWithVersion(name); err != nil {
 				return
 			}
