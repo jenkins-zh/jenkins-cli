@@ -126,7 +126,23 @@ func (d *PluginAPI) DownloadPlugins(names []string) (err error) {
 	plugins := make([]PluginInfo, 0)
 	for _, name := range names {
 		logger.Debug("start to collect dependency", zap.String("plugin", name))
-		plugins = append(plugins, d.collectDependencies(strings.ToLower(name))...)
+
+		if !strings.Contains(name, "@") {
+			plugins = append(plugins, d.collectDependencies(strings.ToLower(name))...)
+		} else {
+			jclient := &PluginManager{
+				JenkinsCore: JenkinsCore{
+					RoundTripper: d.RoundTripper,
+				},
+				ShowProgress: d.ShowProgress,
+				UseMirror:    d.UseMirror,
+				MirrorURL:    d.MirrorURL,
+			}
+			fmt.Println("mirror url", d.MirrorURL)
+			if err = jclient.DownloadPluginWithVersion(name); err != nil {
+				return
+			}
+		}
 	}
 
 	logger.Info("ready to download plugins", zap.Int("total", len(plugins)))
@@ -149,7 +165,7 @@ func (d *PluginAPI) getMirrorURL(url string) (mirror string) {
 	mirror = url
 	if d.UseMirror && d.MirrorURL != "" {
 		logger.Debug("replace with mirror", zap.String("original", url))
-		mirror = strings.Replace(url, "http://updates.jenkins-ci.org/download/", d.MirrorURL, -1)
+		mirror = strings.ReplaceAll(url, "https://updates.jenkins-ci.org/download/", d.MirrorURL)
 	}
 	return
 }
