@@ -88,6 +88,7 @@ Thanks to JetBrains for giving us the open source licence.
 There're a few similar projects that you might be interested in:
 
 * [jenni](https://github.com/m-sureshraj/jenni) is a Jenkins Personal Assistant
+* [jenkins-job-cli](https://github.com/gocruncher/jenkins-job-cli) Easy way to run Jenkins job from the Command Line
 
 ## Stargazers over time
 
