@@ -11,7 +11,7 @@ import (
 // JobTypeOption is the job type cmd option
 type JobTypeOption struct {
 	common.OutputOption
-	common.CommonOption
+	common.Option
 }
 
 var jobTypeOption JobTypeOption

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -17,14 +17,14 @@ import (
 
 // ComputerLaunchOption option for config list command
 type ComputerLaunchOption struct {
-	common.CommonOption
+	common.Option
 
 	Type         string
 	ShowProgress bool
 
 	/** share info between inner functions */
 	ComputerClient *client.ComputerClient
-	CurrentJenkins *JenkinsServer
+	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 }
 
@@ -55,7 +55,7 @@ var computerLaunchCmd = &cobra.Command{
 jcli agent launch agent-name --type jnlp`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
-			GetComputerClient(computerLaunchOption.CommonOption)
+			GetComputerClient(computerLaunchOption.Option)
 
 		if computerLaunchOption.Type != AgentJNLP {
 			return
@@ -138,7 +138,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 // Check do the health check of casc cmd
 func (o *ComputerLaunchOption) Check() (err error) {
 	opt := PluginOptions{
-		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
+		Option: common.Option{RoundTripper: o.RoundTripper},
 	}
 	_, err = opt.FindPlugin("pipeline-restful-api")
 	return

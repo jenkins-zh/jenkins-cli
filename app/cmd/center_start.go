@@ -18,7 +18,7 @@ import (
 
 // CenterStartOption option for upgrade Jenkins
 type CenterStartOption struct {
-	common.CommonOption
+	common.Option
 
 	Port                      int
 	Context                   string

@@ -11,7 +11,7 @@ import (
 // JobDeleteOption is the job delete option
 type JobDeleteOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 }
 
 var jobDeleteOption JobDeleteOption
@@ -20,7 +20,7 @@ func init() {
 	jobCmd.AddCommand(jobDeleteCmd)
 	jobDeleteOption.SetFlag(jobDeleteCmd)
 	jobDeleteOption.BatchOption.Stdio = common.GetSystemStdio()
-	jobDeleteOption.CommonOption.Stdio = common.GetSystemStdio()
+	jobDeleteOption.Option.Stdio = common.GetSystemStdio()
 }
 
 var jobDeleteCmd = &cobra.Command{

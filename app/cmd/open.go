@@ -3,18 +3,20 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"os"
+	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // OpenOption is the open cmd option
 type OpenOption struct {
-	common.CommonOption
+	common.Option
 	common.InteractiveOption
 
 	Browser string
@@ -59,16 +61,16 @@ JCLI_BROWSER="Google Chrome" jcli open`,
 }
 
 func (o *OpenOption) run(_ *cobra.Command, args []string) (err error) {
-	var jenkins *JenkinsServer
+	var jenkins *appCfg.JenkinsServer
 
 	var configName string
 	if len(args) > 0 {
 		configName = args[0]
 	}
 
-	if configName == "" && openOption.Interactive {
+	if configName == "" && o.Interactive {
 		jenkinsNames := getJenkinsNames()
-		configName, err = openOption.Select(jenkinsNames,
+		configName, err = o.Select(jenkinsNames,
 			i18n.T("Choose a Jenkins which you want to open:"), "")
 	}
 
@@ -86,16 +88,29 @@ func (o *OpenOption) run(_ *cobra.Command, args []string) (err error) {
 
 		if jenkins != nil && jenkins.URL != "" {
 			url := jenkins.URL
-			if openOption.Config {
+			if o.Config {
 				url = fmt.Sprintf("%s/configure", url)
 			} else if external != "" {
 				url = jenkins.Data[external]
 			}
-			browser := openOption.Browser
-			err = util.Open(url, browser, openOption.ExecContext)
+			err = o.smartOpen(url)
 		} else {
 			err = fmt.Errorf("no URL found with Jenkins %s", jenkinsName)
 		}
+	}
+	return
+}
+
+// smartOpen can open with or without specific protocol
+func (o *OpenOption) smartOpen(url string) (err error) {
+	if strings.HasPrefix(url, "ssh://") {
+		var ssh string
+		if ssh, err = exec.LookPath("ssh"); err == nil {
+			err = syscall.Exec(ssh, []string{"ssh", strings.TrimLeft(url, "ssh://")}, os.Environ())
+		}
+	} else {
+		browser := o.Browser
+		err = util.Open(url, browser, o.ExecContext)
 	}
 	return
 }

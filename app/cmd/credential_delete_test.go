@@ -153,7 +153,7 @@ var _ = Describe("credential delete command", func() {
 //	RunEditorTest(t, EditorTest{
 //		Message:        "message",
 //		DefaultContent: "hello",
-//		EditContent:    &common.CommonOption{},
+//		EditContent:    &common.Option{},
 //		Procedure: func(c *expect.Console) {
 //			c.ExpectString("message")
 //			c.SendLine("")

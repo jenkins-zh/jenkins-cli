@@ -10,7 +10,7 @@ import (
 	"os"
 
 	"github.com/atotto/clipboard"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ import (
 // ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
 	common.InteractiveOption
-	common.CommonOption
+	common.Option
 	common.BatchOption
 
 	Copy bool
@@ -32,7 +32,7 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
-	configGenerateOption.CommonOption.Stdio = common.GetSystemStdio()
+	configGenerateOption.Option.Stdio = common.GetSystemStdio()
 	configGenerateOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 
@@ -90,10 +90,10 @@ func printCfg(cmd *cobra.Command, data []byte) {
 	cmd.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
-func getSampleConfig() (sampleConfig Config) {
-	sampleConfig = Config{
+func getSampleConfig() (sampleConfig appCfg.Config) {
+	sampleConfig = appCfg.Config{
 		Current: "yourServer",
-		JenkinsServers: []JenkinsServer{
+		JenkinsServers: []appCfg.JenkinsServer{
 			{
 				Name:               "yourServer",
 				URL:                "http://localhost:8080/jenkins",
@@ -102,7 +102,7 @@ func getSampleConfig() (sampleConfig Config) {
 				InsecureSkipVerify: true,
 			},
 		},
-		Mirrors: []JenkinsMirror{
+		Mirrors: []appCfg.JenkinsMirror{
 			{
 				Name: "default",
 				URL:  "http://mirrors.jenkins.io/",

@@ -13,7 +13,7 @@ import (
 
 // PluginReleaseOptions for the plugin create command
 type PluginReleaseOptions struct {
-	common.CommonOption
+	common.Option
 
 	Batch       bool
 	Prepare     bool

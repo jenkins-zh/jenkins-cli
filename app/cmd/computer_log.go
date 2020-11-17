@@ -9,7 +9,7 @@ import (
 
 // ComputerLogOption option for config list command
 type ComputerLogOption struct {
-	common.CommonOption
+	common.Option
 }
 
 var computerLogOption ComputerLogOption
@@ -24,7 +24,7 @@ var computerLogCmd = &cobra.Command{
 	Long:  i18n.T("Output the log of the agent"),
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient, _ := GetComputerClient(computerLogOption.CommonOption)
+		jClient, _ := GetComputerClient(computerLogOption.Option)
 
 		var log string
 		if log, err = jClient.GetLog(args[0]); err == nil {

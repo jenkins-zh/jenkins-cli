@@ -12,7 +12,7 @@ import (
 // JobArtifactOption is the options of job artifact command
 type JobArtifactOption struct {
 	common.OutputOption
-	common.CommonOption
+	common.Option
 }
 
 var jobArtifactOption JobArtifactOption

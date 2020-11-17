@@ -1,4 +1,4 @@
-package config_plugin
+package config
 
 import (
 	"fmt"
@@ -11,9 +11,9 @@ import (
 )
 
 // NewConfigPluginUninstallCmd create a command to uninstall a plugin
-func NewConfigPluginUninstallCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+func NewConfigPluginUninstallCmd(opt *common.Option) (cmd *cobra.Command) {
 	jcliPluginUninstallCmd := jcliPluginUninstallCmd{
-		CommonOption: opt,
+		Option: opt,
 	}
 
 	cmd = &cobra.Command{

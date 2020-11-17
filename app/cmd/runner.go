@@ -17,7 +17,7 @@ import (
 // RunnerOption is the wrapper of jenkinsfile runner cli
 type RunnerOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 	RoundTripper http.RoundTripper
 
 	Safe            bool

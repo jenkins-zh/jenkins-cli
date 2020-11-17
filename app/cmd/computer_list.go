@@ -12,7 +12,7 @@ import (
 
 // ComputerListOption option for config list command
 type ComputerListOption struct {
-	common.CommonOption
+	common.Option
 	common.OutputOption
 }
 
@@ -28,7 +28,7 @@ var computerListCmd = &cobra.Command{
 	Short: i18n.T("List all Jenkins agents"),
 	Long:  i18n.T("List all Jenkins agents"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jClient, config := GetComputerClient(computerListOption.CommonOption)
+		jClient, config := GetComputerClient(computerListOption.Option)
 		if config == nil {
 			err = fmt.Errorf("cannot found the configuration")
 			return

@@ -18,17 +18,17 @@ gen-mock:
 
 init: gen-mock
 
-darwin:
+darwin: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 	rm -rf jcli && ln -s bin/darwin/$(NAME) jcli
 
-linux:
+linux: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
 	rm -rf jcli && ln -s bin/linux/$(NAME) jcli
 
-win:
+win: pre-build
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
@@ -54,8 +54,10 @@ copy: darwin
 copy-linux: linux
 	cp bin/linux/$(NAME) /usr/local/bin/jcli
 
-tools: i18n-tools
+get-golint:
 	go get -u golang.org/x/lint/golint
+
+tools: i18n-tools get-golint
 
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
@@ -80,9 +82,13 @@ gen-data-darwin: go-bindata-download-darwin
 
 verify: dep tools lint
 
+pre-build: fmt vet
+	go mod tidy
 
-lint:
+vet:
 	go vet ./...
+
+lint: vet
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...
 	golint -set_exit_status app/i18n/i18n.go
@@ -127,6 +133,9 @@ test:
 #	go test ./app/i18n -v -count=1
 #	go test ./app/cmd -v -count=1
 
+test-release:
+	goreleaser release --rm-dist --snapshot
+
 dep:
 	go get github.com/AlecAivazis/survey/v2
 	go get github.com/spf13/cobra
@@ -144,3 +153,6 @@ gen-data:
 
 image:
 	docker build . -t jenkinszh/jcli
+
+setup-env-centos:
+	yum install make golang -y

@@ -10,66 +10,63 @@ jobs:
     name: Build
     runs-on: macos-10.15
     steps:
-
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
           go-version: 1.13
         id: go
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v1
         with:
           version: latest
           args: check
-
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make clean gen-data-darwin tools release
+  GoLint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.13
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: Go-linter-1
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: app/cmd/...
+      - name: Go-linter-2
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: app/helper/...
+      - name: Go-linter-3
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: app/i18n/i18n.go
+      - name: Go-linter-4
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: app/.
+      - name: Go-linter-5
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: client/...
+      - name: Go-linter-6
+        uses: Jerome1337/golint-action@v1.0.2
+        with:
+          golint-path: util/...
 
 #      - name: SonarCloud Scan
 #        uses: LinuxSuRen/sonarcloud-github-action@master
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Upload PR to Bintray
-        run: |
-          pr=$(echo $GITHUB_REF | sed 's/refs\/pull\///g' | sed 's/\/merge//g')
-          echo "start to upload generic packages for pr-$pr"
-          curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X DELETE https://api.bintray.com/packages/jenkins-zh/generic/jenkins-cli/versions/pr-$pr
-          curl -T release/jcli-darwin-amd64.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-            -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:pr-$pr" \
-            https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/pr-$pr/jcli-darwin-amd64.tar.gz
-          curl -T release/jcli-linux-amd64.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-            -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:pr-$pr" \
-            https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/pr-$pr/jcli-linux-amd64.tar.gz
-          curl -T release/jcli-windows-386.tar.gz -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} \
-            -H "X-Bintray-Package:jenkins-cli" -H "X-Bintray-Version:pr-$pr" \
-            https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/pr-$pr/jcli-windows-386.tar.gz
-          curl -ulinuxsuren:${{ secrets.BINTRAY_TOKEN }} -X POST https://api.bintray.com/content/jenkins-zh/generic/jenkins-cli/pr-$pr/publish
-
-      - name: Upload darwin artifact
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: darwin
-          path: bin/darwin/jcli
-
-      - name: Upload linux artifact
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: linux
-          path: bin/linux/jcli
-
-      - name: Upload windows artifact
-        uses: actions/upload-artifact@v1.0.0
-        with:
-          name: windows
-          path: bin/windows/jcli.exe
 
 #      - name: Test
 #        run: |

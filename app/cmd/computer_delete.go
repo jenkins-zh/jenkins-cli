@@ -9,7 +9,7 @@ import (
 
 // ComputerDeleteOption option for agent delete command
 type ComputerDeleteOption struct {
-	common.CommonOption
+	common.Option
 }
 
 var computerDeleteOption ComputerDeleteOption
@@ -26,7 +26,7 @@ var computerDeleteCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	Example: `jcli agent delete agent-name`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient, _ := GetComputerClient(computerDeleteOption.CommonOption)
+		jClient, _ := GetComputerClient(computerDeleteOption.Option)
 		return jClient.Delete(args[0])
 	},
 	Annotations: map[string]string{

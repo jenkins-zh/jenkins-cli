@@ -26,7 +26,7 @@ var _ = Describe("shutdown command", func() {
 		rootOptions := GetRootOptions()
 		ctrl = gomock.NewController(GinkgoT())
 		roundTripper = mhttp.NewMockRoundTripper(ctrl)
-		rootOptions.CommonOption = &common.CommonOption{
+		rootOptions.CommonOption = &common.Option{
 			RoundTripper: roundTripper,
 		}
 		rootOptions.Jenkins = ""

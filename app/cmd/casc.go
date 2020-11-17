@@ -14,7 +14,7 @@ func init() {
 
 // CASCOptions is the option of casc
 type CASCOptions struct {
-	common.CommonOption
+	common.Option
 }
 
 var cascOptions CASCOptions
@@ -22,7 +22,7 @@ var cascOptions CASCOptions
 // Check do the health check of casc cmd
 func (o *CASCOptions) Check() (err error) {
 	opt := PluginOptions{
-		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
+		Option: common.Option{RoundTripper: o.RoundTripper},
 	}
 	_, err = opt.FindPlugin("configuration-as-code")
 	return

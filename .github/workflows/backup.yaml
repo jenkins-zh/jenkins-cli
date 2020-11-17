@@ -26,22 +26,13 @@ jobs:
         git clone https://github.com/jenkins-zh/jcli-repo
         cp release/checksums.txt jcli-repo
         cp release/jcli-darwin-amd64.tar.gz jcli-repo
-        cp release/jcli-freebsd-386.tar.gz jcli-repo
         cp release/jcli-freebsd-amd64.tar.gz jcli-repo
-        cp release/jcli-freebsd-arm.tar.gz jcli-repo
-        cp release/jcli-linux-32bit.deb jcli-repo
-        cp release/jcli-linux-32bit.rpm jcli-repo
-        cp release/jcli-linux-386.tar.gz jcli-repo
         cp release/jcli-linux-64bit.deb jcli-repo
         cp release/jcli-linux-64bit.rpm jcli-repo
         cp release/jcli-linux-amd64.tar.gz jcli-repo
         cp release/jcli-linux-arm64.tar.gz jcli-repo
-        cp release/jcli-linux-arm.deb jcli-repo
-        cp release/jcli-linux-arm.tar.gz jcli-repo
-        cp release/jcli-linux-arm.rpm jcli-repo
         cp release/jcli-linux-arm64.rpm jcli-repo
         cp release/jcli-linux-arm64.deb jcli-repo
-        cp release/jcli-windows-386.zip jcli-repo
         cp release/jcli-windows-amd64.zip jcli-repo
         cd jcli-repo && git config --local user.email "361981269@qq.com" && \
           git config --local user.name "rick" && git add . && \

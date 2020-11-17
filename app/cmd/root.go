@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
 	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
@@ -43,13 +43,13 @@ type RootOptions struct {
 	Proxy              string
 	ProxyAuth          string
 	ProxyDisable       bool
-	Timeout int64
+	Timeout            int64
 
 	Doctor    bool
 	StartTime time.Time
 	EndTime   time.Time
 
-	CommonOption *common.CommonOption
+	CommonOption *common.Option
 
 	LoggerLevel string
 }
@@ -131,7 +131,7 @@ func needReadConfig(cmd *cobra.Command) bool {
 
 	// allow sub-commands give their decisions
 	if cmd.Annotations != nil {
-		if disable, ok := cmd.Annotations[ANNOTATION_CONFIG_LOAD]; ok {
+		if disable, ok := cmd.Annotations[appCfg.ANNOTATION_CONFIG_LOAD]; ok {
 			return disable != "disable"
 		}
 	}
@@ -220,7 +220,7 @@ func GetRootCommand() *cobra.Command {
 	return rootCmd
 }
 
-func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
+func getCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
 
 	if jenkinsOpt == "" {
@@ -231,7 +231,7 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 
 	// take URL from options if it's not empty
 	if jenkinsServer == nil && rootOptions.URL != "" {
-		jenkinsServer = &JenkinsServer{}
+		jenkinsServer = &appCfg.JenkinsServer{}
 	}
 
 	if jenkinsServer != nil {
@@ -264,7 +264,7 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *JenkinsServer) {
 }
 
 // Deprecated, please use getCurrentJenkinsFromOptions instead of it
-func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *JenkinsServer) {
+func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *appCfg.JenkinsServer) {
 	if jenkinsServer = getCurrentJenkinsFromOptions(); jenkinsServer == nil {
 		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins)
 	}
@@ -334,7 +334,9 @@ func execute(command string, writer io.Writer) (err error) {
 }
 
 const (
-	UTF8    = "UTF-8"
+	// UTF8 is the chart set name
+	UTF8 = "UTF-8"
+	// GB18030 is the chart set name
 	GB18030 = "GB18030"
 )
 
@@ -390,7 +392,7 @@ func ConvertByte2String(byte []byte, charset string) string {
 }
 
 // Deprecated, please replace this with getCurrentJenkinsAndClient
-func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *JenkinsServer) {
+func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
 	jenkins = getCurrentJenkinsFromOptionsOrDie()
 	jclient.URL = jenkins.URL
 	jclient.UserName = jenkins.UserName
@@ -400,7 +402,7 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *Jenk
 	return
 }
 
-func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsServer) {
+func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
 	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL
 		jClient.UserName = jenkins.UserName
@@ -413,12 +415,12 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *JenkinsSe
 }
 
 // GetCurrentJenkinsFromOptions returns the current Jenkins
-func (o *RootOptions) GetCurrentJenkinsFromOptions() *JenkinsServer {
+func (o *RootOptions) GetCurrentJenkinsFromOptions() *appCfg.JenkinsServer {
 	return getCurrentJenkinsFromOptions()
 }
 
 // GetCurrentJenkinsAndClient returns the current Jenkins
-func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *JenkinsServer {
+func (o *RootOptions) GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) *appCfg.JenkinsServer {
 	return getCurrentJenkinsAndClient(jClient)
 }
 
@@ -438,7 +440,7 @@ func (o *RootOptions) GetGitHubClient() *github.Client {
 // SetGitHubClient set the GitHub client
 func (o *RootOptions) SetGitHubClient(gitHubClient *github.Client) {
 	if o.CommonOption == nil {
-		o.CommonOption = &common.CommonOption{}
+		o.CommonOption = &common.Option{}
 	}
 	o.CommonOption.GitHubClient = gitHubClient
 }

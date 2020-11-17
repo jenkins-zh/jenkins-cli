@@ -10,7 +10,7 @@ import (
 
 // UserEditOption is the user edit cmd option
 type UserEditOption struct {
-	common.CommonOption
+	common.Option
 
 	Description string
 }
