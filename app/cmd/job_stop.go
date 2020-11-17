@@ -12,7 +12,7 @@ import (
 // JobStopOption is the job stop option
 type JobStopOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 }
 
 var jobStopOption JobStopOption
@@ -20,7 +20,7 @@ var jobStopOption JobStopOption
 func init() {
 	jobCmd.AddCommand(jobStopCmd)
 	jobStopOption.SetFlag(jobStopCmd)
-	jobStopOption.CommonOption.Stdio = common.GetSystemStdio()
+	jobStopOption.Option.Stdio = common.GetSystemStdio()
 	jobStopOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 

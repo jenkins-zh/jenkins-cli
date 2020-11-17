@@ -10,7 +10,7 @@ import (
 // JobEnableOption is the job delete option
 type JobEnableOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 }
 
 var jobEnableOption JobEnableOption

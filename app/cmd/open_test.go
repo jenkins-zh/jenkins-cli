@@ -97,7 +97,7 @@ var _ = Describe("test open", func() {
 //			err = ioutil.WriteFile(configFile, data, 0664)
 //
 //			openOption.ExecContext = util.FakeExecCommandSuccess
-//			openOption.CommonOption.Stdio = stdio
+//			openOption.Option.Stdio = stdio
 //			rootCmd.SetArgs([]string{"open", "--interactive", "--configFile", configFile})
 //			_, err = rootCmd.ExecuteC()
 //			return

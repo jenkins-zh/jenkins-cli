@@ -11,7 +11,7 @@ import (
 
 // CenterIdentityOption option for upgrade Jenkins
 type CenterIdentityOption struct {
-	common.CommonOption
+	common.Option
 }
 
 var centerIdentityOption CenterIdentityOption

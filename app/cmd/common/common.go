@@ -21,11 +21,12 @@ import (
 )
 
 const (
+	// Since indicate when the feature war added
 	Since = "since"
 )
 
-// CommonOption contains the common options
-type CommonOption struct {
+// Option contains the common options
+type Option struct {
 	ExecContext     util.ExecContext
 	SystemCallExec  util.SystemCallExec
 	LookPathContext util.LookPathContext
@@ -242,7 +243,7 @@ type Selector interface {
 }
 
 // Editor edit a file than return the content
-func (o *CommonOption) Editor(defaultContent, message string) (content string, err error) {
+func (o *Option) Editor(defaultContent, message string) (content string, err error) {
 	var fileName string
 	if o.EditFileName != "" {
 		fileName = o.EditFileName
@@ -263,7 +264,7 @@ func (o *CommonOption) Editor(defaultContent, message string) (content string, e
 }
 
 // Select return a target
-func (o *CommonOption) Select(options []string, message, defaultOpt string) (target string, err error) {
+func (o *Option) Select(options []string, message, defaultOpt string) (target string, err error) {
 	prompt := &survey.Select{
 		Message: message,
 		Options: options,

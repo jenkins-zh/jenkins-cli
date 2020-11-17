@@ -13,7 +13,7 @@ import (
 
 // PluginCreateOptions for the plugin create command
 type PluginCreateOptions struct {
-	common.CommonOption
+	common.Option
 
 	DebugOutput bool
 }

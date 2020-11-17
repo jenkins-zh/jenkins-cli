@@ -43,7 +43,7 @@ func init() {
 // Check do the health check of plugin formula cmd
 func (o *PluginFormulaOption) Check() (err error) {
 	opt := PluginOptions{
-		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
+		Option: common.Option{RoundTripper: o.RoundTripper},
 	}
 	_, err = opt.FindPlugin("pipeline-restful-api")
 	return

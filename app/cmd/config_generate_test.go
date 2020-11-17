@@ -79,7 +79,7 @@ mirrors:
 //			configFile := path.Join(os.TempDir(), "fake.yaml")
 //			defer os.Remove(configFile)
 //			configGenerateOption.BatchOption.Stdio = stdio
-//			configGenerateOption.CommonOption.Stdio = stdio
+//			configGenerateOption.Option.Stdio = stdio
 //			rootCmd.SetArgs([]string{"config", "generate", "--interactive", "--copy=false", "--configFile=" + configFile})
 //			_, err = rootCmd.ExecuteC()
 //			return

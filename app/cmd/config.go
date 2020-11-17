@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/config_plugin"
+	cmdCfg "github.com/jenkins-zh/jenkins-cli/app/cmd/config"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"io/ioutil"
@@ -20,7 +20,7 @@ import (
 
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
-	common.CommonOption
+	common.Option
 
 	ConfigFileLocation string
 	Detail             bool
@@ -39,7 +39,7 @@ func init() {
 	flags.BoolVarP(&configOptions.Decrypt, "decrypt", "", false,
 		`Decrypt the credential field`)
 
-	configCmd.AddCommand(config_plugin.NewConfigPluginCmd(&configOptions.CommonOption))
+	configCmd.AddCommand(cmdCfg.NewConfigPluginCmd(&configOptions.Option))
 }
 
 var configCmd = &cobra.Command{
@@ -55,8 +55,8 @@ var configCmd = &cobra.Command{
 			if !configOptions.Decrypt {
 				current.Token = keyring.PlaceHolder
 			} else {
-				jenkinsCfg := &Config{
-					JenkinsServers: []JenkinsServer{*current},
+				jenkinsCfg := &appCfg.Config{
+					JenkinsServers: []appCfg.JenkinsServer{*current},
 				}
 				keyring.LoadTokenFromKeyring(jenkinsCfg)
 				current = &(jenkinsCfg.JenkinsServers[0])
@@ -100,9 +100,9 @@ func setCurrentJenkins(name string) {
 	}
 }
 
-var config *Config
+var config *appCfg.Config
 
-func getConfig() *Config {
+func getConfig() *appCfg.Config {
 	return config
 }
 
@@ -117,7 +117,7 @@ func getJenkinsNames() []string {
 	return names
 }
 
-func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
+func getCurrentJenkins() (jenkinsServer *appCfg.JenkinsServer) {
 	if config != nil {
 		current := config.Current
 		jenkinsServer = findJenkinsByName(current)
@@ -126,7 +126,7 @@ func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 	return
 }
 
-func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
+func findJenkinsByName(name string) (jenkinsServer *appCfg.JenkinsServer) {
 	if config == nil {
 		return
 	}
@@ -140,7 +140,7 @@ func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	return
 }
 
-func findSuiteByName(name string) (suite *PluginSuite) {
+func findSuiteByName(name string) (suite *appCfg.PluginSuite) {
 	for _, cfg := range config.PluginSuites {
 		if cfg.Name == name {
 			suite = &cfg
@@ -182,12 +182,12 @@ func loadConfig(path string) (err error) {
 }
 
 // getMirrors returns the mirror list, one official mirror should be returned if user don't give it
-func getMirrors() (mirrors []JenkinsMirror) {
+func getMirrors() (mirrors []appCfg.JenkinsMirror) {
 	if config != nil {
 		mirrors = config.Mirrors
 	}
 	if len(mirrors) == 0 {
-		mirrors = []JenkinsMirror{
+		mirrors = []appCfg.JenkinsMirror{
 			{
 				Name: "default",
 				URL:  "http://mirrors.jenkins.io/",

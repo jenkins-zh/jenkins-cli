@@ -13,7 +13,7 @@ import (
 
 // ConfigEditOption is the option for edit config command
 type ConfigEditOption struct {
-	common.CommonOption
+	common.Option
 }
 
 var configEditOption ConfigEditOption

@@ -11,7 +11,7 @@ import (
 // RestartOption holds the options for restart cmd
 type RestartOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 
 	Safe bool
 }
@@ -24,7 +24,7 @@ func init() {
 	restartCmd.Flags().BoolVarP(&restartOption.Safe, "safe", "s", true,
 		i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then restart Jenkins"))
 	restartOption.BatchOption.Stdio = common.GetSystemStdio()
-	restartOption.CommonOption.Stdio = common.GetSystemStdio()
+	restartOption.Option.Stdio = common.GetSystemStdio()
 }
 
 var restartCmd = &cobra.Command{

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
@@ -16,7 +16,7 @@ import (
 
 // OpenOption is the open cmd option
 type OpenOption struct {
-	common.CommonOption
+	common.Option
 	common.InteractiveOption
 
 	Browser string
@@ -61,7 +61,7 @@ JCLI_BROWSER="Google Chrome" jcli open`,
 }
 
 func (o *OpenOption) run(_ *cobra.Command, args []string) (err error) {
-	var jenkins *JenkinsServer
+	var jenkins *appCfg.JenkinsServer
 
 	var configName string
 	if len(args) > 0 {

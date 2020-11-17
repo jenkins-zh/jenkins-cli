@@ -8,7 +8,7 @@ import (
 
 // ConfigSelectOptions is the option for select a config
 type ConfigSelectOptions struct {
-	common.CommonOption
+	common.Option
 }
 
 func init() {

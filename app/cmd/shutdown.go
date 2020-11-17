@@ -11,7 +11,7 @@ import (
 // ShutdownOption holds the options for shutdown cmd
 type ShutdownOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 	RootOptions *RootOptions
 
 	Safe          bool
@@ -73,5 +73,5 @@ func (o *ShutdownOption) init(shutdownCmd *cobra.Command) {
 	shutdownCmd.Flags().BoolVarP(&o.CancelPrepare, "prepare-cancel", "", false,
 		i18n.T(" Cancel the effect of the “quiet-down” command"))
 	o.BatchOption.Stdio = common.GetSystemStdio()
-	o.CommonOption.Stdio = common.GetSystemStdio()
+	o.Option.Stdio = common.GetSystemStdio()
 }

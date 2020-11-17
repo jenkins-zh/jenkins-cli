@@ -16,7 +16,7 @@ package cmd
 //			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 //
 //			rootCmd.SetArgs([]string{"config", "edit"})
-//			configEditOption.CommonOption.Stdio = stdio
+//			configEditOption.Option.Stdio = stdio
 //			_, err = rootCmd.ExecuteC()
 //			return
 //		},

@@ -14,7 +14,7 @@ import (
 // JobBuildOption is the job build option
 type JobBuildOption struct {
 	common.BatchOption
-	common.CommonOption
+	common.Option
 	common.OutputOption
 
 	Param      string
@@ -55,7 +55,7 @@ func init() {
 
 	jobBuildOption.SetFlagWithHeaders(jobBuildCmd, "Number,URL")
 	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
-	jobBuildOption.CommonOption.Stdio = common.GetSystemStdio()
+	jobBuildOption.Option.Stdio = common.GetSystemStdio()
 }
 
 var jobBuildCmd = &cobra.Command{

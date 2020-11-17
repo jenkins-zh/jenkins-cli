@@ -13,7 +13,7 @@ import (
 
 // PluginRunOptions for the plugin run command
 type PluginRunOptions struct {
-	common.CommonOption
+	common.Option
 
 	DebugOutput bool
 }

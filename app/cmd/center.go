@@ -5,7 +5,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -41,7 +41,7 @@ var centerCmd = &cobra.Command{
 	},
 }
 
-func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) (
+func printUpdateCenter(jenkins *appCfg.JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) (
 	status *client.UpdateCenter, err error) {
 	jclient := &client.UpdateCenterManager{
 		JenkinsCore: client.JenkinsCore{
@@ -72,7 +72,7 @@ func printUpdateCenter(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper 
 	return
 }
 
-func printJenkinsStatus(jenkins *JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) {
+func printJenkinsStatus(jenkins *appCfg.JenkinsServer, cmd *cobra.Command, roundTripper http.RoundTripper) {
 	jclient := &client.JenkinsStatusClient{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: roundTripper,

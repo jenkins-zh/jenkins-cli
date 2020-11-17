@@ -60,7 +60,7 @@ func init() {
 // CWPOptions is the option of custom-war-packager
 // see also https://github.com/jenkinsci/custom-war-packager
 type CWPOptions struct {
-	common.CommonOption
+	common.Option
 
 	ConfigPath      string
 	Version         string

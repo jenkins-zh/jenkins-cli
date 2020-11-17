@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -20,7 +20,7 @@ var computerCmd = &cobra.Command{
 }
 
 // GetComputerClient returns the client of computer
-func GetComputerClient(option common.CommonOption) (*client.ComputerClient, *JenkinsServer) {
+func GetComputerClient(option common.Option) (*client.ComputerClient, *appCfg.JenkinsServer) {
 	jClient := &client.ComputerClient{
 		JenkinsCore: client.JenkinsCore{
 			RoundTripper: option.RoundTripper,

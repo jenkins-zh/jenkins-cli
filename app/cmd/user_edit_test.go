@@ -32,7 +32,7 @@ package cmd
 //			rootCmd.SetArgs([]string{"user", "edit", "--desc", description, "--configFile", configFile})
 //
 //			userEditOption.RoundTripper = roundTripper
-//			userEditOption.CommonOption.Stdio = stdio
+//			userEditOption.Option.Stdio = stdio
 //			_, err = rootCmd.ExecuteC()
 //			return
 //		},

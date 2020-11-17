@@ -10,7 +10,7 @@ import (
 
 // PluginOptions contains the command line options
 type PluginOptions struct {
-	common.CommonOption
+	common.Option
 
 	Suite string
 }

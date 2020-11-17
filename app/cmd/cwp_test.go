@@ -28,9 +28,9 @@ var _ = Describe("cwp command test", func() {
 		localCache = os.TempDir()
 		roundTripper := mhttp.NewMockRoundTripper(ctrl)
 		cwpOptions = CWPOptions{
-			CommonOption: common.CommonOption{RoundTripper: roundTripper},
-			MetadataURL:  "http://localhost/maven-metadata.xml",
-			LocalCache:   localCache,
+			Option:      common.Option{RoundTripper: roundTripper},
+			MetadataURL: "http://localhost/maven-metadata.xml",
+			LocalCache:  localCache,
 		}
 		prepareMavenMetadataRequest(roundTripper)
 
@@ -63,9 +63,9 @@ func TestDownload(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: common.CommonOption{RoundTripper: roundTripper},
-		MetadataURL:  "http://localhost/maven-metadata.xml",
-		LocalCache:   tmpDir,
+		Option:      common.Option{RoundTripper: roundTripper},
+		MetadataURL: "http://localhost/maven-metadata.xml",
+		LocalCache:  tmpDir,
 	}
 	prepareMavenMetadataRequest(roundTripper)
 
@@ -86,8 +86,8 @@ func TestGetLatest(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: common.CommonOption{RoundTripper: roundTripper},
-		MetadataURL:  "http://localhost/maven-metadata.xml",
+		Option:      common.Option{RoundTripper: roundTripper},
+		MetadataURL: "http://localhost/maven-metadata.xml",
 	}
 	prepareMavenMetadataRequest(roundTripper)
 

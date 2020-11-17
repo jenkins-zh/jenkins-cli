@@ -1,4 +1,4 @@
-package config_plugin
+package config
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
@@ -8,11 +8,11 @@ import (
 
 type (
 	configPluginListCmd struct {
-		*common.CommonOption
+		*common.Option
 		common.OutputOption
 	}
 	jcliPluginFetchCmd struct {
-		*common.CommonOption
+		*common.Option
 		PluginRepo string
 		Reset      bool
 
@@ -23,17 +23,17 @@ type (
 		output io.Writer
 	}
 	jcliPluginInstallCmd struct {
-		*common.CommonOption
+		*common.Option
 		RoundTripper http.RoundTripper
 		ShowProgress bool
 
 		output io.Writer
 	}
 	jcliPluginUninstallCmd struct {
-		*common.CommonOption
+		*common.Option
 	}
 	jcliPluginUpdateCmd struct {
-		*common.CommonOption
+		*common.Option
 	}
 	plugin struct {
 		Use          string

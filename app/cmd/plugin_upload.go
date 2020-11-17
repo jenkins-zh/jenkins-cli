@@ -66,6 +66,7 @@ func init() {
 	}
 }
 
+// HPICompletion auto find the *.hpi files
 func (o *PluginUploadOption) HPICompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	if len(args) != 0 {
 		return nil, cobra.ShellCompDirectiveNoFileComp

@@ -1,4 +1,4 @@
-package config_plugin
+package config
 
 import (
 	"archive/tar"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/ghodss/yaml"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/mitchellh/go-homedir"
 	"go.uber.org/zap"
@@ -31,7 +31,7 @@ import (
 )
 
 // NewConfigPluginCmd create a command as root of config plugin
-func NewConfigPluginCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+func NewConfigPluginCmd(opt *common.Option) (cmd *cobra.Command) {
 	cmd = &cobra.Command{
 		Use:   "plugin",
 		Short: i18n.T("Manage plugins for jcli"),
@@ -51,9 +51,9 @@ https://github.com/jenkins-zh/jcli-plugins`),
 }
 
 // NewConfigPluginListCmd create a command for list all jcli plugins
-func NewConfigPluginListCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+func NewConfigPluginListCmd(opt *common.Option) (cmd *cobra.Command) {
 	configPluginListCmd := configPluginListCmd{
-		CommonOption: opt,
+		Option: opt,
 	}
 
 	cmd = &cobra.Command{
@@ -78,9 +78,9 @@ func (c *configPluginListCmd) RunE(cmd *cobra.Command, args []string) (err error
 }
 
 // NewConfigPluginFetchCmd create a command for fetching plugin metadata
-func NewConfigPluginFetchCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+func NewConfigPluginFetchCmd(opt *common.Option) (cmd *cobra.Command) {
 	pluginFetchCmd := jcliPluginFetchCmd{
-		CommonOption: opt,
+		Option: opt,
 	}
 
 	cmd = &cobra.Command{
@@ -113,9 +113,9 @@ but you can change it by giving a command parameter.`,
 }
 
 // NewConfigPluginInstallCmd create a command for fetching plugin metadata
-func NewConfigPluginInstallCmd(opt *common.CommonOption) (cmd *cobra.Command) {
+func NewConfigPluginInstallCmd(opt *common.Option) (cmd *cobra.Command) {
 	pluginInstallCmd := jcliPluginInstallCmd{
-		CommonOption: opt,
+		Option: opt,
 	}
 
 	cmd = &cobra.Command{
@@ -283,7 +283,7 @@ func loadPlugins(cmd *cobra.Command) {
 			DisableFlagParsing: true,
 		}
 		c.Annotations = map[string]string{
-			ANNOTATION_CONFIG_LOAD: "disable",
+			appCfg.ANNOTATION_CONFIG_LOAD: "disable",
 		}
 		cmd.AddCommand(c)
 	}

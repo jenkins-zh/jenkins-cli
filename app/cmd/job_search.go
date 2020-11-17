@@ -11,7 +11,7 @@ import (
 
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
-	common.CommonOption
+	common.Option
 	common.OutputOption
 	Name   string
 	Type   string
@@ -72,7 +72,7 @@ var jobSearchCmd = &cobra.Command{
 // Check do the conditions check
 func (o *JobSearchOption) Check() (err error) {
 	opt := PluginOptions{
-		CommonOption: common.CommonOption{RoundTripper: o.RoundTripper},
+		Option: common.Option{RoundTripper: o.RoundTripper},
 	}
 	const pluginName = "pipeline-restful-api"
 	const targetVersion = "0.3"

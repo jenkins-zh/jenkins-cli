@@ -138,7 +138,7 @@ var _ = Describe("job build command", func() {
 //			c.Send("\x1b")
 //			c.SendLine(":wq!")
 //		},
-//		CommonOption: &jobBuildOption.CommonOption,
+//		Option: &jobBuildOption.Option,
 //		BatchOption:  &jobBuildOption.BatchOption,
 //		Test: func(stdio terminal.Stdio) (err error) {
 //			var data []byte
@@ -192,7 +192,7 @@ var _ = Describe("job build command", func() {
 //
 //			jobBuildOption.RoundTripper = roundTripper
 //			jobBuildOption.BatchOption.Stdio = stdio
-//			jobBuildOption.CommonOption.Stdio = stdio
+//			jobBuildOption.Option.Stdio = stdio
 //			rootCmd.SetArgs([]string{"job", "build", "fake", "-b=false"})
 //			_, err = rootCmd.ExecuteC()
 //			return

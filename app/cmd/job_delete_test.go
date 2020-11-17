@@ -107,7 +107,7 @@ type EditCommandTest struct {
 	Message          string
 	DefaultContent   string
 	EditContent      common.EditContent
-	CommonOption     *common.CommonOption
+	CommonOption     *common.Option
 	BatchOption      *common.BatchOption
 	ConfirmProcedure func(*expect.Console)
 	Procedure        func(*expect.Console)
@@ -161,7 +161,7 @@ func RunPromptTest(t *testing.T, test PromptTest) {
 func RunEditorTest(t *testing.T, test EditorTest) {
 	var content string
 	RunTest(t, func(stdio terminal.Stdio) (err error) {
-		editor := &common.CommonOption{
+		editor := &common.Option{
 			Stdio: stdio,
 		}
 		content, err = editor.Editor(test.DefaultContent, test.Message)

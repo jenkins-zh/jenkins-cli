@@ -18,17 +18,17 @@ gen-mock:
 
 init: gen-mock
 
-darwin:
+darwin: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
 	rm -rf jcli && ln -s bin/darwin/$(NAME) jcli
 
-linux:
+linux: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
 	rm -rf jcli && ln -s bin/linux/$(NAME) jcli
 
-win:
+win: pre-build
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
@@ -80,6 +80,8 @@ gen-data-darwin: go-bindata-download-darwin
 
 verify: dep tools lint
 
+pre-build: fmt lint
+	go mod tidy
 
 lint:
 	go vet ./...

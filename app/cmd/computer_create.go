@@ -9,7 +9,7 @@ import (
 
 // ComputerCreateOption option for config list command
 type ComputerCreateOption struct {
-	common.CommonOption
+	common.Option
 	common.OutputOption
 }
 
@@ -27,7 +27,7 @@ It can only create a JNLP agent.`),
 	Example: `jcli agent create agent-name`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient, _ := GetComputerClient(computerCreateOption.CommonOption)
+		jClient, _ := GetComputerClient(computerCreateOption.Option)
 		return jClient.Create(args[0])
 	},
 	Annotations: map[string]string{

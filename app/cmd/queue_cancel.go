@@ -24,11 +24,11 @@ func init() {
 }
 
 var queueCancelCmd = &cobra.Command{
-	Use:   "cancel",
+	Use:     "cancel",
 	Example: "jcli queue cancel 234",
-	Short: i18n.T("Cancel the queue items of your Jenkins"),
-	Long:  i18n.T("Cancel the queue items of your Jenkins"),
-	Args:  cobra.MinimumNArgs(1),
+	Short:   i18n.T("Cancel the queue items of your Jenkins"),
+	Long:    i18n.T("Cancel the queue items of your Jenkins"),
+	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		for _, arg := range args {
 			if err = queueCancelOption.cancel(arg); err != nil {

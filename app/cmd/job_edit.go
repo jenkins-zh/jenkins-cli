@@ -38,7 +38,7 @@ import (
 
 // JobEditOption is the option for job create command
 type JobEditOption struct {
-	common.CommonOption
+	common.Option
 
 	Filename  string
 	Script    string

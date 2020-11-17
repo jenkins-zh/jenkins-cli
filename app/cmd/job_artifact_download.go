@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	. "github.com/jenkins-zh/jenkins-cli/app/config"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
 	"path/filepath"
@@ -21,7 +21,7 @@ type JobArtifactDownloadOption struct {
 	ShowProgress bool
 	DownloadDir  string
 
-	Jenkins      *JenkinsServer
+	Jenkins      *appCfg.JenkinsServer
 	RoundTripper http.RoundTripper
 }
 

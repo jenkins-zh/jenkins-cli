@@ -19,7 +19,7 @@ import (
 
 // ShellOptions is the option of shell command
 type ShellOptions struct {
-	common.CommonOption
+	common.Option
 
 	TmpDir            string
 	TmpConfigFileName string
