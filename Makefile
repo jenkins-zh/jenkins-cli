@@ -127,6 +127,9 @@ test:
 #	go test ./app/i18n -v -count=1
 #	go test ./app/cmd -v -count=1
 
+test-release:
+	goreleaser release --rm-dist --snapshot
+
 dep:
 	go get github.com/AlecAivazis/survey/v2
 	go get github.com/spf13/cobra
@@ -144,3 +147,6 @@ gen-data:
 
 image:
 	docker build . -t jenkinszh/jcli
+
+setup-env-centos:
+	yum install make golang -y

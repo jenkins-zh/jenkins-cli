@@ -12,6 +12,7 @@ import (
 	"moul.io/http2curl"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/app"
@@ -247,7 +248,8 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 
 	var jenkinsHost *url.URL
 	if jenkinsHost, err = url.Parse(j.URL); err == nil {
-		jenkinsHost, err = jenkinsHost.Parse(api)
+		pathURL, _ := url.Parse(path.Join(jenkinsHost.Path, api))
+		jenkinsHost = jenkinsHost.ResolveReference(pathURL)
 	}
 
 	if err != nil {
