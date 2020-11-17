@@ -54,8 +54,10 @@ copy: darwin
 copy-linux: linux
 	cp bin/linux/$(NAME) /usr/local/bin/jcli
 
-tools: i18n-tools
+get-golint:
 	go get -u golang.org/x/lint/golint
+
+tools: i18n-tools get-golint
 
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
@@ -80,11 +82,13 @@ gen-data-darwin: go-bindata-download-darwin
 
 verify: dep tools lint
 
-pre-build: fmt lint
+pre-build: fmt vet
 	go mod tidy
 
-lint:
+vet:
 	go vet ./...
+
+lint: vet
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...
 	golint -set_exit_status app/i18n/i18n.go
