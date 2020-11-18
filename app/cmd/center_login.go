@@ -73,7 +73,7 @@ var centerLoginCmd = &cobra.Command{
 			}
 		}()
 
-		callback := fmt.Sprintf(jenkins.URL+"/jcliPluginManager/test?callback=http://localhost:%d", port)
+		callback := fmt.Sprintf(jenkins.URL+"/instance/generateToken?callback=http://localhost:%d", port)
 
 		_ = util.Open(callback, "", nil)
 		httpServerDone.Wait()
