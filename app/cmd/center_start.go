@@ -159,7 +159,7 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 	if err == nil {
 		env := os.Environ()
 
-		jenkinsHome := fmt.Sprintf("%s/.jenkins-cli/cache/%s/web", userHome, c.Version)
+		jenkinsHome := fmt.Sprintf("%s/.jenkins-cli/cache/%s/web", userHome, strings.Split(c.Version, "@")[0])
 
 		dockerArgs := []string{"docker", "run"}
 		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s:/var/jenkins_home", jenkinsHome))
@@ -184,6 +184,7 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		if c.CleanHome && os.RemoveAll(jenkinsHome) != nil {
 			err = fmt.Errorf("cannot remove JENKINS_HOME %s", jenkinsHome)
 		} else {
+			fmt.Println(dockerArgs)
 			err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 		}
 	}
