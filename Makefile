@@ -83,6 +83,8 @@ gen-data-darwin: go-bindata-download-darwin
 verify: dep tools lint
 
 pre-build: fmt vet
+	export GO111MODULE=on
+	export GOPROXY=https://goproxy.io
 	go mod tidy
 
 vet:
