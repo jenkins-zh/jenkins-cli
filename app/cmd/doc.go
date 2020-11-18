@@ -54,9 +54,10 @@ var docCmd = &cobra.Command{
 	Use: "doc",
 	Example: `jcli doc tmp
 jcli doc --doc-type ManPage /usr/local/share/man/man1`,
-	Short: i18n.T("Generate document for all jcl commands"),
-	Long:  i18n.T("Generate document for all jcl commands"),
-	Args:  cobra.MinimumNArgs(1),
+	Short:  i18n.T("Generate document for all jcl commands"),
+	Long:   i18n.T("Generate document for all jcl commands"),
+	Args:   cobra.MinimumNArgs(1),
+	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		outputDir := args[0]
 		if err = os.MkdirAll(outputDir, os.FileMode(0755)); err != nil {

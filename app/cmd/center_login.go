@@ -3,8 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/go-version"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/condition"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
@@ -26,35 +26,11 @@ var centerLoginOption CenterLoginOption
 
 func init() {
 	centerCmd.AddCommand(centerLoginCmd)
-	healthCheckRegister.Register(getCmdPath(centerLoginCmd), &centerLoginOption)
-}
 
-// Check do the health check of center login cmd
-func (o *CenterLoginOption) Check() (err error) {
-	opt := PluginOptions{
-		Option: common.Option{RoundTripper: o.RoundTripper},
+	if jenkins := getCurrentJenkinsFromOptions(); jenkins != nil {
+		healthCheckRegister.Register(getCmdPath(centerLoginCmd), condition.NewChecker(jenkins, centerLoginOption.RoundTripper,
+			"pipeline-restful-api", "0.11"))
 	}
-	const pluginName = "pipeline-restful-api"
-	const targetVersion = "0.11"
-	var plugin *client.InstalledPlugin
-	if plugin, err = opt.FindPlugin(pluginName); err == nil {
-		var (
-			current      *version.Version
-			target       *version.Version
-			versionMatch bool
-		)
-
-		if current, err = version.NewVersion(plugin.Version); err == nil {
-			if target, err = version.NewVersion(targetVersion); err == nil {
-				versionMatch = current.GreaterThanOrEqual(target)
-			}
-		}
-
-		if err == nil && !versionMatch {
-			err = fmt.Errorf("%s version is %s, should be %s", pluginName, plugin.Version, targetVersion)
-		}
-	}
-	return
 }
 
 var centerLoginCmd = &cobra.Command{
@@ -67,7 +43,7 @@ var centerLoginCmd = &cobra.Command{
 		httpServerDone := &sync.WaitGroup{}
 
 		jenkins := getCurrentJenkins()
-		fmt.Fprintf(cmd.OutOrStdout(), "Try to login %s, %s\n", jenkins.Name, jenkins.URL)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Try to login %s, %s\n", jenkins.Name, jenkins.URL)
 
 		httpServerDone.Add(1)
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -80,22 +56,26 @@ var centerLoginCmd = &cobra.Command{
 							config.JenkinsServers[i].Token = token.Data.TokenValue
 							err = saveConfig()
 
-							fmt.Fprintln(cmd.OutOrStdout(), "Good to go!")
+							_, _ = fmt.Fprintln(cmd.OutOrStdout(), "Good to go!")
 							break
 						}
 					}
 				}
 			}
-			srv.Close()
+			if srvErr := srv.Close(); srvErr != nil {
+				_, _ = fmt.Fprintf(cmd.OutOrStderr(), "Cannot close the local server: %v. %v", srv, srvErr)
+			}
 			httpServerDone.Done()
 		})
 		go func() {
-			srv.ListenAndServe()
+			if srvErr := srv.ListenAndServe(); srvErr != nil {
+				_, _ = fmt.Fprintf(cmd.OutOrStderr(), "Got error when starting a local server: %v. %v", srv, srvErr)
+			}
 		}()
 
 		callback := fmt.Sprintf(jenkins.URL+"/jcliPluginManager/test?callback=http://localhost:%d", port)
 
-		util.Open(callback, "", nil)
+		_ = util.Open(callback, "", nil)
 		httpServerDone.Wait()
 		return
 	},
