@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -24,6 +25,7 @@ type CenterStartOption struct {
 	Context                   string
 	SetupWizard               bool
 	AdminCanGenerateNewTokens bool
+	CleanHome                 bool
 
 	// comes from folder plugin
 	ConcurrentIndexing int
@@ -69,6 +71,8 @@ func init() {
 		i18n.T("If you want to show the setup wizard at first start"))
 	flags.BoolVarP(&centerStartOption.AdminCanGenerateNewTokens, "admin-can-generate-new-tokens", "", false,
 		i18n.T("If enabled, the users with administer permissions can generate new tokens for other users"))
+	flags.BoolVarP(&centerStartOption.CleanHome, "clean-home", "", false,
+		i18n.T("If you want to clean the JENKINS_HOME before start it"))
 
 	flags.BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
@@ -152,16 +156,18 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 	}
 
 	var binary string
-	binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
+	binary, err = util.LookPath("docker", c.LookPathContext)
 	if err == nil {
 		env := os.Environ()
 
-		dockerArgs := []string{"docker", "run"}
-		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s/.jenkins-cli/cache/%s/web:/var/jenkins_home", userHome, centerStartOption.Version))
-		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:8080", centerStartOption.Port))
+		jenkinsHome := fmt.Sprintf("%s/.jenkins-cli/cache/%s/web", userHome, c.Version)
 
-		if centerStartOption.ContainerUser != "" {
-			dockerArgs = append(dockerArgs, "-u", centerStartOption.ContainerUser)
+		dockerArgs := []string{"docker", "run"}
+		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s:/var/jenkins_home", jenkinsHome))
+		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:8080", c.Port))
+
+		if c.ContainerUser != "" {
+			dockerArgs = append(dockerArgs, "-u", c.ContainerUser)
 		}
 
 		javaOpts := ""
@@ -175,7 +181,12 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		}
 
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
-		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
+
+		if c.CleanHome && os.RemoveAll(jenkinsHome) != nil {
+			err = errors.New(fmt.Sprintf("cannot remove JENKINS_HOME %s", jenkinsHome))
+		} else {
+			err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
+		}
 	}
 	return
 }
