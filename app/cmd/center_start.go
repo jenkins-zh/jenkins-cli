@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -183,7 +182,7 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
 
 		if c.CleanHome && os.RemoveAll(jenkinsHome) != nil {
-			err = errors.New(fmt.Sprintf("cannot remove JENKINS_HOME %s", jenkinsHome))
+			err = fmt.Errorf("cannot remove JENKINS_HOME %s", jenkinsHome)
 		} else {
 			err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 		}
