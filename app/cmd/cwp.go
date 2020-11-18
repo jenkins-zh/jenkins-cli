@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -11,6 +10,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 	"html/template"
 	"io/ioutil"
 	"os"

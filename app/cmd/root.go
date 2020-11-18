@@ -61,7 +61,11 @@ var healthCheckRegister = &health.CheckRegister{
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
 	Short: i18n.T("Jenkins CLI written by golang which could help you with your multiple Jenkins"),
-	Long: `Jenkins CLI written by golang which could help you with your multiple Jenkins,
+	Long: `Jenkins CLI written by golang which could help you with your multiple Jenkins
+
+If this is the first time you run jcli on current machine, please generate config file first via 'jcli config gen'.
+Then you can set your Jenkins config file manually via 'jcli config edit'. Or you can get the user token of Jenkins 
+automatically via 'jcli center login'.
 
 We'd love to hear your feedback at https://github.com/jenkins-zh/jenkins-cli/issues`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) (err error) {

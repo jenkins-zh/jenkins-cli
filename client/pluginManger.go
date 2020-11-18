@@ -153,7 +153,11 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 	plugins := p.getPluginsInstallQuery(names)
 	versionalPlugins := p.getVersionalPlugins(names)
 	if plugins != "" {
-		err = p.installPluginsWithoutVersion(plugins)
+		for _, plugin := range strings.Split(plugins, "&") {
+			if err = p.installPluginsWithoutVersion(plugin); err != nil {
+				return
+			}
+		}
 	}
 
 	if err == nil && len(versionalPlugins) > 0 {

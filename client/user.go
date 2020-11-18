@@ -19,15 +19,16 @@ type UserClient struct {
 
 // Token is the token of user
 type Token struct {
-	Status string
-	Data   TokenData
+	Status string    `json:"status"`
+	Data   TokenData `json:"data"`
 }
 
 // TokenData represents the token
 type TokenData struct {
-	TokenName  string
-	TokenUUID  string
-	TokenValue string
+	TokenName  string `json:"tokenName"`
+	TokenUUID  string `json:"tokenUuid"`
+	TokenValue string `json:"tokenValue"`
+	UserName   string `json:"userName"`
 }
 
 // Get returns a user's detail
