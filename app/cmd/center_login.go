@@ -8,6 +8,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"sync"
 
@@ -38,8 +39,8 @@ var centerLoginCmd = &cobra.Command{
 	Short: i18n.T("Login Jenkins and fetch the token"),
 	Long:  i18n.T("Login Jenkins and fetch the token"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		port := 17890
-		srv := &http.Server{Addr: fmt.Sprintf(":%d", port)}
+		listener, err := net.Listen("tcp", ":0")
+		srv := &http.Server{Addr: fmt.Sprintf(":0")}
 		httpServerDone := &sync.WaitGroup{}
 
 		jenkins := getCurrentJenkins()
@@ -54,6 +55,7 @@ var centerLoginCmd = &cobra.Command{
 					for i, cfg := range config.JenkinsServers {
 						if cfg.Name == jenkins.Name {
 							config.JenkinsServers[i].Token = token.Data.TokenValue
+							config.JenkinsServers[i].UserName = token.Data.UserName
 							err = saveConfig()
 
 							_, _ = fmt.Fprintln(cmd.OutOrStdout(), "Good to go!")
@@ -62,18 +64,23 @@ var centerLoginCmd = &cobra.Command{
 					}
 				}
 			}
-			if srvErr := srv.Close(); srvErr != nil {
+			if srvErr := listener.Close(); srvErr != nil {
 				_, _ = fmt.Fprintf(cmd.OutOrStderr(), "Cannot close the local server: %v. %v", srv, srvErr)
 			}
 			httpServerDone.Done()
 		})
 		go func() {
-			if srvErr := srv.ListenAndServe(); srvErr != nil {
-				_, _ = fmt.Fprintf(cmd.OutOrStderr(), "Got error when starting a local server: %v. %v", srv, srvErr)
-			}
+			_ = http.Serve(listener, nil)
 		}()
 
-		callback := fmt.Sprintf(jenkins.URL+"/instance/generateToken?callback=http://localhost:%d", port)
+		var ipAddr string
+		var ipErr error
+		if ipAddr, ipErr = util.GetExternalIP(); ipErr != nil {
+			ipAddr = "localhost"
+			logger.Warn("cannot find the external ip, use local instead of.")
+		}
+		port := listener.Addr().(*net.TCPAddr).Port
+		callback := fmt.Sprintf(jenkins.URL+"/instance/generateToken?callback=http://%s:%d", ipAddr, port)
 
 		_ = util.Open(callback, "", nil)
 		httpServerDone.Wait()

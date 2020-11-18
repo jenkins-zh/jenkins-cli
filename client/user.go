@@ -28,6 +28,7 @@ type TokenData struct {
 	TokenName  string `json:"tokenName"`
 	TokenUUID  string `json:"tokenUuid"`
 	TokenValue string `json:"tokenValue"`
+	UserName   string `json:"userName"`
 }
 
 // Get returns a user's detail
