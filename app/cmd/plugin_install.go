@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"go.uber.org/zap"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 

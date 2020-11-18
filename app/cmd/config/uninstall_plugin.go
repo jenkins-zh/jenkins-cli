@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 )
