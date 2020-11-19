@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -80,10 +81,13 @@ var centerLoginCmd = &cobra.Command{
 			logger.Warn("cannot find the external ip, use local instead of.")
 		}
 		port := listener.Addr().(*net.TCPAddr).Port
-		callback := fmt.Sprintf(jenkins.URL+"/instance/generateToken?callback=http://%s:%d", ipAddr, port)
 
-		_ = util.Open(callback, "", nil)
-		httpServerDone.Wait()
+		var callback string
+		if callback, err = util.URLJoinAsString(jenkins.URL,
+			fmt.Sprintf("/instance/generateToken?callback=%s%s:%d", url.QueryEscape("http://"), ipAddr, port)); err == nil {
+			_ = util.Open(callback, "", nil)
+			httpServerDone.Wait()
+		}
 		return
 	},
 }
