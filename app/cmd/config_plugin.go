@@ -329,7 +329,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	var data []byte
-	pluginsMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/%s.yaml", userHome, name)
+	pluginsMetadataFile := common.GetJCLIPluginPath(userHome, name, true)
 	logger.Info("read plugin metadata info", zap.String("path", pluginsMetadataFile))
 	if data, err = ioutil.ReadFile(pluginsMetadataFile); err == nil {
 		plugin := plugin{}
@@ -339,7 +339,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	if err == nil {
-		cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/plugins/%s.yaml", userHome, name)
+		cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, true)
 		err = ioutil.WriteFile(cachedMetadataFile, data, 0664)
 	}
 	return

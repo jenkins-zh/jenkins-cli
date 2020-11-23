@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -37,13 +36,13 @@ func (c *jcliPluginUninstallCmd) RunE(cmd *cobra.Command, args []string) (err er
 	}
 
 	name := args[0]
-	cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s.yaml", userHome, name)
+	cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, true)
 
 	var data []byte
 	if data, err = ioutil.ReadFile(cachedMetadataFile); err == nil {
 		plugin := &plugin{}
 		if err = yaml.Unmarshal(data, plugin); err == nil {
-			mainFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s", userHome, plugin.Main)
+			mainFile := common.GetJCLIPluginPath(userHome, plugin.Main, false)
 
 			os.Remove(cachedMetadataFile)
 			os.Remove(mainFile)

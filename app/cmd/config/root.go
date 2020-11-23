@@ -274,7 +274,7 @@ func loadPlugins(cmd *cobra.Command) {
 					return
 				}
 
-				pluginExec := fmt.Sprintf("%s/.jenkins-cli/plugins/%s", userHome, plugin.Main)
+				pluginExec := common.GetJCLIPluginPath(userHome, plugin.Main, false)
 
 				err = callPluginExecutable(cmd, pluginExec, args, cmd.OutOrStdout())
 				return
@@ -308,7 +308,7 @@ func (c *jcliPluginInstallCmd) Run(cmd *cobra.Command, args []string) (err error
 	}
 
 	if err == nil {
-		cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s.yaml", userHome, name)
+		cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, true)
 		err = ioutil.WriteFile(cachedMetadataFile, data, 0664)
 	}
 	return
