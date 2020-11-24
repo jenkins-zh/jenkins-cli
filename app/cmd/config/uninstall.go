@@ -16,11 +16,12 @@ func NewConfigPluginUninstallCmd(opt *common.Option) (cmd *cobra.Command) {
 	}
 
 	cmd = &cobra.Command{
-		Use:   "uninstall",
-		Short: "Remove a plugin",
-		Long:  "Remove a plugin",
-		Args:  cobra.MinimumNArgs(1),
-		RunE:  jcliPluginUninstallCmd.RunE,
+		Use:               "uninstall",
+		Short:             "Remove a plugin",
+		Long:              "Remove a plugin",
+		Args:              cobra.MinimumNArgs(1),
+		RunE:              jcliPluginUninstallCmd.RunE,
+		ValidArgsFunction: ValidPluginNames,
 		Annotations: map[string]string{
 			common.Since: common.VersionSince0028,
 		},
