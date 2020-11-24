@@ -36,9 +36,10 @@ func init() {
 }
 
 var centerLoginCmd = &cobra.Command{
-	Use:   "login",
-	Short: i18n.T("Login Jenkins and fetch the token"),
-	Long:  i18n.T("Login Jenkins and fetch the token"),
+	Use:               "login",
+	Short:             i18n.T("Login Jenkins and fetch the token"),
+	Long:              i18n.T("Login Jenkins and fetch the token"),
+	ValidArgsFunction: common.NoFileCompletion,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		listener, err := net.Listen("tcp", ":0")
 		srv := &http.Server{Addr: fmt.Sprintf(":0")}

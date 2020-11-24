@@ -132,10 +132,11 @@ func init() {
 }
 
 var centerStartCmd = &cobra.Command{
-	Use:   "start",
-	Short: i18n.T("Start Jenkins server from a cache directory"),
-	Long:  i18n.T("Start Jenkins server from a cache directory"),
-	RunE:  centerStartOption.run,
+	Use:               "start",
+	Short:             i18n.T("Start Jenkins server from a cache directory"),
+	Long:              i18n.T("Start Jenkins server from a cache directory"),
+	RunE:              centerStartOption.run,
+	ValidArgsFunction: common.NoFileCompletion,
 }
 
 func (c *CenterStartOption) run(cmd *cobra.Command, _ []string) (err error) {
