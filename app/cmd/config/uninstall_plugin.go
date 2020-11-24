@@ -36,17 +36,20 @@ func (c *jcliPluginUninstallCmd) RunE(cmd *cobra.Command, args []string) (err er
 	}
 
 	name := args[0]
-	cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, true)
+	cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, false)
 
 	var data []byte
 	if data, err = ioutil.ReadFile(cachedMetadataFile); err == nil {
 		plugin := &plugin{}
 		if err = yaml.Unmarshal(data, plugin); err == nil {
-			mainFile := common.GetJCLIPluginPath(userHome, plugin.Main, false)
+			mainFile := common.GetJCLIPluginPath(userHome, plugin.Main, true)
 
 			os.Remove(cachedMetadataFile)
 			os.Remove(mainFile)
 		}
+	} else if os.IsNotExist(err) {
+		err = nil
+		cmd.Printf("plugin \"%s\" does not exists\n", name)
 	}
 	return
 }

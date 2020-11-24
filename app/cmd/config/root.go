@@ -58,22 +58,25 @@ func NewConfigPluginListCmd(opt *common.Option) (cmd *cobra.Command) {
 
 	cmd = &cobra.Command{
 		Use:   "list",
-		Short: "list all installed plugins",
-		Long:  "list all installed plugins",
+		Short: "List all installed plugins",
+		Long:  "List all installed plugins",
 		RunE:  configPluginListCmd.RunE,
 		Annotations: map[string]string{
 			common.Since: common.VersionSince0028,
 		},
 	}
 
-	configPluginListCmd.SetFlagWithHeaders(cmd, "Use,Version,DownloadLink")
+	configPluginListCmd.SetFlagWithHeaders(cmd, "Use,Version,Installed,DownloadLink")
 	return
 }
 
 // RunE is the main entry point of config plugin list command
 func (c *configPluginListCmd) RunE(cmd *cobra.Command, args []string) (err error) {
 	c.Writer = cmd.OutOrStdout()
-	err = c.OutputV2(findPlugins())
+	var plugins []plugin
+	if plugins, err = findPlugins(); err == nil {
+		err = c.OutputV2(plugins)
+	}
 	return
 }
 
@@ -207,24 +210,29 @@ func (c *jcliPluginFetchCmd) getAuth() (auth transport.AuthMethod) {
 	return
 }
 
-func findPlugins() (plugins []plugin) {
+func findPlugins() (plugins []plugin, err error) {
 	var userHome string
-	var err error
 	if userHome, err = homedir.Dir(); err != nil {
 		return
 	}
 
 	plugins = make([]plugin, 0)
-	pluginsDir := fmt.Sprintf("%s/.jenkins-cli/plugins/*.yaml", userHome)
+	pluginsDir := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/*.yaml", userHome)
 	if files, err := filepath.Glob(pluginsDir); err == nil {
 		for _, metaFile := range files {
 			var data []byte
-
 			plugin := plugin{}
 			if data, err = ioutil.ReadFile(metaFile); err == nil {
 				if err = yaml.Unmarshal(data, &plugin); err != nil {
 					fmt.Println(err)
 				} else {
+					if plugin.Main == "" {
+						plugin.Main = fmt.Sprintf("jcli-%s-plugin", plugin.Use)
+					}
+
+					if _, fileErr := os.Stat(common.GetJCLIPluginPath(userHome, plugin.Main, true)); !os.IsNotExist(fileErr) {
+						plugin.Installed = true
+					}
 					plugins = append(plugins, plugin)
 				}
 			}
@@ -233,8 +241,14 @@ func findPlugins() (plugins []plugin) {
 	return
 }
 
-func loadPlugins(cmd *cobra.Command) {
-	plugins := findPlugins()
+// LoadPlugins loads the plugins
+func LoadPlugins(cmd *cobra.Command) {
+	var plugins []plugin
+	var err error
+	if plugins, err = findPlugins(); err != nil {
+		cmd.PrintErrln("Cannot load plugins successfully")
+		return
+	}
 	//cmd.Println("found plugins, count", len(plugins))
 
 	for _, plugin := range plugins {
@@ -274,7 +288,7 @@ func loadPlugins(cmd *cobra.Command) {
 					return
 				}
 
-				pluginExec := common.GetJCLIPluginPath(userHome, plugin.Main, false)
+				pluginExec := common.GetJCLIPluginPath(userHome, plugin.Main, true)
 
 				err = callPluginExecutable(cmd, pluginExec, args, cmd.OutOrStdout())
 				return

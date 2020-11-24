@@ -36,12 +36,13 @@ type (
 		*common.Option
 	}
 	plugin struct {
-		Use          string
+		Use          string `yaml:"use"`
 		Short        string
 		Long         string
 		Main         string
 		Version      string
 		DownloadLink string `yaml:"downloadLink"`
+		Installed    bool
 	}
 	pluginError struct {
 		error
