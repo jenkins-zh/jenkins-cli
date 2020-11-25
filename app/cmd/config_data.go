@@ -22,12 +22,16 @@ func init() {
 		i18n.T("The key of config data"))
 	configDataCmd.Flags().StringVarP(&configDataOptions.Value, "value", "v", "",
 		i18n.T("The value of config data"))
+
+	configDataCmd.MarkFlagRequired("key")
+	configDataCmd.MarkFlagRequired("value")
 }
 
 var configDataCmd = &cobra.Command{
-	Use:   "data",
-	Short: i18n.T("Add a key/value to a config item"),
-	Long:  i18n.T("Add a key/value to a config item"),
+	Use:               "data",
+	Short:             i18n.T("Add a key/value to a config item"),
+	Long:              i18n.T("Add a key/value to a config item"),
+	ValidArgsFunction: ValidJenkinsNames,
 	RunE: func(_ *cobra.Command, args []string) (err error) {
 		var jenkinsName string
 		if len(args) <= 0 {

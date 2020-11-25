@@ -46,11 +46,12 @@ func init() {
 }
 
 var computerLaunchCmd = &cobra.Command{
-	Use:     "launch",
-	Aliases: []string{"start"},
-	Short:   i18n.T("Launch the agent of your Jenkins"),
-	Long:    i18n.T("Launch the agent of your Jenkins"),
-	Args:    cobra.MinimumNArgs(1),
+	Use:               "launch",
+	Aliases:           []string{"start"},
+	Short:             i18n.T("Launch the agent of your Jenkins"),
+	Long:              i18n.T("Launch the agent of your Jenkins"),
+	ValidArgsFunction: ValidAgentNames,
+	Args:              cobra.MinimumNArgs(1),
 	Example: `jcli agent launch agent-name
 jcli agent launch agent-name --type jnlp`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {

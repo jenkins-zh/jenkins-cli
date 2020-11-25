@@ -19,9 +19,10 @@ func init() {
 var configSelectOptions ConfigSelectOptions
 
 var configSelectCmd = &cobra.Command{
-	Use:   "select",
-	Short: i18n.T("Select one config as current Jenkins"),
-	Long:  i18n.T("Select one config as current Jenkins"),
+	Use:               "select",
+	Short:             i18n.T("Select one config as current Jenkins"),
+	Long:              i18n.T("Select one config as current Jenkins"),
+	ValidArgsFunction: ValidJenkinsNames,
 	RunE: func(_ *cobra.Command, args []string) (err error) {
 		var jenkinsName string
 		if len(args) > 0 {

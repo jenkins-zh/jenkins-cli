@@ -14,10 +14,11 @@ func init() {
 }
 
 var configRemoveCmd = &cobra.Command{
-	Use:   "remove",
-	Short: i18n.T("Remove a Jenkins config"),
-	Long:  i18n.T("Remove a Jenkins config"),
-	Args:  cobra.MinimumNArgs(1),
+	Use:               "remove",
+	Short:             i18n.T("Remove a Jenkins config"),
+	Long:              i18n.T("Remove a Jenkins config"),
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: ValidJenkinsNames,
 	RunE: func(_ *cobra.Command, args []string) error {
 		target := args[0]
 		return removeJenkins(target)
