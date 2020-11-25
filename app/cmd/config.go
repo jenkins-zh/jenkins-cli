@@ -7,6 +7,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"strings"
 
 	"io/ioutil"
 	"log"
@@ -227,5 +228,44 @@ func saveConfig() (err error) {
 	if data, err = yaml.Marshal(&config); err == nil {
 		err = ioutil.WriteFile(configPath, data, 0644)
 	}
+	return
+}
+
+// ValidJenkinsNames autocomplete with Jenkins names
+func ValidJenkinsNames(_ *cobra.Command, args []string, prefix string) (jenkinsNames []string, directive cobra.ShellCompDirective) {
+	directive = cobra.ShellCompDirectiveNoFileComp
+	allNames := getJenkinsNames()
+	jenkinsNames = make([]string, 0)
+
+	for i := range allNames {
+		name := allNames[i]
+
+		duplicated := false
+		for j := range args {
+			if name == args[j] {
+				duplicated = true
+				break
+			}
+		}
+
+		if !duplicated && strings.HasPrefix(name, prefix) {
+			jenkinsNames = append(jenkinsNames, name)
+		}
+	}
+	return
+}
+
+// ValidJenkinsAndDataNames autocomplete with Jenkins names
+func ValidJenkinsAndDataNames(cmd *cobra.Command, args []string, prefix string) (result []string, directive cobra.ShellCompDirective) {
+	result = make([]string, 0)
+	if current := getCurrentJenkins(); current != nil {
+		for key := range current.Data {
+			result = append(result, "."+key)
+		}
+	}
+
+	var jenkinsNames []string
+	jenkinsNames, directive = ValidJenkinsNames(cmd, args, prefix)
+	result = append(result, jenkinsNames...)
 	return
 }

@@ -19,12 +19,13 @@ func init() {
 }
 
 var computerDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Aliases: common.GetAliasesDel(),
-	Short:   i18n.T("Delete an agent from Jenkins"),
-	Long:    i18n.T("Delete an agent from Jenkins"),
-	Args:    cobra.MinimumNArgs(1),
-	Example: `jcli agent delete agent-name`,
+	Use:               "delete",
+	Aliases:           common.GetAliasesDel(),
+	Short:             i18n.T("Delete an agent from Jenkins"),
+	Long:              i18n.T("Delete an agent from Jenkins"),
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: ValidAgentNames,
+	Example:           `jcli agent delete agent-name`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jClient, _ := GetComputerClient(computerDeleteOption.Option)
 		return jClient.Delete(args[0])

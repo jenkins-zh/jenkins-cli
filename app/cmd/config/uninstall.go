@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -17,11 +16,12 @@ func NewConfigPluginUninstallCmd(opt *common.Option) (cmd *cobra.Command) {
 	}
 
 	cmd = &cobra.Command{
-		Use:   "uninstall",
-		Short: "Remove a plugin",
-		Long:  "Remove a plugin",
-		Args:  cobra.MinimumNArgs(1),
-		RunE:  jcliPluginUninstallCmd.RunE,
+		Use:               "uninstall",
+		Short:             "Remove a plugin",
+		Long:              "Remove a plugin",
+		Args:              cobra.MinimumNArgs(1),
+		RunE:              jcliPluginUninstallCmd.RunE,
+		ValidArgsFunction: ValidPluginNames,
 		Annotations: map[string]string{
 			common.Since: common.VersionSince0028,
 		},
@@ -37,17 +37,20 @@ func (c *jcliPluginUninstallCmd) RunE(cmd *cobra.Command, args []string) (err er
 	}
 
 	name := args[0]
-	cachedMetadataFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s.yaml", userHome, name)
+	cachedMetadataFile := common.GetJCLIPluginPath(userHome, name, false)
 
 	var data []byte
 	if data, err = ioutil.ReadFile(cachedMetadataFile); err == nil {
 		plugin := &plugin{}
 		if err = yaml.Unmarshal(data, plugin); err == nil {
-			mainFile := fmt.Sprintf("%s/.jenkins-cli/pluginss/%s", userHome, plugin.Main)
+			mainFile := common.GetJCLIPluginPath(userHome, plugin.Main, true)
 
 			os.Remove(cachedMetadataFile)
 			os.Remove(mainFile)
 		}
+	} else if os.IsNotExist(err) {
+		err = nil
+		cmd.Printf("plugin \"%s\" does not exists\n", name)
 	}
 	return
 }

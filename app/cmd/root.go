@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	cmdCfg "github.com/jenkins-zh/jenkins-cli/app/cmd/config"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"io"
 	"log"
@@ -201,7 +202,7 @@ func init() {
 
 	rootCmd.SetOut(os.Stdout)
 
-	loadPlugins(rootCmd)
+	cmdCfg.LoadPlugins(rootCmd)
 
 	if rootOptions.GetGitHubClient() == nil {
 		rootOptions.SetGitHubClient(github.NewClient(nil))

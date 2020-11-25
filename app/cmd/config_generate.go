@@ -37,10 +37,11 @@ func init() {
 }
 
 var configGenerateCmd = &cobra.Command{
-	Use:     "generate",
-	Aliases: []string{"gen"},
-	Short:   i18n.T("Generate a sample config file for you"),
-	Long:    i18n.T("Generate a sample config file for you"),
+	Use:               "generate",
+	Aliases:           []string{"gen"},
+	Short:             i18n.T("Generate a sample config file for you"),
+	Long:              i18n.T("Generate a sample config file for you"),
+	ValidArgsFunction: common.NoFileCompletion,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		var data []byte
 		data, err = GenerateSampleConfig()

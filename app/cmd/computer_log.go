@@ -19,10 +19,11 @@ func init() {
 }
 
 var computerLogCmd = &cobra.Command{
-	Use:   "log <name>",
-	Short: i18n.T("Output the log of the agent"),
-	Long:  i18n.T("Output the log of the agent"),
-	Args:  cobra.MinimumNArgs(1),
+	Use:               "log <name>",
+	Short:             i18n.T("Output the log of the agent"),
+	Long:              i18n.T("Output the log of the agent"),
+	ValidArgsFunction: ValidAgentNames,
+	Args:              cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		jClient, _ := GetComputerClient(computerLogOption.Option)
 
