@@ -29,7 +29,7 @@ var centerLoginOption CenterLoginOption
 func init() {
 	centerCmd.AddCommand(centerLoginCmd)
 
-	if jenkins := getCurrentJenkinsFromOptions(); jenkins != nil {
+	if jenkins := GetCurrentJenkinsFromOptions(); jenkins != nil {
 		healthCheckRegister.Register(getCmdPath(centerLoginCmd), condition.NewChecker(jenkins, centerLoginOption.RoundTripper,
 			"pipeline-restful-api", "0.10"))
 	}

@@ -29,7 +29,7 @@ var configEditCmd = &cobra.Command{
 	Long: i18n.T(fmt.Sprintf(`Edit a Jenkins config
 %s`, common.GetEditorHelpText())),
 	RunE: func(_ *cobra.Command, _ []string) (err error) {
-		current := getCurrentJenkinsFromOptions()
+		current := GetCurrentJenkinsFromOptions()
 		configPath := configOptions.ConfigFileLocation
 
 		var data []byte

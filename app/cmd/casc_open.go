@@ -36,7 +36,7 @@ var cascOpenCmd = &cobra.Command{
 		}
 	},
 	RunE: func(_ *cobra.Command, _ []string) (err error) {
-		jenkins := getCurrentJenkinsFromOptions()
+		jenkins := GetCurrentJenkinsFromOptions()
 		if jenkins == nil {
 			err = fmt.Errorf("cannot found Jenkins by %s", rootOptions.Jenkins)
 			return

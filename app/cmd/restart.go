@@ -32,7 +32,7 @@ var restartCmd = &cobra.Command{
 	Short: i18n.T("Restart your Jenkins"),
 	Long:  i18n.T("Restart your Jenkins"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jenkins := getCurrentJenkinsFromOptions()
+		jenkins := GetCurrentJenkinsFromOptions()
 		if !restartOption.Confirm(fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL)) {
 			return
 		}

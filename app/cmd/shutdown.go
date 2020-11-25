@@ -40,7 +40,7 @@ func NewShutdownCmd(rootOpt *RootOptions) (cmd *cobra.Command) {
 }
 
 func (o *ShutdownOption) runE(cmd *cobra.Command, _ []string) (err error) {
-	jenkins := getCurrentJenkinsFromOptions()
+	jenkins := GetCurrentJenkinsFromOptions()
 	if !o.Confirm(fmt.Sprintf("Are you sure to shutdown Jenkins %s?", jenkins.URL)) {
 		return
 	}
