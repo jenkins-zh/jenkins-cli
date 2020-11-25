@@ -44,9 +44,10 @@ func init() {
 }
 
 var openCmd = &cobra.Command{
-	Use:   "open",
-	Short: i18n.T("Open your Jenkins with a browser"),
-	Long:  i18n.T(`Open your Jenkins with a browser`),
+	Use:               "open",
+	Short:             i18n.T("Open your Jenkins with a browser"),
+	Long:              i18n.T(`Open your Jenkins with a browser`),
+	ValidArgsFunction: ValidJenkinsAndDataNames,
 	Example: `jcli open -n [config name]
 Open Jenkins with a specific browser is useful in some use cases. For example, one browser has a proxy setting.
 There are two ways to achieve this:

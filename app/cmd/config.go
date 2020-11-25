@@ -254,3 +254,18 @@ func ValidJenkinsNames(_ *cobra.Command, args []string, prefix string) (jenkinsN
 	}
 	return
 }
+
+// ValidJenkinsAndDataNames autocomplete with Jenkins names
+func ValidJenkinsAndDataNames(cmd *cobra.Command, args []string, prefix string) (result []string, directive cobra.ShellCompDirective) {
+	result = make([]string, 0)
+	if current := getCurrentJenkins(); current != nil {
+		for key := range current.Data {
+			result = append(result, "."+key)
+		}
+	}
+
+	var jenkinsNames []string
+	jenkinsNames, directive = ValidJenkinsNames(cmd, args, prefix)
+	result = append(result, jenkinsNames...)
+	return
+}
