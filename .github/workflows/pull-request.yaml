@@ -23,6 +23,7 @@ jobs:
           version: latest
           args: check
       - name: Build
+        uses: crazy-max/ghaction-upx@v1
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make clean gen-data-darwin tools release test-release
