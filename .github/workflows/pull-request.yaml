@@ -25,7 +25,9 @@ jobs:
       - name: Build
         run: |
           curl https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz -L | tar xzv
+          chmod u+x upx-3.96-amd64_linux/upx
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin:upx-3.96-amd64_linux
+          upx -V
           make clean gen-data-darwin tools release test-release
   GoLint:
     name: Lint
