@@ -23,9 +23,9 @@ jobs:
           version: latest
           args: check
       - name: Build
-        uses: crazy-max/ghaction-upx@v1
         run: |
-          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
+          curl https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz -L | tar xzv
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin:upx-3.96-amd64_linux
           make clean gen-data-darwin tools release test-release
   GoLint:
     name: Lint
