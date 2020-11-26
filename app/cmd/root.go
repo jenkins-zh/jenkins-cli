@@ -230,6 +230,7 @@ func GetRootCommand() *cobra.Command {
 	return rootCmd
 }
 
+// GetCurrentJenkinsFromOptions return the jenkins server
 func GetCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
 
@@ -412,6 +413,7 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appC
 	return
 }
 
+// Deprecated see also GetCurrentJenkinsAndClient
 func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
 	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL
@@ -424,6 +426,7 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.Je
 	return
 }
 
+// GetCurrentJenkinsAndClient returns the client
 func GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
 	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL
