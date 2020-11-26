@@ -26,7 +26,6 @@ jobs:
         git clone https://github.com/jenkins-zh/jcli-repo
         cp release/checksums.txt jcli-repo
         cp release/jcli-darwin-amd64.tar.gz jcli-repo
-        cp release/jcli-freebsd-amd64.tar.gz jcli-repo
         cp release/jcli-linux-64bit.deb jcli-repo
         cp release/jcli-linux-64bit.rpm jcli-repo
         cp release/jcli-linux-amd64.tar.gz jcli-repo
