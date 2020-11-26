@@ -176,7 +176,9 @@ func loadConfig(path string) (err error) {
 	var content []byte
 	if content, err = ioutil.ReadFile(path); err == nil {
 		err = yaml.Unmarshal([]byte(content), &config)
-
+		if err == nil && config.Current == "" {
+			err = fmt.Errorf("current jenkins is not specified, kindly provide a valid value using \"jcli config select\" command")
+		}
 		keyring.LoadTokenFromKeyring(config)
 	}
 	return
