@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: |
           export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
-          make clean gen-data-darwin tools release
+          make clean gen-data-darwin tools release test-release
   GoLint:
     name: Lint
     runs-on: ubuntu-latest
