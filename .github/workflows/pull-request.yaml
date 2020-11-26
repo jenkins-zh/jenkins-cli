@@ -25,7 +25,8 @@ jobs:
       - name: Build
         run: |
           brew install upx
-          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin\
+          upx -V
+          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
           make clean gen-data-darwin tools release test-release
   GoLint:
     name: Lint
