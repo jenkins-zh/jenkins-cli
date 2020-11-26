@@ -80,6 +80,10 @@ func LoadPlugins(cmd *cobra.Command) {
 	//cmd.Println("found plugins, count", len(plugins), plugins)
 
 	for _, plugin := range plugins {
+		if !plugin.Installed {
+			continue
+		}
+
 		// This function is used to setup the environment for the plugin and then
 		// call the executable specified by the parameter 'main'
 		callPluginExecutable := func(cmd *cobra.Command, main string, argv []string, out io.Writer) error {
