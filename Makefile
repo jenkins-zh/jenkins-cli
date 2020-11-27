@@ -36,7 +36,7 @@ win: pre-build
 build-all: darwin linux win
 
 release: build-all
-	mkdir release
+	mkdir -p release
 	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-darwin-amd64.tar.gz > jcli-darwin-amd64.txt
 	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-linux-amd64.tar.gz > jcli-linux-amd64.txt
 	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe; cd ../../release/; shasum -a 256 jcli-windows-386.tar.gz > jcli-windows-386.txt
@@ -136,7 +136,7 @@ test:
 #	go test ./app/cmd -v -count=1
 
 test-release:
-	goreleaser release --rm-dist --snapshot
+	goreleaser release --rm-dist --snapshot --skip-publish
 
 dep:
 	go get github.com/AlecAivazis/survey/v2

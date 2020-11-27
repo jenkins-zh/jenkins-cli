@@ -59,6 +59,11 @@ var healthCheckRegister = &health.CheckRegister{
 	Member: make(map[string]health.CommandHealth, 0),
 }
 
+// GetHealthCheckRegister return the instance of health check register
+func GetHealthCheckRegister() *health.CheckRegister {
+	return healthCheckRegister
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "jcli",
 	Short: i18n.T("Jenkins CLI written by golang which could help you with your multiple Jenkins"),
@@ -225,7 +230,8 @@ func GetRootCommand() *cobra.Command {
 	return rootCmd
 }
 
-func getCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
+// GetCurrentJenkinsFromOptions return the jenkins server
+func GetCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 	jenkinsOpt := rootOptions.Jenkins
 
 	if jenkinsOpt == "" {
@@ -268,9 +274,9 @@ func getCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 	return
 }
 
-// Deprecated, please use getCurrentJenkinsFromOptions instead of it
+// Deprecated, please use GetCurrentJenkinsFromOptions instead of it
 func getCurrentJenkinsFromOptionsOrDie() (jenkinsServer *appCfg.JenkinsServer) {
-	if jenkinsServer = getCurrentJenkinsFromOptions(); jenkinsServer == nil {
+	if jenkinsServer = GetCurrentJenkinsFromOptions(); jenkinsServer == nil {
 		log.Fatal("Cannot found Jenkins by", rootOptions.Jenkins)
 	}
 	return
@@ -407,8 +413,22 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appC
 	return
 }
 
+// Deprecated see also GetCurrentJenkinsAndClient
 func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
-	if jenkins = getCurrentJenkinsFromOptions(); jenkins != nil {
+	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
+	}
+	return
+}
+
+// GetCurrentJenkinsAndClient returns the client
+func GetCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
+	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL
 		jClient.UserName = jenkins.UserName
 		jClient.Token = jenkins.Token
@@ -421,7 +441,7 @@ func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.Je
 
 // GetCurrentJenkinsFromOptions returns the current Jenkins
 func (o *RootOptions) GetCurrentJenkinsFromOptions() *appCfg.JenkinsServer {
-	return getCurrentJenkinsFromOptions()
+	return GetCurrentJenkinsFromOptions()
 }
 
 // GetCurrentJenkinsAndClient returns the current Jenkins

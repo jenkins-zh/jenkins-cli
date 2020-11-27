@@ -301,7 +301,7 @@ var _ = Describe("Root cmd test", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).NotTo(HaveOccurred())
 
-			jenkins := getCurrentJenkinsFromOptions()
+			jenkins := GetCurrentJenkinsFromOptions()
 			Expect(jenkins.URL).To(Equal("fake-url"))
 			Expect(jenkins.UserName).To(Equal("fake-user"))
 			Expect(jenkins.Token).To(Equal("fake-token"))

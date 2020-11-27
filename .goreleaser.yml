@@ -8,17 +8,17 @@ builds:
     - amd64
     - arm64
   goos:
-    - freebsd
     - windows
     - linux
     - darwin
-  ignore:
-    - goos: freebsd
-      goarch: arm64
+  hooks:
+    post:
+      - upx "{{ .Path }}"
   ldflags:
     - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
     - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
     - -X github.com/jenkins-zh/jenkins-cli/app.date={{.Date}}
+    - -w
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"

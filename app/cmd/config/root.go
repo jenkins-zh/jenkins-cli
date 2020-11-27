@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
+	//appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
@@ -77,9 +77,13 @@ func LoadPlugins(cmd *cobra.Command) {
 		cmd.PrintErrln("Cannot load plugins successfully")
 		return
 	}
-	//cmd.Println("found plugins, count", len(plugins))
+	//cmd.Println("found plugins, count", len(plugins), plugins)
 
 	for _, plugin := range plugins {
+		if !plugin.Installed {
+			continue
+		}
+
 		// This function is used to setup the environment for the plugin and then
 		// call the executable specified by the parameter 'main'
 		callPluginExecutable := func(cmd *cobra.Command, main string, argv []string, out io.Writer) error {
@@ -110,22 +114,22 @@ func LoadPlugins(cmd *cobra.Command) {
 			Use:   plugin.Use,
 			Short: plugin.Short,
 			Long:  plugin.Long,
+			Annotations: map[string]string{
+				"main": plugin.Main,
+				//appCfg.ANNOTATION_CONFIG_LOAD: "disable",
+			},
 			RunE: func(cmd *cobra.Command, args []string) (err error) {
 				var userHome string
 				if userHome, err = homedir.Dir(); err != nil {
 					return
 				}
 
-				pluginExec := common.GetJCLIPluginPath(userHome, plugin.Main, true)
-
+				pluginExec := common.GetJCLIPluginPath(userHome, cmd.Annotations["main"], true)
 				err = callPluginExecutable(cmd, pluginExec, args, cmd.OutOrStdout())
 				return
 			},
-			// This passes all the flags to the subcommand.
-			DisableFlagParsing: true,
-		}
-		c.Annotations = map[string]string{
-			appCfg.ANNOTATION_CONFIG_LOAD: "disable",
+			// This passes all the flags to the sub-command.
+			//DisableFlagParsing: true,
 		}
 		cmd.AddCommand(c)
 	}
