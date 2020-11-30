@@ -1,5 +1,6 @@
 NAME := jcli
 CGO_ENABLED = 0
+BUILD_GOOS=$(shell go env GOOS)
 GO := go
 BUILD_TARGET = build
 COMMIT := $(shell git rev-parse --short HEAD)
@@ -9,14 +10,14 @@ BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSIO
 	-X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT) \
 	-X github.com/jenkins-zh/jenkins-cli/app.date=$(shell date +'%Y-%m-%d')"
 COVERED_MAIN_SRC_FILE=./main
-PATH  := $(PATH):$(PWD)/bin
+PATH := $(PATH):$(PWD)/bin
 
-gen-mock:
-	go get github.com/golang/mock/gomock
-	go install github.com/golang/mock/mockgen
-	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+.PHONY: build
 
-init: gen-mock
+build: pre-build
+	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=$(BUILD_GOOS) GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/$(BUILD_GOOS)/$(NAME) $(MAIN_SRC_FILE)
+	chmod +x bin/$(BUILD_GOOS)/$(NAME)
+	rm -rf jcli && ln -s bin/$(BUILD_GOOS)/$(NAME) jcli
 
 darwin: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
@@ -34,6 +35,12 @@ win: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
 
 build-all: darwin linux win
+
+init: gen-mock
+gen-mock:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
 
 release: build-all
 	mkdir -p release
