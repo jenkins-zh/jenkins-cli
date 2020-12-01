@@ -28,12 +28,14 @@ type ComputerLaunchOption struct {
 	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 
-	Mode        string
-	Remove      bool
-	Restart     string
-	Detach      bool
-	AgentType   string
-	CustomImage string
+	Mode                 string
+	Remove               bool
+	Restart              string
+	Detach               bool
+	AgentType            string
+	AgentImageTag        string
+	GeneralAgentImageTag string
+	CustomImage          string
 }
 
 const (
@@ -59,8 +61,12 @@ func init() {
 		i18n.T("The custom docker image of Jenkins agent. It works only you set --agent-type=custom"))
 	flags.StringVarP(&computerLaunchOption.Type, "type", "", AgentJNLP,
 		i18n.T("The type of agent, include jnlp"))
-	flags.StringVarP(&computerLaunchOption.AgentType, "agent-type", "", "",
+	flags.StringVarP(&computerLaunchOption.AgentType, "agent-type", "", "generic",
 		i18n.T("The type of agent, include generic, maven, python. See also https://github.com/jenkinsci/jnlp-agents"))
+	flags.StringVarP(&computerLaunchOption.AgentImageTag, "agent-image-tag", "", "latest",
+		i18n.T("The Jenkins agent image tag. See also https://github.com/jenkinsci/jnlp-agents"))
+	flags.StringVarP(&computerLaunchOption.GeneralAgentImageTag, "general-agent-image-tag", "", "4.0.1-1-alpine",
+		i18n.T("The tag of jenkins/slave. See also "))
 	flags.BoolVarP(&computerLaunchOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading agent.jar"))
 
@@ -71,7 +77,7 @@ func init() {
 		pluginCmd.PrintErrln(err)
 	}
 	if err := computerLaunchCmd.RegisterFlagCompletionFunc("agent-type", common.ArrayCompletion(
-		"generic", "maven", "python", "node", "ruby", "docker", "custom")); err != nil {
+		"generic", "maven", "python", "node", "ruby", "docker", "terraform", "custom")); err != nil {
 		pluginCmd.PrintErrln(err)
 	}
 
@@ -183,22 +189,18 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				var agentImage string
 				switch o.AgentType {
+				case "maven", "python", "docker", "node", "ruby", "terraform":
+					agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s:%s", o.AgentType, o.AgentImageTag)
 				case "generic":
-					agentImage = "jenkins/slave:4.0.1-1-alpine"
-					agentArgs = append(agentArgs, []string{agentImage, "java", "-jar", "/usr/share/jenkins/agent.jar",
-						"-jnlpUrl", fmt.Sprintf("%s/computer/%s/slave-agent.jnlp", o.ComputerClient.URL, name),
-						"-secret", secret, "-workDir", "/tmp"}...)
-				case "maven", "python", "docker", "node", "ruby":
-					agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s", o.AgentType)
-					agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
+					agentImage = fmt.Sprintf("jenkins/inbound-agent:%s", o.AgentImageTag)
 				case "custom":
 					if o.CustomImage == "" {
 						err = errors.New("--custom-image cannot be empty if you choose custom agent type")
 						return
 					}
 					agentImage = o.CustomImage
-					agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
 				}
+				agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
 
 				if o.CurrentJenkins.ProxyAuth != "" {
 					proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
