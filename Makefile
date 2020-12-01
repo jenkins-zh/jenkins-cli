@@ -56,7 +56,7 @@ clean: ## Clean the generated artifacts
 	rm -rf util/test-utils.xml
 
 copy: darwin
-	sudo cp bin/darwin/$(NAME) $(shell which jcli)
+	sudo cp bin/darwin/$(NAME) /usr/local/bin/jcli
 
 copy-linux: linux
 	cp bin/linux/$(NAME) /usr/local/bin/jcli

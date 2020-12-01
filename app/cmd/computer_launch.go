@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
@@ -27,11 +28,12 @@ type ComputerLaunchOption struct {
 	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 
-	Mode      string
-	Remove    bool
-	Restart   string
-	Detach    bool
-	AgentType string
+	Mode        string
+	Remove      bool
+	Restart     string
+	Detach      bool
+	AgentType   string
+	CustomImage string
 }
 
 const (
@@ -53,6 +55,8 @@ func init() {
 		i18n.T("Run container in background and print container ID"))
 	flags.StringVarP(&computerLaunchOption.Restart, "restart", "", "no",
 		i18n.T("Restart policy to apply when a container exits"))
+	flags.StringVarP(&computerLaunchOption.CustomImage, "custom-image", "", "",
+		i18n.T("The custom docker image of Jenkins agent. It works only you set --agent-type=custom"))
 	flags.StringVarP(&computerLaunchOption.Type, "type", "", AgentJNLP,
 		i18n.T("The type of agent, include jnlp"))
 	flags.StringVarP(&computerLaunchOption.AgentType, "agent-type", "", "",
@@ -67,7 +71,7 @@ func init() {
 		pluginCmd.PrintErrln(err)
 	}
 	if err := computerLaunchCmd.RegisterFlagCompletionFunc("agent-type", common.ArrayCompletion(
-		"generic", "maven", "python", "node", "ruby", "docker")); err != nil {
+		"generic", "maven", "python", "node", "ruby", "docker", "custom")); err != nil {
 		pluginCmd.PrintErrln(err)
 	}
 
@@ -187,6 +191,13 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 				case "maven", "python", "docker", "node", "ruby":
 					agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s", o.AgentType)
 					agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
+				case "custom":
+					if o.CustomImage == "" {
+						err = errors.New("--custom-image cannot be empty if you choose custom agent type")
+						return
+					}
+					agentImage = o.CustomImage
+					agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
 				}
 
 				if o.CurrentJenkins.ProxyAuth != "" {
@@ -204,7 +215,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
 		} else {
-			err = fmt.Errorf("not support mode: %s\n", o.Mode)
+			err = fmt.Errorf("not support mode: %s", o.Mode)
 		}
 	}
 	return
