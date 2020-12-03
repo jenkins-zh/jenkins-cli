@@ -28,7 +28,7 @@ type ComputerLaunchOption struct {
 	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 
-	Mode                 string
+	Mode                 LaunchMode
 	Remove               bool
 	Restart              string
 	Detach               bool
@@ -66,6 +66,22 @@ func (l LaunchMode) String() string {
 // All returns all launch modes
 func (l LaunchMode) All() []string {
 	return []string{LaunchModeDocker.String(), LaunchModeJava.String()}
+}
+
+func (l *LaunchMode) Set(s string) (err error) {
+	switch s {
+	case LaunchModeDocker.String():
+		*l = LaunchModeDocker
+	case LaunchModeJava.String():
+		*l = LaunchModeJava
+	default:
+		err = fmt.Errorf("invalid launch mode: %s", s)
+	}
+	return
+}
+
+func (l LaunchMode) Type() string {
+	return "LaunchMode"
 }
 
 // JNLPAgentImage is the type of Jenkins JNLP agent image
@@ -110,7 +126,7 @@ func init() {
 	computerCmd.AddCommand(computerLaunchCmd)
 	flags := computerLaunchCmd.Flags()
 
-	flags.StringVarP(&computerLaunchOption.Mode, "mode", "m", LaunchModeJava.String(),
+	flags.VarP(&computerLaunchOption.Mode, "mode", "m",
 		i18n.T(fmt.Sprintf("Mode of launching Jenkins, you can choose: %v", LaunchMode.All(""))))
 	flags.BoolVarP(&computerLaunchOption.Remove, "remove", "", false,
 		i18n.T("Automatically remove the container when it exits"))
@@ -157,7 +173,7 @@ jcli agent launch agent-name --type jnlp`,
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
 			GetComputerClient(computerLaunchOption.Option)
 
-		if computerLaunchOption.Type != AgentJNLP || LaunchModeDocker.Equal(computerLaunchOption.Mode) {
+		if computerLaunchOption.Type != AgentJNLP || LaunchModeDocker == computerLaunchOption.Mode {
 			return
 		}
 
@@ -209,7 +225,8 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 	if secret, err = o.ComputerClient.GetSecret(name); err == nil {
 		logger.Info("get agent secret", zap.String("value", secret))
 
-		if LaunchModeJava.Equal(o.Mode) {
+		switch o.Mode {
+		case LaunchModeJava, "":
 			var binary string
 			binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 			if err == nil {
@@ -232,7 +249,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
-		} else if LaunchModeDocker.Equal(o.Mode) {
+		case LaunchModeDocker:
 			var binary string
 			binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
 			if err == nil {
@@ -277,7 +294,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
-		} else {
+		default:
 			err = fmt.Errorf("not support mode: %s", o.Mode)
 		}
 	}

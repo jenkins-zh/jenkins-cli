@@ -15,6 +15,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
+	github.com/linuxsuren/go-cli-plugin v0.0.1 // indirect
 	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
@@ -28,7 +29,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.16.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392
 	golang.org/x/text v0.3.4
 	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.4.0
