@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 
 	"github.com/spf13/cobra"
 )
 
 // ConfigListOption option for config list command
 type ConfigListOption struct {
-	common.OutputOption
+	cobra_ext.OutputOption
 
 	Config string
 }

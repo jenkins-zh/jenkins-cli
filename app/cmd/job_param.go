@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"encoding/json"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
@@ -14,7 +14,7 @@ import (
 
 // JobParamOption is the job param option
 type JobParamOption struct {
-	common.OutputOption
+	cobra_ext.OutputOption
 
 	Indent bool
 

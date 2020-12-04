@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"strconv"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -11,7 +12,7 @@ import (
 
 // JobArtifactOption is the options of job artifact command
 type JobArtifactOption struct {
-	common.OutputOption
+	cobra_ext.OutputOption
 	common.Option
 }
 
