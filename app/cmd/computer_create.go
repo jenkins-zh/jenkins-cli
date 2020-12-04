@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 
 	"github.com/spf13/cobra"
 )
@@ -10,7 +11,7 @@ import (
 // ComputerCreateOption option for config list command
 type ComputerCreateOption struct {
 	common.Option
-	common.OutputOption
+	cobra_ext.OutputOption
 }
 
 var computerCreateOption ComputerCreateOption

@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -11,7 +11,7 @@ import (
 
 // QueueListOption represents the option of queue list command
 type QueueListOption struct {
-	common.OutputOption
+	cobra_ext.OutputOption
 
 	RoundTripper http.RoundTripper
 }

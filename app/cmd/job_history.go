@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -11,7 +11,7 @@ import (
 
 // JobHistoryOption is the job history option
 type JobHistoryOption struct {
-	common.OutputOption
+	cobra_ext.OutputOption
 
 	RoundTripper http.RoundTripper
 }
