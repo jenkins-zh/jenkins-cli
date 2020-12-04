@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"reflect"
@@ -9,12 +10,12 @@ import (
 
 var _ = Describe("test OutputOption", func() {
 	var (
-		outputOption OutputOption
+		outputOption cobra_ext.OutputOption
 		fakeFoos     []FakeFoo
 	)
 
 	BeforeEach(func() {
-		outputOption = OutputOption{}
+		outputOption = cobra_ext.OutputOption{}
 
 		fakeFoos = []FakeFoo{{
 			Name: "fake",
@@ -38,7 +39,7 @@ var _ = Describe("test OutputOption", func() {
 
 		Context("with filter", func() {
 			BeforeEach(func() {
-				outputOption = OutputOption{
+				outputOption = cobra_ext.OutputOption{
 					Filter: []string{"Name=fake"},
 				}
 			})
@@ -94,7 +95,7 @@ foo-1
 
 			Context("with json format", func() {
 				BeforeEach(func() {
-					outputOption.Format = JSONOutputFormat
+					outputOption.Format = cobra_ext.JSONOutputFormat
 				})
 
 				It("should get a json text", func() {
@@ -111,7 +112,7 @@ foo-1
 
 			Context("with yaml format", func() {
 				BeforeEach(func() {
-					outputOption.Format = YAMLOutputFormat
+					outputOption.Format = cobra_ext.YAMLOutputFormat
 				})
 
 				It("should get a yaml text", func() {
@@ -149,7 +150,7 @@ foo-1
 
 		Context("ignore invalid filter", func() {
 			BeforeEach(func() {
-				outputOption = OutputOption{
+				outputOption = cobra_ext.OutputOption{
 					Filter: []string{"Name"},
 				}
 			})

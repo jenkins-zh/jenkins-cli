@@ -6,13 +6,14 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"github.com/spf13/cobra"
 )
 
 // JobSearchOption is the options of job search command
 type JobSearchOption struct {
 	common.Option
-	common.OutputOption
+	cobra_ext.OutputOption
 	Name   string
 	Type   string
 	Parent string

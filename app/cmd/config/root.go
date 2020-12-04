@@ -1,20 +1,10 @@
 package config
 
 import (
-	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	//appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
-	"io"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"syscall"
+	goPlugin "github.com/linuxsuren/go-cli-plugin/pkg/cmd"
 
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
@@ -31,106 +21,6 @@ https://github.com/jenkins-zh/jcli-plugins`),
 		},
 	}
 
-	cmd.AddCommand(NewConfigPluginListCmd(opt),
-		NewConfigPluginFetchCmd(opt),
-		NewConfigPluginInstallCmd(opt),
-		NewConfigPluginUninstallCmd(opt))
+	goPlugin.AppendPluginCmd(cmd, "jenkins-zh", "jcli-plugins")
 	return
-}
-
-func findPlugins() (plugins []plugin, err error) {
-	var userHome string
-	if userHome, err = homedir.Dir(); err != nil {
-		return
-	}
-
-	plugins = make([]plugin, 0)
-	pluginsDir := fmt.Sprintf("%s/.jenkins-cli/plugins-repo/*.yaml", userHome)
-	if files, err := filepath.Glob(pluginsDir); err == nil {
-		for _, metaFile := range files {
-			var data []byte
-			plugin := plugin{}
-			if data, err = ioutil.ReadFile(metaFile); err == nil {
-				if err = yaml.Unmarshal(data, &plugin); err != nil {
-					fmt.Println(err)
-				} else {
-					if plugin.Main == "" {
-						plugin.Main = fmt.Sprintf("jcli-%s-plugin", plugin.Use)
-					}
-
-					if _, fileErr := os.Stat(common.GetJCLIPluginPath(userHome, plugin.Main, true)); !os.IsNotExist(fileErr) {
-						plugin.Installed = true
-					}
-					plugins = append(plugins, plugin)
-				}
-			}
-		}
-	}
-	return
-}
-
-// LoadPlugins loads the plugins
-func LoadPlugins(cmd *cobra.Command) {
-	var plugins []plugin
-	var err error
-	if plugins, err = findPlugins(); err != nil {
-		cmd.PrintErrln("Cannot load plugins successfully")
-		return
-	}
-	//cmd.Println("found plugins, count", len(plugins), plugins)
-
-	for _, plugin := range plugins {
-		if !plugin.Installed {
-			continue
-		}
-
-		// This function is used to setup the environment for the plugin and then
-		// call the executable specified by the parameter 'main'
-		callPluginExecutable := func(cmd *cobra.Command, main string, argv []string, out io.Writer) error {
-			env := os.Environ()
-
-			prog := exec.Command(main, argv...)
-			prog.Env = env
-			prog.Stdin = os.Stdin
-			prog.Stdout = out
-			prog.Stderr = os.Stderr
-			if err := prog.Run(); err != nil {
-				if eerr, ok := err.(*exec.ExitError); ok {
-					os.Stderr.Write(eerr.Stderr)
-					status := eerr.Sys().(syscall.WaitStatus)
-					return pluginError{
-						error: errors.Errorf("plugin %s exited with error", main),
-						code:  status.ExitStatus(),
-					}
-				}
-				return err
-			}
-
-			return nil
-		}
-
-		//cmd.Println("register plugin name", plugin.Use)
-		c := &cobra.Command{
-			Use:   plugin.Use,
-			Short: plugin.Short,
-			Long:  plugin.Long,
-			Annotations: map[string]string{
-				"main": plugin.Main,
-				//appCfg.ANNOTATION_CONFIG_LOAD: "disable",
-			},
-			RunE: func(cmd *cobra.Command, args []string) (err error) {
-				var userHome string
-				if userHome, err = homedir.Dir(); err != nil {
-					return
-				}
-
-				pluginExec := common.GetJCLIPluginPath(userHome, cmd.Annotations["main"], true)
-				err = callPluginExecutable(cmd, pluginExec, args, cmd.OutOrStdout())
-				return
-			},
-			// This passes all the flags to the sub-command.
-			//DisableFlagParsing: true,
-		}
-		cmd.AddCommand(c)
-	}
 }
