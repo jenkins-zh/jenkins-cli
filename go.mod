@@ -15,6 +15,7 @@ require (
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
 	github.com/linuxsuren/cobra-extension v0.0.1
+	github.com/linuxsuren/go-cli-alias v0.0.3
 	github.com/linuxsuren/go-cli-plugin v0.0.2
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
@@ -26,6 +27,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.16.0
+	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
 	golang.org/x/text v0.3.4
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0

@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	alias "github.com/linuxsuren/go-cli-alias/pkg"
+	"github.com/linuxsuren/go-cli-alias/pkg/cmd"
 	goPlugin "github.com/linuxsuren/go-cli-plugin/pkg"
+	"golang.org/x/net/context"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"io"
 	"log"
@@ -218,6 +221,19 @@ func init() {
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
 	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
+
+	var ctx context.Context
+	if defMgr, err := alias.GetDefaultAliasMgrWithNameAndInitialData(rootCmd.Name(), []alias.Alias{
+		{Name: "cl", Command: "config list"},
+	}); err == nil {
+		ctx = context.WithValue(context.Background(), alias.AliasKey, defMgr)
+
+		rootCmd.AddCommand(cmd.NewRootCommand(ctx))
+
+		cmd.RegisterAliasCommands(ctx, rootCmd)
+	} else {
+		fmt.Println(fmt.Errorf("cannot get default alias manager, error: %v", err))
+	}
 }
 
 // GetRootOptions returns the root options

@@ -59,7 +59,7 @@ copy: darwin
 	sudo cp bin/darwin/$(NAME) /usr/local/bin/jcli
 
 copy-linux: linux
-	cp bin/linux/$(NAME) /usr/local/bin/jcli
+	sudo cp bin/linux/$(NAME) /usr/local/bin/jcli
 
 get-golint:
 	go get -u golang.org/x/lint/golint

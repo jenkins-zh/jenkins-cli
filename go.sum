@@ -161,6 +161,7 @@ github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
+github.com/jenkins-zh/jenkins-cli v0.0.32/go.mod h1:uE1mH9PNITrg0sugv6HXuM/CSddg0zxXoYu3w57I3JY=
 github.com/jenkins-zh/jenkins-formulas v0.0.5 h1:6d/WoZCSdjTMRry1wHRe2rrf6zQHlfXmaPbp0Bi3I6w=
 github.com/jenkins-zh/jenkins-formulas v0.0.5/go.mod h1:zS8fm8u5L6FcjZM0QznXsLV9T2UtSVK+hT6Sm76iUZ4=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
@@ -189,6 +190,9 @@ github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/linuxsuren/cobra-extension v0.0.1 h1:e288zsm1iWUaAOjfiw42hiWJsrrXZnJ0vKApWPyTfkQ=
 github.com/linuxsuren/cobra-extension v0.0.1/go.mod h1:UqHi31q7Dj+46nzcVWNZz5Z1JcHBJcmCyPAZRoM8LXo=
+github.com/linuxsuren/go-cli-alias v0.0.3 h1:IbqC+4uOTCRM27WCII7Z35pXP4bwqck0J5jg2xmIqr4=
+github.com/linuxsuren/go-cli-alias v0.0.3/go.mod h1:l2/nzdvung0zorpCxI1CT+Fuuc/W1sFEWS0jt3/b2ZM=
+github.com/linuxsuren/go-cli-plugin v0.0.1/go.mod h1:uyO09KK8otYfDV5LVTfcWX2UbAi3kEz3PrkdfIxnDlg=
 github.com/linuxsuren/go-cli-plugin v0.0.2 h1:TASIObCEzmfOblTWt53c8g+r5kuTMcGS9KXFNOLinRU=
 github.com/linuxsuren/go-cli-plugin v0.0.2/go.mod h1:ffi2sOHF6qE83rTUaWPjNBy4sPH87IYJYQldxBAdOEk=
 github.com/magiconair/properties v1.8.0 h1:LLgXmsheXeRoUOBOjtwPQCWIYqM/LU1ayDtDePerRcY=
@@ -198,6 +202,8 @@ github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czP
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.2 h1:/bC9yWikZXAL9uJdulbSfyVNIR3n3trXl+v8+1sx8mU=
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
+github.com/mattn/go-colorable v0.1.4 h1:snbPLB8fVfU9iwbbo30TPtbLRzwWu6aJS6Xh4eaaviA=
+github.com/mattn/go-colorable v0.1.4/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/mattn/go-isatty v0.0.8 h1:HLtExJ+uU2HOZ+wI0Tt5DtUDrx8yhUqDcp7fYERX4CE=
 github.com/mattn/go-isatty v0.0.8/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
