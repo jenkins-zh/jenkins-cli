@@ -118,7 +118,7 @@ func (i JNLPAgentImage) All() []string {
 }
 
 // Type returns the type of current struct
-func (l JNLPAgentImage) Type() string {
+func (i JNLPAgentImage) Type() string {
 	return "JNLPAgentImage"
 }
 
