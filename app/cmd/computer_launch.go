@@ -68,6 +68,7 @@ func (l LaunchMode) All() []string {
 	return []string{LaunchModeDocker.String(), LaunchModeJava.String()}
 }
 
+// Set give a appropriate value
 func (l *LaunchMode) Set(s string) (err error) {
 	switch s {
 	case LaunchModeDocker.String():
@@ -80,6 +81,7 @@ func (l *LaunchMode) Set(s string) (err error) {
 	return
 }
 
+// Type returns the type of current struct
 func (l LaunchMode) Type() string {
 	return "LaunchMode"
 }
@@ -115,6 +117,7 @@ func (i JNLPAgentImage) All() []string {
 		TerraformAgentImage.String(), CustomAgentImage.String()}
 }
 
+// Type returns the type of current struct
 func (l JNLPAgentImage) Type() string {
 	return "JNLPAgentImage"
 }
@@ -124,6 +127,7 @@ func (i JNLPAgentImage) String() string {
 	return string(i)
 }
 
+// Set give a appropriate value
 func (i *JNLPAgentImage) Set(s string) (err error) {
 	switch s {
 	case GenericAgentImage.String():
