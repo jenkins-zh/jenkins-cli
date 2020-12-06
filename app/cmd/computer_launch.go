@@ -28,11 +28,11 @@ type ComputerLaunchOption struct {
 	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 
-	Mode                 string
+	Mode                 LaunchMode
 	Remove               bool
 	Restart              string
 	Detach               bool
-	AgentType            string
+	AgentType            JNLPAgentImage
 	AgentImageTag        string
 	GeneralAgentImageTag string
 	CustomImage          string
@@ -68,6 +68,24 @@ func (l LaunchMode) All() []string {
 	return []string{LaunchModeDocker.String(), LaunchModeJava.String()}
 }
 
+// Set give a appropriate value
+func (l *LaunchMode) Set(s string) (err error) {
+	switch s {
+	case LaunchModeDocker.String():
+		*l = LaunchModeDocker
+	case LaunchModeJava.String():
+		*l = LaunchModeJava
+	default:
+		err = fmt.Errorf("invalid launch mode: %s", s)
+	}
+	return
+}
+
+// Type returns the type of current struct
+func (l LaunchMode) Type() string {
+	return "LaunchMode"
+}
+
 // JNLPAgentImage is the type of Jenkins JNLP agent image
 type JNLPAgentImage string
 
@@ -99,9 +117,41 @@ func (i JNLPAgentImage) All() []string {
 		TerraformAgentImage.String(), CustomAgentImage.String()}
 }
 
+// Type returns the type of current struct
+func (i JNLPAgentImage) Type() string {
+	return "JNLPAgentImage"
+}
+
 // String returns the string format of JNLPAgentImage
 func (i JNLPAgentImage) String() string {
 	return string(i)
+}
+
+// Set give a appropriate value
+func (i *JNLPAgentImage) Set(s string) (err error) {
+	switch s {
+	case GenericAgentImage.String():
+		*i = GenericAgentImage
+	case GolangAgentImage.String():
+		*i = GolangAgentImage
+	case MavenAgentImage.String():
+		*i = MavenAgentImage
+	case PythonAgentImage.String():
+		*i = PythonAgentImage
+	case NodeAgentImage.String():
+		*i = NodeAgentImage
+	case RubyAgentImage.String():
+		*i = RubyAgentImage
+	case DockerAgentImage.String():
+		*i = DockerAgentImage
+	case TerraformAgentImage.String():
+		*i = TerraformAgentImage
+	case CustomAgentImage.String():
+		*i = CustomAgentImage
+	default:
+		err = fmt.Errorf("invalid JNLP agent image: %s", s)
+	}
+	return
 }
 
 var computerLaunchOption ComputerLaunchOption
@@ -110,7 +160,7 @@ func init() {
 	computerCmd.AddCommand(computerLaunchCmd)
 	flags := computerLaunchCmd.Flags()
 
-	flags.StringVarP(&computerLaunchOption.Mode, "mode", "m", LaunchModeJava.String(),
+	flags.VarP(&computerLaunchOption.Mode, "mode", "m",
 		i18n.T(fmt.Sprintf("Mode of launching Jenkins, you can choose: %v", LaunchMode.All(""))))
 	flags.BoolVarP(&computerLaunchOption.Remove, "remove", "", false,
 		i18n.T("Automatically remove the container when it exits"))
@@ -122,7 +172,7 @@ func init() {
 		i18n.T(fmt.Sprintf("The custom docker image of Jenkins agent. It works only you set --agent-type=%s", CustomAgentImage.String())))
 	flags.StringVarP(&computerLaunchOption.Type, "type", "", AgentJNLP,
 		i18n.T("The type of agent, include jnlp"))
-	flags.StringVarP(&computerLaunchOption.AgentType, "agent-type", "", GenericAgentImage.String(),
+	flags.VarP(&computerLaunchOption.AgentType, "agent-type", "",
 		i18n.T(fmt.Sprintf("The type of agent, include %v. See also https://github.com/jenkinsci/jnlp-agents", JNLPAgentImage.All(""))))
 	flags.StringVarP(&computerLaunchOption.AgentImageTag, "agent-image-tag", "", "latest",
 		i18n.T("The Jenkins agent image tag. See also https://github.com/jenkinsci/jnlp-agents"))
@@ -157,7 +207,7 @@ jcli agent launch agent-name --type jnlp`,
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
 			GetComputerClient(computerLaunchOption.Option)
 
-		if computerLaunchOption.Type != AgentJNLP || LaunchModeDocker.Equal(computerLaunchOption.Mode) {
+		if computerLaunchOption.Type != AgentJNLP || LaunchModeDocker == computerLaunchOption.Mode {
 			return
 		}
 
@@ -209,7 +259,8 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 	if secret, err = o.ComputerClient.GetSecret(name); err == nil {
 		logger.Info("get agent secret", zap.String("value", secret))
 
-		if LaunchModeJava.Equal(o.Mode) {
+		switch o.Mode {
+		case LaunchModeJava, "":
 			var binary string
 			binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 			if err == nil {
@@ -232,7 +283,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
-		} else if LaunchModeDocker.Equal(o.Mode) {
+		case LaunchModeDocker:
 			var binary string
 			binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
 			if err == nil {
@@ -249,12 +300,12 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				var agentImage string
 				switch o.AgentType {
-				case GolangAgentImage.String(), MavenAgentImage.String(), PythonAgentImage.String(),
-					DockerAgentImage.String(), NodeAgentImage.String(), RubyAgentImage.String(), TerraformAgentImage.String():
+				case GolangAgentImage, MavenAgentImage, PythonAgentImage,
+					DockerAgentImage, NodeAgentImage, RubyAgentImage, TerraformAgentImage:
 					agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s:%s", o.AgentType, o.AgentImageTag)
-				case GenericAgentImage.String():
+				case GenericAgentImage:
 					agentImage = fmt.Sprintf("jenkins/inbound-agent:%s", o.AgentImageTag)
-				case CustomAgentImage.String():
+				case CustomAgentImage:
 					if o.CustomImage == "" {
 						err = errors.New("--custom-image cannot be empty if you choose custom agent type")
 						return
@@ -277,7 +328,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
-		} else {
+		default:
 			err = fmt.Errorf("not support mode: %s", o.Mode)
 		}
 	}
