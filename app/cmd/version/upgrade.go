@@ -60,7 +60,8 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		err = fmt.Errorf("cannot find Jenkins CLI from system path, error: %v", err)
 		return
 	}
-	if _, err = os.Stat(targetPath); err != nil {
+
+	if err = syscall.Access(targetPath, syscall.O_RDWR); err != nil {
 		if !o.Privilege {
 			return
 		}
@@ -127,7 +128,7 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 	}
 
 	if err = o.extractFiles(output); err == nil {
-		err = overWriteJCLI(output, targetPath)
+		err = overWriteJCLI(fmt.Sprintf("%s/jcli", filepath.Dir(output)), targetPath)
 	} else {
 		err = fmt.Errorf("cannot extract Jenkins CLI from tar file, error: %v", err)
 	}
@@ -143,7 +144,7 @@ func overWriteJCLI(sourceFile, targetPath string) (err error) {
 		}
 	default:
 		sourceF, _ := os.Open(sourceFile)
-		targetF, _ := os.Open(targetPath)
+		targetF, _ := os.OpenFile(targetPath, os.O_CREATE|os.O_RDWR, 0664)
 		if _, err = io.Copy(targetF, sourceF); err != nil {
 			err = fmt.Errorf("cannot copy Jenkins CLI from %s to %v, error: %v", sourceFile, targetPath, err)
 		}
