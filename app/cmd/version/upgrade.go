@@ -61,7 +61,9 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		return
 	}
 
-	if err = syscall.Access(targetPath, syscall.O_RDWR); err != nil {
+	var f *os.File
+	if f, err = os.OpenFile(targetPath, os.O_WRONLY, 0666); os.IsPermission(err) {
+		//if err = syscall.Access(targetPath, syscall.O_RDWR); err != nil {
 		if !o.Privilege {
 			return
 		}
@@ -76,6 +78,7 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 		}
 		return
 	}
+	f.Close()
 
 	// try to understand the version from user input
 	switch version {
