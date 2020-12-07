@@ -63,7 +63,6 @@ func (o *SelfUpgradeOption) RunE(cmd *cobra.Command, args []string) (err error) 
 
 	var f *os.File
 	if f, err = os.OpenFile(targetPath, os.O_WRONLY, 0666); os.IsPermission(err) {
-		//if err = syscall.Access(targetPath, syscall.O_RDWR); err != nil {
 		if !o.Privilege {
 			return
 		}
