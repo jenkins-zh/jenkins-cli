@@ -192,8 +192,8 @@ github.com/linuxsuren/cobra-extension v0.0.1 h1:e288zsm1iWUaAOjfiw42hiWJsrrXZnJ0
 github.com/linuxsuren/cobra-extension v0.0.1/go.mod h1:UqHi31q7Dj+46nzcVWNZz5Z1JcHBJcmCyPAZRoM8LXo=
 github.com/linuxsuren/cobra-extension v0.0.3 h1:06tdJNYM4Wcx6WZPDnz/WLuP2jVdVZ9RLuwlUHIblmg=
 github.com/linuxsuren/cobra-extension v0.0.3/go.mod h1:UqHi31q7Dj+46nzcVWNZz5Z1JcHBJcmCyPAZRoM8LXo=
-github.com/linuxsuren/go-cli-alias v0.0.3 h1:IbqC+4uOTCRM27WCII7Z35pXP4bwqck0J5jg2xmIqr4=
-github.com/linuxsuren/go-cli-alias v0.0.3/go.mod h1:l2/nzdvung0zorpCxI1CT+Fuuc/W1sFEWS0jt3/b2ZM=
+github.com/linuxsuren/go-cli-alias v0.0.4 h1:+otarDOeSZzzbTCr9CllAOQCQNpaf/HI41iDvWWUo/w=
+github.com/linuxsuren/go-cli-alias v0.0.4/go.mod h1:dfwOx8H0iVpdS9gtLC80GCC4cvDvzWejxjxXn7sFWUs=
 github.com/linuxsuren/go-cli-plugin v0.0.1/go.mod h1:uyO09KK8otYfDV5LVTfcWX2UbAi3kEz3PrkdfIxnDlg=
 github.com/linuxsuren/go-cli-plugin v0.0.2 h1:TASIObCEzmfOblTWt53c8g+r5kuTMcGS9KXFNOLinRU=
 github.com/linuxsuren/go-cli-plugin v0.0.2/go.mod h1:ffi2sOHF6qE83rTUaWPjNBy4sPH87IYJYQldxBAdOEk=
