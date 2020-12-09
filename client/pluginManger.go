@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PluginManager is the client of plugin manager
@@ -304,9 +304,9 @@ func (p *PluginManager) newfileUploadRequest(uri string, params map[string]strin
 		return
 	}
 
-	var progressWriter *util.ProgressIndicator
+	var progressWriter *httpdownloader.ProgressIndicator
 	if p.ShowProgress {
-		progressWriter = &util.ProgressIndicator{
+		progressWriter = &httpdownloader.ProgressIndicator{
 			Total:  total,
 			Writer: bytesBuffer,
 			Reader: bytesBuffer,

@@ -5,6 +5,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -68,7 +69,7 @@ Get more about jenkinsfile runner from https://github.com/jenkinsci/jenkinsfile-
 		logger.Info("Prepare to start Downloading jenkinfileRunner", zap.String("URL", jenkinsfileRunnerURL))
 
 		if _, fErr := os.Stat(jenkinsfileRunnerTargetPath); fErr != nil && os.IsNotExist(fErr) {
-			downloader := util.HTTPDownloader{
+			downloader := httpdownloader.HTTPDownloader{
 				URL:            jenkinsfileRunnerURL,
 				ShowProgress:   true,
 				TargetFilePath: jenkinsfileRunnerTargetPath,

@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -75,10 +75,10 @@ func (c *ComputerClient) Create(name string) (err error) {
 	}
 	payload := strings.NewReader(formData.Encode())
 	if _, err = c.RequestWithoutData(http.MethodPost, "/computer/createItem",
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200); err == nil {
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200); err == nil {
 		payload = GetPayloadForCreateAgent(name)
 		_, err = c.RequestWithoutData(http.MethodPost, "/computer/doCreateItem",
-			map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	}
 	return
 }

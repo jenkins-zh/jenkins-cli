@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -327,7 +327,7 @@ var _ = Describe("job test", func() {
 			jobName := "fakeJob"
 			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
-			request.Header.Add(util.ContentType, util.ApplicationForm)
+			request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",

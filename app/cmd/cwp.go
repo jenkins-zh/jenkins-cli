@@ -7,6 +7,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	jenkinsFormula "github.com/jenkins-zh/jenkins-formulas/pkg/common"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -239,7 +240,7 @@ func (o *CWPOptions) GetLatest() (version string, err error) {
 }
 
 func (o *CWPOptions) downloadFile(url, output string) (err error) {
-	downloader := util.HTTPDownloader{
+	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   o.RoundTripper,
 		TargetFilePath: output,
 		URL:            url,

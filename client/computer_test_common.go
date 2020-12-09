@@ -3,13 +3,13 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PrepareForComputerListRequest only for test
@@ -74,12 +74,12 @@ func PrepareForComputerCreateRequest(roundTripper *mhttp.MockRoundTripper, rootU
 	}
 	payload := strings.NewReader(formData.Encode())
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/createItem", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 
 	payload = GetPayloadForCreateAgent(name)
 	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/doCreateItem", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
