@@ -28,7 +28,7 @@ var crumbIssuerCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(jenkinsCore)
 
 		var crumb *client.JenkinsCrumb
-		if crumb, err = jenkinsCore.GetCrumb(); err == nil {
+		if crumb, err = jenkinsCore.GetCrumb(); err == nil && crumb != nil {
 			cmd.Printf("%s=%s\n", crumb.CrumbRequestField, crumb.Crumb)
 		}
 		return
