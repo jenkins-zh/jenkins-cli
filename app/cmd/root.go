@@ -15,15 +15,16 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/health"
 
-	ver "github.com/jenkins-zh/jenkins-cli/app/cmd/version"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	ver "github.com/linuxsuren/cobra-extension/version"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 
@@ -220,7 +221,10 @@ func init() {
 
 	// add sub-commands
 	NewShutdownCmd(&rootOptions)
-	rootCmd.AddCommand(ver.NewVersionCmd(&rootOptions, &rootOptions))
+	rootCmd.AddCommand(ver.NewVersionCmd("jenkins-zh", "jenkins-cli", "jcli", func(version string) string {
+		return fmt.Sprintf("https://cdn.jsdelivr.net/gh/jenkins-zh/jcli-repo@%s/jcli-%s-amd64.tar.gz",
+			version, runtime.GOOS)
+	}))
 
 	var ctx context.Context
 	if defMgr, err := alias.GetDefaultAliasMgrWithNameAndInitialData(rootCmd.Name(), []alias.Alias{

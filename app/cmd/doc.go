@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	ext "github.com/linuxsuren/cobra-extension/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"os"
@@ -72,7 +72,7 @@ jcli doc --doc-type ManPage /usr/local/share/man/man1`,
 				base := strings.TrimSuffix(name, path.Ext(name))
 				return fmt.Sprintf(gendocFrontmatterTemplate, now,
 					strings.Replace(base, "_", " ", -1),
-					app.GetVersion())
+					ext.GetVersion())
 			}
 
 			linkHandler := func(name string) string {

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"go.uber.org/zap"
 )
 
@@ -173,7 +174,7 @@ func (d *PluginAPI) download(url string, name string) (err error) {
 	url = d.getMirrorURL(url)
 	logger.Info("prepare to download", zap.String("name", name), zap.String("url", url))
 
-	downloader := util.HTTPDownloader{
+	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   d.RoundTripper,
 		TargetFilePath: path.Join(d.DownloadDir, fmt.Sprintf("%s.hpi", name)),
 		URL:            url,

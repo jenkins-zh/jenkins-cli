@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -109,7 +109,7 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			}
 
 			pluginUploadOption.pluginFilePathArray = []string{fmt.Sprintf("%s.hpi", file.Name())}
-			downloader := util.HTTPDownloader{
+			downloader := httpdownloader.HTTPDownloader{
 				TargetFilePath: pluginUploadOption.pluginFilePathArray[0],
 				URL:            pluginUploadOption.Remote,
 				UserName:       pluginUploadOption.RemoteUser,

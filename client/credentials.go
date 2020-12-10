@@ -3,12 +3,11 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"go.uber.org/zap"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 // CredentialsManager hold the info of credentials client
@@ -41,7 +40,7 @@ func (c *CredentialsManager) Create(store, credential string) (err error) {
 	payload := strings.NewReader(formData.Encode())
 
 	_, err = c.RequestWithoutData(http.MethodPost, api,
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	return
 }
 

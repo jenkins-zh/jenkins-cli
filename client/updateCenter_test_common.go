@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,7 +17,7 @@ func PrepareForSetMirrorCertificate(roundTripper *mhttp.MockRoundTripper, rootUR
 	}
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s", rootURL, api), nil)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
@@ -28,6 +28,6 @@ func PrepareForChangeUpdateCenterSite(roundTripper *mhttp.MockRoundTripper, root
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/pluginManager/siteConfigure", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }

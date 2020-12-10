@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -16,8 +17,6 @@ import (
 
 	"go.uber.org/zap"
 	"moul.io/http2curl"
-
-	"github.com/jenkins-zh/jenkins-cli/util"
 )
 
 const (
@@ -147,13 +146,13 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 		}
 
 		_, err = q.RequestWithoutData(http.MethodPost, api,
-			map[string]string{util.ContentType: writer.FormDataContentType()}, body, 201)
+			map[string]string{httpdownloader.ContentType: writer.FormDataContentType()}, body, 201)
 	} else {
 		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
 		payload := strings.NewReader(formData.Encode())
 
 		_, err = q.RequestWithoutData(http.MethodPost, api,
-			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
+			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 201)
 	}
 	return
 }
@@ -329,7 +328,7 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 
 	var code int
 	code, err = q.RequestWithoutData(http.MethodPost, "/view/all/createItem",
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
 	}
@@ -345,7 +344,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	jobName = ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/doDelete", jobName)
 	header := map[string]string{
-		util.ContentType: util.ApplicationForm,
+		httpdownloader.ContentType: httpdownloader.ApplicationForm,
 	}
 
 	if statusCode, _, err = q.Request(http.MethodPost, api, header, nil); err == nil {

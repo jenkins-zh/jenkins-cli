@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PrepareForGetCredentialList only for test
@@ -45,7 +45,7 @@ func PrepareForCreateCredential(roundTripper *mhttp.MockRoundTripper, rootURL, u
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest(http.MethodPost, api, payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 

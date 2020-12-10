@@ -7,6 +7,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/condition"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -77,7 +78,7 @@ var centerLoginCmd = &cobra.Command{
 
 		var ipAddr string
 		var ipErr error
-		if ipAddr, ipErr = util.GetExternalIP(); ipErr != nil {
+		if ipAddr, ipErr = httpdownloader.GetExternalIP(); ipErr != nil {
 			ipAddr = "localhost"
 			logger.Warn("cannot find the external ip, use local instead of.")
 		}

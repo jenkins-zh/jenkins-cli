@@ -8,6 +8,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"io/ioutil"
@@ -219,7 +220,7 @@ jcli agent launch agent-name --type jnlp`,
 			logger.Debug("proxy setting", zap.String("sever", computerLaunchOption.CurrentJenkins.Proxy),
 				zap.String("auth", computerLaunchOption.CurrentJenkins.ProxyAuth))
 
-			downloader := util.HTTPDownloader{
+			downloader := httpdownloader.HTTPDownloader{
 				RoundTripper:   computerLaunchOption.RoundTripper,
 				TargetFilePath: computerLaunchOption.Output,
 				URL:            agentURL,

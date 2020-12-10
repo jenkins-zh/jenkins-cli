@@ -11,7 +11,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -81,7 +81,7 @@ var jobArtifactDownloadCmd = &cobra.Command{
 }
 
 func (j *JobArtifactDownloadOption) download(url, fileName string) (err error) {
-	downloader := util.HTTPDownloader{
+	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   j.RoundTripper,
 		TargetFilePath: fileName,
 		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, url),

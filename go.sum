@@ -199,7 +199,10 @@ github.com/linuxsuren/go-cli-alias v0.0.4/go.mod h1:dfwOx8H0iVpdS9gtLC80GCC4cvDv
 github.com/linuxsuren/go-cli-plugin v0.0.1/go.mod h1:uyO09KK8otYfDV5LVTfcWX2UbAi3kEz3PrkdfIxnDlg=
 github.com/linuxsuren/go-cli-plugin v0.0.2 h1:TASIObCEzmfOblTWt53c8g+r5kuTMcGS9KXFNOLinRU=
 github.com/linuxsuren/go-cli-plugin v0.0.2/go.mod h1:ffi2sOHF6qE83rTUaWPjNBy4sPH87IYJYQldxBAdOEk=
+github.com/linuxsuren/http-downloader v0.0.2-0.20201207132639-19888a6beaec h1:N6xw+W4IvgOV0cmhE7iUWKHNZqMUXlT3in+1ORmqIGo=
 github.com/linuxsuren/http-downloader v0.0.2-0.20201207132639-19888a6beaec/go.mod h1:zRZY9FCDBuYNDxbI2Ny5suasZsMk7J6q9ecQ3V3PIqI=
+github.com/linuxsuren/http-downloader v0.0.2 h1:yCQ8rpIjUw2Uyq3IX6+Hw1CHIPtQwDTlatM0sb7SsYk=
+github.com/linuxsuren/http-downloader v0.0.2/go.mod h1:zRZY9FCDBuYNDxbI2Ny5suasZsMk7J6q9ecQ3V3PIqI=
 github.com/magiconair/properties v1.8.0 h1:LLgXmsheXeRoUOBOjtwPQCWIYqM/LU1ayDtDePerRcY=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.1 h1:ZC2Vc7/ZFkGmsVC9KvOjumD+G5lXy2RtTKyzRKO2BQ4=

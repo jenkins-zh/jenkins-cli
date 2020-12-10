@@ -13,8 +13,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	ext "github.com/linuxsuren/cobra-extension/version"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // language is for global Accept Language
@@ -56,7 +57,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: j.InsecureSkipVerify},
 		}
-		if err := util.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
+		if err := httpdownloader.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
 			log.Fatal(err)
 		}
 		roundTripper = tr
@@ -91,7 +92,7 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 
 	// not add the User-Agent for tests
 	if j.RoundTripper == nil {
-		request.Header.Set("User-Agent", app.GetCombinedVersion())
+		request.Header.Set("User-Agent", ext.GetCombinedVersion())
 	}
 
 	j.ProxyHandle(request)

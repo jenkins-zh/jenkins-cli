@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -34,7 +34,7 @@ func PrepareCreateUser(roundTripper *mhttp.MockRoundTripper, rootURL,
 	user, passwd, targetUserName string) (response *http.Response) {
 	payload, _ := genSimpleUserAsPayload(targetUserName, "fakePass")
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/securityRealm/createAccountByAdmin", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
@@ -47,7 +47,7 @@ func PrepareCreateToken(roundTripper *mhttp.MockRoundTripper, rootURL,
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/user/%s/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken", rootURL, targetUser), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	response = PrepareCommonPost(request, `{"status":"ok"}`, roundTripper, user, passwd, rootURL)
 	return
 }
@@ -59,7 +59,7 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 	payload := strings.NewReader(formData.Encode())
 
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/user/%s/submitDescription", rootURL, userName), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }
@@ -68,7 +68,7 @@ func PrepareForEditUserDesc(roundTripper *mhttp.MockRoundTripper, rootURL, userN
 func PrepareForDeleteUser(roundTripper *mhttp.MockRoundTripper, rootURL, userName, user, passwd string) (
 	response *http.Response) {
 	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/securityRealm/user/%s/doDelete", rootURL, userName), nil)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	response = PrepareCommonPost(request, "", roundTripper, user, passwd, rootURL)
 	return
 }

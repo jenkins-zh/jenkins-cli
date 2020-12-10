@@ -3,13 +3,14 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/util"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/Pallinder/go-randomdata"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // UserClient for connect the user
@@ -43,13 +44,15 @@ func (q *UserClient) EditDesc(description string) (err error) {
 	formData := url.Values{}
 	formData.Add("description", description)
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/user/%s/submitDescription", q.UserName), map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/user/%s/submitDescription", q.UserName),
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	return
 }
 
 // Delete will remove a user from Jenkins
 func (q *UserClient) Delete(username string) (err error) {
-	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/securityRealm/user/%s/doDelete", username), map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("/securityRealm/user/%s/doDelete", username),
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, nil, 200)
 	return
 }
 
@@ -88,7 +91,7 @@ func (q *UserClient) Create(username, password string) (user *UserForCreate, err
 
 	payload, user = genSimpleUserAsPayload(username, password)
 	code, err = q.RequestWithoutData(http.MethodPost, "/securityRealm/createAccountByAdmin",
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
 	}
@@ -112,7 +115,7 @@ func (q *UserClient) CreateToken(targetUser, newTokenName string) (status *Token
 	payload := strings.NewReader(formData.Encode())
 
 	err = q.RequestWithData(http.MethodPost, api,
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200, &status)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200, &status)
 	return
 }
 

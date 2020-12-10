@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // UpdateCenterManager manages the UpdateCenter
@@ -118,7 +118,7 @@ func (u *UpdateCenterManager) DownloadJenkins() (err error) {
 	showProgress, output := u.ShowProgress, u.Output
 	warURL := u.GetJenkinsWarURL()
 
-	downloader := util.HTTPDownloader{
+	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   u.RoundTripper,
 		TargetFilePath: output,
 		URL:            warURL,
@@ -159,7 +159,7 @@ func (u *UpdateCenterManager) ChangeUpdateCenterSite(name, updateCenterURL strin
 
 	api := "/pluginManager/siteConfigure"
 	_, err = u.RequestWithoutData(http.MethodPost, api,
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -171,6 +171,6 @@ func (u *UpdateCenterManager) SetMirrorCertificate(enable bool) (err error) {
 	}
 
 	_, err = u.RequestWithoutData(http.MethodPost, api,
-		map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, nil, 200)
 	return
 }
