@@ -47,6 +47,7 @@ type CenterStartOption struct {
 
 	Mode          string
 	Image         string
+	ForcePull     bool
 	ContainerUser string
 	DryRun        bool
 }
@@ -97,7 +98,9 @@ func init() {
 	flags.StringVarP(&centerStartOption.Mode, "mode", "m", "java",
 		i18n.T("Which mode do you want to run. Supported mode contains: java, docker"))
 	flags.StringVarP(&centerStartOption.Image, "image", "", "jenkins/jenkins",
-		i18n.T("Which docker image do you want to run. It works only the mode is docker"))
+		i18n.T("Which docker image do you want to run. It works only the mode is docker. Please use --version if you want to specific the version of docker image."))
+	flags.BoolVarP(&centerStartOption.ForcePull, "force-pull", "", false,
+		"Indicate if you want to force pull image. Sometimes your local image is not the latest.")
 	flags.StringVarP(&centerStartOption.ContainerUser, "c-user", "", "",
 		i18n.T("Container Username or UID (format: <name|uid>[:<group|gid>])"))
 
@@ -144,7 +147,24 @@ func (c *CenterStartOption) run(cmd *cobra.Command, _ []string) (err error) {
 	case "java":
 		err = c.createJavaArgs(cmd)
 	case "docker":
+		if c.ForcePull {
+			if err = c.pullImage(fmt.Sprintf("%s:%s", c.Image, c.Version)); err != nil {
+				return
+			}
+		}
 		err = c.createDockerArgs(cmd)
+	}
+	return
+}
+
+func (c *CenterStartOption) pullImage(image string) (err error) {
+	var binary string
+	binary, err = util.LookPath("docker", c.LookPathContext)
+	if err == nil {
+		env := os.Environ()
+
+		dockerArgs := []string{"docker", "pull", image}
+		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 	}
 	return
 }
