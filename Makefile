@@ -17,17 +17,17 @@ PATH := $(PATH):$(PWD)/bin
 build: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=$(BUILD_GOOS) GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/$(BUILD_GOOS)/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/$(BUILD_GOOS)/$(NAME)
-	rm -rf jcli && ln -s bin/$(BUILD_GOOS)/$(NAME) jcli
+	rm -rf $(NAME) && ln -s bin/$(BUILD_GOOS)/$(NAME) $(NAME)
 
 darwin: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
-	rm -rf jcli && ln -s bin/darwin/$(NAME) jcli
+	rm -rf $(NAME) && ln -s bin/darwin/$(NAME) $(NAME)
 
 linux: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
-	rm -rf jcli && ln -s bin/linux/$(NAME) jcli
+	rm -rf $(NAME) && ln -s bin/linux/$(NAME) $(NAME)
 
 win: pre-build
 	go get github.com/inconshreveable/mousetrap
@@ -44,9 +44,9 @@ gen-mock:
 
 release: build-all
 	mkdir -p release
-	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-darwin-amd64.tar.gz > jcli-darwin-amd64.txt
-	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-linux-amd64.tar.gz > jcli-linux-amd64.txt
-	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe; cd ../../release/; shasum -a 256 jcli-windows-386.tar.gz > jcli-windows-386.txt
+	cd ./bin/darwin; upx $(NAME); tar -zcvf ../../release/$(NAME)-darwin-amd64.tar.gz $(NAME); cd ../../release/; shasum -a 256 $(NAME)-darwin-amd64.tar.gz > $(NAME)-darwin-amd64.txt
+	cd ./bin/linux; upx $(NAME); tar -zcvf ../../release/$(NAME)-linux-amd64.tar.gz $(NAME); cd ../../release/; shasum -a 256 $(NAME)-linux-amd64.tar.gz > $(NAME)-linux-amd64.txt
+	cd ./bin/windows; upx $(NAME).exe; tar -zcvf ../../release/$(NAME)-windows-386.tar.gz $(NAME).exe; cd ../../release/; shasum -a 256 $(NAME)-windows-386.tar.gz > $(NAME)-windows-386.txt
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
@@ -56,10 +56,10 @@ clean: ## Clean the generated artifacts
 	rm -rf util/test-utils.xml
 
 copy: darwin
-	sudo cp bin/darwin/$(NAME) /usr/local/bin/jcli
+	sudo cp bin/darwin/$(NAME) /usr/local/bin/$(NAME)
 
 copy-linux: linux
-	sudo cp bin/linux/$(NAME) /usr/local/bin/jcli
+	sudo cp bin/linux/$(NAME) /usr/local/bin/$(NAME)
 
 get-golint:
 	go get -u golang.org/x/lint/golint
@@ -161,7 +161,7 @@ gen-data:
 	cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
 image:
-	docker build . -t jenkinszh/jcli
+	docker build . -t jenkinszh/$(NAME)
 
 setup-env-centos:
 	yum install make golang -y
