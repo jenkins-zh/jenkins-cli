@@ -4,11 +4,12 @@ BUILD_GOOS=$(shell go env GOOS)
 GO := go
 BUILD_TARGET = build
 COMMIT := $(shell git rev-parse --short HEAD)
+BIN_PATH:=$(shell rm -rf jcli && which jcli)
 # CHANGE_LOG := $(shell echo -n "$(shell hub release show $(shell hub release --include-drafts -L 1))" | base64)
 VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
-BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) \
-	-X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT) \
-	-X github.com/jenkins-zh/jenkins-cli/app.date=$(shell date +'%Y-%m-%d')"
+BUILDFLAGS = -ldflags "-X github.com/linuxsuren/cobra-extension/version.version=$(VERSION) \
+	-X github.com/linuxsuren/cobra-extension/version.commit=$(COMMIT) \
+	-X github.com/linuxsuren/cobra-extension/version.date=$(shell date +'%Y-%m-%d')"
 COVERED_MAIN_SRC_FILE=./main
 PATH := $(PATH):$(PWD)/bin
 
@@ -27,7 +28,8 @@ darwin: pre-build
 linux: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
-	rm -rf $(NAME) && ln -s bin/linux/$(NAME) $(NAME)
+	rm -rf $(NAME)
+	ln -s bin/linux/$(NAME) $(NAME)
 
 win: pre-build
 	go get github.com/inconshreveable/mousetrap
@@ -55,11 +57,8 @@ clean: ## Clean the generated artifacts
 	rm -rf app/test-app.xml
 	rm -rf util/test-utils.xml
 
-copy: darwin
-	sudo cp bin/darwin/$(NAME) /usr/local/bin/$(NAME)
-
-copy-linux: linux
-	sudo cp bin/linux/$(NAME) /usr/local/bin/$(NAME)
+copy: build
+	sudo cp bin/$(BUILD_GOOS)/$(NAME) $(BIN_PATH)
 
 get-golint:
 	go get -u golang.org/x/lint/golint

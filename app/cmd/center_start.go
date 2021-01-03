@@ -202,8 +202,11 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
 
-		if c.CleanHome && os.RemoveAll(jenkinsHome) != nil {
-			err = fmt.Errorf("cannot remove JENKINS_HOME %s", jenkinsHome)
+		if c.CleanHome {
+			logger.Debug("start to clean JENKINS_HOME before start it", zap.String("JENKINS_HOME", jenkinsHome))
+			if err = os.RemoveAll(jenkinsHome); err != nil {
+				err = fmt.Errorf("cannot remove JENKINS_HOME %s, error: %v", jenkinsHome, err)
+			}
 		} else {
 			err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 		}

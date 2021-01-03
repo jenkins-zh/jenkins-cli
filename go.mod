@@ -15,7 +15,7 @@ require (
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
 	github.com/linuxsuren/cobra-extension v0.0.5
 	github.com/linuxsuren/go-cli-alias v0.0.4
-	github.com/linuxsuren/go-cli-plugin v0.0.2
+	github.com/linuxsuren/go-cli-plugin v0.0.3-0.20210103082519-cacc531289f3
 	github.com/linuxsuren/http-downloader v0.0.2
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
