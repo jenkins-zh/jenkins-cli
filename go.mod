@@ -23,7 +23,7 @@ require (
 	github.com/onsi/gomega v1.10.3
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/spf13/cobra v1.1.1
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.16.0
 	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
