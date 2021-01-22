@@ -195,7 +195,29 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/api/json", path)
 
-	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &job)
+	return
+}
+
+// AddParameters add parameters to a Pipeline
+func (q *JobClient) AddParameters(name, parameters string) (err error) {
+	path := ParseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/addParameter", path)
+
+	formData := url.Values{
+		"params": {parameters},
+	}
+	payload := strings.NewReader(formData.Encode())
+	_, err = q.RequestWithoutData(http.MethodPost, api, map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
+	return
+}
+
+// RemoveParameters add parameters to a Pipeline
+func (q *JobClient) RemoveParameters(name, parameters string) (err error) {
+	path := ParseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/removeParameter?params=%s", path, parameters)
+
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
