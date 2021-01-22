@@ -68,7 +68,7 @@ Here are other package managers:
 | `choco install jcli` | `choco upgrade jcli` | `choco uninstall jcli` | `Windows` |
 | `snap install jcli` | `snap refresh jcli` | `snap remove jcli` | `Linux` |
 
-See more about [how to download jcli](docs/book/en/download.md). You can find the download details [from here](http://somsubhra.com/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
+See more about [how to download jcli](docs/book/en/download.md). You can find the download details [from here](https://tooomm.github.io/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
 
 ## Get started
 
