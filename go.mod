@@ -13,20 +13,20 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
-	github.com/linuxsuren/cobra-extension v0.0.5
+	github.com/linuxsuren/cobra-extension v0.0.10
 	github.com/linuxsuren/go-cli-alias v0.0.4
 	github.com/linuxsuren/go-cli-plugin v0.0.3
-	github.com/linuxsuren/http-downloader v0.0.2
+	github.com/linuxsuren/http-downloader v0.0.6
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.14.2
-	github.com/onsi/gomega v1.10.3
+	github.com/onsi/gomega v1.10.4
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/spf13/cobra v1.1.1
 	github.com/stretchr/testify v1.7.0
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.16.0
-	golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
+	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
 	golang.org/x/text v0.3.5
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0
