@@ -104,10 +104,16 @@ func (o *OpenOption) run(_ *cobra.Command, args []string) (err error) {
 
 // smartOpen can open with or without specific protocol
 func (o *OpenOption) smartOpen(url string) (err error) {
+	var cmd string
 	if strings.HasPrefix(url, "ssh://") {
-		var ssh string
-		if ssh, err = exec.LookPath("ssh"); err == nil {
-			err = syscall.Exec(ssh, []string{"ssh", strings.TrimLeft(url, "ssh://")}, os.Environ())
+		if cmd, err = exec.LookPath("ssh"); err == nil {
+			err = syscall.Exec(cmd, []string{"ssh", strings.TrimLeft(url, "ssh://")}, os.Environ())
+		}
+	} else if strings.HasPrefix(url, "shell://") {
+		shellCmd := strings.TrimLeft(url, "shell://")
+		shellArgs := strings.Split(shellCmd, " ")
+		if cmd, err = exec.LookPath(shellArgs[0]); err == nil {
+			err = syscall.Exec(cmd, shellArgs, os.Environ())
 		}
 	} else {
 		browser := o.Browser
