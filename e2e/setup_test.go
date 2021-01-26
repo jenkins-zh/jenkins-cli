@@ -39,7 +39,8 @@ func TestMain(m *testing.M) {
 	}
 	jenkinsURL = fmt.Sprintf("http://localhost:%d", port)
 
-	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--port", fmt.Sprintf("%d", port), "--version", version)
+	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false",
+		"--port", fmt.Sprintf("%d", port), "--version", version, "--thread", "10")
 	fmt.Println(cmd.String())
 	cmdStderrPipe, _ := cmd.StderrPipe()
 	if err = cmd.Start(); err != nil {

@@ -25,6 +25,7 @@ type CenterDownloadOption struct {
 
 	Formula string
 
+	Thread       int
 	RoundTripper http.RoundTripper
 }
 
@@ -44,6 +45,8 @@ func init() {
 		i18n.T("The file of output"))
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Formula, "formula", "", "",
 		i18n.T("The formula of jenkins.war, only support zh currently"))
+	centerDownloadCmd.Flags().IntVarP(&centerDownloadOption.Thread, "thread", "t", 0,
+		"Using multi-thread to download jenkins.war")
 }
 
 var centerDownloadCmd = &cobra.Command{
@@ -97,6 +100,7 @@ func (c *CenterDownloadOption) DownloadJenkins() (err error) {
 		Version:      c.Version,
 		Output:       c.Output,
 		ShowProgress: c.ShowProgress,
+		Thread:       c.Thread,
 	}
 
 	jenkinsWarURL := jClient.GetJenkinsWarURL()

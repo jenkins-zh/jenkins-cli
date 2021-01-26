@@ -21,6 +21,7 @@ type UpdateCenterManager struct {
 
 	Formula string
 
+	Thread       int
 	ShowProgress bool
 }
 
@@ -124,7 +125,12 @@ func (u *UpdateCenterManager) DownloadJenkins() (err error) {
 		URL:            warURL,
 		ShowProgress:   showProgress,
 	}
-	err = downloader.DownloadFile()
+
+	if u.Thread > 1 {
+		err = httpdownloader.DownloadFileWithMultipleThread(warURL, output, u.Thread, showProgress)
+	} else {
+		err = downloader.DownloadFile()
+	}
 	return
 }
 

@@ -40,6 +40,7 @@ type CenterStartOption struct {
 	System       []string
 
 	Download     bool
+	Thread       int
 	Version      string
 	LTS          bool
 	Formula      string
@@ -76,6 +77,7 @@ func init() {
 
 	flags.BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
+	flags.IntVarP(&centerStartOption.Thread, "thread", "t", 0, "Using multi-thread to download jenkins.war")
 	flags.StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
 		i18n.T("The of version of jenkins.war. You can give it another default value by setting env JCLI_JENKINS_VERSION"))
 	flags.BoolVarP(&centerStartOption.LTS, "lts", "", true,
@@ -232,6 +234,7 @@ func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
 				Output:       jenkinsWar,
 				ShowProgress: true,
 				Version:      centerStartOption.Version,
+				Thread:       centerStartOption.Thread,
 			}
 
 			if err = download.DownloadJenkins(); err != nil {
