@@ -75,6 +75,18 @@ jobs:
         uses: Jerome1337/golint-action@v1.0.2
         with:
           golint-path: util/...
+  Security:
+    name: Security
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v2
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: '-exclude=G402,G204,G304,G110 app/cmd/common'
 
 #      - name: SonarCloud Scan
 #        uses: LinuxSuRen/sonarcloud-github-action@master
