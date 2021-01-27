@@ -55,7 +55,7 @@ func (b *BatchOption) Confirm(message string) bool {
 		prompt = &survey.Confirm{
 			Message: message,
 		}
-		survey.AskOne(prompt, &confirm, survey.WithStdio(b.Stdio.In, b.Stdio.Out, b.Stdio.Err))
+		_ = survey.AskOne(prompt, &confirm, survey.WithStdio(b.Stdio.In, b.Stdio.Out, b.Stdio.Err))
 		return confirm
 	}
 
