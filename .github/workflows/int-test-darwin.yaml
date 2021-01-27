@@ -10,7 +10,6 @@ jobs:
     name: Build
     runs-on: macOS-latest
     steps:
-
       - name: Set up Go 1.15
         uses: actions/setup-go@v2.1.3
         with:

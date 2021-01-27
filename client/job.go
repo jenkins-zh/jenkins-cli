@@ -281,6 +281,14 @@ func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 	return
 }
 
+// DeleteHistory returns the build history of a job
+func (q *JobClient) DeleteHistory(jobName string, num int) (err error) {
+	path := ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/%d/doDelete", path, num)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	return
+}
+
 // Log get the log of a job
 func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog, err error) {
 	path := ParseJobPath(jobName)

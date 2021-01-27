@@ -211,7 +211,7 @@ func init() {
 
 	rootCmd.SetOut(os.Stdout)
 
-	goPlugin.LoadPlugins(rootCmd)
+	goPlugin.LoadPlugins(rootCmd, "jenkins-zh", "jcli-plugins")
 
 	if rootOptions.GetGitHubClient() == nil {
 		rootOptions.SetGitHubClient(github.NewClient(nil))
