@@ -23,6 +23,7 @@ jobs:
         wget https://github.com/upx/upx/releases/download/v3.96/upx-3.96-amd64_linux.tar.xz
         tar xvf upx-3.96-amd64_linux.tar.xz
         upx-3.96-amd64_linux/upx -V
+        rm -rf upx-3.96-amd64_linux
         sudo mv upx-3.96-amd64_linux/upx $(which upx)
         upx -V
     - name: Run GoReleaser
