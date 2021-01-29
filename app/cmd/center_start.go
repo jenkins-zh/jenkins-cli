@@ -5,6 +5,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 	"go.uber.org/zap"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -107,7 +108,7 @@ func init() {
 		i18n.T("Container Username or UID (format: <name|uid>[:<group|gid>])"))
 
 	flags.BoolVarP(&centerStartOption.RandomWebDir, "random-web-dir", "", false,
-		i18n.T("If start jenkins.war in a random web dir"))
+		i18n.T(fmt.Sprintf("If start jenkins.war in a random web dir which under %s/.jenkins-cli/cache", os.TempDir())))
 	flags.BoolVarP(&centerStartOption.DryRun, "dry-run", "", false,
 		i18n.T("Don't run jenkins.war really"))
 
@@ -208,10 +209,10 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 			logger.Debug("start to clean JENKINS_HOME before start it", zap.String("JENKINS_HOME", jenkinsHome))
 			if err = os.RemoveAll(jenkinsHome); err != nil {
 				err = fmt.Errorf("cannot remove JENKINS_HOME %s, error: %v", jenkinsHome, err)
+				return
 			}
-		} else {
-			err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 		}
+		err = util.Exec(binary, dockerArgs, env, centerStartOption.SystemCallExec)
 	}
 	return
 }
@@ -244,12 +245,15 @@ func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
 	}
 
 	var binary string
+	var jenkinsHome string
 	binary, err = util.LookPath("java", centerStartOption.LookPathContext)
 	if err == nil {
 		env := os.Environ()
 
 		if centerStartOption.RandomWebDir {
-			randomWebDir := fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", os.TempDir(), centerStartOption.Version)
+			rand.Seed(1)
+			jenkinsHome = fmt.Sprintf("%s/.jenkins-cli/cache/%d/%s/web", os.TempDir(), rand.Int(), centerStartOption.Version)
+			randomWebDir := fmt.Sprintf("JENKINS_HOME=%s", jenkinsHome)
 			defer func(logger helper.Printer, randomWebDir string) {
 				if err := os.RemoveAll(randomWebDir); err != nil {
 					logger.PrintErr(fmt.Sprintf("remove random web dir [%s] of Jenkins failed, %#v", randomWebDir, err))
@@ -258,7 +262,8 @@ func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
 
 			env = append(env, randomWebDir)
 		} else {
-			env = append(env, fmt.Sprintf("JENKINS_HOME=%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version))
+			jenkinsHome = fmt.Sprintf("%s/.jenkins-cli/cache/%s/web", userHome, centerStartOption.Version)
+			env = append(env, fmt.Sprintf("JENKINS_HOME=%s", jenkinsHome))
 		}
 
 		if centerStartOption.Environments != nil {
@@ -281,6 +286,13 @@ func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
 				fmt.Sprintf("--httpsPrivateKey=%s", centerStartOption.HTTPSPrivateKey))
 		}
 
+		if c.CleanHome {
+			logger.Debug("start to clean JENKINS_HOME before start it", zap.String("JENKINS_HOME", jenkinsHome))
+			if err = os.RemoveAll(jenkinsHome); err != nil {
+				err = fmt.Errorf("cannot remove JENKINS_HOME %s, error: %v", jenkinsHome, err)
+				return
+			}
+		}
 		err = util.Exec(binary, jenkinsWarArgs, env, centerStartOption.SystemCallExec)
 	}
 	return

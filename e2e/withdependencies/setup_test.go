@@ -15,6 +15,7 @@ var jenkinsURL string
 func GetJenkinsURL() string {
 	return jenkinsURL
 }
+
 func TestMain(m *testing.M) {
 	var err error
 
@@ -50,6 +51,7 @@ func TestMain(m *testing.M) {
 	go func(reader io.ReadCloser, cmd *exec.Cmd) {
 		e2e.WaitRunningUp(reader)
 
+		e2e.ExecuteCmd("plugin", "check", "--url", GetJenkinsURL())
 		e2e.InstallPlugin("localization-zh-cn", GetJenkinsURL(), true)
 
 		e2e.RestartAndWait(GetJenkinsURL(), reader)
