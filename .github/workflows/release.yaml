@@ -25,6 +25,7 @@ jobs:
         upx-3.96-amd64_linux/upx -V
         sudo mv upx-3.96-amd64_linux/upx $(which upx)
         rm -rf upx-3.96-amd64_linux
+        rm -rf xvf upx-3.96-amd64_linux.tar.xz
         upx -V
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v2.4.1
