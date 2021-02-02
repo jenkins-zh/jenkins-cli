@@ -205,6 +205,8 @@ github.com/linuxsuren/http-downloader v0.0.2-0.20201207132639-19888a6beaec/go.mo
 github.com/linuxsuren/http-downloader v0.0.6/go.mod h1:xxgh2OE7WGL9TwDE9L8Gh7Lqq9fFPuHbh5tofUitEfE=
 github.com/linuxsuren/http-downloader v0.0.10 h1:LavSzwPzHvxSp1b3hnP4IVNiP79p8VqDHnKU5q2mFjA=
 github.com/linuxsuren/http-downloader v0.0.10/go.mod h1:4hVRWYnIifme60jM0gCoEzglPdjUt7fBwXRwYs/rwwE=
+github.com/linuxsuren/http-downloader v0.0.13 h1:VQYQDRfzVzqLMcrzzq724M6MvuBHIZ6FiQyDbax4JIE=
+github.com/linuxsuren/http-downloader v0.0.13/go.mod h1:qYsc9WCm9R+DCbDKRLAtQ+GQsSl2tZ4ofiv1R9tdku8=
 github.com/magiconair/properties v1.8.0 h1:LLgXmsheXeRoUOBOjtwPQCWIYqM/LU1ayDtDePerRcY=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.1 h1:ZC2Vc7/ZFkGmsVC9KvOjumD+G5lXy2RtTKyzRKO2BQ4=
