@@ -34,6 +34,8 @@ func TestCheckUpdateCenter(t *testing.T) {
 }
 
 func TestInstallPlugin(t *testing.T) {
+	TestCheckUpdateCenter(t)
+
 	cmd := exec.Command("jcli", "plugin", "install", "localization-zh-cn", "--url", GetJenkinsURL())
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
