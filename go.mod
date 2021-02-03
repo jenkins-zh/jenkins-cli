@@ -19,7 +19,7 @@ require (
 	github.com/linuxsuren/http-downloader v0.0.15
 	github.com/magiconair/properties v1.8.4
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/ginkgo v1.15.0
 	github.com/onsi/gomega v1.10.4
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/spf13/cobra v1.1.1
