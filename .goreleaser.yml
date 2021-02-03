@@ -15,10 +15,11 @@ builds:
     post:
       - upx "{{ .Path }}"
   ldflags:
-    - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
-    - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
-    - -X github.com/jenkins-zh/jenkins-cli/app.date={{.Date}}
+    - -X github.com/linuxsuren/cobra-extension/version.version={{.Version}}
+    - -X github.com/linuxsuren/cobra-extension/version.commit={{.ShortCommit}}
+    - -X github.com/linuxsuren/cobra-extension/version.date={{.Date}}
     - -w
+    - -s
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
