@@ -7,10 +7,7 @@
 * [Job](en/job.md)
 * [Plugin](en/plugin.md)
 * [Download](en/download.md)
-* [Credential](en/credential.md)
 * [Completion](en/completion.md)
-* [User](en/user.md)
-* [Diganose](en/doctor.md)
 * [Proxy setting](en/proxy.md)
 
 ## 中文 <a id="zh"></a>
