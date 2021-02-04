@@ -1,13 +1,5 @@
 # download
 
-## JFrog Bintray
-
-You can download `jcli` from [bintray.com/jenkins-zh](https://bintray.com/beta/#/jenkins-zh/generic/jenkins-cli/).
-
-`curl -L "https://bintray.com/jenkins-zh/jenkins-cli/download_file?file_path=v0.0.24%2Fjcli-darwin-amd64.tar.gz"|tar xzv`
-
-Get all versions from [here](https://dl.bintray.com/jenkins-zh/generic/jenkins-cli/).
-
 ## YUM
 
 Add YUM source repo by the following command:
