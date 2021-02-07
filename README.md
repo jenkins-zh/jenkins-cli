@@ -31,9 +31,12 @@ Jenkins CLI allows you manage your Jenkins in an easy way. No matter if you're a
 
 ## Get it
 
-We support Mac, Linux and Windows for now.
+We support macOS, Linux and Windows for now.
+<a href="https://repology.org/project/jenkins-cli/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/jenkins-cli.svg" alt="Packaging status" align="right">
+</a>
 
-### Mac
+### macOS
 
 You can use `brew` to install jcli.
 
@@ -42,11 +45,19 @@ brew tap jenkins-zh/jcli
 brew install jcli
 ```
 
+Alternatively, you can use [MacPorts](https://ports.macports.org/port/jenkins-cli/summary).
+
+```text
+sudo port install jenkins-cli
+```
+
+For MacPorts, add `+bash_completion` or `+zsh_completion` for shell completion.
+
 ### Linux
 
 To install `jcli` on your Linux OS, execute the following command:
 
-```text
+```sh
 curl -L https://github.com/jenkins-zh/jenkins-cli/releases/latest/download/jcli-linux-amd64.tar.gz|tar xzv
 sudo mv jcli /usr/local/bin/
 ```
@@ -67,6 +78,7 @@ Here are other package managers:
 | `scoop install jcli` | | | `Windows` |
 | `choco install jcli` | `choco upgrade jcli` | `choco uninstall jcli` | `Windows` |
 | `snap install jcli` | `snap refresh jcli` | `snap remove jcli` | `Linux` |
+| `sudo port install jenkins-cli`| `sudo port selfupdate && sudo port upgrade jenkins-cli` | `sudo port uninstall jenkins-cli` | `macOS`
 
 See more about [how to download jcli](docs/book/en/download.md). You can find the download details [from here](https://tooomm.github.io/github-release-stats/?username=jenkins-zh&repository=jenkins-cli).
 
