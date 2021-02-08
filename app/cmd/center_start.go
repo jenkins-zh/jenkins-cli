@@ -22,6 +22,7 @@ type CenterStartOption struct {
 	common.Option
 
 	Port                      int
+	AgentPort                 int
 	Context                   string
 	SetupWizard               bool
 	AdminCanGenerateNewTokens bool
@@ -41,6 +42,7 @@ type CenterStartOption struct {
 	System       []string
 
 	Download     bool
+	Mirror       string
 	Thread       int
 	Version      string
 	LTS          bool
@@ -63,6 +65,8 @@ func init() {
 	flags := centerStartCmd.Flags()
 	flags.IntVarP(&centerStartOption.Port, "port", "", 8080,
 		i18n.T("Port of Jenkins"))
+	flags.IntVarP(&centerStartOption.AgentPort, "agent-port", "", 50000,
+		i18n.T("Port of Jenkins agent"))
 	flags.StringVarP(&centerStartOption.Context, "context", "", "/",
 		i18n.T("Web context of Jenkins server"))
 	flags.StringArrayVarP(&centerStartOption.Environments, "env", "", nil,
@@ -78,6 +82,8 @@ func init() {
 
 	flags.BoolVarP(&centerStartOption.Download, "download", "", true,
 		i18n.T("If you want to download jenkins.war when it does not exist"))
+	flags.StringVarP(&centerStartOption.Mirror, "mirror", "", "default",
+		i18n.T("The mirror site of Jenkins"))
 	flags.IntVarP(&centerStartOption.Thread, "thread", "t", 0, "Using multi-thread to download jenkins.war")
 	flags.StringVarP(&centerStartOption.Version, "version", "", jenkinsVersion,
 		i18n.T("The of version of jenkins.war. You can give it another default value by setting env JCLI_JENKINS_VERSION"))
@@ -188,6 +194,7 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		dockerArgs := []string{"docker", "run"}
 		dockerArgs = append(dockerArgs, "-v", fmt.Sprintf("%s:/var/jenkins_home", jenkinsHome))
 		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:8080", c.Port))
+		dockerArgs = append(dockerArgs, "-p", fmt.Sprintf("%d:50000", c.AgentPort))
 
 		if c.ContainerUser != "" {
 			dockerArgs = append(dockerArgs, "-u", c.ContainerUser)
@@ -204,6 +211,7 @@ func (c *CenterStartOption) createDockerArgs(cmd *cobra.Command) (err error) {
 		}
 
 		dockerArgs = append(dockerArgs, fmt.Sprintf("%s:%s", c.Image, c.Version))
+		dockerArgs = append(dockerArgs, fmt.Sprintf("--prefix=%s", centerStartOption.Context))
 
 		if c.CleanHome {
 			logger.Debug("start to clean JENKINS_HOME before start it", zap.String("JENKINS_HOME", jenkinsHome))
@@ -229,7 +237,7 @@ func (c *CenterStartOption) createJavaArgs(cmd *cobra.Command) (err error) {
 	if !centerStartOption.DryRun {
 		if _, fileErr := os.Stat(jenkinsWar); fileErr != nil {
 			download := &CenterDownloadOption{
-				Mirror:       "default",
+				Mirror:       c.Mirror,
 				Formula:      centerStartOption.Formula,
 				LTS:          centerStartOption.LTS,
 				Output:       jenkinsWar,

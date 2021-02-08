@@ -3,6 +3,7 @@ package e2e
 import (
 	"fmt"
 	"io"
+	"net"
 	"os/exec"
 	"strings"
 )
@@ -37,15 +38,61 @@ func RestartAndWait(jenkins string, outputReader io.ReadCloser) {
 	}
 }
 
-// WaitRunningUp wait until Jenkins running up
-func WaitRunningUp(outputReader io.ReadCloser) {
+// RunAndWait run command and wait the callback function
+func RunAndWait(cmd *exec.Cmd, callback func(reader io.ReadCloser)) {
+	var err error
+	cmdStderrPipe, _ := cmd.StderrPipe()
+	if err = cmd.Start(); err != nil {
+		panic(err)
+	}
+
+	go func(reader io.ReadCloser, cmd *exec.Cmd) {
+		if callback != nil {
+			callback(reader)
+		}
+
+		if err = cmd.Process.Kill(); err != nil {
+			panic(err)
+		}
+	}(cmdStderrPipe, cmd)
+
+	err = cmd.Wait()
+}
+
+// WaitJenkinsRunningUp wait until Jenkins running up
+func WaitJenkinsRunningUp(outputReader io.ReadCloser) {
+	WaitUntilExpect(outputReader, "Jenkins is fully up and running")
+}
+
+// WaitAgentRunningUp wait until Jenkins agent running up
+func WaitAgentRunningUp(outputReader io.ReadCloser) {
+	WaitUntilExpect(outputReader, "INFO: Connected")
+}
+
+// WaitUntilExpect wait until find the expect string
+func WaitUntilExpect(outputReader io.ReadCloser, expect string) {
 	buf := make([]byte, 1024, 1024)
 	for {
-		if strNum, err := outputReader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), "Jenkins is fully up and running") {
+		if strNum, err := outputReader.Read(buf); err != nil || strings.Contains(string(buf[:strNum]), expect) {
 			fmt.Print(string(buf[:strNum]))
 			break
 		} else {
 			fmt.Print(string(buf[:strNum]))
 		}
 	}
+}
+
+// GetLocalIP returns the local ip address
+func GetLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err == nil {
+		for _, value := range addrs {
+			if ipnet, ok := value.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				if ipnet.IP.To4() != nil {
+					return ipnet.IP.String()
+				}
+			}
+		}
+	}
+	return "127.0.0.1"
 }
