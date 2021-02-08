@@ -257,81 +257,82 @@ func (o *ComputerLaunchOption) Launch(name string) (err error) {
 // LaunchJnlp start a JNLP agent
 func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 	var secret string
-	if secret, err = o.ComputerClient.GetSecret(name); err == nil {
-		logger.Info("get agent secret", zap.String("value", secret))
+	if secret, err = o.ComputerClient.GetSecret(name); err != nil {
+		return
+	}
+	logger.Info("get agent secret", zap.String("value", secret))
 
-		switch o.Mode {
-		case LaunchModeJava, "":
-			var binary string
-			binary, err = util.LookPath("java", centerStartOption.LookPathContext)
-			if err == nil {
-				env := os.Environ()
-				agentArgs := []string{"java", "-jar", computerLaunchOption.Output,
-					"-jnlpUrl", fmt.Sprintf("%s/computer/%s/slave-agent.jnlp", o.ComputerClient.URL, name),
-					"-secret", secret, "-workDir", "/tmp"}
+	switch o.Mode {
+	case LaunchModeJava, "":
+		var binary string
+		binary, err = util.LookPath("java", centerStartOption.LookPathContext)
+		if err == nil {
+			env := os.Environ()
+			agentArgs := []string{"java", "-jar", computerLaunchOption.Output,
+				"-jnlpUrl", fmt.Sprintf("%s/computer/%s/slave-agent.jnlp", o.ComputerClient.URL, name),
+				"-secret", secret, "-workDir", client.GetDefaultAgentWorkDir()}
 
-				if o.CurrentJenkins.ProxyAuth != "" {
-					proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
-					agentArgs = append(agentArgs, "-proxyCredentials", o.CurrentJenkins.ProxyAuth)
+			if o.CurrentJenkins.ProxyAuth != "" {
+				proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
+				agentArgs = append(agentArgs, "-proxyCredentials", o.CurrentJenkins.ProxyAuth)
 
-					proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
-					if len(proxyAuth) == 2 {
-						env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
-					}
+				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
+				if len(proxyAuth) == 2 {
+					env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
 				}
-
-				logger.Debug("start a jnlp agent", zap.Any("command", strings.Join(agentArgs, " ")))
-
-				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 			}
-		case LaunchModeDocker:
-			var binary string
-			binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
-			if err == nil {
-				env := os.Environ()
-				agentArgs := []string{"docker", "run", "--restart", o.Restart}
 
-				if o.Remove {
-					agentArgs = append(agentArgs, "--rm")
-				}
+			logger.Debug("start a jnlp agent", zap.Any("command", strings.Join(agentArgs, " ")))
 
-				if o.Detach {
-					agentArgs = append(agentArgs, "--detach")
-				}
-
-				var agentImage string
-				switch o.AgentType {
-				case GolangAgentImage, MavenAgentImage, PythonAgentImage,
-					DockerAgentImage, NodeAgentImage, RubyAgentImage, TerraformAgentImage:
-					agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s:%s", o.AgentType, o.AgentImageTag)
-				case GenericAgentImage:
-					agentImage = fmt.Sprintf("jenkins/inbound-agent:%s", o.AgentImageTag)
-				case CustomAgentImage:
-					if o.CustomImage == "" {
-						err = errors.New("--custom-image cannot be empty if you choose custom agent type")
-						return
-					}
-					agentImage = o.CustomImage
-				}
-				agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
-
-				if o.CurrentJenkins.ProxyAuth != "" {
-					proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
-					agentArgs = append(agentArgs, "-proxyCredentials", o.CurrentJenkins.ProxyAuth)
-
-					proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
-					if len(proxyAuth) == 2 {
-						env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
-					}
-				}
-
-				logger.Debug("start a jnlp agent", zap.Any("command", strings.Join(agentArgs, " ")))
-
-				err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
-			}
-		default:
-			err = fmt.Errorf("not support mode: %s", o.Mode)
+			err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
 		}
+	case LaunchModeDocker:
+		var binary string
+		binary, err = util.LookPath("docker", centerStartOption.LookPathContext)
+		if err == nil {
+			env := os.Environ()
+			agentArgs := []string{"docker", "run", "--restart", o.Restart}
+
+			if o.Remove {
+				agentArgs = append(agentArgs, "--rm")
+			}
+
+			if o.Detach {
+				agentArgs = append(agentArgs, "--detach")
+			}
+
+			var agentImage string
+			switch o.AgentType {
+			case GolangAgentImage, MavenAgentImage, PythonAgentImage,
+				DockerAgentImage, NodeAgentImage, RubyAgentImage, TerraformAgentImage:
+				agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s:%s", o.AgentType, o.AgentImageTag)
+			case GenericAgentImage:
+				agentImage = fmt.Sprintf("jenkins/inbound-agent:%s", o.AgentImageTag)
+			case CustomAgentImage:
+				if o.CustomImage == "" {
+					err = errors.New("--custom-image cannot be empty if you choose custom agent type")
+					return
+				}
+				agentImage = o.CustomImage
+			}
+			agentArgs = append(agentArgs, []string{agentImage, "-url", o.ComputerClient.URL, secret, name}...)
+
+			if o.CurrentJenkins.ProxyAuth != "" {
+				proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)
+				agentArgs = append(agentArgs, "-proxyCredentials", o.CurrentJenkins.ProxyAuth)
+
+				proxyAuth := strings.SplitN(o.CurrentJenkins.ProxyAuth, ":", 2)
+				if len(proxyAuth) == 2 {
+					env = append(env, fmt.Sprintf("http_proxy=http://%s:%s@%s", url.QueryEscape(proxyAuth[0]), url.QueryEscape(proxyAuth[1]), proxyURL.Host))
+				}
+			}
+
+			logger.Debug("start a jnlp agent", zap.Any("command", strings.Join(agentArgs, " ")))
+
+			err = util.Exec(binary, agentArgs, env, o.SystemCallExec)
+		}
+	default:
+		err = fmt.Errorf("not support mode: %s", o.Mode)
 	}
 	return
 }

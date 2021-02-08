@@ -37,25 +37,14 @@ func TestMain(m *testing.M) {
 		fmt.Println("get free port error", err)
 		panic(err)
 	}
-	jenkinsURL = fmt.Sprintf("http://localhost:%d", port)
+	jenkinsURL = fmt.Sprintf("http://%s:%d", GetLocalIP(), port)
 
 	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false",
 		"--port", fmt.Sprintf("%d", port), "--version", version, "--thread", "10", "--clean-home")
 	fmt.Println(cmd.String())
-	cmdStderrPipe, _ := cmd.StderrPipe()
-	if err = cmd.Start(); err != nil {
-		panic(err)
-	}
-
-	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		WaitRunningUp(reader)
+	RunAndWait(cmd, func(reader io.ReadCloser) {
+		WaitJenkinsRunningUp(reader)
 
 		m.Run()
-
-		if err = cmd.Process.Kill(); err != nil {
-			panic(err)
-		}
-	}(cmdStderrPipe, cmd)
-
-	err = cmd.Wait()
+	})
 }

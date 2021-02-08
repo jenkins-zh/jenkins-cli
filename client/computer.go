@@ -1,11 +1,13 @@
 package client
 
 import (
+	"encoding/xml"
 	"fmt"
 	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"runtime"
 	"strings"
 )
 
@@ -35,14 +37,28 @@ func (c *ComputerClient) Delete(name string) (err error) {
 	return
 }
 
+type agentJNLP struct {
+	XMLName      xml.Name `xml:"jnlp"`
+	AppArguments []string `xml:"application-desc>argument"`
+}
+
 // GetSecret returns the secret of an agent
 func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
-	api := fmt.Sprintf("/instance/agentSecret?name=%s", name)
+	api := fmt.Sprintf("/computer/%s/slave-agent.jnlp", name)
 	var response *http.Response
-	if response, err = c.RequestWithResponse(http.MethodPost, api, nil, nil); err == nil {
-		var data []byte
-		if data, err = ioutil.ReadAll(response.Body); err == nil {
-			secret = string(data)
+	if response, err = c.RequestWithResponse(http.MethodGet, api, nil, nil); err == nil {
+		if response.StatusCode == http.StatusOK {
+			var data []byte
+			if data, err = ioutil.ReadAll(response.Body); err == nil {
+				jnlp := &agentJNLP{}
+				if err = xml.Unmarshal(data, jnlp); err == nil {
+					secret = jnlp.AppArguments[0]
+				} else {
+					err = fmt.Errorf("invalid jnlp xml, error: %v", err)
+				}
+			}
+		} else {
+			err = fmt.Errorf("unexpected status code: %d", response.StatusCode)
 		}
 	}
 	return
@@ -83,14 +99,24 @@ func (c *ComputerClient) Create(name string) (err error) {
 	return
 }
 
+func getDefaultAgentLabels() string {
+	return fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
+}
+
+// GetDefaultAgentWorkDir returns the Jenkins agent work dir
+func GetDefaultAgentWorkDir() string {
+	// TODO return different directory base on the OS
+	return "/var/tmp/jenkins"
+}
+
 // GetPayloadForCreateAgent returns a payload for creating an agent
 func GetPayloadForCreateAgent(name string) *strings.Reader {
 	palyLoad := fmt.Sprintf(`{
 	"name": "%s",
 	"nodeDescription": "",
 	"numExecutors": "1",
-	"remoteFS": "/abc",
-	"labelString": "",
+	"remoteFS": "%s",
+	"labelString": "%s",
 	"mode": "NORMAL",
 	"launcher": {
 		"$class": "hudson.slaves.JNLPLauncher",
@@ -104,7 +130,7 @@ func GetPayloadForCreateAgent(name string) *strings.Reader {
 		"vmargs": ""
 	},
 	"type": "hudson.slaves.DumbSlave"
-}`, name)
+}`, name, GetDefaultAgentWorkDir(), getDefaultAgentLabels())
 	formData := url.Values{
 		"name": {name},
 		"type": {"hudson.slaves.DumbSlave"},

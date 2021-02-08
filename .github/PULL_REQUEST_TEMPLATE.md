@@ -13,6 +13,8 @@
   - [ ] MacOS
   - [ ] Linux
   - [ ] Windows
+- [ ] Unit Test covered
+- [ ] e2e Test covered
 
 <!--
 Put an `x` into the [ ] to show you have filled the information

@@ -1,0 +1,38 @@
+# see more environment from https://github.com/actions/virtual-environments
+
+name: e2e Test
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-10.15]
+        jenkins_version: [2.190.1, 2.190.2, 2.190.3, 2.204.1]
+    steps:
+      - name: Set up Go 1.15
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: 1.15
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2.3.4
+      - name: Build
+        env:
+          JENKINS_VERSION: ${{ matrix.jenkins_version }}
+        run: |
+          if [[ "$(uname -s)" == "Darwin" ]]; then
+            export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/darwin:/System/Volumes/Data/Users/runner/go/bin
+            make go-bindata-download-darwin tools init darwin
+            make test-slow
+          elif [[ "$(uname -s)" == "Linux" ]]; then
+            export PATH=$PATH:$GOPATH/bin:/home/runner/go/bin:${PWD}/bin:${PWD}/bin/linux:/System/Volumes/Data/Users/runner/go/bin
+            make go-bindata-download-linux tools init linux
+            make test-slow
+          fi

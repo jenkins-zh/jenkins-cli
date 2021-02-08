@@ -38,18 +38,12 @@ func TestMain(m *testing.M) {
 		fmt.Println("get free port error", err)
 		panic(err)
 	}
-	jenkinsURL = fmt.Sprintf("http://localhost:%d", port)
+	jenkinsURL = fmt.Sprintf("http://%s:%d", e2e.GetLocalIP(), port)
 
 	cmd := exec.Command("jcli", "center", "start", "--random-web-dir", "--setup-wizard=false", "--port", fmt.Sprintf("%d", port), "--version", version)
 	fmt.Println(cmd.String())
-	cmdStderrPipe, _ := cmd.StderrPipe()
-	err = cmd.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	go func(reader io.ReadCloser, cmd *exec.Cmd) {
-		e2e.WaitRunningUp(reader)
+	e2e.RunAndWait(cmd, func(reader io.ReadCloser) {
+		e2e.WaitJenkinsRunningUp(reader)
 
 		e2e.ExecuteCmd("plugin", "check", "--url", GetJenkinsURL())
 		e2e.InstallPlugin("localization-zh-cn", GetJenkinsURL(), true)
@@ -64,11 +58,5 @@ func TestMain(m *testing.M) {
 		e2e.RestartAndWait(GetJenkinsURL(), reader)
 
 		m.Run()
-
-		if err = cmd.Process.Kill(); err != nil {
-			panic(err)
-		}
-	}(cmdStderrPipe, cmd)
-
-	err = cmd.Wait()
+	})
 }
