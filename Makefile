@@ -112,22 +112,22 @@ fmt:
 
 test-slow:
 #	JENKINS_VERSION=2.190.3 go test ./e2e/... -v -count=1 -parallel 1
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestBashCompletion$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestZshCompletion$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestPowerShellCompletion$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListComputers$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigGenerate$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestShowCurrentConfig$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCrumb$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDoc$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestSearchPlugins$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListPlugins$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCheckUpdateCenter$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestInstallPlugin$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDownloadPlugin$
-	JENKINS_VERSION=2.190.3 go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListQueue$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestBashCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestZshCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestPowerShellCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListComputers$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigGenerate$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestShowCurrentConfig$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCrumb$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDoc$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestSearchPlugins$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListPlugins$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCheckUpdateCenter$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestInstallPlugin$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDownloadPlugin$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListQueue$
 
 test:
 	mkdir -p bin
