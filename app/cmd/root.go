@@ -290,6 +290,10 @@ func GetCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 			jenkinsServer.Proxy = ""
 			jenkinsServer.ProxyAuth = ""
 		}
+
+		if rootOptions.InsecureSkipVerify {
+			jenkinsServer.InsecureSkipVerify = rootOptions.InsecureSkipVerify
+		}
 	}
 	return
 }
@@ -430,6 +434,7 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appC
 	jclient.Token = jenkins.Token
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
+	jclient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	return
 }
 
