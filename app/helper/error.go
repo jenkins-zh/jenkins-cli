@@ -44,12 +44,12 @@ func StandardErrorMessage(err error) (msg string, ok bool) {
 			if server, err := url.Parse(t.URL); err == nil {
 				host = server.Host
 			}
-			msg = fmt.Sprintf("The connection to the server %s was refused - did you specify the right host or port?", host)
+			msg = fmt.Sprintf("The connection to the server %s was refused - did you specify the right host or port? \n", host)
 		default:
-			msg = fmt.Sprintf("Unable to connect to the server: %v", t.Err)
+			msg = fmt.Sprintf("Unable to connect to the server: %v \n", t.Err)
 		}
 	case *os.PathError:
-		msg = fmt.Sprintf("error: %s %s: %s", t.Op, t.Path, t.Err)
+		msg = fmt.Sprintf("error: %s %s: %s \n", t.Op, t.Path, t.Err)
 	default:
 		ok = false
 	}
