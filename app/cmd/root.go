@@ -16,6 +16,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -44,7 +45,7 @@ type RootOptions struct {
 	URL                string
 	Username           string
 	Token              string
-	InsecureSkipVerify bool
+	InsecureSkipVerify string
 	Proxy              string
 	ProxyAuth          string
 	ProxyDisable       bool
@@ -198,7 +199,7 @@ func init() {
 		i18n.T("The username of Jenkins"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Token, "token", "", "",
 		i18n.T("The token of Jenkins"))
-	rootCmd.PersistentFlags().BoolVarP(&rootOptions.InsecureSkipVerify, "insecureSkipVerify", "", true,
+	rootCmd.PersistentFlags().StringVarP(&rootOptions.InsecureSkipVerify, "insecureSkipVerify", "", "true",
 		i18n.T("If skip insecure skip verify"))
 	rootCmd.PersistentFlags().StringVarP(&rootOptions.Proxy, "proxy", "", "",
 		i18n.T("The proxy of connection to Jenkins"))
@@ -289,6 +290,10 @@ func GetCurrentJenkinsFromOptions() (jenkinsServer *appCfg.JenkinsServer) {
 		if rootOptions.ProxyDisable {
 			jenkinsServer.Proxy = ""
 			jenkinsServer.ProxyAuth = ""
+		}
+
+		if rootOptions.InsecureSkipVerify != "" {
+			jenkinsServer.InsecureSkipVerify, _ = strconv.ParseBool(rootOptions.InsecureSkipVerify)
 		}
 	}
 	return
@@ -430,6 +435,7 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appC
 	jclient.Token = jenkins.Token
 	jclient.Proxy = jenkins.Proxy
 	jclient.ProxyAuth = jenkins.ProxyAuth
+	jclient.InsecureSkipVerify = jenkins.InsecureSkipVerify
 	return
 }
 
