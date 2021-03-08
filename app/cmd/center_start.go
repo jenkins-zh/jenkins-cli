@@ -27,6 +27,7 @@ type CenterStartOption struct {
 	SetupWizard               bool
 	AdminCanGenerateNewTokens bool
 	CleanHome                 bool
+	CrumbExcludeSessionID     bool
 
 	// comes from folder plugin
 	ConcurrentIndexing int
@@ -75,6 +76,8 @@ func init() {
 		i18n.T("System property key-value"))
 	flags.BoolVarP(&centerStartOption.SetupWizard, "setup-wizard", "", true,
 		i18n.T("If you want to show the setup wizard at first start"))
+	flags.BoolVarP(&centerStartOption.CrumbExcludeSessionID, "crumb-exclude-sessionId", "", false,
+		i18n.T(`Add system properties with 'hudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true'`))
 	flags.BoolVarP(&centerStartOption.AdminCanGenerateNewTokens, "admin-can-generate-new-tokens", "", false,
 		i18n.T("If enabled, the users with administer permissions can generate new tokens for other users"))
 	flags.BoolVarP(&centerStartOption.CleanHome, "clean-home", "", false,
@@ -315,6 +318,10 @@ func (c *CenterStartOption) setSystemProperty(jenkinsWarArgs []string) []string 
 	c.System = append(c.System, fmt.Sprintf("jenkins.security.ApiTokenProperty.adminCanGenerateNewTokens=%v", c.AdminCanGenerateNewTokens))
 	if c.ConcurrentIndexing > -1 {
 		c.System = append(c.System, fmt.Sprintf("com.cloudbees.hudson.plugins.folder.computed.ThrottleComputationQueueTaskDispatcher.LIMIT=%d", c.ConcurrentIndexing))
+	}
+
+	if c.CrumbExcludeSessionID {
+		c.System = append(c.System, "hudson.security.csrf.DefaultCrumbIssuer.EXCLUDE_SESSION_ID=true")
 	}
 
 	for _, item := range centerStartOption.System {
