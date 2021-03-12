@@ -37,6 +37,12 @@ func (o *configUpdateOption) preRunE(_ *cobra.Command, args []string) (err error
 	if len(args) > 0 {
 		o.name = args[0]
 	}
+
+	if o.name == "" {
+		if jenkins := getCurrentJenkins(); jenkins != nil {
+			o.name = jenkins.Name
+		}
+	}
 	return
 }
 
