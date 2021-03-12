@@ -40,7 +40,8 @@ func init() {
 	flags.BoolVarP(&configOptions.Decrypt, "decrypt", "", false,
 		`Decrypt the credential field`)
 
-	configCmd.AddCommand(cmdCfg.NewConfigPluginCmd(&configOptions.Option))
+	configCmd.AddCommand(cmdCfg.NewConfigPluginCmd(&configOptions.Option),
+		createConfigUpdateCmd())
 }
 
 var configCmd = &cobra.Command{
