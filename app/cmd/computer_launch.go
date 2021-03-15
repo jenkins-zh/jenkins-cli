@@ -37,7 +37,7 @@ type ComputerLaunchOption struct {
 	AgentImageTag        string
 	GeneralAgentImageTag string
 	CustomImage          string
-	Volume               string
+	Volume               []string
 }
 
 const (
@@ -182,8 +182,8 @@ func init() {
 		i18n.T("The tag of jenkins/slave. See also "))
 	flags.BoolVarP(&computerLaunchOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading agent.jar"))
-	flags.StringVarP(&computerLaunchOption.Volume, "volume", "", client.GetDefaultAgentWorkDir(),
-		"The data directory for docker mode")
+	flags.StringArrayVarP(&computerLaunchOption.Volume, "volume", "v", []string{fmt.Sprintf("%s:%s", client.GetDefaultAgentWorkDir(), client.GetDefaultAgentWorkDir())},
+		"The data directory for docker mode, it should be like localPath:targetPath")
 
 	if err := computerLaunchCmd.RegisterFlagCompletionFunc("restart", common.ArrayCompletion("no", "always")); err != nil {
 		pluginCmd.PrintErrln(err)
@@ -206,7 +206,8 @@ var computerLaunchCmd = &cobra.Command{
 	ValidArgsFunction: ValidAgentNames,
 	Args:              cobra.MinimumNArgs(1),
 	Example: `jcli agent launch agent-name
-jcli agent launch agent-name --type jnlp`,
+jcli agent launch agent-name --type jnlp
+jcli agent launch maven -m docker --agent-type maven -v /root/.m2:/root/.m2 -d`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {
 		computerLaunchOption.ComputerClient, computerLaunchOption.CurrentJenkins =
 			GetComputerClient(computerLaunchOption.Option)
@@ -304,14 +305,14 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 				agentArgs = append(agentArgs, "--detach")
 			}
 
-			if o.Volume != "" {
-				// for data cache purpose
-				agentArgs = append(agentArgs, "-v", fmt.Sprintf("%s:%s", o.Volume, client.GetDefaultAgentWorkDir()))
+			// for data cache purpose
+			for _, vol := range o.Volume {
+				agentArgs = append(agentArgs, "-v", vol)
 			}
 
 			var agentImage string
 			switch o.AgentType {
-			case GolangAgentImage, MavenAgentImage, PythonAgentImage,
+			case GolangAgentImage, PythonAgentImage, MavenAgentImage,
 				DockerAgentImage, NodeAgentImage, RubyAgentImage, TerraformAgentImage:
 				agentImage = fmt.Sprintf("jenkins/jnlp-agent-%s:%s", o.AgentType, o.AgentImageTag)
 			case GenericAgentImage:
