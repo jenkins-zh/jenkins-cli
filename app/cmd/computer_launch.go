@@ -37,6 +37,7 @@ type ComputerLaunchOption struct {
 	AgentImageTag        string
 	GeneralAgentImageTag string
 	CustomImage          string
+	Volume               string
 }
 
 const (
@@ -181,6 +182,8 @@ func init() {
 		i18n.T("The tag of jenkins/slave. See also "))
 	flags.BoolVarP(&computerLaunchOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Show the progress of downloading agent.jar"))
+	flags.StringVarP(&computerLaunchOption.Volume, "volume", "", client.GetDefaultAgentWorkDir(),
+		"The data directory for docker mode")
 
 	if err := computerLaunchCmd.RegisterFlagCompletionFunc("restart", common.ArrayCompletion("no", "always")); err != nil {
 		pluginCmd.PrintErrln(err)
@@ -299,6 +302,11 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 
 			if o.Detach {
 				agentArgs = append(agentArgs, "--detach")
+			}
+
+			if o.Volume != "" {
+				// for data cache purpose
+				agentArgs = append(agentArgs, "-v", fmt.Sprintf("%s:%s", o.Volume, client.GetDefaultAgentWorkDir()))
 			}
 
 			var agentImage string
