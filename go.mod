@@ -8,7 +8,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
-	github.com/golang/mock v1.4.4
+	github.com/golang/mock v1.5.0
 	github.com/google/go-github/v29 v29.0.3
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
