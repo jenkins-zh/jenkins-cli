@@ -14,7 +14,7 @@ require (
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
 	github.com/linuxsuren/cobra-extension v0.0.10
-	github.com/linuxsuren/go-cli-alias v0.0.4
+	github.com/linuxsuren/go-cli-alias v0.0.6
 	github.com/linuxsuren/go-cli-plugin v0.0.4
 	github.com/linuxsuren/http-downloader v0.0.22
 	github.com/magiconair/properties v1.8.4
