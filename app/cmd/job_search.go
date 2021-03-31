@@ -20,25 +20,32 @@ type JobSearchOption struct {
 
 	Start int
 	Limit int
+
+	Plugin string
 }
 
 var jobSearchOption JobSearchOption
 
 func init() {
 	jobCmd.AddCommand(jobSearchCmd)
-	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Start, "start", "", 0,
-		i18n.T("The list of items offset"))
-	jobSearchCmd.Flags().IntVarP(&jobSearchOption.Limit, "limit", "", 50,
-		i18n.T("The list of items limit"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Name, "name", "", "",
-		i18n.T("The name of items for search"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Type, "type", "", "",
-		i18n.T("The type of items for search"))
-	jobSearchCmd.Flags().StringVarP(&jobSearchOption.Parent, "parent", "", "",
-		i18n.T("The parent of items for search"))
-	jobSearchOption.SetFlagWithHeaders(jobSearchCmd, "Name,DisplayName,Type,URL")
 
+	flags := jobSearchCmd.Flags()
+	flags.IntVarP(&jobSearchOption.Start, "start", "", 0,
+		i18n.T("The list of items offset"))
+	flags.IntVarP(&jobSearchOption.Limit, "limit", "", 50,
+		i18n.T("The list of items limit"))
+	flags.StringVarP(&jobSearchOption.Name, "name", "", "",
+		i18n.T("The name of items for search"))
+	flags.StringVarP(&jobSearchOption.Type, "type", "", "",
+		i18n.T("The type of items for search"))
+	flags.StringVarP(&jobSearchOption.Parent, "parent", "", "",
+		i18n.T("The parent of items for search"))
+	flags.StringVarP(&jobSearchOption.Plugin, "plugin", "p", "pipeline-restful-api",
+		"Search jobs base on the target plugin")
+
+	jobSearchOption.SetFlagWithHeaders(jobSearchCmd, "Name,DisplayName,Type,URL")
 	healthCheckRegister.Register(getCmdPath(jobSearchCmd), &jobSearchOption)
+	jobSearchCmd.RegisterFlagCompletionFunc("plugin", common.ArrayCompletion("pipeline-restful-api", "blueocean"))
 }
 
 var jobSearchCmd = &cobra.Command{
@@ -61,8 +68,18 @@ var jobSearchCmd = &cobra.Command{
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var items []client.JenkinsItem
-		if items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
-			jobSearchOption.Start, jobSearchOption.Limit); err == nil {
+		switch jobSearchOption.Plugin {
+		case "blueocean":
+			jobSearchOption.Columns = "Name,FullName,WeatherScore"
+			items, err = jClient.SearchViaBlue(jobSearchOption.Name, jobSearchOption.Start, jobSearchOption.Limit)
+		case "pipeline-restful-api":
+			items, err = jClient.Search(jobSearchOption.Name, jobSearchOption.Type,
+				jobSearchOption.Start, jobSearchOption.Limit)
+		default:
+			err = fmt.Errorf("unsupport plugin %s", jobSearchOption.Plugin)
+		}
+
+		if err == nil {
 			jobSearchOption.Writer = cmd.OutOrStdout()
 			err = jobSearchOption.OutputV2(items)
 		}

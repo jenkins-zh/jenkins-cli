@@ -41,6 +41,15 @@ func (q *JobClient) Search(name, kind string, start, limit int) (items []Jenkins
 	return
 }
 
+// SearchViaBlue searches jobs via the BlueOcean API
+func (q *JobClient) SearchViaBlue(name string, start, limit int) (items []JenkinsItem, err error) {
+	api := fmt.Sprintf("/blue/rest/search/?q=pipeline:*%s*;type:pipeline;organization:jenkins;excludedFromFlattening=jenkins.branch.MultiBranchProject,com.cloudbees.hudson.plugins.folder.AbstractFolder&filter=no-folders&start=%d&limit=%d",
+		name, start, limit)
+	err = q.RequestWithData(http.MethodGet, api,
+		nil, nil, 200, &items)
+	return
+}
+
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
 	path := ParseJobPath(jobName)
@@ -465,6 +474,11 @@ type JenkinsItem struct {
 	/** comes from ParameterizedJob */
 	Parameterized bool
 	Disabled      bool
+
+	/** comes from blueOcean */
+	FullName     string
+	WeatherScore int
+	Parameters   []ParameterDefinition
 }
 
 // Job represents a job
