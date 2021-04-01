@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -25,6 +26,14 @@ func init() {
 // CoreClient hold the client of Jenkins core
 type CoreClient struct {
 	JenkinsCore
+}
+
+// Reload will send the reload request
+func (q *CoreClient) Reload() (err error) {
+	_, err = q.RequestWithoutData(http.MethodPost, "/reload", map[string]string{
+		httpdownloader.ContentType: httpdownloader.ApplicationForm},
+		nil, 503)
+	return
 }
 
 // Restart will send the restart request

@@ -13,7 +13,8 @@ type RestartOption struct {
 	common.BatchOption
 	common.Option
 
-	Safe bool
+	Safe   bool
+	Reload bool
 }
 
 var restartOption RestartOption
@@ -23,6 +24,8 @@ func init() {
 	restartOption.SetFlag(restartCmd)
 	restartCmd.Flags().BoolVarP(&restartOption.Safe, "safe", "s", true,
 		i18n.T("Puts Jenkins into the quiet mode, wait for existing builds to be completed, and then restart Jenkins"))
+	restartCmd.Flags().BoolVarP(&restartOption.Reload, "reload", "r", false,
+		i18n.T("Reload configuration from disk, this action would not restart your Jenkins"))
 	restartOption.BatchOption.Stdio = common.GetSystemStdio()
 	restartOption.Option.Stdio = common.GetSystemStdio()
 }
@@ -33,7 +36,7 @@ var restartCmd = &cobra.Command{
 	Long:  i18n.T("Restart your Jenkins"),
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := GetCurrentJenkinsFromOptions()
-		if !restartOption.Confirm(fmt.Sprintf("Are you sure to restart Jenkins %s?", jenkins.URL)) {
+		if !restartOption.Confirm(fmt.Sprintf("Are you sure to restart/reload Jenkins %s?", jenkins.URL)) {
 			return
 		}
 
@@ -45,14 +48,20 @@ var restartCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
-		if restartOption.Safe {
+		if restartOption.Reload {
+			err = jClient.Reload()
+		} else if restartOption.Safe {
 			err = jClient.Restart()
 		} else {
 			err = jClient.RestartDirectly()
 		}
 
 		if err == nil {
-			cmd.Println("Please wait while Jenkins is restarting")
+			if restartOption.Reload {
+				cmd.Println("Please wait while Jenkins is reloading")
+			} else {
+				cmd.Println("Please wait while Jenkins is restarting")
+			}
 		}
 		return
 	},
