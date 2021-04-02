@@ -10,7 +10,7 @@ VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-cou
 BUILDFLAGS = -ldflags "-X github.com/linuxsuren/cobra-extension/version.version=$(VERSION) \
 	-X github.com/linuxsuren/cobra-extension/version.commit=$(COMMIT) \
 	-X github.com/linuxsuren/cobra-extension/version.date=$(shell date +'%Y-%m-%d')"
-COVERED_MAIN_SRC_FILE=./main
+MAIN_SRC_FILE = main.go
 PATH := $(PATH):$(PWD)/bin
 
 .PHONY: build
