@@ -1,6 +1,6 @@
 module github.com/jenkins-zh/jenkins-cli
 
-go 1.12
+go 1.14
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.2.9
