@@ -29,22 +29,6 @@ jobs:
       with:
         version: latest
         args: release --rm-dist --snapshot
-    - name: Backup Dev Version
-      run: |
-        git clone https://github.com/jenkins-zh/jcli-repo
-        cp release/checksums.txt jcli-repo
-        cp release/jcli-darwin-amd64.tar.gz jcli-repo
-        cp release/jcli-linux-64bit.deb jcli-repo
-        cp release/jcli-linux-64bit.rpm jcli-repo
-        cp release/jcli-linux-amd64.tar.gz jcli-repo
-        cp release/jcli-linux-arm64.tar.gz jcli-repo
-        cp release/jcli-linux-arm64.rpm jcli-repo
-        cp release/jcli-linux-arm64.deb jcli-repo
-        cp release/jcli-windows-amd64.zip jcli-repo
-        cd jcli-repo && git config --local user.email "361981269@qq.com" && \
-          git config --local user.name "rick" && git add . && \
-          git commit -m 'Auto commit by rick bot' && \
-          git push https://linuxsuren:${{ secrets.GITHUB_SECRETS }}@github.com/jenkins-zh/jcli-repo.git
   BackupGit:
     runs-on: ubuntu-latest
     steps:
