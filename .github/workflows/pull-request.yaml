@@ -98,3 +98,25 @@ jobs:
 #        run: |
 #          export PATH=$PATH:${PWD}/bin:$GOPATH/bin:/home/runner/go/bin
 #          make test
+  UnitTest:
+    name: Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go 1.15
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: 1.15
+        id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2.3.4
+      - name: Test
+        run: |
+          make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.out
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
