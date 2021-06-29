@@ -116,4 +116,9 @@ There're a few similar projects that you might be interested in:
 ## Stargazers over time
 
 [![Stargazers over time](https://starchart.cc/jenkins-zh/jenkins-cli.svg)](https://starchart.cc/jenkins-zh/jenkins-cli)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjenkins-zh%2Fjenkins-cli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjenkins-zh%2Fjenkins-cli?ref=badge_shield)
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjenkins-zh%2Fjenkins-cli.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjenkins-zh%2Fjenkins-cli?ref=badge_large)
