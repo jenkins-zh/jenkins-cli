@@ -58,6 +58,13 @@ jcli job log <jobName> --tail <numberOfLines>`,
 			} else {
 				err = fmt.Errorf("job history must be a number instead of '%s'", historyStr)
 			}
+			numberOfLinesStr := args[2]
+			numberOfLines, err := strconv.Atoi(numberOfLinesStr)
+			if err != nil || numberOfLines <= 0 {
+				err = fmt.Errorf(err.Error(), "lines of job must be a positive integer instead of '%s'", numberOfLinesStr)
+			} else {
+				jobLogOption.NumberOfLines = numberOfLines
+			}
 		}
 		return
 	},
