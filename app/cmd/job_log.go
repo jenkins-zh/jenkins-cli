@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/spf13/cobra"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/spf13/cobra"
 )
 
 // JobLogOption is the job log option
@@ -35,7 +36,7 @@ func init() {
 	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 1,
 		i18n.T("Interval of watch"))
 	jobLogCmd.Flags().IntVarP(&jobLogOption.NumberOfLines, "tail", "t", -1,
-		i18n.T("The last number of lines of the log"))
+		i18n.T("the last number of lines of the log"))
 }
 
 var jobLogCmd = &cobra.Command{
@@ -56,6 +57,13 @@ jcli job log <jobName> --tail <numberOfLines>`,
 				jobLogOption.History = history
 			} else {
 				err = fmt.Errorf("job history must be a number instead of '%s'", historyStr)
+			}
+			numberOfLinesStr := args[2]
+			numberOfLines, err := strconv.Atoi(numberOfLinesStr)
+			if err != nil || numberOfLines <= 0 {
+				err = fmt.Errorf(err.Error(), "lines of job must be a positive integer instead of '%s'", numberOfLinesStr)
+			} else {
+				jobLogOption.NumberOfLines = numberOfLines
 			}
 		}
 		return
@@ -113,7 +121,8 @@ func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, his
 				isNew = true
 			}
 		}
-		numberOfLinesOfJobLogText := strings.Count(jobLog.Text, "\n") - 1
+
+		numberOfLinesOfJobLogText := strings.Count(jobLog.Text, "\n")
 		if isNew && (numberOfLines > 0 || numberOfLines == -1) {
 			if numberOfLines >= numberOfLinesOfJobLogText || numberOfLines == -1 {
 				cmd.Print(jobLog.Text)
