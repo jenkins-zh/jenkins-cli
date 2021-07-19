@@ -10,24 +10,30 @@ import (
 	"net/http"
 	"strings"
 )
-
-const LTSURL = "https://www.jenkins.io/changelog-stable/rss.xml"
-const WEEKLYURL = "https://www.jenkins.io/changelog/rss.xml"
-
+//URL of stable Jenkins RSS
+const LtsURL = "https://www.jenkins.io/changelog-stable/rss.xml"
+//URL of stable Jenkins RSS
+const WeeklyYURL = "https://www.jenkins.io/changelog/rss.xml"
 //the width of the description column
-const WIDTH_OF_DESCRIPTION = 60
-const NUMBER_OF_LINES_OF_DESCRIPTION = 10
-const ASCII_OF_LINE_FEED = 10
-const ASCII_OF_SPACE = 32
+const WidthOfDescription = 60
+//the number of lines to be printed in description column
+const NumberOfLinesOfDescription = 10
+//ASCII of line feed
+const AsciiOfLineFeed = 10
+//ASCII of space
+const AsciiOfSpace = 32
 
+//CenterListOption as options for Jenkins RSS
 type CenterListOption struct {
 	Channel      Channel `xml:"channel"`
 	RoundTripper http.RoundTripper
 }
+//Channel as part of CenterListOption
 type Channel struct {
 	Title string `xml:"title"`
 	Items []Item `xml:"item"`
 }
+//Item as a option for information of newly-released Jenkins
 type Item struct {
 	Title       string `xml:"title"`
 	Description string `xml:"description"`
@@ -61,7 +67,7 @@ var centerListCmd = &cobra.Command{
 			return error
 		}
 		jenkinsVersion := status.Version
-		changeLog, err := printChangelog(LTSURL, jenkinsVersion)
+		changeLog, err := printChangelog(LtsURL, jenkinsVersion)
 		cmd.Println(changeLog)
 		//err = printChangelog(WEEKLYURL,cmd)
 		return err
@@ -91,23 +97,22 @@ func printChangelog(rss string, version string) (changelog string, err error) {
 		}
 		isTheLatestVersion = 0
 		temp = trimXMLSymbols(item.Description)
-		temp = regulateWidthAndLines(temp, WIDTH_OF_DESCRIPTION, NUMBER_OF_LINES_OF_DESCRIPTION)
+		temp = regulateWidthAndLines(temp, WidthOfDescription, NumberOfLinesOfDescription)
 		t.AppendRow([]interface{}{index + 1, item.Title, temp, item.PubDate[:17]})
 		t.AppendSeparator()
 	}
 	resp.Body.Close()
 	if isTheLatestVersion == 1 {
 		return "You already have the latest version of Jenkins installed!", nil
-	} else {
-		return t.Render(), nil
 	}
+	return t.Render(), nil
 }
 func regulateWidthAndLines(content string, width int, numberOfLines int) string {
 	var count = 0
 	myContent := []uint8(content)
 	var i int
 	for i = 0; i < len(myContent); i++ {
-		if myContent[i] == ASCII_OF_LINE_FEED {
+		if myContent[i] == AsciiOfLineFeed {
 			count++
 		}
 		if count == numberOfLines {
@@ -119,18 +124,18 @@ func regulateWidthAndLines(content string, width int, numberOfLines int) string 
 	for index, char := range myContent {
 		indexInLine++
 		if indexInLine%width == 0 {
-			if char == ASCII_OF_SPACE {
-				myContent[index] = ASCII_OF_LINE_FEED
+			if char == AsciiOfSpace {
+				myContent[index] = AsciiOfLineFeed
 				indexInLine = 0
 			} else {
 				indexInLine = 0
-				for ; myContent[index] != ASCII_OF_SPACE; index-- {
+				for ; myContent[index] != AsciiOfSpace; index-- {
 					indexInLine++
 				}
-				myContent[index] = ASCII_OF_LINE_FEED
+				myContent[index] = AsciiOfLineFeed
 			}
 		}
-		if char == ASCII_OF_LINE_FEED {
+		if char == AsciiOfLineFeed {
 			indexInLine = 0
 		}
 	}
