@@ -10,17 +10,23 @@ import (
 	"net/http"
 	"strings"
 )
-//URL of stable Jenkins RSS
+
+//LtsURL is the URL of stable Jenkins RSS
 const LtsURL = "https://www.jenkins.io/changelog-stable/rss.xml"
-//URL of stable Jenkins RSS
+
+//WeeklyYURL is the URL of stable Jenkins RSS
 const WeeklyYURL = "https://www.jenkins.io/changelog/rss.xml"
-//the width of the description column
+
+//WidthOfDescription is the width of the description column
 const WidthOfDescription = 60
-//the number of lines to be printed in description column
+
+//NumberOfLinesOfDescription is the number of lines to be printed in description column
 const NumberOfLinesOfDescription = 10
-//ASCII of line feed
+
+//AsciiOfLineFeed is the ASCII of line feed
 const AsciiOfLineFeed = 10
-//ASCII of space
+
+//AsciiOfSpace is the ASCII of space
 const AsciiOfSpace = 32
 
 //CenterListOption as options for Jenkins RSS
@@ -28,11 +34,13 @@ type CenterListOption struct {
 	Channel      Channel `xml:"channel"`
 	RoundTripper http.RoundTripper
 }
+
 //Channel as part of CenterListOption
 type Channel struct {
 	Title string `xml:"title"`
 	Items []Item `xml:"item"`
 }
+
 //Item as a option for information of newly-released Jenkins
 type Item struct {
 	Title       string `xml:"title"`
@@ -67,31 +75,40 @@ var centerListCmd = &cobra.Command{
 			return error
 		}
 		jenkinsVersion := status.Version
-		changeLog, err := printChangelog(LtsURL, jenkinsVersion)
+		changeLog, err := getChangelog(LtsURL, jenkinsVersion, getVersionData)
 		cmd.Println(changeLog)
 		//err = printChangelog(WEEKLYURL,cmd)
 		return err
 	},
 }
 
-func printChangelog(rss string, version string) (changelog string, err error) {
+func getVersionData(rss string) ([]Item, string, error) {
 	resp, err := http.Get(rss)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 	var centerListOption CenterListOption
 	xml.Unmarshal(bytes, &centerListOption)
+	resp.Body.Close()
+	return centerListOption.Channel.Items, centerListOption.Channel.Title, nil
+}
+
+func getChangelog(rss string, version string, getData func(rss string) ([]Item, string, error)) (changelog string, err error) {
+	items, title, error := getData(rss)
+	if error != nil {
+		return "", error
+	}
 	t := table.NewWriter()
 	rowConfigAutoMerge := table.RowConfig{AutoMerge: true}
-	t.AppendHeader(table.Row{centerListOption.Channel.Title, centerListOption.Channel.Title, centerListOption.Channel.Title, centerListOption.Channel.Title}, rowConfigAutoMerge)
+	t.AppendHeader(table.Row{title, title, title, title}, rowConfigAutoMerge)
 	t.AppendRow(table.Row{"Index", "Title", "Description", "PubDate"})
 	var temp string
 	var isTheLatestVersion = 1
-	for index, item := range centerListOption.Channel.Items {
+	for index, item := range items {
 		if compareVersionTitle(version, item.Title[8:]) >= 0 {
 			break
 		}
@@ -101,7 +118,6 @@ func printChangelog(rss string, version string) (changelog string, err error) {
 		t.AppendRow([]interface{}{index + 1, item.Title, temp, item.PubDate[:17]})
 		t.AppendSeparator()
 	}
-	resp.Body.Close()
 	if isTheLatestVersion == 1 {
 		return "You already have the latest version of Jenkins installed!", nil
 	}
@@ -166,18 +182,10 @@ func compareVersionTitle(versionOne string, versionTwo string) int {
 
 func trimXMLSymbols(temp string) string {
 	temp = strings.TrimSpace(temp)
-	temp = strings.Replace(temp, "<br>", "", -1)
-	temp = strings.Replace(temp, "<br/>", "", -1)
-	temp = strings.Replace(temp, "<br />", "", -1)
-	temp = strings.Replace(temp, "<ul>", "", -1)
-	temp = strings.Replace(temp, "<li>", "", -1)
+	xmlSymbols := []string{"<br>", "<br/>", "<br />", "<ul>", "<li>", "</ul>", "<strong>", "</strong>", "<code>", "</code>", "<em>", "</em>"}
+	for _, xmlSymbol := range xmlSymbols {
+		temp = strings.Replace(temp, xmlSymbol, "", -1)
+	}
 	temp = strings.Replace(temp, "</li>", "\n", -1)
-	temp = strings.Replace(temp, "</ul>", "", -1)
-	temp = strings.Replace(temp, "<strong>", "", -1)
-	temp = strings.Replace(temp, "</strong>", "", -1)
-	temp = strings.Replace(temp, "<code>", "", -1)
-	temp = strings.Replace(temp, "</code>", "", -1)
-	temp = strings.Replace(temp, "<em>", "", -1)
-	temp = strings.Replace(temp, "</em>", "", -1)
 	return temp
 }
