@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	bytes2 "bytes"
 	"encoding/xml"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
@@ -35,21 +36,87 @@ var _ = Describe("center list command", func() {
 	})
 
 	Context("basic cases", func() {
+		jenkinsVersions := []string{"Jenkins 2.289.2", "Jenkins 2.289.1"}
+		result := []string{
+			"You already have the latest version of Jenkins installed!",
+			resultOneVersionData(),
+		}
 		It("no jenkins version information in the list", func() {
 			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
+			temp, _ := getChangelog(LtsURL, jenkinsVersions[0][8:], mockGetVersionData)
+			Expect(temp).To(Equal(result[0]))
+		})
 
-			resp, _ := http.Get(LTSURL)
-			bytes, _ := ioutil.ReadAll(resp.Body)
-			var centerListOption CenterListOption
-			xml.Unmarshal(bytes, &centerListOption)
-			theNewestJenkinsVersion := centerListOption.Channel.Items[0].Title[8:]
-			temp, _ := printChangelog(LTSURL, theNewestJenkinsVersion)
-
-			Expect(temp == "You already have the latest version of Jenkins installed!").To(BeTrue())
-
+		It("one jenkins version information in the list", func() {
+			data, err := GenerateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+			temp, _ := getChangelog(LtsURL, jenkinsVersions[1][8:], mockGetVersionData)
+			Expect(temp).To(Equal(result[1]))
 		})
 	})
 })
+
+func mockGetVersionData(rss string) ([]Item, string, error) {
+	requestVersionData, _ := http.NewRequest(http.MethodGet, rss, nil)
+	responseVersionData := &http.Response{
+		StatusCode: 200,
+		Proto:      "HTTP/1.1",
+		Request:    requestVersionData,
+		Body:       ioutil.NopCloser(bytes2.NewBufferString(versionXML())),
+	}
+	bytes, err := ioutil.ReadAll(responseVersionData.Body)
+	if err != nil {
+		return nil, "", err
+	}
+	var centerListOption CenterListOption
+	xml.Unmarshal(bytes, &centerListOption)
+	return centerListOption.Channel.Items, centerListOption.Channel.Title, nil
+}
+
+func versionXML() string {
+	return `<rss>
+<channel>
+<title> Jenkins LTS Changelog </title>
+<item>
+<title>Jenkins 2.289.2</title>
+<description>&lt;strong&gt;&lt;/strong&gt;&lt;ul&gt;&lt;li&gt; Security: Important security fixes. &lt;/li&gt;
+&lt;li&gt;RFE: Winstone 5.18: Update Jetty from 9.4.39.v20210325 to 9.4.41.v20210516 for bug fixes and enhancements. &lt;/li&gt;
+ &lt;/ul&gt; </description>
+<pubDate> Wed, 30 Jun 2021 00:00:00 +0000 </pubDate>
+</item>
+<item>
+<title>Jenkins 2.289.1</title>
+<description> &lt;strong&gt;Changes since 2.289:&lt;/strong&gt; &lt;ul&gt;
+&lt;li&gt; Bug: Fix form submission for some specific form validation cases (regression in 2.289). &lt;/li&gt;
+&lt;li&gt; Bug: Wrap the build name in the build results list if it is too long. &lt;/li&gt;
+ &lt;/ul&gt; </description>
+<pubDate> Wed, 2 Jun 2021 00:00:00 +0000 </pubDate>
+</item>
+</channel>
+</rss>`
+}
+
+func resultOneVersionData() string {
+	return "+------------------------------------------------------------------------------------------" +
+		"-----------------------------------------------+\n|                                              " +
+		"            JENKINS LTS CHANGELOG                                                          |\n+----" +
+		"---------------------+-------------------------+-----------------------------------------------------" +
+		"------+-------------------------+\n| Index                   | Title                   | Description    " +
+		"                                           | PubDate                 |\n| 1                       | Jenkins " +
+		"2.289.2         |  Security: Important security fixes.                      |  Wed, 30 Jun 2021       |\n| " +
+		"                        |                         |                                                           " +
+		"|                         |\n|                         |                         | RFE: Winstone 5.18: Update " +
+		"Jetty from 9.4.39.v20210325 to |                         |\n|                         |                      " +
+		"   | 9.4.41.v20210516 for bug fixes and enhancements.          |                         |\n|                " +
+		"         |                         |                                                           |              " +
+		"           |\n|                         |                         |                                           " +
+		"                |                         |\n+-------------------------+-------------------------+------------" +
+		"-----------------------------------------------+-------------------------+"
+}
