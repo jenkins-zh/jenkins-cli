@@ -14,20 +14,17 @@ import (
 //LtsURL is the URL of stable Jenkins RSS
 const LtsURL = "https://www.jenkins.io/changelog-stable/rss.xml"
 
-//WeeklyYURL is the URL of stable Jenkins RSS
-const WeeklyYURL = "https://www.jenkins.io/changelog/rss.xml"
-
 //WidthOfDescription is the width of the description column
 const WidthOfDescription = 60
 
 //NumberOfLinesOfDescription is the number of lines to be printed in description column
 const NumberOfLinesOfDescription = 10
 
-//AsciiOfLineFeed is the ASCII of line feed
-const AsciiOfLineFeed = 10
+//ASCIIOfLineFeed is the ASCII of line feed
+const ASCIIOfLineFeed = 10
 
-//AsciiOfSpace is the ASCII of space
-const AsciiOfSpace = 32
+//ASCIIOfSpace is the ASCII of space
+const ASCIIOfSpace = 32
 
 //CenterListOption as options for Jenkins RSS
 type CenterListOption struct {
@@ -77,7 +74,6 @@ var centerListCmd = &cobra.Command{
 		jenkinsVersion := status.Version
 		changeLog, err := getChangelog(LtsURL, jenkinsVersion, getVersionData)
 		cmd.Println(changeLog)
-		//err = printChangelog(WEEKLYURL,cmd)
 		return err
 	},
 }
@@ -128,7 +124,7 @@ func regulateWidthAndLines(content string, width int, numberOfLines int) string 
 	myContent := []uint8(content)
 	var i int
 	for i = 0; i < len(myContent); i++ {
-		if myContent[i] == AsciiOfLineFeed {
+		if myContent[i] == ASCIIOfLineFeed {
 			count++
 		}
 		if count == numberOfLines {
@@ -140,18 +136,18 @@ func regulateWidthAndLines(content string, width int, numberOfLines int) string 
 	for index, char := range myContent {
 		indexInLine++
 		if indexInLine%width == 0 {
-			if char == AsciiOfSpace {
-				myContent[index] = AsciiOfLineFeed
+			if char == ASCIIOfSpace {
+				myContent[index] = ASCIIOfLineFeed
 				indexInLine = 0
 			} else {
 				indexInLine = 0
-				for ; myContent[index] != AsciiOfSpace; index-- {
+				for ; myContent[index] != ASCIIOfSpace; index-- {
 					indexInLine++
 				}
-				myContent[index] = AsciiOfLineFeed
+				myContent[index] = ASCIIOfLineFeed
 			}
 		}
-		if char == AsciiOfLineFeed {
+		if char == ASCIIOfLineFeed {
 			indexInLine = 0
 		}
 	}
