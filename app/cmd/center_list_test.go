@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	bytes2 "bytes"
+	"bytes"
+	_ "embed"
 	"encoding/xml"
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
@@ -11,6 +12,9 @@ import (
 	"net/http"
 	"os"
 )
+
+//go:embed center_list.txt
+var resultOneVersionData string
 
 var _ = Describe("center list command", func() {
 	var (
@@ -39,7 +43,7 @@ var _ = Describe("center list command", func() {
 		jenkinsVersions := []string{"Jenkins 2.289.2", "Jenkins 2.289.1"}
 		result := []string{
 			"You already have the latest version of Jenkins installed!",
-			resultOneVersionData(),
+			resultOneVersionData,
 		}
 		It("no jenkins version information in the list", func() {
 			data, err := GenerateSampleConfig()
@@ -69,7 +73,7 @@ func mockGetVersionData(rss string) ([]Item, string, error) {
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
 		Request:    requestVersionData,
-		Body:       ioutil.NopCloser(bytes2.NewBufferString(versionXML())),
+		Body:       ioutil.NopCloser(bytes.NewBufferString(versionXML())),
 	}
 	bytes, err := ioutil.ReadAll(responseVersionData.Body)
 	if err != nil {
@@ -101,22 +105,4 @@ func versionXML() string {
 </item>
 </channel>
 </rss>`
-}
-
-func resultOneVersionData() string {
-	return "+------------------------------------------------------------------------------------------" +
-		"-----------------------------------------------+\n|                                              " +
-		"            JENKINS LTS CHANGELOG                                                          |\n+----" +
-		"---------------------+-------------------------+-----------------------------------------------------" +
-		"------+-------------------------+\n| Index                   | Title                   | Description    " +
-		"                                           | PubDate                 |\n| 1                       | Jenkins " +
-		"2.289.2         |  Security: Important security fixes.                      |  Wed, 30 Jun 2021       |\n| " +
-		"                        |                         |                                                           " +
-		"|                         |\n|                         |                         | RFE: Winstone 5.18: Update " +
-		"Jetty from 9.4.39.v20210325 to |                         |\n|                         |                      " +
-		"   | 9.4.41.v20210516 for bug fixes and enhancements.          |                         |\n|                " +
-		"         |                         |                                                           |              " +
-		"           |\n|                         |                         |                                           " +
-		"                |                         |\n+-------------------------+-------------------------+------------" +
-		"-----------------------------------------------+-------------------------+"
 }
