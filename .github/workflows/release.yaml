@@ -16,7 +16,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2.1.3
       with:
-        go-version: 1.15.x
+        go-version: 1.16.x
     - name: Upgrade upx
       run: |
         # try to fix https://github.com/jenkins-zh/jenkins-cli/issues/493
