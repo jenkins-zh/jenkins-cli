@@ -2,6 +2,7 @@
 
 # Jenkins CLI
 
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/jenkins-zh/jenkins-cli)
 [![Go Report Card][go-report-card-badge]][go-report-card-url]
 [![Quality Gate Status][sonar-badge]][sonar-link]
 [![GoDoc][godoc-badge]][godoc-url]
