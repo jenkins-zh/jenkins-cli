@@ -1,15 +1,17 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 
 	"github.com/spf13/cobra"
 )
 
 // ComputerCreateOption option for config list command
 type ComputerCreateOption struct {
-	CommonOption
-	OutputOption
+	common.Option
+	cobra_ext.OutputOption
 }
 
 var computerCreateOption ComputerCreateOption
@@ -26,10 +28,10 @@ It can only create a JNLP agent.`),
 	Example: `jcli agent create agent-name`,
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient, _ := GetComputerClient(computerCreateOption.CommonOption)
+		jClient, _ := GetComputerClient(computerCreateOption.Option)
 		return jClient.Create(args[0])
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

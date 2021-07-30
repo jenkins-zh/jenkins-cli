@@ -1,11 +1,13 @@
 package client
 
 import (
+	"encoding/xml"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"runtime"
 	"strings"
 )
 
@@ -16,7 +18,7 @@ type ComputerClient struct {
 
 // List get the computer list
 func (c *ComputerClient) List() (computers ComputerList, err error) {
-	err = c.RequestWithData("GET", "/computer/api/json",
+	err = c.RequestWithData(http.MethodGet, "/computer/api/json",
 		nil, nil, 200, &computers)
 	return
 }
@@ -24,25 +26,39 @@ func (c *ComputerClient) List() (computers ComputerList, err error) {
 // Launch starts up a agent
 func (c *ComputerClient) Launch(name string) (err error) {
 	api := fmt.Sprintf("/computer/%s/launchSlaveAgent", name)
-	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = c.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
 // Delete removes a agent from Jenkins
 func (c *ComputerClient) Delete(name string) (err error) {
 	api := fmt.Sprintf("/computer/%s/doDelete", name)
-	_, err = c.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = c.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
+}
+
+type agentJNLP struct {
+	XMLName      xml.Name `xml:"jnlp"`
+	AppArguments []string `xml:"application-desc>argument"`
 }
 
 // GetSecret returns the secret of an agent
 func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
-	api := fmt.Sprintf("/instance/agentSecret?name=%s", name)
+	api := fmt.Sprintf("/computer/%s/slave-agent.jnlp", name)
 	var response *http.Response
-	if response, err = c.RequestWithResponse("POST", api, nil, nil); err == nil {
-		var data []byte
-		if data, err = ioutil.ReadAll(response.Body); err == nil {
-			secret = string(data)
+	if response, err = c.RequestWithResponse(http.MethodGet, api, nil, nil); err == nil {
+		if response.StatusCode == http.StatusOK {
+			var data []byte
+			if data, err = ioutil.ReadAll(response.Body); err == nil {
+				jnlp := &agentJNLP{}
+				if err = xml.Unmarshal(data, jnlp); err == nil {
+					secret = jnlp.AppArguments[0]
+				} else {
+					err = fmt.Errorf("invalid jnlp xml, error: %v", err)
+				}
+			}
+		} else {
+			err = fmt.Errorf("unexpected status code: %d", response.StatusCode)
 		}
 	}
 	return
@@ -52,7 +68,7 @@ func (c *ComputerClient) GetSecret(name string) (secret string, err error) {
 func (c *ComputerClient) GetLog(name string) (log string, err error) {
 	var response *http.Response
 	api := fmt.Sprintf("/computer/%s/logText/progressiveText", name)
-	if response, err = c.RequestWithResponse("GET", api, nil, nil); err == nil {
+	if response, err = c.RequestWithResponse(http.MethodGet, api, nil, nil); err == nil {
 		statusCode := response.StatusCode
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code %d", statusCode)
@@ -74,13 +90,23 @@ func (c *ComputerClient) Create(name string) (err error) {
 		"mode": {"hudson.slaves.DumbSlave"},
 	}
 	payload := strings.NewReader(formData.Encode())
-	if _, err = c.RequestWithoutData("POST", "/computer/createItem",
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200); err == nil {
+	if _, err = c.RequestWithoutData(http.MethodPost, "/computer/createItem",
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200); err == nil {
 		payload = GetPayloadForCreateAgent(name)
-		_, err = c.RequestWithoutData("POST", "/computer/doCreateItem",
-			map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+		_, err = c.RequestWithoutData(http.MethodPost, "/computer/doCreateItem",
+			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	}
 	return
+}
+
+func getDefaultAgentLabels() string {
+	return fmt.Sprintf("%s %s", runtime.GOOS, runtime.GOARCH)
+}
+
+// GetDefaultAgentWorkDir returns the Jenkins agent work dir
+func GetDefaultAgentWorkDir() string {
+	// TODO return different directory base on the OS
+	return "/var/tmp/jenkins"
 }
 
 // GetPayloadForCreateAgent returns a payload for creating an agent
@@ -89,8 +115,8 @@ func GetPayloadForCreateAgent(name string) *strings.Reader {
 	"name": "%s",
 	"nodeDescription": "",
 	"numExecutors": "1",
-	"remoteFS": "/abc",
-	"labelString": "",
+	"remoteFS": "%s",
+	"labelString": "%s",
 	"mode": "NORMAL",
 	"launcher": {
 		"$class": "hudson.slaves.JNLPLauncher",
@@ -104,7 +130,7 @@ func GetPayloadForCreateAgent(name string) *strings.Reader {
 		"vmargs": ""
 	},
 	"type": "hudson.slaves.DumbSlave"
-}`, name)
+}`, name, GetDefaultAgentWorkDir(), getDefaultAgentLabels())
 	formData := url.Values{
 		"name": {name},
 		"type": {"hudson.slaves.DumbSlave"},

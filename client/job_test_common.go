@@ -9,13 +9,13 @@ import (
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PrepareForGetJobInputActions only for test
 func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, jobName string, buildID int) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/job/%s/%d/wfapi/pendingInputActions", rootURL, jobName, buildID), nil)
+	request, _ = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/%s/%d/wfapi/pendingInputActions", rootURL, jobName, buildID), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -25,7 +25,7 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 "abortUrl":"/job/test/5/input/Eff7d5dba32b4da32d9a67a519434d3f/abort","redirectApprovalUrl":"/job/test/5/input/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
@@ -36,7 +36,7 @@ func PrepareForGetJobInputActions(roundTripper *mhttp.MockRoundTripper, rootURL,
 // PrepareForSubmitInput only for test
 func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, password string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/abort?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s/%d/input/%s/abort?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
@@ -44,7 +44,7 @@ func PrepareForSubmitInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPat
 // PrepareForSubmitProcessInput only for test
 func PrepareForSubmitProcessInput(roundTripper *mhttp.MockRoundTripper, rootURL, jobPath, user, password string) (
 	request *http.Request, response *http.Response) {
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s%s/%d/input/%s/proceed?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s/%d/input/%s/proceed?json={\"parameter\":[]}", rootURL, jobPath, 1, "Eff7d5dba32b4da32d9a67a519434d3f"), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	return
 }
@@ -54,8 +54,8 @@ func PrepareForBuildWithNoParams(roundTripper *mhttp.MockRoundTripper, rootURL, 
 	request *http.Request, response *http.Response) {
 	formData := url.Values{"json": {`{"parameter": []}`}}
 	payload := strings.NewReader(formData.Encode())
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	response = PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	response.StatusCode = 201
 	return
@@ -66,8 +66,8 @@ func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jo
 	request *http.Request, response *http.Response) {
 	formData := url.Values{"json": {`{"parameter": {"Description":"","name":"name","Type":"StringParameterDefinition","value":"value","DefaultParameterValue":{"Description":"","Value":null}}}`}}
 	payload := strings.NewReader(formData.Encode())
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", rootURL, jobName), payload)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	response = PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 	response.StatusCode = 201
 	return
@@ -76,7 +76,7 @@ func PrepareForBuildWithParams(roundTripper *mhttp.MockRoundTripper, rootURL, jo
 // PrepareForGetJob only for test
 func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, user, password string) (
 	response *http.Response) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json", rootURL, jobName), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/%s/api/json", rootURL, jobName), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
@@ -95,7 +95,7 @@ func PrepareForGetJob(roundTripper *mhttp.MockRoundTripper, rootURL, jobName, us
 				}`, jobName))),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -145,7 +145,7 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 	} else {
 		api = fmt.Sprintf("%s/job/%s/%d/api/json", rootURL, jobName, buildID)
 	}
-	request, _ := http.NewRequest("GET", api, nil)
+	request, _ := http.NewRequest(http.MethodGet, api, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Proto:      "HTTP/1.1",
@@ -155,7 +155,7 @@ func PrepareForGetBuild(roundTripper *mhttp.MockRoundTripper, rootURL, jobName s
 				`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -169,18 +169,18 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 	} else {
 		api = fmt.Sprintf("%s/job/%s/%d/logText/progressiveText?start=%d", rootURL, jobName, buildID, 0)
 	}
-	request, _ := http.NewRequest("GET", api, nil)
+	request, _ := http.NewRequest(http.MethodGet, api, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
 		Header: map[string][]string{
-			"X-More-Data": []string{"false"},
-			"X-Text-Size": []string{"8"},
+			"X-More-Data": {"false"},
+			"X-Text-Size": {"8"},
 		},
 		Body: ioutil.NopCloser(bytes.NewBufferString("fake log")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -188,7 +188,7 @@ func PrepareForJobLog(roundTripper *mhttp.MockRoundTripper, rootURL, jobName str
 
 // PrepareOneItem only for test
 func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
 		rootURL, name, kind, 0, 50), nil)
 	response := &http.Response{
 		StatusCode: 200,
@@ -196,7 +196,7 @@ func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, u
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{"name":"fake","displayName":"fake","description":null,"type":"WorkflowJob","shortURL":"job/fake/","url":"job/fake/"}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
@@ -204,7 +204,7 @@ func PrepareOneItem(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, u
 
 // PrepareEmptyItems only for test
 func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind, user, token string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/items/list?name=%s&type=%s&start=%d&limit=%d&parent=",
 		rootURL, name, kind, 0, 50), nil)
 	response := &http.Response{
 		StatusCode: 200,
@@ -212,7 +212,7 @@ func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && token != "" {
 		request.SetBasicAuth(user, token)
 	}
@@ -220,7 +220,7 @@ func PrepareEmptyItems(roundTripper *mhttp.MockRoundTripper, rootURL, name, kind
 
 // PrepareForDisableJob only for test
 func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/disable", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/disable", rootURL, name), nil)
 	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
 	//response := &http.Response{
 	//	StatusCode: 200,
@@ -228,7 +228,7 @@ func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, u
 	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
 	//}
 	//roundTripper.EXPECT().
-	//	RoundTrip(request).Return(response, nil)
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	//if user != "" && token != "" {
 	//	request.SetBasicAuth(user, token)
 	//}
@@ -236,7 +236,7 @@ func PrepareForDisableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, u
 
 // PrepareForEnableJob only for test
 func PrepareForEnableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, user, token string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/enable", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/enable", rootURL, name), nil)
 	PrepareCommonPost(request, "", roundTripper, user, token, rootURL)
 	//response := &http.Response{
 	//	StatusCode: 200,
@@ -244,7 +244,7 @@ func PrepareForEnableJob(roundTripper *mhttp.MockRoundTripper, rootURL, name, us
 	//	Body:       ioutil.NopCloser(bytes.NewBufferString(``)),
 	//}
 	//roundTripper.EXPECT().
-	//	RoundTrip(request).Return(response, nil)
+	//	RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	//if user != "" && token != "" {
 	//	request.SetBasicAuth(user, token)
 	//}

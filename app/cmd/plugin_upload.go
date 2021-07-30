@@ -2,17 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -24,41 +24,49 @@ type PluginUploadOption struct {
 	RemoteJenkins  string
 	ShowProgress   bool
 	FileName       string
+	// Timeout is the timeout when upload the plugin
+	Timeout int64
 
 	RoundTripper http.RoundTripper
 
-	HookOption
+	common.HookOption
 
-	pluginFilePath string
+	pluginFilePathArray []string
 }
 
 var pluginUploadOption PluginUploadOption
 
 func init() {
 	pluginCmd.AddCommand(pluginUploadCmd)
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
+	flags := pluginUploadCmd.Flags()
+
+	flags.BoolVarP(&pluginUploadOption.ShowProgress, "show-progress", "", true,
 		i18n.T("Whether show the upload progress"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.FileName, "file", "f", "",
+	flags.StringVarP(&pluginUploadOption.FileName, "file", "f", "",
 		i18n.T("The plugin file path which should end with .hpi"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
+	flags.StringVarP(&pluginUploadOption.Remote, "remote", "r", "",
 		i18n.T("Remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
+	flags.StringVarP(&pluginUploadOption.RemoteUser, "remote-user", "", "",
 		i18n.T("User of remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "",
+	flags.StringVarP(&pluginUploadOption.RemotePassword, "remote-password", "", "",
 		i18n.T("Password of remote plugin URL"))
-	pluginUploadCmd.Flags().StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "",
+	flags.StringVarP(&pluginUploadOption.RemoteJenkins, "remote-jenkins", "", "",
 		i18n.T("Remote Jenkins which will find from config list"))
 
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false,
+	flags.BoolVarP(&pluginUploadOption.SkipPreHook, "skip-prehook", "", false,
 		i18n.T("Whether skip the previous command hook"))
-	pluginUploadCmd.Flags().BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
+	flags.BoolVarP(&pluginUploadOption.SkipPostHook, "skip-posthook", "", false,
 		i18n.T("Whether skip the post command hook"))
+
+	flags.Int64VarP(&pluginUploadOption.Timeout, "timeout", "", 120,
+		"Timeout in second when upload the plugin")
 
 	if err := pluginUploadCmd.RegisterFlagCompletionFunc("file", pluginUploadOption.HPICompletion); err != nil {
 		pluginCmd.PrintErrln(err)
 	}
 }
 
+// HPICompletion auto find the *.hpi files
 func (o *PluginUploadOption) HPICompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	if len(args) != 0 {
 		return nil, cobra.ShellCompDirectiveNoFileComp
@@ -82,14 +90,16 @@ var pluginUploadCmd = &cobra.Command{
 	Example: `  jcli plugin upload --remote https://server/sample.hpi
 jcli plugin upload sample.hpi
 jcli plugin upload sample.hpi --show-progress=false`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if pluginUploadOption.Remote != "" {
-			file, err := ioutil.TempFile(".", "jcli-plugin")
-			if err != nil {
-				log.Fatal(err)
+			var file *os.File
+			if file, err = ioutil.TempFile(".", "jcli-plugin"); err != nil {
+				return
 			}
 
-			defer os.Remove(file.Name())
+			defer func() {
+				_ = os.Remove(file.Name())
+			}()
 
 			if pluginUploadOption.RemoteJenkins != "" {
 				if jenkins := findJenkinsByName(pluginUploadOption.RemoteJenkins); jenkins != nil {
@@ -98,9 +108,9 @@ jcli plugin upload sample.hpi --show-progress=false`,
 				}
 			}
 
-			pluginUploadOption.pluginFilePath = fmt.Sprintf("%s.hpi", file.Name())
-			downloader := util.HTTPDownloader{
-				TargetFilePath: pluginUploadOption.pluginFilePath,
+			pluginUploadOption.pluginFilePathArray = []string{fmt.Sprintf("%s.hpi", file.Name())}
+			downloader := httpdownloader.HTTPDownloader{
+				TargetFilePath: pluginUploadOption.pluginFilePathArray[0],
 				URL:            pluginUploadOption.Remote,
 				UserName:       pluginUploadOption.RemoteUser,
 				Password:       pluginUploadOption.RemotePassword,
@@ -108,12 +118,12 @@ jcli plugin upload sample.hpi --show-progress=false`,
 				Debug:          rootOptions.Debug,
 			}
 
-			if err := downloader.DownloadFile(); err != nil {
-				log.Fatal(err)
-			}
+			err = downloader.DownloadFile()
 		} else if len(args) == 0 {
 			if !pluginUploadOption.SkipPreHook {
-				executePreCmd(cmd, args, os.Stdout)
+				if err = executePreCmd(cmd, args, os.Stdout); err != nil {
+					return
+				}
 			}
 
 			path, _ := os.Getwd()
@@ -121,35 +131,43 @@ jcli plugin upload sample.hpi --show-progress=false`,
 			dirName = strings.Replace(dirName, "-plugin", "", -1)
 			path += fmt.Sprintf("/target/%s.hpi", dirName)
 
-			pluginUploadOption.pluginFilePath = path
+			pluginUploadOption.pluginFilePathArray = []string{path}
 		} else {
-			pluginUploadOption.pluginFilePath = args[0]
+			pluginUploadOption.pluginFilePathArray = args
 		}
+		return
 	},
-	PostRun: func(cmd *cobra.Command, args []string) {
+	PostRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if pluginUploadOption.SkipPostHook {
 			return
 		}
 
-		executePostCmd(cmd, args, cmd.OutOrStdout())
+		err = executePostCmd(cmd, args, cmd.OutOrStdout())
+		return
 	},
 	ValidArgsFunction: pluginUploadOption.HPICompletion,
-	Run: func(cmd *cobra.Command, _ []string) {
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jclient := &client.PluginManager{
 			JenkinsCore: client.JenkinsCore{
 				RoundTripper: pluginUploadOption.RoundTripper,
 				Output:       cmd.OutOrStdout(),
+				Timeout:      time.Duration(pluginUploadOption.Timeout) * time.Second,
 			},
 			ShowProgress: pluginUploadOption.ShowProgress,
 		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
-		jclient.Debug = rootOptions.Debug
+		getCurrentJenkinsAndClient(&(jclient.JenkinsCore))
 
 		if pluginUploadOption.Remote != "" {
-			defer os.Remove(pluginUploadOption.pluginFilePath)
+			defer func() {
+				_ = os.Remove(pluginUploadOption.pluginFilePathArray[0])
+			}()
 		}
 
-		err := jclient.Upload(pluginUploadOption.pluginFilePath)
-		helper.CheckErr(cmd, err)
+		for _, item := range pluginUploadOption.pluginFilePathArray {
+			if err = jclient.Upload(item); err != nil {
+				break
+			}
+		}
+		return
 	},
 }

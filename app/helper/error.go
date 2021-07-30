@@ -10,6 +10,8 @@ import (
 // Printer for print the info
 type Printer interface {
 	PrintErr(i ...interface{})
+	Println(i ...interface{})
+	Printf(format string, i ...interface{})
 }
 
 // CheckErr print a friendly error message
@@ -22,7 +24,7 @@ func CheckErr(printer Printer, err error) {
 		if !ok {
 			msg = err.Error()
 			if !strings.HasPrefix(msg, "error: ") {
-				msg = fmt.Sprintf("error: %s", msg)
+				msg = fmt.Sprintln("error:", msg)
 			}
 		}
 		printer.PrintErr(msg)
@@ -42,12 +44,12 @@ func StandardErrorMessage(err error) (msg string, ok bool) {
 			if server, err := url.Parse(t.URL); err == nil {
 				host = server.Host
 			}
-			msg = fmt.Sprintf("The connection to the server %s was refused - did you specify the right host or port?", host)
+			msg = fmt.Sprintln("The connection to the server", host, "was refused - did you specify the right host or port?")
 		default:
-			msg = fmt.Sprintf("Unable to connect to the server: %v", t.Err)
+			msg = fmt.Sprintln("Unable to connect to the server:", t.Err)
 		}
 	case *os.PathError:
-		msg = fmt.Sprintf("error: %s %s: %s", t.Op, t.Path, t.Err)
+		msg = fmt.Sprintln("error:", t.Op, t.Path, ":", t.Err)
 	default:
 		ok = false
 	}

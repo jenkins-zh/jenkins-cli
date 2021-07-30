@@ -35,7 +35,7 @@ var _ = Describe("core test", func() {
 		ctrl.Finish()
 	})
 
-	Context("Get", func() {
+	Context("Get data", func() {
 		It("should success", func() {
 			PrepareRestart(roundTripper, coreClient.URL, username, password, 503)
 
@@ -67,6 +67,66 @@ var _ = Describe("core test", func() {
 				PublicKey:     "publicKey",
 				SystemMessage: "systemMessage",
 			}))
+		})
+	})
+
+	Context("shutdown", func() {
+		var (
+			err  error
+			safe bool
+		)
+
+		JustBeforeEach(func() {
+			PrepareForShutdown(roundTripper, coreClient.URL, username, password, safe)
+			err = coreClient.Shutdown(safe)
+		})
+
+		Context("shutdown safely", func() {
+			BeforeEach(func() {
+				safe = true
+			})
+			It("should success", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("shutdown not safely", func() {
+			BeforeEach(func() {
+				safe = false
+			})
+			It("should success", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+	})
+
+	Context("prepare shutdown", func() {
+		var (
+			err    error
+			cancel bool
+		)
+
+		JustBeforeEach(func() {
+			PrepareForCancelShutdown(roundTripper, coreClient.URL, username, password, cancel)
+			err = coreClient.PrepareShutdown(cancel)
+		})
+
+		Context("cancelQuietDown", func() {
+			BeforeEach(func() {
+				cancel = true
+			})
+			It("should success", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		Context("quietDown", func() {
+			BeforeEach(func() {
+				cancel = false
+			})
+			It("should success", func() {
+				Expect(err).To(BeNil())
+			})
 		})
 	})
 })

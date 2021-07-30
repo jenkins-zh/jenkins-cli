@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -10,7 +11,7 @@ import (
 
 // UserOption is the user cmd option
 type UserOption struct {
-	OutputOption
+	cobra_ext.OutputOption
 
 	RoundTripper http.RoundTripper
 }

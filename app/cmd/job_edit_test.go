@@ -48,7 +48,7 @@ var _ = Describe("job edit command", func() {
 
 	Context("basic cases", func() {
 		It("edit with script param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -67,7 +67,7 @@ var _ = Describe("job edit command", func() {
 		})
 
 		It("edit with file param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -91,7 +91,7 @@ var _ = Describe("job edit command", func() {
 		})
 
 		It("edit with url param", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -100,14 +100,14 @@ var _ = Describe("job edit command", func() {
 			client.PrepareForUpdatePipelineJob(roundTripper, jenkinsRoot, "sample", username, token)
 
 			remoteJenkinsfileURL := "http://test"
-			remoteJenkinsfileReq, _ := http.NewRequest("GET", remoteJenkinsfileURL, nil)
+			remoteJenkinsfileReq, _ := http.NewRequest(http.MethodGet, remoteJenkinsfileURL, nil)
 			remoteJenkinsfileResponse := &http.Response{
 				StatusCode: 200,
 				Request:    remoteJenkinsfileReq,
 				Body:       ioutil.NopCloser(bytes.NewBufferString(script)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(remoteJenkinsfileReq).Return(remoteJenkinsfileResponse, nil)
+				RoundTrip(client.NewRequestMatcher(remoteJenkinsfileReq)).Return(remoteJenkinsfileResponse, nil)
 
 			rootCmd.SetArgs([]string{"job", "edit", jobName, "--filename", "", "--script", "", "--url", remoteJenkinsfileURL})
 

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 
 // CenterWatchOption as the options of watch command
 type CenterWatchOption struct {
-	WatchOption
+	common.WatchOption
 	UtilNeedRestart     bool
 	UtilInstallComplete bool
 
@@ -31,9 +32,10 @@ func init() {
 }
 
 var centerWatchCmd = &cobra.Command{
-	Use:   "watch",
-	Short: "Watch your update center status",
-	Long:  `Watch your update center status`,
+	Use:               "watch",
+	Short:             "Watch your update center status",
+	Long:              `Watch your update center status`,
+	ValidArgsFunction: common.NoFileCompletion,
 	Run: func(cmd *cobra.Command, _ []string) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		printJenkinsStatus(jenkins, cmd, centerWatchOption.RoundTripper)

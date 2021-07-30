@@ -270,7 +270,7 @@ var _ = Describe("Root cmd test", func() {
 
 			defer os.Remove(configFile.Name())
 
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(configFile.Name(), data, 0664)
 			Expect(err).To(BeNil())
@@ -301,7 +301,7 @@ var _ = Describe("Root cmd test", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).NotTo(HaveOccurred())
 
-			jenkins := getCurrentJenkinsFromOptions()
+			jenkins := GetCurrentJenkinsFromOptions()
 			Expect(jenkins.URL).To(Equal("fake-url"))
 			Expect(jenkins.UserName).To(Equal("fake-user"))
 			Expect(jenkins.Token).To(Equal("fake-token"))

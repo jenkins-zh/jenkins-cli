@@ -19,14 +19,14 @@ func PrepareGetArtifacts(roundTripper *mhttp.MockRoundTripper, rootURL, user, pa
 	} else {
 		api = fmt.Sprintf("%s/%d/wfapi/artifacts", path, buildID)
 	}
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", rootURL, api), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", rootURL, api), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{"id":"n1","name":"a.log","path":"a.log","url":"/job/pipeline/1/artifact/a.log","size":0}]`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 	if user != "" && passwd != "" {
 		request.SetBasicAuth(user, passwd)

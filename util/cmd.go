@@ -23,7 +23,7 @@ func Open(url string, browser string, cmdContext ExecContext) error {
 			args = append(args, "-a", browser)
 		}
 	default: // "linux", "freebsd", "openbsd", "netbsd"
-		cmd = "xdg-Open"
+		cmd = "xdg-open"
 	}
 	args = append(args, url)
 	return ExecCommand(cmdContext, cmd, args...).Start()

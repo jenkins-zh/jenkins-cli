@@ -44,7 +44,7 @@ var _ = Describe("job search command", func() {
 
 	Context("basic cases, need RoundTripper", func() {
 		It("without parameters", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -62,7 +62,7 @@ var _ = Describe("job search command", func() {
 		})
 
 		It("with one parameter", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -80,7 +80,7 @@ var _ = Describe("job search command", func() {
 		})
 
 		It("with one parameter, output with indent", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

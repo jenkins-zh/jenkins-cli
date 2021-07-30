@@ -2,8 +2,12 @@ package cmd
 
 import (
 	"fmt"
-
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	cmdCfg "github.com/jenkins-zh/jenkins-cli/app/cmd/config"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"strings"
 
 	"io/ioutil"
 	"log"
@@ -17,13 +21,27 @@ import (
 
 // ConfigOptions is the config cmd option
 type ConfigOptions struct {
+	common.Option
+
 	ConfigFileLocation string
+	Detail             bool
+	Decrypt            bool
 }
 
 var configOptions ConfigOptions
 
 func init() {
 	rootCmd.AddCommand(configCmd)
+
+	// add flags
+	flags := configCmd.Flags()
+	flags.BoolVarP(&configOptions.Detail, "detail", "d", false,
+		`Show the all detail of current configuration`)
+	flags.BoolVarP(&configOptions.Decrypt, "decrypt", "", false,
+		`Decrypt the credential field`)
+
+	configCmd.AddCommand(cmdCfg.NewConfigPluginCmd(&configOptions.Option),
+		createConfigUpdateCmd())
 }
 
 var configCmd = &cobra.Command{
@@ -36,7 +54,22 @@ var configCmd = &cobra.Command{
 		if current == nil {
 			err = fmt.Errorf("no config file found or no current setting")
 		} else {
-			if current.Description != "" {
+			if !configOptions.Decrypt {
+				current.Token = keyring.PlaceHolder
+			} else {
+				jenkinsCfg := &appCfg.Config{
+					JenkinsServers: []appCfg.JenkinsServer{*current},
+				}
+				keyring.LoadTokenFromKeyring(jenkinsCfg)
+				current = &(jenkinsCfg.JenkinsServers[0])
+			}
+
+			if configOptions.Detail {
+				var data []byte
+				if data, err = yaml.Marshal(current); err == nil {
+					cmd.Print(string(data))
+				}
+			} else if current.Description != "" {
 				cmd.Printf("Current Jenkins's name is %s, url is %s, description is %s\n", current.Name, current.URL, current.Description)
 			} else {
 				cmd.Printf("Current Jenkins's name is %s, url is %s\n", current.Name, current.URL)
@@ -46,49 +79,8 @@ var configCmd = &cobra.Command{
 	},
 	Example: `  jcli config generate
   jcli config list
-  jcli config edit`,
-}
-
-// JenkinsServer holds the configuration of your Jenkins
-type JenkinsServer struct {
-	Name               string `yaml:"name"`
-	URL                string `yaml:"url"`
-	UserName           string `yaml:"username"`
-	Token              string `yaml:"token"`
-	Proxy              string `yaml:"proxy"`
-	ProxyAuth          string `yaml:"proxyAuth"`
-	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
-	Description        string `yaml:"description"`
-}
-
-// CommandHook is a hook
-type CommandHook struct {
-	Path    string `yaml:"path"`
-	Command string `yaml:"cmd"`
-}
-
-// PluginSuite define a suite of plugins
-type PluginSuite struct {
-	Name        string   `yaml:"name"`
-	Plugins     []string `yaml:"plugins"`
-	Description string   `yaml:"description"`
-}
-
-// JenkinsMirror represents the mirror of Jenkins
-type JenkinsMirror struct {
-	Name string
-	URL  string
-}
-
-// Config is a global config struct
-type Config struct {
-	Current        string          `yaml:"current"`
-	Language       string          `yaml:"language"`
-	JenkinsServers []JenkinsServer `yaml:"jenkins_servers"`
-	PreHooks       []CommandHook   `yaml:"preHooks"`
-	PostHooks      []CommandHook   `yaml:"postHooks"`
-	PluginSuites   []PluginSuite   `yaml:"pluginSuites"`
-	Mirrors        []JenkinsMirror `yaml:"mirrors"`
+  jcli config edit
+`,
 }
 
 func setCurrentJenkins(name string) {
@@ -110,21 +102,24 @@ func setCurrentJenkins(name string) {
 	}
 }
 
-var config *Config
+var config *appCfg.Config
 
-func getConfig() *Config {
+func getConfig() *appCfg.Config {
 	return config
 }
 
 func getJenkinsNames() []string {
 	names := make([]string, 0)
+	if config == nil {
+		return names
+	}
 	for _, j := range config.JenkinsServers {
 		names = append(names, j.Name)
 	}
 	return names
 }
 
-func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
+func getCurrentJenkins() (jenkinsServer *appCfg.JenkinsServer) {
 	if config != nil {
 		current := config.Current
 		jenkinsServer = findJenkinsByName(current)
@@ -133,7 +128,7 @@ func getCurrentJenkins() (jenkinsServer *JenkinsServer) {
 	return
 }
 
-func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
+func findJenkinsByName(name string) (jenkinsServer *appCfg.JenkinsServer) {
 	if config == nil {
 		return
 	}
@@ -147,7 +142,7 @@ func findJenkinsByName(name string) (jenkinsServer *JenkinsServer) {
 	return
 }
 
-func findSuiteByName(name string) (suite *PluginSuite) {
+func findSuiteByName(name string) (suite *appCfg.PluginSuite) {
 	for _, cfg := range config.PluginSuites {
 		if cfg.Name == name {
 			suite = &cfg
@@ -182,17 +177,21 @@ func loadConfig(path string) (err error) {
 	var content []byte
 	if content, err = ioutil.ReadFile(path); err == nil {
 		err = yaml.Unmarshal([]byte(content), &config)
+		if err == nil && config.Current == "" {
+			err = fmt.Errorf("current jenkins is not specified, kindly provide a valid value using \"jcli config select\" command")
+		}
+		keyring.LoadTokenFromKeyring(config)
 	}
 	return
 }
 
 // getMirrors returns the mirror list, one official mirror should be returned if user don't give it
-func getMirrors() (mirrors []JenkinsMirror) {
+func getMirrors() (mirrors []appCfg.JenkinsMirror) {
 	if config != nil {
 		mirrors = config.Mirrors
 	}
 	if len(mirrors) == 0 {
-		mirrors = []JenkinsMirror{
+		mirrors = []appCfg.JenkinsMirror{
 			{
 				Name: "default",
 				URL:  "http://mirrors.jenkins.io/",
@@ -227,8 +226,49 @@ func saveConfig() (err error) {
 		configPath = rootOptions.ConfigFile
 	}
 
+	keyring.SaveTokenToKeyring(config)
+
 	if data, err = yaml.Marshal(&config); err == nil {
 		err = ioutil.WriteFile(configPath, data, 0644)
 	}
+	return
+}
+
+// ValidJenkinsNames autocomplete with Jenkins names
+func ValidJenkinsNames(_ *cobra.Command, args []string, prefix string) (jenkinsNames []string, directive cobra.ShellCompDirective) {
+	directive = cobra.ShellCompDirectiveNoFileComp
+	allNames := getJenkinsNames()
+	jenkinsNames = make([]string, 0)
+
+	for i := range allNames {
+		name := allNames[i]
+
+		duplicated := false
+		for j := range args {
+			if name == args[j] {
+				duplicated = true
+				break
+			}
+		}
+
+		if !duplicated && strings.HasPrefix(name, prefix) {
+			jenkinsNames = append(jenkinsNames, name)
+		}
+	}
+	return
+}
+
+// ValidJenkinsAndDataNames autocomplete with Jenkins names
+func ValidJenkinsAndDataNames(cmd *cobra.Command, args []string, prefix string) (result []string, directive cobra.ShellCompDirective) {
+	result = make([]string, 0)
+	if current := getCurrentJenkins(); current != nil {
+		for key := range current.Data {
+			result = append(result, "."+key)
+		}
+	}
+
+	var jenkinsNames []string
+	jenkinsNames, directive = ValidJenkinsNames(cmd, args, prefix)
+	result = append(result, jenkinsNames...)
 	return
 }

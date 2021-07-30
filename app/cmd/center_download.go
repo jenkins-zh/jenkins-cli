@@ -25,6 +25,7 @@ type CenterDownloadOption struct {
 
 	Formula string
 
+	Thread       int
 	RoundTripper http.RoundTripper
 }
 
@@ -44,6 +45,8 @@ func init() {
 		i18n.T("The file of output"))
 	centerDownloadCmd.Flags().StringVarP(&centerDownloadOption.Formula, "formula", "", "",
 		i18n.T("The formula of jenkins.war, only support zh currently"))
+	centerDownloadCmd.Flags().IntVarP(&centerDownloadOption.Thread, "thread", "t", 0,
+		"Using multi-thread to download jenkins.war")
 }
 
 var centerDownloadCmd = &cobra.Command{
@@ -52,9 +55,12 @@ var centerDownloadCmd = &cobra.Command{
 	Long: i18n.T(`Download jenkins.war from a mirror site.
 You can get more mirror sites from https://jenkins-zh.cn/tutorial/management/mirror/
 If you want to download different formulas of jenkins.war, please visit the following project
-https://github.com/jenkins-zh/docker-zh`),
-	RunE: func(cmd *cobra.Command, _ []string) error {
-		return centerDownloadOption.DownloadJenkins()
+https://github.com/jenkins-zh/jenkins-formulas`),
+	RunE: func(cmd *cobra.Command, _ []string) (err error) {
+		if err = centerDownloadOption.DownloadJenkins(); err == nil {
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "download success, %s\n", centerDownloadOption.Output)
+		}
+		return err
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
 		if centerDownloadOption.Output != "" {
@@ -94,6 +100,7 @@ func (c *CenterDownloadOption) DownloadJenkins() (err error) {
 		Version:      c.Version,
 		Output:       c.Output,
 		ShowProgress: c.ShowProgress,
+		Thread:       c.Thread,
 	}
 
 	jenkinsWarURL := jClient.GetJenkinsWarURL()

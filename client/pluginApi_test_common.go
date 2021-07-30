@@ -12,7 +12,7 @@ import (
 // PrepareShowTrend only for test
 func PrepareShowTrend(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	response *http.Response) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", keyword), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("https://plugins.jenkins.io/api/plugin/%s", keyword), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -22,7 +22,7 @@ func PrepareShowTrend(roundTripper *mhttp.MockRoundTripper, keyword string) (
 		`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
@@ -56,7 +56,7 @@ func PrepareOnePluginWithOptionalDep(roundTripper *mhttp.MockRoundTripper, plugi
 
 // PrepareDownloadPlugin only for test
 func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) (response *http.Response) {
-	request, _ := http.NewRequest("GET",
+	request, _ := http.NewRequest(http.MethodGet,
 		"http://updates.jenkins-ci.org/download/plugins/hugo/0.1.8/hugo.hpi", nil)
 	response = &http.Response{
 		StatusCode: 200,
@@ -64,21 +64,21 @@ func PrepareDownloadPlugin(roundTripper *mhttp.MockRoundTripper) (response *http
 		Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }
 
 // PrepareCheckUpdate only for test
 func PrepareCheckUpdate(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
 	api := fmt.Sprintf("%s/pluginManager/checkUpdatesServer", rootURL)
-	request, _ := http.NewRequest("POST", api, nil)
+	request, _ := http.NewRequest(http.MethodPost, api, nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
 // PrepareShowPlugins only for test
 func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 	response *http.Response) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("https://plugins.jenkins.io/api/plugins/?q=%s&page=1&limit=1000", keyword), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("https://plugins.jenkins.io/api/plugins/?q=%s&page=1&limit=1000", keyword), nil)
 	response = &http.Response{
 		StatusCode: 200,
 		Request:    request,
@@ -91,6 +91,6 @@ func PrepareShowPlugins(roundTripper *mhttp.MockRoundTripper, keyword string) (
 		`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	return
 }

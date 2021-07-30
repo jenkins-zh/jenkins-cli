@@ -1,15 +1,29 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
+	"go.uber.org/zap"
+	"moul.io/http2curl"
+)
+
+const (
+	// StringParameterDefinition is the definition for string parameter
+	StringParameterDefinition = "StringParameterDefinition"
+	// FileParameterDefinition is the definition for file parameter
+	FileParameterDefinition = "FileParameterDefinition"
 )
 
 // JobClient is client for operate jobs
@@ -21,8 +35,17 @@ type JobClient struct {
 
 // Search find a set of jobs by name
 func (q *JobClient) Search(name, kind string, start, limit int) (items []JenkinsItem, err error) {
-	err = q.RequestWithData("GET", fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d&parent=%s",
+	err = q.RequestWithData(http.MethodGet, fmt.Sprintf("/items/list?name=%s&type=%s&start=%d&limit=%d&parent=%s",
 		name, kind, start, limit, q.Parent),
+		nil, nil, 200, &items)
+	return
+}
+
+// SearchViaBlue searches jobs via the BlueOcean API
+func (q *JobClient) SearchViaBlue(name string, start, limit int) (items []JenkinsItem, err error) {
+	api := fmt.Sprintf("/blue/rest/search/?q=pipeline:*%s*;type:pipeline;organization:jenkins;excludedFromFlattening=jenkins.branch.MultiBranchProject,com.cloudbees.hudson.plugins.folder.AbstractFolder&filter=no-folders&start=%d&limit=%d",
+		name, start, limit)
+	err = q.RequestWithData(http.MethodGet, api,
 		nil, nil, 200, &items)
 	return
 }
@@ -30,7 +53,39 @@ func (q *JobClient) Search(name, kind string, start, limit int) (items []Jenkins
 // Build trigger a job
 func (q *JobClient) Build(jobName string) (err error) {
 	path := ParseJobPath(jobName)
-	_, err = q.RequestWithoutData("POST", fmt.Sprintf("%s/build", path), nil, nil, 201)
+	_, err = q.RequestWithoutData(http.MethodPost, fmt.Sprintf("%s/build", path), nil, nil, 201)
+	return
+}
+
+// IdentityBuild is the build which carry the identity cause
+type IdentityBuild struct {
+	Build JobBuild
+	Cause IdentityCause
+}
+
+// IdentityCause carray a identity cause
+type IdentityCause struct {
+	UUID             string `json:"uuid"`
+	ShortDescription string `json:"shortDescription"`
+	Message          string
+}
+
+// BuildAndReturn trigger a job then returns the build info
+func (q *JobClient) BuildAndReturn(jobName, cause string, timeout, delay int) (build IdentityBuild, err error) {
+	path := ParseJobPath(jobName)
+
+	api := fmt.Sprintf("%s/restFul/build?1=1", path)
+	if timeout >= 0 {
+		api += fmt.Sprintf("&timeout=%d", timeout)
+	}
+	if delay >= 0 {
+		api += fmt.Sprintf("&delay=%d", delay)
+	}
+	if cause != "" {
+		api += fmt.Sprintf("&identifyCause=%s", cause)
+	}
+
+	err = q.RequestWithData(http.MethodPost, api, nil, nil, 200, &build)
 	return
 }
 
@@ -53,19 +108,60 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/build", path)
 
-	var paramJSON []byte
-	if len(parameters) == 1 {
-		paramJSON, err = json.Marshal(parameters[0])
-	} else {
-		paramJSON, err = json.Marshal(parameters)
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	defer writer.Close()
+
+	hasFileParam := false
+	stringParameters := make([]ParameterDefinition, 0, len(parameters))
+	for _, parameter := range parameters {
+		if parameter.Type == FileParameterDefinition {
+			hasFileParam = true
+			var file *os.File
+			file, err = os.Open(parameter.Filepath)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			var fWriter io.Writer
+			fWriter, err = writer.CreateFormFile(parameter.Filepath, filepath.Base(parameter.Filepath))
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(fWriter, file)
+		} else {
+			stringParameters = append(stringParameters, parameter)
+		}
 	}
 
-	if err == nil {
+	var paramJSON []byte
+	if len(stringParameters) == 1 {
+		paramJSON, err = json.Marshal(stringParameters[0])
+	} else {
+		paramJSON, err = json.Marshal(stringParameters)
+	}
+	if err != nil {
+		return
+	}
+
+	if hasFileParam {
+		if err = writer.WriteField("json", fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))); err != nil {
+			return
+		}
+
+		if err = writer.Close(); err != nil {
+			return
+		}
+
+		_, err = q.RequestWithoutData(http.MethodPost, api,
+			map[string]string{httpdownloader.ContentType: writer.FormDataContentType()}, body, 201)
+	} else {
 		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
 		payload := strings.NewReader(formData.Encode())
 
-		_, err = q.RequestWithoutData("POST", api,
-			map[string]string{util.ContentType: util.ApplicationForm}, payload, 201)
+		_, err = q.RequestWithoutData(http.MethodPost, api,
+			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 201)
 	}
 	return
 }
@@ -75,7 +171,7 @@ func (q *JobClient) DisableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/disable", path)
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -84,7 +180,7 @@ func (q *JobClient) EnableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/enable", path)
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -99,7 +195,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 		api = fmt.Sprintf("%s/%d/stop", path, num)
 	}
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -108,7 +204,29 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/api/json", path)
 
-	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &job)
+	return
+}
+
+// AddParameters add parameters to a Pipeline
+func (q *JobClient) AddParameters(name, parameters string) (err error) {
+	path := ParseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/addParameter", path)
+
+	formData := url.Values{
+		"params": {parameters},
+	}
+	payload := strings.NewReader(formData.Encode())
+	_, err = q.RequestWithoutData(http.MethodPost, api, map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
+	return
+}
+
+// RemoveParameters add parameters to a Pipeline
+func (q *JobClient) RemoveParameters(name, parameters string) (err error) {
+	path := ParseJobPath(name)
+	api := fmt.Sprintf("%s/restFul/removeParameter?params=%s", path, parameters)
+
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -150,7 +268,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
 
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -169,6 +287,14 @@ func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 			builds = append(builds, build)
 		}
 	}
+	return
+}
+
+// DeleteHistory returns the build history of a job
+func (q *JobClient) DeleteHistory(jobName string, num int) (err error) {
+	path := ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/%d/doDelete", path, num)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 	return
 }
 
@@ -200,6 +326,11 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 		Text:      "",
 		NextStart: int64(0),
 	}
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
+	}
+
 	if response, err = client.Do(req); err == nil {
 		code := response.StatusCode
 		var data []byte
@@ -235,8 +366,8 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 	payload := strings.NewReader(formData.Encode())
 
 	var code int
-	code, err = q.RequestWithoutData("POST", "/view/all/createItem",
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	code, err = q.RequestWithoutData(http.MethodPost, "/view/all/createItem",
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
 	}
@@ -252,10 +383,10 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	jobName = ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/doDelete", jobName)
 	header := map[string]string{
-		util.ContentType: util.ApplicationForm,
+		httpdownloader.ContentType: httpdownloader.ApplicationForm,
 	}
 
-	if statusCode, _, err = q.Request("POST", api, header, nil); err == nil {
+	if statusCode, _, err = q.Request(http.MethodPost, api, header, nil); err == nil {
 		if statusCode != 200 && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}
@@ -299,7 +430,7 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 	paramData, _ := json.Marshal(request)
 
 	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
-	_, err = q.RequestWithoutData("POST", api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
 
 	return
 }
@@ -343,6 +474,11 @@ type JenkinsItem struct {
 	/** comes from ParameterizedJob */
 	Parameterized bool
 	Disabled      bool
+
+	/** comes from blueOcean */
+	FullName     string
+	WeatherScore int
+	Parameters   []ParameterDefinition
 }
 
 // Job represents a job
@@ -370,6 +506,7 @@ type ParameterDefinition struct {
 	Name                  string `json:"name"`
 	Type                  string
 	Value                 string `json:"value"`
+	Filepath              string `json:"file"`
 	DefaultParameterValue DefaultParameterValue
 }
 

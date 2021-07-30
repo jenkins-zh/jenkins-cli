@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
@@ -39,12 +40,12 @@ var _ = Describe("job type command", func() {
 
 	Context("basic cases", func() {
 		It("GetCategories", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -53,11 +54,11 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString(`{"_class":"jenkins.model.item_category.Categories","categories":[{"description":"description","id":"standalone-projects","items":[{"displayName":"Freestyle project","iconFilePathPattern":"static/da605e5f/images/:size/freestyleproject.png","description":"description","iconClassName":"icon-freestyle-project","class":"hudson.model.FreeStyleProject","order":1}],"minToShow":1,"name":"Nested Projects","order":1}]}`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			config = &Config{
 				Current: "fake",
-				JenkinsServers: []JenkinsServer{JenkinsServer{
+				JenkinsServers: []JenkinsServer{{
 					Name:     "fake",
 					URL:      "http://localhost:8080/jenkins",
 					UserName: "admin",
@@ -78,12 +79,12 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -92,7 +93,7 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"job", "type"})
 
@@ -105,12 +106,12 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, empty list", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -119,7 +120,7 @@ var _ = Describe("job type command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"job", "type"})
 
@@ -132,12 +133,12 @@ var _ = Describe("job type command", func() {
 		})
 
 		It("should success, one item", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/view/all/itemCategories?depth=3", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -164,7 +165,7 @@ var _ = Describe("job type command", func() {
 				}`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)

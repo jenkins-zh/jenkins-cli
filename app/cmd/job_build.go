@@ -5,19 +5,28 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-
 	"github.com/jenkins-zh/jenkins-cli/client"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"github.com/spf13/cobra"
 )
 
 // JobBuildOption is the job build option
 type JobBuildOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.Option
+	cobra_ext.OutputOption
 
 	Param      string
 	ParamArray []string
+
+	ParamFilePathArray []string
+
+	Wait     bool
+	WaitTime int
+	Delay    int
+	Cause    string
 }
 
 var jobBuildOption JobBuildOption
@@ -29,13 +38,25 @@ func ResetJobBuildOption() {
 
 func init() {
 	jobCmd.AddCommand(jobBuildCmd)
-	jobBuildOption.SetFlag(jobBuildCmd)
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Batch, "batch", "b", false, "Batch mode, no need confirm")
 	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Param, "param", "", "",
 		i18n.T("Parameters of the job which is JSON format"))
 	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamArray, "param-entry", nil,
 		i18n.T("Parameters of the job which are the entry format, for example: --param-entry name=value"))
-	jobBuildOption.BatchOption.Stdio = GetSystemStdio()
-	jobBuildOption.CommonOption.Stdio = GetSystemStdio()
+	jobBuildCmd.Flags().StringArrayVar(&jobBuildOption.ParamFilePathArray, "param-file", nil,
+		i18n.T("Parameters of the job which is file path, for example: --param-file name=filename"))
+	jobBuildCmd.Flags().BoolVarP(&jobBuildOption.Wait, "wait", "", false,
+		i18n.T("If you want to wait for the build ID from Jenkins. You need to install plugin pipeline-restful-api first"))
+	jobBuildCmd.Flags().IntVarP(&jobBuildOption.WaitTime, "wait-timeout", "", 30,
+		i18n.T("The timeout of seconds when you wait for the build ID"))
+	jobBuildCmd.Flags().IntVarP(&jobBuildOption.Delay, "delay", "", 0,
+		i18n.T("Delay when trigger a Jenkins job"))
+	jobBuildCmd.Flags().StringVarP(&jobBuildOption.Cause, "cause", "", "triggered by jcli",
+		i18n.T("The cause of a job build"))
+
+	jobBuildOption.SetFlagWithHeaders(jobBuildCmd, "Number,URL")
+	jobBuildOption.BatchOption.Stdio = common.GetSystemStdio()
+	jobBuildOption.Option.Stdio = common.GetSystemStdio()
 }
 
 var jobBuildCmd = &cobra.Command{
@@ -44,8 +65,8 @@ var jobBuildCmd = &cobra.Command{
 	Long: i18n.T(`Build the job of your Jenkins.
 You need to give the parameters if your pipeline has them. Learn more about it from https://jenkins.io/doc/book/pipeline/syntax/#parameters.`),
 	Args: cobra.MinimumNArgs(1),
-	PreRunE: func(cmd *cobra.Command, args []string) (err error) {
-		if jobBuildOption.ParamArray == nil {
+	PreRunE: func(_ *cobra.Command, _ []string) (err error) {
+		if jobBuildOption.ParamArray == nil && jobBuildOption.ParamFilePathArray == nil {
 			return
 		}
 
@@ -61,7 +82,17 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 				paramDefs = append(paramDefs, client.ParameterDefinition{
 					Name:  entryArray[0],
 					Value: entryArray[1],
-					Type:  "StringParameterDefinition",
+					Type:  client.StringParameterDefinition,
+				})
+			}
+		}
+
+		for _, filepathEntry := range jobBuildOption.ParamFilePathArray {
+			if filepathArray := strings.SplitN(filepathEntry, "=", 2); len(filepathArray) == 2 {
+				paramDefs = append(paramDefs, client.ParameterDefinition{
+					Name:     filepathArray[0],
+					Filepath: filepathArray[1],
+					Type:     client.FileParameterDefinition,
 				})
 			}
 		}
@@ -121,6 +152,12 @@ You need to give the parameters if your pipeline has them. Learn more about it f
 		if err == nil {
 			if hasParam {
 				err = jclient.BuildWithParams(name, paramDefs)
+			} else if jobBuildOption.Wait {
+				var build client.IdentityBuild
+				if build, err = jclient.BuildAndReturn(name, jobBuildOption.Cause, jobBuildOption.WaitTime, jobBuildOption.Delay); err == nil {
+					jobBuildOption.Writer = cmd.OutOrStdout()
+					err = jobBuildOption.OutputV2([1]client.SimpleJobBuild{build.Build.SimpleJobBuild})
+				}
 			} else {
 				err = jclient.Build(name)
 			}

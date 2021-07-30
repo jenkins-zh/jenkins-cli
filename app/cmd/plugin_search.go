@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 	"strings"
 
@@ -11,13 +12,12 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/spf13/cobra"
 )
 
 // PluginSearchOption is the plugin search option
 type PluginSearchOption struct {
-	OutputOption
+	cobra_ext.OutputOption
 
 	RoundTripper http.RoundTripper
 }
@@ -169,7 +169,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 		buf := new(bytes.Buffer)
 
 		if len(pluginList) != 0 {
-			table := util.CreateTableWithHeader(buf, pluginSearchOption.WithoutHeaders)
+			table := cobra_ext.CreateTableWithHeader(buf, pluginSearchOption.WithoutHeaders)
 			table.AddHeader("number", "name", "installed", "version", "installedVersion", "title")
 
 			for i, plugin := range pluginList {
@@ -183,7 +183,7 @@ func (o *PluginSearchOption) Output(obj interface{}) (data []byte, err error) {
 	return
 }
 
-func formatTable(table *util.Table, i int, plugin client.CenterPlugin) {
+func formatTable(table *cobra_ext.Table, i int, plugin client.CenterPlugin) {
 	installed := plugin.Installed
 	if installed.Active {
 		table.AddRow(fmt.Sprintf("%d", i), plugin.Name,

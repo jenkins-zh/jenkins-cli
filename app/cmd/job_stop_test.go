@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
@@ -29,7 +30,7 @@ var _ = Describe("job stop command", func() {
 		rootOptions.ConfigFile = "test.yaml"
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())
@@ -47,7 +48,7 @@ var _ = Describe("job stop command", func() {
 
 			jobName := "fakeJob"
 			buildID := 1
-			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/%d/stop", jobName, buildID), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8080/jenkins/job/%s/%d/stop", jobName, buildID), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
@@ -57,9 +58,9 @@ var _ = Describe("job stop command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,
@@ -70,7 +71,7 @@ var _ = Describe("job stop command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "stop", jobName, "1", "-b"})
 
@@ -83,13 +84,13 @@ var _ = Describe("job stop command", func() {
 		})
 
 		It("stop the last build, with batch mode", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/lastBuild/stop", jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8080/jenkins/job/%s/lastBuild/stop", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
@@ -99,9 +100,9 @@ var _ = Describe("job stop command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,
@@ -112,7 +113,7 @@ var _ = Describe("job stop command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "stop", jobName, "-b"})
 

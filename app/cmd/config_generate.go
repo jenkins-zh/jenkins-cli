@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/mitchellh/go-homedir"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
@@ -9,15 +10,16 @@ import (
 	"os"
 
 	"github.com/atotto/clipboard"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
 
 // ConfigGenerateOption is the config generate cmd option
 type ConfigGenerateOption struct {
-	InteractiveOption
-	CommonOption
-	BatchOption
+	common.InteractiveOption
+	common.Option
+	common.BatchOption
 
 	Copy bool
 }
@@ -30,18 +32,19 @@ func init() {
 		i18n.T("Interactive mode"))
 	configGenerateCmd.Flags().BoolVarP(&configGenerateOption.Copy, "copy", "c", false,
 		i18n.T("Copy the output into clipboard"))
-	configGenerateOption.CommonOption.Stdio = GetSystemStdio()
-	configGenerateOption.BatchOption.Stdio = GetSystemStdio()
+	configGenerateOption.Option.Stdio = common.GetSystemStdio()
+	configGenerateOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 
 var configGenerateCmd = &cobra.Command{
-	Use:     "generate",
-	Aliases: []string{"gen"},
-	Short:   i18n.T("Generate a sample config file for you"),
-	Long:    i18n.T("Generate a sample config file for you"),
+	Use:               "generate",
+	Aliases:           []string{"gen"},
+	Short:             i18n.T("Generate a sample config file for you"),
+	Long:              i18n.T("Generate a sample config file for you"),
+	ValidArgsFunction: common.NoFileCompletion,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		if err == nil {
 			if configGenerateOption.Interactive {
 				err = configGenerateOption.InteractiveWithConfig(cmd, data)
@@ -88,10 +91,10 @@ func printCfg(cmd *cobra.Command, data []byte) {
 	cmd.Println("# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.")
 }
 
-func getSampleConfig() (sampleConfig Config) {
-	sampleConfig = Config{
+func getSampleConfig() (sampleConfig appCfg.Config) {
+	sampleConfig = appCfg.Config{
 		Current: "yourServer",
-		JenkinsServers: []JenkinsServer{
+		JenkinsServers: []appCfg.JenkinsServer{
 			{
 				Name:               "yourServer",
 				URL:                "http://localhost:8080/jenkins",
@@ -100,7 +103,7 @@ func getSampleConfig() (sampleConfig Config) {
 				InsecureSkipVerify: true,
 			},
 		},
-		Mirrors: []JenkinsMirror{
+		Mirrors: []appCfg.JenkinsMirror{
 			{
 				Name: "default",
 				URL:  "http://mirrors.jenkins.io/",
@@ -122,7 +125,8 @@ func getSampleConfig() (sampleConfig Config) {
 	return
 }
 
-func generateSampleConfig() ([]byte, error) {
+// GenerateSampleConfig returns a sample config
+func GenerateSampleConfig() ([]byte, error) {
 	sampleConfig := getSampleConfig()
 	return yaml.Marshal(&sampleConfig)
 }

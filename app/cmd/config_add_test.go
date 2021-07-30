@@ -30,7 +30,7 @@ var _ = Describe("config add command", func() {
 		configPath = path.Join(os.TempDir(), "fake.yaml")
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(configPath, data, 0664)
 		Expect(err).To(BeNil())

@@ -44,7 +44,7 @@ var _ = Describe("job artifact download command", func() {
 
 	Context("basic cases", func() {
 		It("invalid build id", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -59,14 +59,14 @@ var _ = Describe("job artifact download command", func() {
 		})
 
 		It("should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
 			client.PrepareGetArtifacts(roundTripper, "http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", jobName, buildID)
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/job/pipeline/1/artifact/a.log", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/job/pipeline/1/artifact/a.log", nil)
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
 				StatusCode: 200,
@@ -74,7 +74,7 @@ var _ = Describe("job artifact download command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			buf := new(bytes.Buffer)
 			rootCmd.SetOutput(buf)
@@ -96,7 +96,7 @@ var _ = Describe("job artifact download command", func() {
 		})
 
 		It("should success, fake artifact id", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

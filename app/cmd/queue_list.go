@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -10,7 +11,7 @@ import (
 
 // QueueListOption represents the option of queue list command
 type QueueListOption struct {
-	OutputOption
+	cobra_ext.OutputOption
 
 	RoundTripper http.RoundTripper
 }
@@ -33,7 +34,7 @@ var queueListCmd = &cobra.Command{
 				Debug:        rootOptions.Debug,
 			},
 		}
-		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 
 		var jobQueue *client.JobQueue
 		if jobQueue, err = jClient.Get(); err == nil {

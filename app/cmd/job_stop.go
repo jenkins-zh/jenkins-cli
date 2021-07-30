@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -10,8 +11,8 @@ import (
 
 // JobStopOption is the job stop option
 type JobStopOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.Option
 }
 
 var jobStopOption JobStopOption
@@ -19,8 +20,8 @@ var jobStopOption JobStopOption
 func init() {
 	jobCmd.AddCommand(jobStopCmd)
 	jobStopOption.SetFlag(jobStopCmd)
-	jobStopOption.CommonOption.Stdio = GetSystemStdio()
-	jobStopOption.BatchOption.Stdio = GetSystemStdio()
+	jobStopOption.Option.Stdio = common.GetSystemStdio()
+	jobStopOption.BatchOption.Stdio = common.GetSystemStdio()
 }
 
 var jobStopCmd = &cobra.Command{

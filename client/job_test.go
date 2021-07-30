@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -62,7 +62,7 @@ var _ = Describe("job test", func() {
 	Context("Build", func() {
 		It("trigger a simple job without a folder", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 201,
@@ -71,7 +71,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -83,7 +83,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Build(jobName)
 			Expect(err).To(BeNil())
@@ -91,7 +91,7 @@ var _ = Describe("job test", func() {
 
 		It("trigger a simple job with an error", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/build", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 500,
@@ -100,7 +100,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -112,7 +112,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Build(jobName)
 			Expect(err).To(HaveOccurred())
@@ -134,7 +134,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			result, err := jobClient.GetBuild(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -162,15 +162,15 @@ var _ = Describe("job test", func() {
 			Expect(err).To(BeNil())
 		})
 
-		It("with params", func() {
+		FIt("with params", func() {
 			jobName := "fake"
 
 			PrepareForBuildWithParams(roundTripper, jobClient.URL, jobName, "", "")
 
-			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{ParameterDefinition{
+			err := jobClient.BuildWithParams(jobName, []ParameterDefinition{{
 				Name:  "name",
 				Value: "value",
-				Type:  "StringParameterDefinition",
+				Type:  StringParameterDefinition,
 			}})
 			Expect(err).To(BeNil())
 		})
@@ -180,7 +180,7 @@ var _ = Describe("job test", func() {
 		It("stop a job build without a folder", func() {
 			jobName := "fakeJob"
 			buildID := 1
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/%d/stop", jobClient.URL, jobName, buildID), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/%d/stop", jobClient.URL, jobName, buildID), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 200,
@@ -189,7 +189,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -201,7 +201,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.StopJob(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -210,7 +210,7 @@ var _ = Describe("job test", func() {
 		It("stop the last job build without a folder", func() {
 			jobName := "fakeJob"
 			buildID := -1
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/lastBuild/stop", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			response := &http.Response{
 				StatusCode: 200,
@@ -219,7 +219,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -231,7 +231,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.StopJob(jobName, buildID)
 			Expect(err).To(BeNil())
@@ -252,7 +252,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			result, err := jobClient.GetJob(jobName)
 			Expect(err).To(BeNil())
@@ -271,7 +271,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("{}")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			_, err := jobClient.GetJobTypeCategories()
 			Expect(err).To(BeNil())
@@ -325,9 +325,9 @@ var _ = Describe("job test", func() {
 	Context("Delete", func() {
 		It("delete a job", func() {
 			jobName := "fakeJob"
-			request, _ := http.NewRequest("POST", fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/job/%s/doDelete", jobClient.URL, jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
-			request.Header.Add(util.ContentType, util.ApplicationForm)
+			request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -335,7 +335,7 @@ var _ = Describe("job test", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
 			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
@@ -347,7 +347,7 @@ var _ = Describe("job test", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			err := jobClient.Delete(jobName)
 			Expect(err).To(BeNil())

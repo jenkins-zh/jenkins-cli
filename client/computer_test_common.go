@@ -3,25 +3,25 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PrepareForComputerListRequest only for test
 func PrepareForComputerListRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/computer/api/json", rootURL), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/computer/api/json", rootURL), nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(PrepareForComputerList())),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -29,7 +29,7 @@ func PrepareForComputerListRequest(roundTripper *mhttp.MockRoundTripper, rootURL
 
 // PrepareForLaunchComputer only for test
 func PrepareForLaunchComputer(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/%s/launchSlaveAgent", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/%s/launchSlaveAgent", rootURL, name), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
@@ -41,14 +41,14 @@ func PrepareForComputerLogRequest(roundTripper *mhttp.MockRoundTripper, rootURL,
 // PrepareForComputerLogRequestWithCode only for test
 func PrepareForComputerLogRequestWithCode(roundTripper *mhttp.MockRoundTripper, rootURL, user, password,
 	name string, statusCode int) {
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/computer/%s/logText/progressiveText", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/computer/%s/logText/progressiveText", rootURL, name), nil)
 	response := &http.Response{
 		StatusCode: statusCode,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(`fake-log`)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 	if user != "" && password != "" {
 		request.SetBasicAuth(user, password)
 	}
@@ -56,13 +56,13 @@ func PrepareForComputerLogRequestWithCode(roundTripper *mhttp.MockRoundTripper, 
 
 // PrepareForComputerDeleteRequest only for test
 func PrepareForComputerDeleteRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/%s/doDelete", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/%s/doDelete", rootURL, name), nil)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 
 // PrepareForComputerAgentSecretRequest only for test
 func PrepareForComputerAgentSecretRequest(roundTripper *mhttp.MockRoundTripper, rootURL, user, password, name, secret string) {
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/instance/agentSecret?name=%s", rootURL, name), nil)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/instance/agentSecret?name=%s", rootURL, name), nil)
 	PrepareCommonPost(request, secret, roundTripper, user, password, rootURL)
 }
 
@@ -73,13 +73,13 @@ func PrepareForComputerCreateRequest(roundTripper *mhttp.MockRoundTripper, rootU
 		"mode": {"hudson.slaves.DumbSlave"},
 	}
 	payload := strings.NewReader(formData.Encode())
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/computer/createItem", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/createItem", rootURL), payload)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 
 	payload = GetPayloadForCreateAgent(name)
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/computer/doCreateItem", rootURL), payload)
-	request.Header.Add(util.ContentType, util.ApplicationForm)
+	request, _ = http.NewRequest(http.MethodPost, fmt.Sprintf("%s/computer/doCreateItem", rootURL), payload)
+	request.Header.Add(httpdownloader.ContentType, httpdownloader.ApplicationForm)
 	PrepareCommonPost(request, "", roundTripper, user, password, rootURL)
 }
 

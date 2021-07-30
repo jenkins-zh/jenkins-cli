@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -8,8 +9,8 @@ import (
 
 // JobEnableOption is the job delete option
 type JobEnableOption struct {
-	BatchOption
-	CommonOption
+	common.BatchOption
+	common.Option
 }
 
 var jobEnableOption JobEnableOption

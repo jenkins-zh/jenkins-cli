@@ -29,7 +29,7 @@ var _ = Describe("restart command", func() {
 		rootOptions.ConfigFile = path.Join(os.TempDir(), "fake.yaml")
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())

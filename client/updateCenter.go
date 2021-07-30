@@ -2,10 +2,11 @@ package client
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // UpdateCenterManager manages the UpdateCenter
@@ -20,6 +21,7 @@ type UpdateCenterManager struct {
 
 	Formula string
 
+	Thread       int
 	ShowProgress bool
 }
 
@@ -101,13 +103,13 @@ type CenterPlugin struct {
 
 // Status returns the status of Jenkins
 func (u *UpdateCenterManager) Status() (status *UpdateCenter, err error) {
-	err = u.RequestWithData("GET", "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
+	err = u.RequestWithData(http.MethodGet, "/updateCenter/api/json?pretty=false&depth=1", nil, nil, 200, &status)
 	return
 }
 
 // Upgrade the Jenkins core
 func (u *UpdateCenterManager) Upgrade() (err error) {
-	_, err = u.RequestWithoutData("POST", "/updateCenter/upgrade",
+	_, err = u.RequestWithoutData(http.MethodPost, "/updateCenter/upgrade",
 		nil, nil, 200)
 	return
 }
@@ -117,13 +119,18 @@ func (u *UpdateCenterManager) DownloadJenkins() (err error) {
 	showProgress, output := u.ShowProgress, u.Output
 	warURL := u.GetJenkinsWarURL()
 
-	downloader := util.HTTPDownloader{
+	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   u.RoundTripper,
 		TargetFilePath: output,
 		URL:            warURL,
 		ShowProgress:   showProgress,
 	}
-	err = downloader.DownloadFile()
+
+	if u.Thread > 1 {
+		err = httpdownloader.DownloadFileWithMultipleThread(warURL, output, u.Thread, showProgress)
+	} else {
+		err = downloader.DownloadFile()
+	}
 	return
 }
 
@@ -146,7 +153,7 @@ func (u *UpdateCenterManager) GetJenkinsWarURL() (warURL string) {
 
 // GetSite is get Available Plugins and Updated Plugins from UpdateCenter
 func (u *UpdateCenterManager) GetSite() (site *CenterSite, err error) {
-	err = u.RequestWithData("GET", "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
+	err = u.RequestWithData(http.MethodGet, "/updateCenter/site/default/api/json?pretty=true&depth=2", nil, nil, 200, &site)
 	return
 }
 
@@ -157,8 +164,8 @@ func (u *UpdateCenterManager) ChangeUpdateCenterSite(name, updateCenterURL strin
 	payload := strings.NewReader(formData.Encode())
 
 	api := "/pluginManager/siteConfigure"
-	_, err = u.RequestWithoutData("POST", api,
-		map[string]string{util.ContentType: util.ApplicationForm}, payload, 200)
+	_, err = u.RequestWithoutData(http.MethodPost, api,
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	return
 }
 
@@ -169,7 +176,7 @@ func (u *UpdateCenterManager) SetMirrorCertificate(enable bool) (err error) {
 		api = "/update-center-mirror/remove"
 	}
 
-	_, err = u.RequestWithoutData("POST", api,
-		map[string]string{util.ContentType: util.ApplicationForm}, nil, 200)
+	_, err = u.RequestWithoutData(http.MethodPost, api,
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, nil, 200)
 	return
 }

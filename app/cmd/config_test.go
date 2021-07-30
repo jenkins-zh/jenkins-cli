@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v2"
@@ -27,9 +28,9 @@ var _ = Describe("Table util test", func() {
 	Context("basic test", func() {
 		It("getJenkinsNames", func() {
 			config = &Config{
-				JenkinsServers: []JenkinsServer{JenkinsServer{
+				JenkinsServers: []JenkinsServer{{
 					Name: "a",
-				}, JenkinsServer{
+				}, {
 					Name: "b",
 				}},
 			}
@@ -48,7 +49,7 @@ var _ = Describe("Table util test", func() {
 			Expect(current).To(BeNil())
 
 			config.Current = "test"
-			config.JenkinsServers = []JenkinsServer{JenkinsServer{
+			config.JenkinsServers = []JenkinsServer{{
 				Name: "test",
 			}}
 			current = getCurrentJenkins()
@@ -61,7 +62,7 @@ var _ = Describe("Table util test", func() {
 			Expect(suite).To(BeNil())
 
 			pluginName := "plugin-one"
-			config.PluginSuites = []PluginSuite{PluginSuite{
+			config.PluginSuites = []PluginSuite{{
 				Name: pluginName,
 			}}
 			suite = findSuiteByName(pluginName)
@@ -83,7 +84,7 @@ var _ = Describe("Table util test", func() {
 			rootOptions.Jenkins = ""
 			rootOptions.ConfigFile = "test.yaml"
 
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

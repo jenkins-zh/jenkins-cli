@@ -3,9 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
-
-	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -13,9 +12,11 @@ import (
 
 // JobParamOption is the job param option
 type JobParamOption struct {
-	OutputOption
+	cobra_ext.OutputOption
 
 	Indent bool
+	Remove string
+	Add    string
 
 	RoundTripper http.RoundTripper
 }
@@ -24,16 +25,21 @@ var jobParamOption JobParamOption
 
 func init() {
 	jobCmd.AddCommand(jobParamCmd)
-	jobParamCmd.Flags().BoolVarP(&jobParamOption.Indent, "indent", "", false, "Output with indent")
+	flags := jobParamCmd.Flags()
+	flags.BoolVarP(&jobParamOption.Indent, "indent", "", false, "Output with indent")
+	flags.StringVarP(&jobParamOption.Add, "add", "", "",
+		`Add parameters into the Pipeline. Example data: [{"name":"name","value":"rick","desc":"this is a name"}]`)
+	flags.StringVarP(&jobParamOption.Remove, "remove", "", "",
+		`Remove parameters from the Pipeline. Example data: name,age`)
 	jobParamOption.SetFlag(jobParamCmd)
 }
 
 var jobParamCmd = &cobra.Command{
-	Use:   "param <jobName>",
+	Use:   "param",
 	Short: i18n.T("Get parameters of the job of your Jenkins"),
 	Long:  i18n.T("Get parameters of the job of your Jenkins"),
 	Args:  cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		name := args[0]
 		jclient := &client.JobClient{
 			JenkinsCore: client.JenkinsCore{
@@ -42,9 +48,21 @@ var jobParamCmd = &cobra.Command{
 		}
 		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
 
-		job, err := jclient.GetJob(name)
+		if jobParamOption.Remove != "" {
+			if err = jclient.RemoveParameters(name, jobParamOption.Remove); err != nil {
+				return
+			}
+		}
+
+		if jobParamOption.Add != "" {
+			if err = jclient.AddParameters(name, jobParamOption.Add); err != nil {
+				return
+			}
+		}
+
+		var job *client.Job
 		var data []byte
-		if err == nil {
+		if job, err = jclient.GetJob(name); err == nil {
 			proCount := len(job.Property)
 			if proCount != 0 {
 				for _, pro := range job.Property {
@@ -60,10 +78,10 @@ var jobParamCmd = &cobra.Command{
 					break
 				}
 			}
+			if len(data) > 0 {
+				cmd.Println(string(data))
+			}
 		}
-		if err == nil && len(data) > 0 {
-			cmd.Println(string(data))
-		}
-		helper.CheckErr(cmd, err)
+		return
 	},
 }

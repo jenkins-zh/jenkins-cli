@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
+	. "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -40,7 +41,7 @@ var _ = Describe("job search command", func() {
 		})
 
 		It("should success, search with one result item", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -64,7 +65,7 @@ fake fake        WorkflowJob job/fake/
 		})
 
 		It("should success, search without keyword", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -107,7 +108,7 @@ var _ = Describe("job search command check", func() {
 
 		config = &Config{
 			Current: "fake",
-			JenkinsServers: []JenkinsServer{JenkinsServer{
+			JenkinsServers: []JenkinsServer{{
 				Name:     "fake",
 				URL:      rootURL,
 				UserName: user,

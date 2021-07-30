@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -10,8 +11,9 @@ import (
 
 // JobHistoryOption is the job history option
 type JobHistoryOption struct {
-	OutputOption
+	cobra_ext.OutputOption
 
+	Delete       int
 	RoundTripper http.RoundTripper
 }
 
@@ -20,10 +22,11 @@ var jobHistoryOption JobHistoryOption
 func init() {
 	jobCmd.AddCommand(jobHistoryCmd)
 	jobHistoryOption.SetFlagWithHeaders(jobHistoryCmd, "DisplayName,Building,Result")
+	jobHistoryCmd.Flags().IntVarP(&jobHistoryOption.Delete, "delete", "d", -1, "Delete a history item")
 }
 
 var jobHistoryCmd = &cobra.Command{
-	Use:   "history <jobName>",
+	Use:   "history",
 	Short: i18n.T("Print the history of job in your Jenkins"),
 	Long:  i18n.T(`Print the history of job in your Jenkins`),
 	Args:  cobra.MinimumNArgs(1),
@@ -36,6 +39,11 @@ var jobHistoryCmd = &cobra.Command{
 			},
 		}
 		getCurrentJenkinsAndClientOrDie(&(jClient.JenkinsCore))
+
+		if jobHistoryOption.Delete != -1 {
+			err = jClient.DeleteHistory(jobName, jobHistoryOption.Delete)
+			return
+		}
 
 		var builds []*client.JobBuild
 		builds, err = jClient.GetHistory(jobName)

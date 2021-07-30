@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 
 // ConfigAddOptions is the config ad option
 type ConfigAddOptions struct {
-	JenkinsServer
+	appCfg.JenkinsServer
 }
 
 var configAddOptions ConfigAddOptions
@@ -42,7 +43,7 @@ var configAddCmd = &cobra.Command{
 	Example: "jcli config add -n demo",
 }
 
-func addJenkins(jenkinsServer JenkinsServer) (err error) {
+func addJenkins(jenkinsServer appCfg.JenkinsServer) (err error) {
 	jenkinsName := jenkinsServer.Name
 	if jenkinsName == "" {
 		err = fmt.Errorf("name cannot be empty")

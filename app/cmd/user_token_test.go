@@ -30,7 +30,7 @@ var _ = Describe("user token command", func() {
 		rootOptions.ConfigFile = "test.yaml"
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())

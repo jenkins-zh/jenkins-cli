@@ -24,6 +24,13 @@ Useful links:
 * [Jenkins Remote Access API](https://wiki.jenkins.io/display/JENKINS/Remote+access+API)
 * [Jenkins REST API overview](https://www.youtube.com/watch?v=D93t1jElt4Q) by [Cliffano Subagio](https://github.com/cliffano)
 
+## Plugins
+
+Jenkins CLI allows you to write a plugin for it. You can follow these steps:
+
+* write a plugin project, e.g. [jcli-account-plugin](https://github.com/jenkins-zh/jcli-account-plugin)
+* submit a metadata file into [the official repository](https://github.com/jenkins-zh/jcli-plugins)
+
 ## Testing
 
 We use a BDD Testing Framework to test our project. Please make sure you're familiar
@@ -38,6 +45,13 @@ a totally fresh environment. Here is list of free resources that you can use:
 |---|---|
 | Aliyun | [https://api.aliyun.com/#/cli](https://api.aliyun.com/#/cli) |
 | Google Could | [https://ssh.cloud.google.com/cloudshell/environment/view](https://ssh.cloud.google.com/cloudshell/environment/view) |
+
+For some cases, you need to make sure it works well in different operation system. Setup a virtual machine is a good practice.
+
+| vm | description |
+|---|---|
+| [multipass](https://github.com/canonical/multipass) | Multipass is a lightweight VM manager for Linux, Windows and macOS |
+| [VirtualBox](https://www.virtualbox.org/) | VirtualBox is a powerful x86 and AMD64/Intel64 virtualization product for enterprise as well as home use. |
 
 ## Pull Requests
 

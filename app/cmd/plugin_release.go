@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"os"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -12,7 +13,7 @@ import (
 
 // PluginReleaseOptions for the plugin create command
 type PluginReleaseOptions struct {
-	CommonOption
+	common.Option
 
 	Batch       bool
 	Prepare     bool
@@ -72,6 +73,6 @@ var pluginReleaseCmd = &cobra.Command{
 		return
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

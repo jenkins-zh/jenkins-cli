@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/spf13/cobra"
@@ -8,7 +9,7 @@ import (
 
 // ComputerDeleteOption option for agent delete command
 type ComputerDeleteOption struct {
-	CommonOption
+	common.Option
 }
 
 var computerDeleteOption ComputerDeleteOption
@@ -18,17 +19,18 @@ func init() {
 }
 
 var computerDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Aliases: GetAliasesDel(),
-	Short:   i18n.T("Delete an agent from Jenkins"),
-	Long:    i18n.T("Delete an agent from Jenkins"),
-	Args:    cobra.MinimumNArgs(1),
-	Example: `jcli agent delete agent-name`,
+	Use:               "delete",
+	Aliases:           common.GetAliasesDel(),
+	Short:             i18n.T("Delete an agent from Jenkins"),
+	Long:              i18n.T("Delete an agent from Jenkins"),
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: ValidAgentNames,
+	Example:           `jcli agent delete agent-name`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		jClient, _ := GetComputerClient(computerDeleteOption.CommonOption)
+		jClient, _ := GetComputerClient(computerDeleteOption.Option)
 		return jClient.Delete(args[0])
 	},
 	Annotations: map[string]string{
-		since: "v0.0.24",
+		common.Since: common.VersionSince0024,
 	},
 }

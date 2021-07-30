@@ -1,42 +1,54 @@
 NAME := jcli
 CGO_ENABLED = 0
+BUILD_GOOS=$(shell go env GOOS)
 GO := go
 BUILD_TARGET = build
 COMMIT := $(shell git rev-parse --short HEAD)
+BIN_PATH:=$(shell rm -rf jcli && which jcli)
 # CHANGE_LOG := $(shell echo -n "$(shell hub release show $(shell hub release --include-drafts -L 1))" | base64)
 VERSION := dev-$(shell git describe --tags $(shell git rev-list --tags --max-count=1))
-BUILDFLAGS = -ldflags "-X github.com/jenkins-zh/jenkins-cli/app.version=$(VERSION) -X github.com/jenkins-zh/jenkins-cli/app.commit=$(COMMIT)"
-COVERED_MAIN_SRC_FILE=./main
-PATH  := $(PATH):$(PWD)/bin
+BUILDFLAGS = -ldflags "-X github.com/linuxsuren/cobra-extension/version.version=$(VERSION) \
+	-X github.com/linuxsuren/cobra-extension/version.commit=$(COMMIT) \
+	-X github.com/linuxsuren/cobra-extension/version.date=$(shell date +'%Y-%m-%d')"
+MAIN_SRC_FILE = main.go
+PATH := $(PATH):$(PWD)/bin
 
-gen-mock:
-	go get github.com/golang/mock/gomock
-	go install github.com/golang/mock/mockgen
-	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+.PHONY: build
 
-init: gen-mock
+build: pre-build
+	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=$(BUILD_GOOS) GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/$(BUILD_GOOS)/$(NAME) $(MAIN_SRC_FILE)
+	chmod +x bin/$(BUILD_GOOS)/$(NAME)
+	rm -rf $(NAME) && ln -s bin/$(BUILD_GOOS)/$(NAME) $(NAME)
 
-darwin:
+darwin: pre-build
 	GO111MODULE=on CGO_ENABLED=$(CGO_ENABLED) GOOS=darwin GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/darwin/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/darwin/$(NAME)
-	rm -rf jcli && ln -s bin/darwin/$(NAME) jcli
+	rm -rf $(NAME) && ln -s bin/darwin/$(NAME) $(NAME)
 
-linux:
+linux: pre-build
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=linux GOARCH=amd64 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/linux/$(NAME) $(MAIN_SRC_FILE)
 	chmod +x bin/linux/$(NAME)
+	rm -rf $(NAME)
+	ln -s bin/linux/$(NAME) $(NAME)
 
-win:
+win: pre-build
 	go get github.com/inconshreveable/mousetrap
 	go get github.com/mattn/go-isatty
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=windows GOARCH=386 $(GO) $(BUILD_TARGET) $(BUILDFLAGS) -o bin/windows/$(NAME).exe $(MAIN_SRC_FILE)
 
 build-all: darwin linux win
 
+init: gen-mock
+gen-mock:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
+	mockgen -destination ./mock/mhttp/roundtripper.go -package mhttp net/http RoundTripper
+
 release: build-all
-	mkdir release
-	cd ./bin/darwin; upx jcli; tar -zcvf ../../release/jcli-darwin-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-darwin-amd64.tar.gz > jcli-darwin-amd64.txt
-	cd ./bin/linux; upx jcli; tar -zcvf ../../release/jcli-linux-amd64.tar.gz jcli; cd ../../release/; shasum -a 256 jcli-linux-amd64.tar.gz > jcli-linux-amd64.txt
-	cd ./bin/windows; upx jcli.exe; tar -zcvf ../../release/jcli-windows-386.tar.gz jcli.exe; cd ../../release/; shasum -a 256 jcli-windows-386.tar.gz > jcli-windows-386.txt
+	mkdir -p release
+	cd ./bin/darwin; upx $(NAME); tar -zcvf ../../release/$(NAME)-darwin-amd64.tar.gz $(NAME); cd ../../release/; shasum -a 256 $(NAME)-darwin-amd64.tar.gz > $(NAME)-darwin-amd64.txt
+	cd ./bin/linux; upx $(NAME); tar -zcvf ../../release/$(NAME)-linux-amd64.tar.gz $(NAME); cd ../../release/; shasum -a 256 $(NAME)-linux-amd64.tar.gz > $(NAME)-linux-amd64.txt
+	cd ./bin/windows; upx $(NAME).exe; tar -zcvf ../../release/$(NAME)-windows-386.tar.gz $(NAME).exe; cd ../../release/; shasum -a 256 $(NAME)-windows-386.tar.gz > $(NAME)-windows-386.txt
 
 clean: ## Clean the generated artifacts
 	rm -rf bin release
@@ -45,14 +57,13 @@ clean: ## Clean the generated artifacts
 	rm -rf app/test-app.xml
 	rm -rf util/test-utils.xml
 
-copy: darwin
-	sudo cp bin/darwin/$(NAME) $(shell which jcli)
+copy: build
+	sudo cp bin/$(BUILD_GOOS)/$(NAME) $(BIN_PATH)
 
-copy-linux: linux
-	cp bin/linux/$(NAME) /usr/local/bin/jcli
-
-tools: i18n-tools
+get-golint:
 	go get -u golang.org/x/lint/golint
+
+tools: i18n-tools get-golint
 
 i18n-tools:
 	go get -u github.com/gosexy/gettext/go-xgettext
@@ -77,9 +88,15 @@ gen-data-darwin: go-bindata-download-darwin
 
 verify: dep tools lint
 
+pre-build: fmt vet
+	export GO111MODULE=on
+	export GOPROXY=https://goproxy.io
+	go mod tidy
 
-lint:
+vet:
 	go vet ./...
+
+lint: vet
 	golint -set_exit_status app/cmd/...
 	golint -set_exit_status app/helper/...
 	golint -set_exit_status app/i18n/i18n.go
@@ -91,16 +108,40 @@ fmt:
 	go fmt ./util/...
 	go fmt ./client/...
 	go fmt ./app/...
+	gofmt -s -w .
+
+test-slow:
+#	JENKINS_VERSION=2.190.3 go test ./e2e/... -v -count=1 -parallel 1
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestBashCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestZshCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestPowerShellCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListComputers$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigGenerate$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestShowCurrentConfig$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCrumb$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDoc$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestSearchPlugins$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListPlugins$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestCheckUpdateCenter$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestInstallPlugin$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestDownloadPlugin$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListQueue$
 
 test:
 	mkdir -p bin
-	go test ./util -v -count=1
-	go test ./client -v -count=1 -coverprofile coverage.out
-	go test ./app -v -count=1
-	go test ./app/health -v -count=1
-	go test ./app/helper -v -count=1
-	go test ./app/i18n -v -count=1
-	go test ./app/cmd -v -count=1
+	go test ./util ./app/health ./app/i18n ./app/cmd/common -v -count=1 -coverprofile coverage.out
+#	go test ./util -v -count=1
+#	go test ./client -v -count=1 -coverprofile coverage.out
+#	go test ./app -v -count=1
+#	go test ./app/health -v -count=1
+#	go test ./app/helper -v -count=1
+#	go test ./app/i18n -v -count=1
+#	go test ./app/cmd -v -count=1
+
+test-release:
+	goreleaser release --rm-dist --snapshot --skip-publish
 
 dep:
 	go get github.com/AlecAivazis/survey/v2
@@ -118,13 +159,7 @@ gen-data:
 	cd app/i18n && go-bindata -o bindata.go -pkg i18n jcli/zh_CN/LC_MESSAGES/
 
 image:
-	docker build . -t jenkinszh/jcli
+	docker build . -t jenkinszh/$(NAME)
 
-image-win:
-	docker build . -t jenkinszh/jcli:win -f Dockerfile-win
-
-image-darwin:
-	docker build . -t jenkinszh/jcli:darwin -f Dockerfile-darwin
-
-image-dev:
-	docker build . -t jenkinszh/jcli:dev -f Docker-dev
+setup-env-centos:
+	yum install make golang -y

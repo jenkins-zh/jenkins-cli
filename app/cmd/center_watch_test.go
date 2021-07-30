@@ -41,12 +41,12 @@ var _ = Describe("center watch command", func() {
 
 	Context("basic cases", func() {
 		It("should success, center watch command", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,
@@ -57,7 +57,7 @@ var _ = Describe("center watch command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"center", "watch"})
 			_, err = rootCmd.ExecuteC()
@@ -71,7 +71,7 @@ var _ = Describe("center watch command", func() {
 			Expect(allPluginsCompleted(status)).To(Equal(false))
 
 			// all install job is completed
-			status.Jobs = []client.InstallationJob{client.InstallationJob{
+			status.Jobs = []client.InstallationJob{{
 				UpdateCenterJob: client.UpdateCenterJob{Type: "InstallationJob"},
 				Status: client.InstallationJobStatus{
 					Success: true,

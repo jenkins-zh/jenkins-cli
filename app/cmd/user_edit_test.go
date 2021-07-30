@@ -14,7 +14,7 @@ package cmd
 //			configFile := path.Join(os.TempDir(), "fake.yaml")
 //			defer os.Remove(configFile)
 //
-//			data, err := generateSampleConfig()
+//			data, err := GenerateSampleConfig()
 //			err = ioutil.WriteFile(configFile, data, 0664)
 //
 //			var (
@@ -32,7 +32,7 @@ package cmd
 //			rootCmd.SetArgs([]string{"user", "edit", "--desc", description, "--configFile", configFile})
 //
 //			userEditOption.RoundTripper = roundTripper
-//			userEditOption.CommonOption.Stdio = stdio
+//			userEditOption.Option.Stdio = stdio
 //			_, err = rootCmd.ExecuteC()
 //			return
 //		},

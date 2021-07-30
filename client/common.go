@@ -9,10 +9,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"moul.io/http2curl"
 	"net/http"
+	"time"
 
-	"github.com/jenkins-zh/jenkins-cli/app"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	ext "github.com/linuxsuren/cobra-extension/version"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // language is for global Accept Language
@@ -26,6 +29,7 @@ func SetLanguage(lan string) {
 // JenkinsCore core information of Jenkins
 type JenkinsCore struct {
 	JenkinsCrumb
+	Timeout            time.Duration
 	URL                string
 	InsecureSkipVerify bool
 	UserName           string
@@ -53,12 +57,21 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: j.InsecureSkipVerify},
 		}
-		if err := util.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
+		if err := httpdownloader.SetProxy(j.Proxy, j.ProxyAuth, tr); err != nil {
 			log.Fatal(err)
 		}
 		roundTripper = tr
 	}
-	client = &http.Client{Transport: roundTripper}
+
+	// make sure have a default timeout here
+	if j.Timeout <= 0 {
+		j.Timeout = 15
+	}
+
+	client = &http.Client{
+		Transport: roundTripper,
+		Timeout:   j.Timeout * time.Second,
+	}
 	return
 }
 
@@ -66,6 +79,7 @@ func (j *JenkinsCore) GetClient() (client *http.Client) {
 func (j *JenkinsCore) ProxyHandle(request *http.Request) {
 	if j.ProxyAuth != "" {
 		basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(j.ProxyAuth))
+		logger.Debug("setting proxy for HTTP request", zap.String("header", basicAuth))
 		request.Header.Add("Proxy-Authorization", basicAuth)
 	}
 }
@@ -78,13 +92,13 @@ func (j *JenkinsCore) AuthHandle(request *http.Request) (err error) {
 
 	// not add the User-Agent for tests
 	if j.RoundTripper == nil {
-		request.Header.Set("User-Agent", app.GetCombinedVersion())
+		request.Header.Set("User-Agent", ext.GetCombinedVersion())
 	}
 
 	j.ProxyHandle(request)
 
 	// all post request to Jenkins must be has the crumb
-	if request.Method == "POST" {
+	if request.Method == http.MethodPost {
 		err = j.CrumbHandle(request)
 	}
 	return
@@ -111,16 +125,16 @@ func (j *JenkinsCore) GetCrumb() (crumbIssuer *JenkinsCrumb, err error) {
 		data       []byte
 	)
 
-	if statusCode, data, err = j.Request("GET", "/crumbIssuer/api/json", nil, nil); err == nil {
+	if statusCode, data, err = j.Request(http.MethodGet, "/crumbIssuer/api/json", nil, nil); err == nil {
 		if statusCode == 200 {
 			err = json.Unmarshal(data, &crumbIssuer)
 		} else if statusCode == 404 {
 			// return 404 if Jenkins does no have crumb
+			//err = fmt.Errorf("crumb is disabled")
 		} else {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}
 	}
-
 	return
 }
 
@@ -215,6 +229,10 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 	}
 
 	client := j.GetClient()
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
+	}
 	return client.Do(req)
 }
 
@@ -222,10 +240,18 @@ func (j *JenkinsCore) RequestWithResponse(method, api string, headers map[string
 func (j *JenkinsCore) Request(method, api string, headers map[string]string, payload io.Reader) (
 	statusCode int, data []byte, err error) {
 	var (
-		req      *http.Request
-		response *http.Response
+		req        *http.Request
+		response   *http.Response
+		requestURL string
 	)
-	if req, err = http.NewRequest(method, fmt.Sprintf("%s%s", j.URL, api), payload); err != nil {
+
+	if requestURL, err = util.URLJoinAsString(j.URL, api); err != nil {
+		err = fmt.Errorf("cannot parse the URL of Jenkins, error is %v", err)
+		return
+	}
+
+	logger.Debug("send HTTP request", zap.String("URL", requestURL), zap.String("method", method))
+	if req, err = http.NewRequest(method, requestURL, payload); err != nil {
 		return
 	}
 	if language != "" {
@@ -237,6 +263,10 @@ func (j *JenkinsCore) Request(method, api string, headers map[string]string, pay
 
 	for k, v := range headers {
 		req.Header.Add(k, v)
+	}
+
+	if curlCmd, curlErr := http2curl.GetCurlCommand(req); curlErr == nil {
+		logger.Debug("HTTP request as curl", zap.String("cmd", curlCmd.String()))
 	}
 
 	client := j.GetClient()

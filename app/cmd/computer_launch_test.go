@@ -39,7 +39,7 @@ var _ = Describe("computer launch command", func() {
 		name = "fake"
 
 		var data []byte
-		data, err = generateSampleConfig()
+		data, err = GenerateSampleConfig()
 		Expect(err).To(BeNil())
 		err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 		Expect(err).To(BeNil())
@@ -73,14 +73,14 @@ var _ = Describe("computer launch command", func() {
 			computerLaunchOption.SystemCallExec = util.FakeSystemCallExecSuccess
 			computerLaunchOption.LookPathContext = util.FakeLookPath
 
-			request, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/jnlpJars/agent.jar", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/jnlpJars/agent.jar", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,
 				Body:       ioutil.NopCloser(bytes.NewBufferString(fakeJar)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			secret := "fake-secret"
 			client.PrepareForComputerAgentSecretRequest(roundTripper,

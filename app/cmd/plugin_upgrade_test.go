@@ -39,7 +39,7 @@ var _ = Describe("plugin upgrade command", func() {
 
 	Context("basic cases", func() {
 		It("given plugin name, should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -57,7 +57,7 @@ var _ = Describe("plugin upgrade command", func() {
 		})
 
 		It("findUpgradeablePlugins", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -86,7 +86,7 @@ var _ = Describe("plugin upgrade command", func() {
 		})
 
 		It("upgrade all plugin, should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())

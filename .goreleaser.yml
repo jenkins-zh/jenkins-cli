@@ -1,28 +1,25 @@
 # Official documentation at http://goreleaser.com
 project_name: jcli
-#before:
-#  hooks:
-#    - make gen-data
 builds:
 - env:
   - CGO_ENABLED=0
   binary: jcli
   goarch:
-    - 386
     - amd64
-    - arm
     - arm64
   goos:
-    - freebsd
     - windows
     - linux
     - darwin
-  ignore:
-    - goos: freebsd
-      goarch: arm64
+  hooks:
+    post:
+      - upx "{{ .Path }}"
   ldflags:
-    - -X github.com/jenkins-zh/jenkins-cli/app.version={{.Version}}
-    - -X github.com/jenkins-zh/jenkins-cli/app.commit={{.ShortCommit}}
+    - -X github.com/linuxsuren/cobra-extension/version.version={{.Version}}
+    - -X github.com/linuxsuren/cobra-extension/version.commit={{.ShortCommit}}
+    - -X github.com/linuxsuren/cobra-extension/version.date={{.Date}}
+    - -w
+    - -s
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
@@ -30,9 +27,7 @@ archives:
     darwin: darwin
     linux: linux
     windows: windows
-    386: 386
     amd64: amd64
-    arm: arm
     arm64: arm64
   format_overrides:
     - goos: windows
@@ -54,12 +49,17 @@ changelog:
 brews:
   -
     name: jcli
-    github:
+    tap:
       owner: jenkins-zh
       name: homebrew-jcli
     folder: Formula
     homepage: "https://github.com/jenkins-zh/jenkins-cli"
     description: Jenkins CLI allows you manage your Jenkins as an easy way
+    dependencies:
+      - name: vim
+        type: optional
+      - name: bash-completion
+        type: optional
     test: |
       version_output = shell_output("#{bin}/jcli version")
       assert_match version.to_s, version_output
@@ -74,6 +74,10 @@ brews:
       output = Utils.popen_read("#{bin}/jcli completion --type zsh")
       (zsh_completion/"_jcli").write output
 
+      (Pathname.pwd/"man").mkpath
+      system "#{bin}/jcli", "doc", "--doc-type", "ManPage", "man"
+      man1.install Dir["man/*.1"]
+
       prefix.install_metafiles
 nfpms:
   - file_name_template: "{{ .Binary }}-{{.Os}}-{{.Arch}}"
@@ -85,15 +89,16 @@ nfpms:
     formats:
       - deb
       - rpm
+    suggests:
+      - java
+      - docker
+    recommends:
+      - bash-completion
+      - vim
     bindir: /usr/bin
     replacements:
       amd64: 64bit
-      386: 32bit
-      arm: arm
       arm64: arm64
       darwin: macOS
       linux: linux
       windows: windows
-#signs:
-#  - artifacts: checksum
-#    cmd: gpg2

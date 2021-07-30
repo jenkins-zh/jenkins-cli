@@ -42,7 +42,7 @@ type JenkinsStatusClient struct {
 func (q *JenkinsStatusClient) Get() (status *JenkinsStatus, err error) {
 	status = &JenkinsStatus{}
 	var response *http.Response
-	response, err = q.RequestWithResponseHeader("GET", "/api/json", nil, nil, status)
+	response, err = q.RequestWithResponseHeader(http.MethodGet, "/api/json", nil, nil, status)
 	if err == nil {
 		if ver, ok := response.Header["X-Jenkins"]; ok && len(ver) > 0 {
 			status.Version = ver[0]

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/keyring"
+	"go.uber.org/zap"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
@@ -12,10 +14,11 @@ func init() {
 }
 
 var configRemoveCmd = &cobra.Command{
-	Use:   "remove",
-	Short: i18n.T("Remove a Jenkins config"),
-	Long:  i18n.T("Remove a Jenkins config"),
-	Args:  cobra.MinimumNArgs(1),
+	Use:               "remove",
+	Short:             i18n.T("Remove a Jenkins config"),
+	Long:              i18n.T("Remove a Jenkins config"),
+	Args:              cobra.MinimumNArgs(1),
+	ValidArgsFunction: ValidJenkinsNames,
 	RunE: func(_ *cobra.Command, args []string) error {
 		target := args[0]
 		return removeJenkins(target)
@@ -41,6 +44,14 @@ func removeJenkins(name string) (err error) {
 	if index == -1 {
 		err = fmt.Errorf("cannot found by name %s", name)
 	} else {
+		targetJenkins := config.JenkinsServers[index]
+		if err = keyring.DelToken(targetJenkins); err == nil {
+			logger.Info("delete keyring item successfully", zap.String("name", targetJenkins.Name))
+		} else {
+			logger.Error("cannot delete keyring item", zap.String("name", targetJenkins.Name),
+				zap.Error(err))
+		}
+
 		config.JenkinsServers = append(config.JenkinsServers[:index], config.JenkinsServers[index+1:]...)
 		err = saveConfig()
 	}

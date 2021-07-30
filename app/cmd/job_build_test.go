@@ -3,16 +3,15 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/golang/mock/gomock"
-	"github.com/jenkins-zh/jenkins-cli/client"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"testing"
 
+	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("job build command", func() {
@@ -49,12 +48,12 @@ var _ = Describe("job build command", func() {
 
 	Context("basic cases", func() {
 		It("should success", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
 
-			request, _ := http.NewRequest("POST", fmt.Sprintf("http://localhost:8080/jenkins/job/%s/build", jobName), nil)
+			request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8080/jenkins/job/%s/build", jobName), nil)
 			request.Header.Add("CrumbRequestField", "Crumb")
 			request.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			response := &http.Response{
@@ -64,9 +63,9 @@ var _ = Describe("job build command", func() {
 				Body:       ioutil.NopCloser(bytes.NewBufferString("")),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/jenkins/crumbIssuer/api/json", nil)
 			requestCrumb.SetBasicAuth("admin", "111e3a2f0231198855dceaff96f20540a9")
 			responseCrumb := &http.Response{
 				StatusCode: 200,
@@ -77,7 +76,7 @@ var _ = Describe("job build command", func() {
 				`)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(requestCrumb).Return(responseCrumb, nil)
+				RoundTrip(client.NewRequestMatcher(requestCrumb)).Return(responseCrumb, nil)
 
 			rootCmd.SetArgs([]string{"job", "build", jobName, "-b", "true"})
 			_, err = rootCmd.ExecuteC()
@@ -92,7 +91,7 @@ var _ = Describe("job build command", func() {
 		})
 
 		It("with --param-entry", func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -104,6 +103,22 @@ var _ = Describe("job build command", func() {
 			_, err = rootCmd.ExecuteC()
 			Expect(err).NotTo(HaveOccurred())
 		})
+
+		/* FIXME: fix the test case
+		It("with --param-file", func() {
+			data, err := generateSampleConfig()
+			Expect(err).To(BeNil())
+			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
+			Expect(err).To(BeNil())
+
+			client.PrepareForBuildWithParams(roundTripper, "http://localhost:8080/jenkins", jobName,
+				"admin", "111e3a2f0231198855dceaff96f20540a9")
+
+			rootCmd.SetArgs([]string{"job", "build", jobName, "--param-file", "sample=/tmp/sample.txt", "-b", "true", "--param", ""})
+			_, err = rootCmd.ExecuteC()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		*/
 	})
 })
 
@@ -123,12 +138,12 @@ var _ = Describe("job build command", func() {
 //			c.Send("\x1b")
 //			c.SendLine(":wq!")
 //		},
-//		CommonOption: &jobBuildOption.CommonOption,
+//		Option: &jobBuildOption.Option,
 //		BatchOption:  &jobBuildOption.BatchOption,
 //		Test: func(stdio terminal.Stdio) (err error) {
 //			var data []byte
 //			rootOptions.ConfigFile = "test.yaml"
-//			data, err = generateSampleConfig()
+//			data, err = GenerateSampleConfig()
 //			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 //
 //			ctrl := gomock.NewController(t)
@@ -141,7 +156,7 @@ var _ = Describe("job build command", func() {
 //				token   = "111e3a2f0231198855dceaff96f20540a9"
 //			)
 //
-//			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json",
+//			request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/%s/api/json",
 //				url, jobName), nil)
 //			request.SetBasicAuth(user, token)
 //			response := &http.Response{
@@ -171,13 +186,13 @@ var _ = Describe("job build command", func() {
 //				`)),
 //			}
 //			roundTripper.EXPECT().
-//				RoundTrip(request).Return(response, nil)
+//				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 //
 //			client.PrepareForBuildWithParams(roundTripper, url, jobName, user, token)
 //
 //			jobBuildOption.RoundTripper = roundTripper
 //			jobBuildOption.BatchOption.Stdio = stdio
-//			jobBuildOption.CommonOption.Stdio = stdio
+//			jobBuildOption.Option.Stdio = stdio
 //			rootCmd.SetArgs([]string{"job", "build", "fake", "-b=false"})
 //			_, err = rootCmd.ExecuteC()
 //			return
@@ -185,6 +200,6 @@ var _ = Describe("job build command", func() {
 //	})
 //}
 
-func RunEditCommandTest(t *testing.T, test EditCommandTest) {
-	RunTest(t, test.Test, test.ConfirmProcedure, test.Procedure)
-}
+//func RunEditCommandTest(t *testing.T, test EditCommandTest) {
+//	RunTest(t, test.Test, test.ConfirmProcedure, test.Procedure)
+//}

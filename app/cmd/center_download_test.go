@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"io/ioutil"
@@ -48,7 +49,7 @@ var _ = Describe("center download command", func() {
 
 	Context("basic cases", func() {
 		BeforeEach(func() {
-			data, err := generateSampleConfig()
+			data, err := GenerateSampleConfig()
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
@@ -59,14 +60,14 @@ var _ = Describe("center download command", func() {
 		})
 
 		It("download the lts Jenkins", func() {
-			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war-stable/latest/jenkins.war", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://mirrors.jenkins.io/war-stable/latest/jenkins.war", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,
 				Body:       ioutil.NopCloser(bytes.NewBufferString(ltsResponseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"center", "download", "--progress=false", "--output", targetFilePath})
 			_, err := rootCmd.ExecuteC()
@@ -81,14 +82,14 @@ var _ = Describe("center download command", func() {
 		})
 
 		It("download the weekly Jenkins", func() {
-			request, _ := http.NewRequest("GET", "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
+			request, _ := http.NewRequest(http.MethodGet, "http://mirrors.jenkins.io/war/latest/jenkins.war", nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Request:    request,
 				Body:       ioutil.NopCloser(bytes.NewBufferString(weeklyResponseBody)),
 			}
 			roundTripper.EXPECT().
-				RoundTrip(request).Return(response, nil)
+				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			rootCmd.SetArgs([]string{"center", "download", "--lts=false", "--progress=false", "--output", targetFilePath})
 			_, err := rootCmd.ExecuteC()

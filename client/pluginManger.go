@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jenkins-zh/jenkins-cli/util"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 )
 
 // PluginManager is the client of plugin manager
@@ -78,7 +78,7 @@ var debugLogFile = "debug.html"
 func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 	api := "/pluginManager/checkUpdatesServer"
 	var response *http.Response
-	response, err = p.RequestWithResponseHeader("POST", api, nil, nil, nil)
+	response, err = p.RequestWithResponseHeader(http.MethodPost, api, nil, nil, nil)
 	if err == nil {
 		p.handleCheck(handle)(response)
 	}
@@ -87,17 +87,24 @@ func (p *PluginManager) CheckUpdate(handle func(*http.Response)) (err error) {
 
 // GetAvailablePlugins get the aviable plugins from Jenkins
 func (p *PluginManager) GetAvailablePlugins() (pluginList *AvailablePluginList, err error) {
-	err = p.RequestWithData("GET", "/pluginManager/plugins", nil, nil, 200, &pluginList)
+	err = p.RequestWithData(http.MethodGet, "/pluginManager/plugins", nil, nil, 200, &pluginList)
 	return
 }
 
 // GetPlugins get installed plugins
 func (p *PluginManager) GetPlugins(depth int) (pluginList *InstalledPluginList, err error) {
 	if depth > 1 {
-		err = p.RequestWithData("GET", fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
+		err = p.RequestWithData(http.MethodGet, fmt.Sprintf("/pluginManager/api/json?depth=%d", depth), nil, nil, 200, &pluginList)
 	} else {
-		err = p.RequestWithData("GET", "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
+		err = p.RequestWithData(http.MethodGet, "/pluginManager/api/json?depth=1", nil, nil, 200, &pluginList)
 	}
+	return
+}
+
+// GetPluginsFormula get the plugin list with Jenkins formula format
+func (p *PluginManager) GetPluginsFormula(data interface{}) (err error) {
+	api := "jcliPluginManager/pluginList"
+	err = p.RequestWithData(http.MethodGet, api, nil, nil, 200, data)
 	return
 }
 
@@ -146,7 +153,11 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 	plugins := p.getPluginsInstallQuery(names)
 	versionalPlugins := p.getVersionalPlugins(names)
 	if plugins != "" {
-		err = p.installPluginsWithoutVersion(plugins)
+		for _, plugin := range strings.Split(plugins, "&") {
+			if err = p.installPluginsWithoutVersion(plugin); err != nil {
+				return
+			}
+		}
 	}
 
 	if err == nil && len(versionalPlugins) > 0 {
@@ -158,7 +169,7 @@ func (p *PluginManager) InstallPlugin(names []string) (err error) {
 func (p *PluginManager) installPluginsWithoutVersion(plugins string) (err error) {
 	api := fmt.Sprintf("/pluginManager/install?%s", plugins)
 	var response *http.Response
-	response, err = p.RequestWithResponse("POST", api, nil, nil)
+	response, err = p.RequestWithResponse(http.MethodPost, api, nil, nil)
 	if response != nil && response.StatusCode == 400 {
 		if errMsg, ok := response.Header["X-Error"]; ok {
 			for _, msg := range errMsg {
@@ -182,24 +193,30 @@ func (p *PluginManager) installPluginsWithVersion(plugins []string) (err error) 
 
 // installPluginWithVersion install a plugin by name & version
 func (p *PluginManager) installPluginWithVersion(name string) (err error) {
+	pluginName := "%s.hpi"
+	defer os.Remove(fmt.Sprintf(pluginName, name))
+
+	if err = p.DownloadPluginWithVersion(name); err == nil {
+		err = p.Upload(fmt.Sprintf(pluginName, name))
+	}
+	return
+}
+
+// DownloadPluginWithVersion downloads a plugin with name and version
+func (p *PluginManager) DownloadPluginWithVersion(nameWithVer string) error {
 	pluginAPI := PluginAPI{
 		RoundTripper: p.RoundTripper,
 		UseMirror:    p.UseMirror,
 		MirrorURL:    p.MirrorURL,
 		ShowProgress: p.ShowProgress,
 	}
-	pluginName := "%s.hpi"
-	pluginVersion := strings.Split(name, "@")
 
-	defer os.Remove(fmt.Sprintf(pluginName, name))
-	url := fmt.Sprintf("http://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi",
-		pluginVersion[0], pluginVersion[1], pluginVersion[0])
+	pluginVersion := strings.Split(nameWithVer, "@")
+	name := pluginVersion[0]
+	version := pluginVersion[1]
+	url := fmt.Sprintf("https://updates.jenkins-ci.org/download/plugins/%s/%s/%s.hpi", name, version, name)
 
-	url = pluginAPI.getMirrorURL(url)
-	if err = pluginAPI.download(url, name); err == nil {
-		err = p.Upload(fmt.Sprintf(pluginName, name))
-	}
-	return
+	return pluginAPI.download(pluginAPI.getMirrorURL(url), name)
 }
 
 // UninstallPlugin uninstall a plugin by name
@@ -210,7 +227,7 @@ func (p *PluginManager) UninstallPlugin(name string) (err error) {
 		data       []byte
 	)
 
-	if statusCode, data, err = p.Request("POST", api, nil, nil); err == nil {
+	if statusCode, data, err = p.Request(http.MethodPost, api, nil, nil); err == nil {
 		if statusCode != 200 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 			if p.Debug {
@@ -230,17 +247,16 @@ func (p *PluginManager) Upload(pluginFile string) (err error) {
 		return
 	}
 
-	p.AuthHandle(request)
+	if err = p.AuthHandle(request); err != nil {
+		return
+	}
 
-	client := p.GetClient()
+	jcli := p.GetClient()
 	var response *http.Response
-	if response, err = client.Do(request); err != nil {
+	if response, err = jcli.Do(request); err != nil {
 		return
 	} else if response.StatusCode != 200 {
 		err = fmt.Errorf("StatusCode: %d", response.StatusCode)
-		if data, readErr := ioutil.ReadAll(response.Body); readErr == nil && p.Debug {
-			ioutil.WriteFile(debugLogFile, data, 0664)
-		}
 	}
 	return err
 }
@@ -288,18 +304,18 @@ func (p *PluginManager) newfileUploadRequest(uri string, params map[string]strin
 		return
 	}
 
-	var progressWriter *util.ProgressIndicator
+	var progressWriter *httpdownloader.ProgressIndicator
 	if p.ShowProgress {
-		progressWriter = &util.ProgressIndicator{
+		progressWriter = &httpdownloader.ProgressIndicator{
 			Total:  total,
 			Writer: bytesBuffer,
 			Reader: bytesBuffer,
 			Title:  "Uploading",
 		}
 		progressWriter.Init()
-		req, err = http.NewRequest("POST", uri, progressWriter)
+		req, err = http.NewRequest(http.MethodPost, uri, progressWriter)
 	} else {
-		req, err = http.NewRequest("POST", uri, bytesBuffer)
+		req, err = http.NewRequest(http.MethodPost, uri, bytesBuffer)
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())

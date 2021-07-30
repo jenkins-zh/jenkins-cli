@@ -86,6 +86,16 @@ func (p *MemoryPrinter) PrintErr(i ...interface{}) {
 	p.Buffer.WriteString(fmt.Sprintf("%v", i))
 }
 
+// Println print the object
+func (p *MemoryPrinter) Println(i ...interface{}) {
+	p.Buffer.WriteString(fmt.Sprintf("%v\n", i))
+}
+
+// Printf print against a format
+func (p *MemoryPrinter) Printf(format string, i ...interface{}) {
+	p.Buffer.WriteString(fmt.Sprintf(format, i...))
+}
+
 var _ = Describe("CheckErr", func() {
 	var (
 		printer *MemoryPrinter

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -18,7 +19,7 @@ import (
 
 // ShellOptions is the option of shell command
 type ShellOptions struct {
-	CommonOption
+	common.Option
 
 	TmpDir            string
 	TmpConfigFileName string

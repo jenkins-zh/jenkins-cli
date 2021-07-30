@@ -3,6 +3,8 @@ package cmd
 import (
 	"bytes"
 	"github.com/golang/mock/gomock"
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	"github.com/jenkins-zh/jenkins-cli/util"
 	. "github.com/onsi/ginkgo"
@@ -26,9 +28,9 @@ var _ = Describe("cwp command test", func() {
 		localCache = os.TempDir()
 		roundTripper := mhttp.NewMockRoundTripper(ctrl)
 		cwpOptions = CWPOptions{
-			CommonOption: CommonOption{RoundTripper: roundTripper},
-			MetadataURL:  "http://localhost/maven-metadata.xml",
-			LocalCache:   localCache,
+			Option:      common.Option{RoundTripper: roundTripper},
+			MetadataURL: "http://localhost/maven-metadata.xml",
+			LocalCache:  localCache,
 		}
 		prepareMavenMetadataRequest(roundTripper)
 
@@ -61,9 +63,9 @@ func TestDownload(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: CommonOption{RoundTripper: roundTripper},
-		MetadataURL:  "http://localhost/maven-metadata.xml",
-		LocalCache:   tmpDir,
+		Option:      common.Option{RoundTripper: roundTripper},
+		MetadataURL: "http://localhost/maven-metadata.xml",
+		LocalCache:  tmpDir,
 	}
 	prepareMavenMetadataRequest(roundTripper)
 
@@ -84,8 +86,8 @@ func TestGetLatest(t *testing.T) {
 
 	roundTripper := mhttp.NewMockRoundTripper(ctrl)
 	cwpOpts := CWPOptions{
-		CommonOption: CommonOption{RoundTripper: roundTripper},
-		MetadataURL:  "http://localhost/maven-metadata.xml",
+		Option:      common.Option{RoundTripper: roundTripper},
+		MetadataURL: "http://localhost/maven-metadata.xml",
 	}
 	prepareMavenMetadataRequest(roundTripper)
 
@@ -95,25 +97,25 @@ func TestGetLatest(t *testing.T) {
 }
 
 func prepareDownloadFileRequest(url, content string, roundTripper *mhttp.MockRoundTripper) {
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(content)),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 }
 
 func prepareMavenMetadataRequest(roundTripper *mhttp.MockRoundTripper) {
-	request, _ := http.NewRequest("GET", "http://localhost/maven-metadata.xml", nil)
+	request, _ := http.NewRequest(http.MethodGet, "http://localhost/maven-metadata.xml", nil)
 	response := &http.Response{
 		StatusCode: 200,
 		Request:    request,
 		Body:       ioutil.NopCloser(bytes.NewBufferString(getMavenMetadataSample())),
 	}
 	roundTripper.EXPECT().
-		RoundTrip(request).Return(response, nil)
+		RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 }
 
 func getMavenMetadataSample() string {
