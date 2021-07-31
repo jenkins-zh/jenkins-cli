@@ -16,7 +16,7 @@ require (
 	github.com/linuxsuren/cobra-extension v0.0.10
 	github.com/linuxsuren/go-cli-alias v0.0.6
 	github.com/linuxsuren/go-cli-plugin v0.0.4
-	github.com/linuxsuren/http-downloader v0.0.22
+	github.com/linuxsuren/http-downloader v0.0.29
 	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.16.4
