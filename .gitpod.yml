@@ -1,0 +1,15 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - init: |
+      [[ ! -z "${DOCKER_USER}" && ! -z "${DOCKER_PASSWD}" ]] && docker login -u${DOCKER_USER} -p${DOCKER_PASSWD}
+      git config --global user.name $GIT_AUTHOR_NAME
+      git config --global user.email $GIT_COMMITTER_EMAIL
+      gh repo fork --remote
+
+vscode:
+  extensions:
+    - golang.go
+    - github.vscode-pull-request-github
+    - ms-azuretools.vscode-docker
