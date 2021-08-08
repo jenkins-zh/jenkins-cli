@@ -30,7 +30,7 @@ func init() {
 		i18n.T("The port to connect to docker"))
 	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.DockerfilePath, "dockerfile-path", "", "./tmp/output/Dockerfile",
 		i18n.T("where you want the dockerfile to be placed"))
-	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.jenkinsPort, "Jenkins-port", "", 8081,
+	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.JenkinsPort, "Jenkins-port", "", 8081,
 		i18n.T("The port to connect to jenkins"))
 	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.WarPath, "war-path", "", "",
 		i18n.T("where you want the dockerfile to be placed"))
@@ -91,19 +91,13 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 			cmd.Println(err)
 		}
 	}
-	newPort, err := nat.NewPort("tcp", strconv.Itoa(o.jenkinsPort))
+	newPort, err := nat.NewPort("tcp", strconv.Itoa(o.JenkinsPort))
 	if err != nil {
 		cmd.Print("4. ")
 		cmd.Println(err)
 		return err
 	}
-	jenkinsPort, err := nat.NewPort("tcp", strconv.Itoa(o.jenkinsPort))
-	if err != nil {
-		cmd.Println(err)
-	}
-	hostConfig :=&container.HostConfig{
-		PortBindings
-	}
+
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:      imageName,
 		Entrypoint: []string{"java -jar", "/usr/share/jenkins/jenkins.war"},
@@ -112,7 +106,7 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 			newPort: []nat.PortBinding{
 				{
 					HostIP:   "127.0.0.1",
-					HostPort: strconv.Itoa(o.jenkinsPort),
+					HostPort: strconv.Itoa(o.JenkinsPort),
 				},
 			},
 		},
