@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/spf13/cobra"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/spf13/cobra"
 )
 
 // JobLogOption is the job log option
 type JobLogOption struct {
 	common.WatchOption
-	History       int
-	LogText       string
-	LastBuildID   int
-	LastBuildURL  string
-	NumberOfLines int
+	History int
+
+	LogText      string
+	LastBuildID  int
+	LastBuildURL string
 
 	RoundTripper http.RoundTripper
 }
@@ -34,8 +34,6 @@ func init() {
 		i18n.T("Watch the job logs"))
 	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 1,
 		i18n.T("Interval of watch"))
-	jobLogCmd.Flags().IntVarP(&jobLogOption.NumberOfLines, "tail", "t", -1,
-		i18n.T("The last number of lines of the log"))
 }
 
 var jobLogCmd = &cobra.Command{
@@ -46,10 +44,9 @@ It'll print the log text of the last build if you don't give the build id.`),
 	Args: cobra.MinimumNArgs(1),
 	Example: `jcli job log <jobName> [buildID]
 jcli job log <jobName> --history 1
-jcli job log <jobName> --watch
-jcli job log <jobName> --tail <numberOfLines>`,
+jcli job log <jobName> --watch`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {
-		if len(args) >= 3 && jobLogOption.History == -1 {
+		if len(args) >= 2 && jobLogOption.History == -1 {
 			var history int
 			historyStr := args[1]
 			if history, err = strconv.Atoi(historyStr); err == nil {
@@ -86,7 +83,7 @@ jcli job log <jobName> --tail <numberOfLines>`,
 				cmd.Println("Current build number:", jobLogOption.LastBuildID)
 				cmd.Println("Current build url:", jobLogOption.LastBuildURL)
 
-				err = printLog(jclient, cmd, name, jobLogOption.History, 0, jobLogOption.NumberOfLines)
+				err = printLog(jclient, cmd, name, jobLogOption.History, 0)
 			}
 
 			if err != nil || !jobLogOption.Watch {
@@ -98,7 +95,7 @@ jcli job log <jobName> --tail <numberOfLines>`,
 	},
 }
 
-func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, history int, start int64, numberOfLines int) (err error) {
+func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, history int, start int64) (err error) {
 	var jobLog client.JobLog
 	if jobLog, err = jclient.Log(jobName, history, start); err == nil {
 		isNew := false
@@ -113,25 +110,13 @@ func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, his
 				isNew = true
 			}
 		}
-		numberOfLinesOfJobLogText := strings.Count(jobLog.Text, "\n") - 1
-		if isNew && (numberOfLines > 0 || numberOfLines == -1) {
-			if numberOfLines >= numberOfLinesOfJobLogText || numberOfLines == -1 {
-				cmd.Print(jobLog.Text)
-				numberOfLines -= numberOfLinesOfJobLogText
 
-			} else if numberOfLines < numberOfLinesOfJobLogText {
-				text := jobLog.Text
-				for i := 0; i <= numberOfLinesOfJobLogText-numberOfLines; i++ {
-					temp := strings.Index(text, "\n")
-					text = text[temp+1:]
-				}
-				cmd.Print(text)
-				numberOfLines = 0
-			}
+		if isNew {
+			cmd.Print(jobLog.Text)
 		}
 
 		if jobLog.HasMore {
-			err = printLog(jclient, cmd, jobName, history, jobLog.NextStart, numberOfLines)
+			err = printLog(jclient, cmd, jobName, history, jobLog.NextStart)
 		}
 	}
 	return
