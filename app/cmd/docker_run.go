@@ -30,8 +30,10 @@ func init() {
 		i18n.T("The port to connect to docker"))
 	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.DockerfilePath, "dockerfile-path", "", "./tmp/output/Dockerfile",
 		i18n.T("where you want the dockerfile to be placed"))
-	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.jenkinsPort, "jenkins-port", "", 8081,
+	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.jenkinsPort, "Jenkins-port", "", 8081,
 		i18n.T("The port to connect to jenkins"))
+	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.WarPath, "war-path", "", "",
+		i18n.T("where you want the dockerfile to be placed"))
 }
 
 type DockerRunOptions struct {
@@ -40,7 +42,8 @@ type DockerRunOptions struct {
 	IP             string
 	DockerPort     int
 	DockerfilePath string
-	jenkinsPort    int
+	JenkinsPort    int
+	WarPath        string
 }
 
 var dockerRunOptions DockerRunOptions
@@ -94,9 +97,16 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 		cmd.Println(err)
 		return err
 	}
+	jenkinsPort, err := nat.NewPort("tcp", strconv.Itoa(o.jenkinsPort))
+	if err != nil {
+		cmd.Println(err)
+	}
+	hostConfig :=&container.HostConfig{
+		PortBindings
+	}
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image: imageName,
-		Cmd:   []string{"java -jar", "/usr/share/jenkins/jenkins.war", "--server.port=8080"},
+		Image:      imageName,
+		Entrypoint: []string{"java -jar", "/usr/share/jenkins/jenkins.war"},
 	}, &container.HostConfig{
 		PortBindings: nat.PortMap{
 			newPort: []nat.PortBinding{
@@ -132,59 +142,57 @@ func (o *DockerRunOptions) CheckImageExistsInDockerHub(cmd *cobra.Command) bool 
 }
 func (o *DockerRunOptions) BuildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
-	cli, err := o.ConnectToDocker()
-	if err != nil {
-		cmd.Print("8. ")
-		cmd.Println(err)
-		return err
-	}
-	file, err := os.Open(o.DockerfilePath)
-	if err != nil {
-		cmd.Print("10. ")
-		cmd.Println(err)
-		return err
-	}
-	readDockerfile, err := ioutil.ReadAll(file)
-	if err != nil {
-		cmd.Print("11. ")
-		cmd.Println(err)
-		return err
-	}
-	tarHeader := &tar.Header{
-		Name: o.DockerfilePath,
-		Size: int64(len(readDockerfile)),
-	}
-	buffer := new(bytes.Buffer)
-	tw := tar.NewWriter(buffer)
-	defer tw.Close()
-	err = tw.WriteHeader(tarHeader)
-	if err != nil {
-		cmd.Print("12. ")
-		cmd.Println(err)
-		return err
-	}
-	_, err = tw.Write(readDockerfile)
-	if err != nil {
-		cmd.Print("13. ")
-		cmd.Println(err)
-		return err
-	}
-	dockerFileTarReader := bytes.NewReader(buffer.Bytes())
-	opts := types.ImageBuildOptions{
+	cli, _ := o.ConnectToDocker()
+	dockerFileTarReader, err := o.TarReader(cmd)
+	buildOptions := types.ImageBuildOptions{
 		Context:    dockerFileTarReader,
 		Dockerfile: o.DockerfilePath,
-		Tags:       []string{o.ImageName, ":" + o.Tag},
 		Remove:     true,
+		Tags:       []string{o.ImageName},
 	}
-	resp, err := cli.ImageBuild(ctx, dockerFileTarReader, opts)
+	imageBuildResponse, err := cli.ImageBuild(
+		ctx,
+		dockerFileTarReader,
+		buildOptions,
+	)
+
 	if err != nil {
-		cmd.Print("9. ")
-		cmd.Println(err)
 		return err
 	}
-	defer resp.Body.Close()
+	defer imageBuildResponse.Body.Close()
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(resp.Body)
+	buf.ReadFrom(imageBuildResponse.Body)
 	cmd.Println(buf.String())
 	return nil
+}
+func (o *DockerRunOptions) TarReader(cmd *cobra.Command) (*bytes.Reader, error) {
+	src := []string{o.DockerfilePath, o.WarPath}
+	buf := new(bytes.Buffer)
+	tw := tar.NewWriter(buf)
+	defer tw.Close()
+
+	for _, fileName := range src {
+		dockerFileReader, err := os.Open(fileName)
+		if err != nil {
+			return nil, err
+		}
+		readDockerFile, err := ioutil.ReadAll(dockerFileReader)
+		if err != nil {
+			return nil, err
+		}
+		tarHeader := &tar.Header{
+			Name: fileName,
+			Size: int64(len(readDockerFile)),
+		}
+		err = tw.WriteHeader(tarHeader)
+		if err != nil {
+			return nil, err
+		}
+		_, err = tw.Write(readDockerFile)
+		if err != nil {
+			return nil, err
+		}
+	}
+	dockerFileTarReader := bytes.NewReader(buf.Bytes())
+	return dockerFileTarReader, nil
 }
