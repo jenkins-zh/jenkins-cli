@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+
 	"strconv"
 
 	"github.com/docker/docker/api/types"
@@ -72,7 +73,6 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 	ctx := context.Background()
 	cli, err := o.ConnectToDocker()
 	if err != nil {
-		cmd.Print("1. ")
 		cmd.Println(err)
 		return err
 	}
@@ -80,41 +80,42 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 	if o.CheckImageExistsInDockerHub(cmd) {
 		reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 		if err != nil {
-			cmd.Print("2. ")
 			cmd.Println(err)
 		}
 		cmd.Print(reader)
 	} else {
 		err := o.BuildImage(cmd)
 		if err != nil {
-			cmd.Print("3. ")
 			cmd.Println(err)
 		}
 	}
-	newPort, err := nat.NewPort("tcp", strconv.Itoa(o.JenkinsPort))
+	jenkinsPort, err := nat.NewPort("tcp", "8080")
 	if err != nil {
-		cmd.Print("4. ")
 		cmd.Println(err)
-		return err
 	}
-
-	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:      imageName,
-		Entrypoint: []string{"java -jar", "/usr/share/jenkins/jenkins.war"},
-	}, &container.HostConfig{
+	hostConfig := &container.HostConfig{
 		PortBindings: nat.PortMap{
-			newPort: []nat.PortBinding{
+			jenkinsPort: []nat.PortBinding{
 				{
-					HostIP:   "127.0.0.1",
+					HostIP:   "0.0.0.0",
 					HostPort: strconv.Itoa(o.JenkinsPort),
 				},
 			},
 		},
-	}, nil, nil, "jenkinsTest")
+	}
+	exposedPorts := map[nat.Port]struct{}{
+		jenkinsPort: struct{}{},
+	}
+	config := &container.Config{
+		Image:        imageName,
+		ExposedPorts: exposedPorts,
+	}
+
+	resp, err := cli.ContainerCreate(ctx, config, hostConfig, nil, nil, "jenkinstest2")
 	if err != nil {
-		cmd.Print("5. ")
 		fmt.Println(err)
 	}
+	cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	fmt.Println(resp.ID)
 	return nil
 }
@@ -122,13 +123,11 @@ func (o *DockerRunOptions) CheckImageExistsInDockerHub(cmd *cobra.Command) bool 
 	ip := fmt.Sprintf("https://index.docker.io/v1/repositories/%s/tags/%s", o.ImageName, o.Tag)
 	resp, err := http.Get(ip)
 	if err != nil {
-		cmd.Print("6. ")
 		cmd.Println(err)
 		return false
 	}
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if string(bytes) != "" {
-		cmd.Print("7. ")
 		cmd.Println(err)
 		return false
 	}
@@ -137,7 +136,7 @@ func (o *DockerRunOptions) CheckImageExistsInDockerHub(cmd *cobra.Command) bool 
 func (o *DockerRunOptions) BuildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
 	cli, _ := o.ConnectToDocker()
-	dockerFileTarReader, err := o.TarReader(cmd)
+	dockerFileTarReader, _ := o.TarReader(cmd)
 	buildOptions := types.ImageBuildOptions{
 		Context:    dockerFileTarReader,
 		Dockerfile: o.DockerfilePath,
