@@ -356,41 +356,11 @@ type CreateJobPayload struct {
 
 // Create can create a job
 func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
-	playLoadData, _ := json.Marshal(jobPayload)
-	formData := url.Values{
-		"json": {string(playLoadData)},
-		"name": {jobPayload.Name},
-		"mode": {jobPayload.Mode},
-		"from": {jobPayload.From},
-	}
-	payload := strings.NewReader(formData.Encode())
-
-	var code int
-	code, err = q.RequestWithoutData(http.MethodPost, "/view/all/createItem",
-		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
-	if code == 302 {
-		err = nil
-	}
-	return
+	return q.CreateJobInFolder(jobPayload, "")
 }
 
 // CreateJobInFolder creates a job in a specific folder and create folder first if the folder does not exist
 func (q *JobClient) CreateJobInFolder(jobPayload CreateJobPayload, path string) (err error) {
-	// check if folder exists
-	_, err = q.GetJob(path)
-	// create folder if not exist
-	if err != nil {
-		createFolderPayload := CreateJobPayload{
-			Name: path,
-			Mode: "com.cloudbees.hudson.plugins.folder.Folder",
-			From: jobPayload.From,
-		}
-		err = q.Create(createFolderPayload)
-		if err != nil {
-			return
-		}
-	}
-
 	// create a job in path
 	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
