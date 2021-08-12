@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-
 	"strconv"
 
 	"github.com/docker/docker/api/types"
@@ -53,23 +52,25 @@ var dockerRunCmd = &cobra.Command{
 	Use:     "docker run",
 	Short:   i18n.T("Start a container in docker where all upgraded plugins and jenkins run in order to test their eligibility"),
 	Long:    i18n.T("Start a container, where all upgraded plugins and jenkins run, using a image built by Jenkins WAR packager in order to test their eligibility"),
-	RunE:    dockerRunOptions.PullImageAndRunContainer,
+	RunE:    dockerRunOptions.pullImageAndRunContainer,
 	Example: `jcli docker run`,
 }
 
+//GetDockerIPAndPort returns a string contains IP and port of a local or remote host
 func (o *DockerRunOptions) GetDockerIPAndPort() string {
 	ip := o.IP
 	port := o.DockerPort
 	return fmt.Sprintf("tcp://%s:%d", ip, port)
 }
 
+//ConnectToDocker returns a client which is used to connect to a local or remote docker host
 func (o *DockerRunOptions) ConnectToDocker() (cli *client.Client, err error) {
 	tcp := fmt.Sprintf("tcp://%s:%d", o.IP, o.DockerPort)
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation(), client.WithHost(tcp))
 	return cli, err
 }
 
-func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
+func (o *DockerRunOptions) pullImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
 	ctx := context.Background()
 	cli, err := o.ConnectToDocker()
 	if err != nil {
@@ -77,14 +78,14 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 		return err
 	}
 	imageName := o.ImageName + ":" + o.Tag
-	if o.CheckImageExistsInDockerHub(cmd) {
+	if o.checkImageExistsInDockerHub(cmd) {
 		reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 		if err != nil {
 			cmd.Println(err)
 		}
 		cmd.Print(reader)
 	} else {
-		err := o.BuildImage(cmd)
+		err := o.buildImage(cmd)
 		if err != nil {
 			cmd.Println(err)
 		}
@@ -119,7 +120,7 @@ func (o *DockerRunOptions) PullImageAndRunContainer(cmd *cobra.Command, args []s
 	fmt.Println(resp.ID)
 	return nil
 }
-func (o *DockerRunOptions) CheckImageExistsInDockerHub(cmd *cobra.Command) bool {
+func (o *DockerRunOptions) checkImageExistsInDockerHub(cmd *cobra.Command) bool {
 	ip := fmt.Sprintf("https://index.docker.io/v1/repositories/%s/tags/%s", o.ImageName, o.Tag)
 	resp, err := http.Get(ip)
 	if err != nil {
@@ -133,10 +134,10 @@ func (o *DockerRunOptions) CheckImageExistsInDockerHub(cmd *cobra.Command) bool 
 	}
 	return true
 }
-func (o *DockerRunOptions) BuildImage(cmd *cobra.Command) error {
+func (o *DockerRunOptions) buildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
 	cli, _ := o.ConnectToDocker()
-	dockerFileTarReader, _ := o.TarReader(cmd)
+	dockerFileTarReader, _ := o.getTarReader(cmd)
 	buildOptions := types.ImageBuildOptions{
 		Context:    dockerFileTarReader,
 		Dockerfile: o.DockerfilePath,
@@ -158,7 +159,7 @@ func (o *DockerRunOptions) BuildImage(cmd *cobra.Command) error {
 	cmd.Println(buf.String())
 	return nil
 }
-func (o *DockerRunOptions) TarReader(cmd *cobra.Command) (*bytes.Reader, error) {
+func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
 	src := []string{o.DockerfilePath, o.WarPath}
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
