@@ -36,6 +36,7 @@ func init() {
 		i18n.T("where you want the dockerfile to be placed"))
 }
 
+//DockerRunOptions contains some of the options used to create a docker image and run a container
 type DockerRunOptions struct {
 	ImageName      string
 	Tag            string
