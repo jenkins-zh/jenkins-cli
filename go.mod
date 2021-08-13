@@ -15,6 +15,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/jenkins-zh/jenkins-client v0.0.1
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
+	github.com/kr/pretty v0.2.1 // indirect
 	github.com/linuxsuren/cobra-extension v0.0.10
 	github.com/linuxsuren/go-cli-alias v0.0.6
 	github.com/linuxsuren/go-cli-plugin v0.0.4
@@ -32,5 +33,6 @@ require (
 	golang.org/x/text v0.3.6
 	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0
+	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	moul.io/http2curl v1.0.0
 )
