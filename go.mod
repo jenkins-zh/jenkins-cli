@@ -1,6 +1,6 @@
 module github.com/jenkins-zh/jenkins-cli
 
-go 1.16
+go 1.14
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.1
@@ -32,6 +32,5 @@ require (
 	golang.org/x/text v0.3.6
 	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
 	moul.io/http2curl v1.0.0
 )
