@@ -356,6 +356,12 @@ type CreateJobPayload struct {
 
 // Create can create a job
 func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
+	return q.CreateJobInFolder(jobPayload, "")
+}
+
+// CreateJobInFolder creates a job in a specific folder and create folder first if the folder does not exist
+func (q *JobClient) CreateJobInFolder(jobPayload CreateJobPayload, path string) (err error) {
+	// create a job in path
 	playLoadData, _ := json.Marshal(jobPayload)
 	formData := url.Values{
 		"json": {string(playLoadData)},
@@ -364,9 +370,10 @@ func (q *JobClient) Create(jobPayload CreateJobPayload) (err error) {
 		"from": {jobPayload.From},
 	}
 	payload := strings.NewReader(formData.Encode())
-
+	path = ParseJobPath(path)
+	api := fmt.Sprintf("/view/all%s/createItem", path)
 	var code int
-	code, err = q.RequestWithoutData(http.MethodPost, "/view/all/createItem",
+	code, err = q.RequestWithoutData(http.MethodPost, api,
 		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
 	if code == 302 {
 		err = nil
