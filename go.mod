@@ -25,7 +25,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/stretchr/testify v1.7.0
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
-	go.uber.org/zap v1.16.0
+	go.uber.org/zap v1.19.0
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/text v0.3.6
 	gopkg.in/yaml.v2 v2.4.0
