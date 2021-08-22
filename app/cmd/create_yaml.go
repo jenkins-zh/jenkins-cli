@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
@@ -38,9 +40,9 @@ type Plugin struct {
 	Source     Source `yaml:"source"`
 }
 type coreAndPluginOption struct {
-	filter []string
-	all    bool
+	plugin PluginUpgradeOption
 	core   bool
+	all    bool
 }
 
 var coreAndPlugin coreAndPluginOption
@@ -48,11 +50,12 @@ var yamlOption YamlOption
 
 func init() {
 	rootCmd.AddCommand(createYamlCmd)
-	createYamlCmd.Flags().StringArrayVarP(&coreAndPlugin.filter, "filter", "", []string{}, i18n.T("Filter for the list"))
+	// createYamlCmd.Flags().StringArrayVarP(&coreAndPlugin.plugin.Filter, "filter", "", []string{}, i18n.T("Filter for the list"))
 	createYamlCmd.Flags().BoolVarP(&coreAndPlugin.all, "all", "", false, i18n.T("Upgrade jenkins core and all plugins to update"))
-	createYamlCmd.Flags().BoolVarP(&coreAndPlugin.core, "core", "", false, i18n.T("Only upgrade jenkins core"))
+	// createYamlCmd.Flags().BoolVarP(&coreAndPlugin.core, "core", "", false, i18n.T("Only upgrade jenkins core"))
+	// createYamlCmd.Flags().BoolVarP(&coreAndPlugin.plugin.All, "plugin-all", "", false, i18n.T("Upgrade all plugins to update"))
 	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.GroupId, "bundle-groupId", "", "io.jenkins.tools.jcli.yaml.demo", i18n.T("GourpId of Bundle in yaml"))
-	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.ArtifactId, "bundle-artifactId", "", "jcli yaml demo", i18n.T("ArtifactId of Bundle in yaml"))
+	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.ArtifactId, "bundle-artifactId", "", "jcli-yaml-demo", i18n.T("ArtifactId of Bundle in yaml"))
 	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.Vendor, "bundle-vendor", "", "jenkins-cli", i18n.T("Vendor of Bundle in yaml"))
 	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.Title, "bundle-title", "", "jcli create yaml demo", i18n.T("Title of Bundle in yaml"))
 	createYamlCmd.Flags().StringVarP(&yamlOption.Bundle.Description, "bundle-description", "", "Upgraded jenkins core and plugins in a YAML specification", i18n.T("Description of Bundle in yaml"))
@@ -91,12 +94,15 @@ func getLocalJenkinsAndPlugins() (jenkinsVersion string, pluginList []client.Ins
 }
 
 func (c *coreAndPluginOption) multipleChoice(cmd *cobra.Command, args []string) (err error) {
-	var yamlOption YamlOption
+	// var yamlOption YamlOption
+	targetPlugins := make([]string, 0)
+	yamlOption.War.GroupId = "org.jenkins-ci.main"
+	yamlOption.War.ArtifactId = "jenkins-war"
 	if c.all {
 		if _, pluginList, err := getLocalJenkinsAndPlugins(); err == nil {
 			yamlOption.Plugins = make([]Plugin, len(pluginList))
 			for index, plugin := range pluginList {
-				if index >= 5 {
+				if index >= 3 {
 					break
 				}
 				yamlOption.Plugins[index].GroupId, yamlOption.Plugins[index].ArtifactId, yamlOption.Plugins[index].Source.Version, err = getGroupIdAndArtifactId(plugin.ShortName)
@@ -104,13 +110,63 @@ func (c *coreAndPluginOption) multipleChoice(cmd *cobra.Command, args []string) 
 					return err
 				}
 			}
-			yamlOption.War.GroupId = "org.jenkins-ci.main"
-			yamlOption.War.ArtifactId = "jenkins-war"
 			if items, _, err := GetVersionData(LtsURL); err == nil {
-				yamlOption.War.Source.Version = items[0].Title[8:]
+				yamlOption.War.Source.Version = "\"" + items[0].Title[8:] + "\""
 			}
 		}
-		renderBundle(cmd)
+		renderYaml(yamlOption)
+		return nil
+	} else if !c.all {
+		var coreTemp string
+		if version, pluginList, err := getLocalJenkinsAndPlugins(); err == nil {
+			promptCore := &survey.MultiSelect{
+				Message: fmt.Sprintf("Please indicate whether do you want to upgrade or not"),
+				Options: []string{"Yes", "No"},
+			}
+			err = survey.AskOne(promptCore, &coreTemp)
+			if err != nil {
+				return err
+			}
+			if coreTemp == "Yes" {
+				if items, _, err := GetVersionData(LtsURL); err == nil {
+					yamlOption.War.Source.Version = "\"" + items[0].Title[8:] + "\""
+				}
+			} else if coreTemp == "No" {
+				yamlOption.War.Source.Version = "\"" + version + "\""
+			}
+			prompt := &survey.Select{
+				Message: fmt.Sprintf("Please select the plugins(%d) which you want to upgrade to the latest: ", len(pluginList)),
+				Options: coreAndPlugin.plugin.convertToArray(pluginList),
+			}
+			err = survey.AskOne(prompt, &targetPlugins)
+
+			if err != nil {
+				return err
+			}
+			tempMap := make(map[string]bool)
+			for _, plugin := range targetPlugins {
+				tempMap[plugin] = true
+			}
+			for index, plugin := range pluginList {
+				if index >= 3 {
+					break
+				}
+				if _, exist := tempMap[plugin.ShortName]; exist {
+					yamlOption.Plugins[index].GroupId, yamlOption.Plugins[index].ArtifactId, yamlOption.Plugins[index].Source.Version, err = getGroupIdAndArtifactId(plugin.ShortName)
+				} else {
+					yamlOption.Plugins[index].GroupId, yamlOption.Plugins[index].ArtifactId, _, err = getGroupIdAndArtifactId(plugin.ShortName)
+					yamlOption.Plugins[index].Source.Version = plugin.Version
+				}
+				if err != nil {
+					return err
+				}
+			}
+			renderYaml(yamlOption)
+			return nil
+		}
+	}
+	if c.all && len(targetPlugins) != 0 {
+		cmd.Println("If you want to upgrade jenkins and all plugins, please use the flag --all. Otherwise, please do not append anything after `create yaml` and use the prompt instead.")
 	}
 	return nil
 }
@@ -145,7 +201,7 @@ func trimToId(content string) (version string, groupId string, artifactId string
 	return version, groupId, artifactId
 }
 
-func renderBundle(cmd *cobra.Command) (err error) {
+func renderYaml(yamlTemp YamlOption) (err error) {
 	bundle := Bundle{
 		yamlOption.Bundle.GroupId,
 		yamlOption.Bundle.ArtifactId,
@@ -153,10 +209,14 @@ func renderBundle(cmd *cobra.Command) (err error) {
 		yamlOption.Bundle.Title,
 		yamlOption.Bundle.Description,
 	}
-	d, err := yaml.Marshal(&bundle)
+	yamlTemp.Bundle = bundle
+	data, err := yaml.Marshal(&yamlTemp)
 	if err != nil {
 		return err
 	}
-	cmd.Printf(string(d))
+	err = ioutil.WriteFile("test.yaml", data, 0)
+	if err != nil {
+		return err
+	}
 	return nil
 }

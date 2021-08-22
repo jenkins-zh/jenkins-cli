@@ -1,0 +1,29 @@
+bundle:
+  groupId: io.jenkins.tools.jcli.yaml.demo
+  artifactId: jcli-yaml-demo
+  vendor: jenkins-cli
+  title: jcli create yaml demo
+  description: Upgraded jenkins core and plugins in a YAML specification
+buildSettings:
+  docker:
+    base: "openjdk:8-jdk"
+    tag: "jenkins-experimental/cwp-jenkinsfile-runner-demo"
+    build: true
+war:
+  groupId: org.jenkins-ci.main
+  artifactId: jenkins-war
+  source:
+    version: "2.289.3"
+plugins:
+- groupId: org.jenkins-ci.plugins
+  artifactId: credentials
+  source:
+    version: "2.5"
+- groupId: org.jenkins-ci.plugins
+  artifactId: apache-httpcomponents-client-4-api
+  source:
+    version: 4.5.13-1.0
+- groupId: org.jenkins-ci.plugins.workflow
+  artifactId: workflow-api
+  source:
+    version: "2.46"
