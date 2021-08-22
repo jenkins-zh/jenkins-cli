@@ -102,9 +102,6 @@ func (c *coreAndPluginOption) multipleChoice(cmd *cobra.Command, args []string) 
 		if _, pluginList, err := getLocalJenkinsAndPlugins(); err == nil {
 			yamlOption.Plugins = make([]Plugin, len(pluginList))
 			for index, plugin := range pluginList {
-				if index >= 3 {
-					break
-				}
 				yamlOption.Plugins[index].GroupId, yamlOption.Plugins[index].ArtifactId, yamlOption.Plugins[index].Source.Version, err = getGroupIdAndArtifactId(plugin.ShortName)
 				if err != nil {
 					return err
@@ -117,24 +114,24 @@ func (c *coreAndPluginOption) multipleChoice(cmd *cobra.Command, args []string) 
 		renderYaml(yamlOption)
 		return nil
 	} else if !c.all {
-		var coreTemp string
+		var coreTemp bool
 		if version, pluginList, err := getLocalJenkinsAndPlugins(); err == nil {
-			promptCore := &survey.MultiSelect{
+			yamlOption.Plugins = make([]Plugin, len(pluginList))
+			promptCore := &survey.Confirm{
 				Message: fmt.Sprintf("Please indicate whether do you want to upgrade or not"),
-				Options: []string{"Yes", "No"},
 			}
 			err = survey.AskOne(promptCore, &coreTemp)
 			if err != nil {
 				return err
 			}
-			if coreTemp == "Yes" {
+			if coreTemp {
 				if items, _, err := GetVersionData(LtsURL); err == nil {
 					yamlOption.War.Source.Version = "\"" + items[0].Title[8:] + "\""
 				}
-			} else if coreTemp == "No" {
+			} else if !coreTemp {
 				yamlOption.War.Source.Version = "\"" + version + "\""
 			}
-			prompt := &survey.Select{
+			prompt := &survey.MultiSelect{
 				Message: fmt.Sprintf("Please select the plugins(%d) which you want to upgrade to the latest: ", len(pluginList)),
 				Options: coreAndPlugin.plugin.convertToArray(pluginList),
 			}
@@ -148,9 +145,6 @@ func (c *coreAndPluginOption) multipleChoice(cmd *cobra.Command, args []string) 
 				tempMap[plugin] = true
 			}
 			for index, plugin := range pluginList {
-				if index >= 3 {
-					break
-				}
 				if _, exist := tempMap[plugin.ShortName]; exist {
 					yamlOption.Plugins[index].GroupId, yamlOption.Plugins[index].ArtifactId, yamlOption.Plugins[index].Source.Version, err = getGroupIdAndArtifactId(plugin.ShortName)
 				} else {
