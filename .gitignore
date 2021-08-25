@@ -26,6 +26,7 @@ mock
 
 # test files
 app/cmd/test.yaml
+*.yaml
 
 # language
 #app/i18n/bindata.go
