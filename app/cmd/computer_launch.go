@@ -6,8 +6,8 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -25,7 +25,7 @@ type ComputerLaunchOption struct {
 	ShowProgress bool
 
 	/** share info between inner functions */
-	ComputerClient *client.ComputerClient
+	ComputerClient *computer.Client
 	CurrentJenkins *appCfg.JenkinsServer
 	Output         string
 
@@ -270,7 +270,7 @@ func (o *ComputerLaunchOption) LaunchJnlp(name string) (err error) {
 			env := os.Environ()
 			agentArgs := []string{"java", "-jar", computerLaunchOption.Output,
 				"-jnlpUrl", fmt.Sprintf("%s/computer/%s/slave-agent.jnlp", o.ComputerClient.URL, name),
-				"-secret", secret, "-workDir", client.GetDefaultAgentWorkDir()}
+				"-secret", secret, "-workDir", computer.GetDefaultAgentWorkDir()}
 
 			if o.CurrentJenkins.ProxyAuth != "" {
 				proxyURL, _ := url.Parse(o.CurrentJenkins.Proxy)

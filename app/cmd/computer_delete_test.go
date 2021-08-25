@@ -2,17 +2,16 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	"io"
 	"io/ioutil"
 	"os"
-
-	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-client/pkg/mock/mhttp"
 )
 
 var _ = Describe("create delete command", func() {
@@ -57,7 +56,7 @@ var _ = Describe("create delete command", func() {
 		It("should success", func() {
 			name := "fake-name"
 
-			client.PrepareForComputerDeleteRequest(roundTripper, "http://localhost:8080/jenkins",
+			computer.PrepareForComputerDeleteRequest(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
 
 			rootCmd.SetArgs([]string{"computer", "delete", name})
