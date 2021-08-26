@@ -31,8 +31,8 @@ require (
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
 	golang.org/x/text v0.3.6
-	golang.org/x/tools v0.1.5 // indirect
+	golang.org/x/tools v0.1.6-0.20210802203754-9b21a8868e16 // indirect
 	gopkg.in/yaml.v2 v2.4.0
-	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
+	honnef.co/go/tools v0.2.0 // indirect
 	moul.io/http2curl v1.0.0
 )

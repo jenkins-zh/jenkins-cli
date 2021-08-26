@@ -37,9 +37,10 @@ func init() {
 
 var createYamlCmd = &cobra.Command{
 	Use:     "create yaml",
-	Short:   "",
-	Long:    "",
-	Example: ``,
+	Short:   i18n.T("Print a formula which contains all plugins come from current Jenkins server and upgraded plugins which were chosen by user"),
+	Long:    i18n.T("Print a formula which contains all plugins come from current Jenkins server and upgraded plugins which were chosen by user"),
+	Example: `create yaml --all
+	create yaml`,
 	RunE:    multipleChoice,
 }
 
@@ -196,7 +197,7 @@ func getLocalJenkinsAndPlugins() (jenkinsVersion string, err error) {
 	jenkinsVersion = status.Version
 	return jenkinsVersion, nil
 }
-
+//ConvertPluginsToArray convert jenkinsFormula.Plugin to slice for the sake of multiple select
 func ConvertPluginsToArray(plugins []jenkinsFormula.Plugin) (pluginArray []string) {
 	pluginArray = make([]string, 0)
 	for _, plugin := range plugins {
