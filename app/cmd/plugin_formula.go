@@ -2,10 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
-	"sort"
-	"strings"
-
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
@@ -13,6 +9,9 @@ import (
 	cobra_ext "github.com/linuxsuren/cobra-extension"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
+	"net/http"
+	"sort"
+	"strings"
 )
 
 // PluginFormulaOption option for plugin formula command

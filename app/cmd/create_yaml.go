@@ -130,12 +130,12 @@ func getNewVersionOfPlugin(pluginName string) (version string, err error) {
 	if err != nil {
 		return "", err
 	}
-	version = trimToId(newPluginOption.Version)
+	version = trimToID(newPluginOption.Version)
 
 	return version, nil
 }
 
-func trimToId(content string) (version string) {
+func trimToID(content string) (version string) {
 	startOfVersionNumber := strings.LastIndex(content, ":")
 	version = content[startOfVersionNumber+1:]
 	return version
