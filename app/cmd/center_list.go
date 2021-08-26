@@ -99,7 +99,8 @@ func checkConnectionWithJenkins(cmd *cobra.Command, args []string) (err error) {
 	}
 	return err
 }
-//GetVersionData fetch the latest jenkins version 
+
+//GetVersionData fetch the latest jenkins version
 func GetVersionData(rss string) ([]Item, string, error) {
 	resp, err := http.Get(rss)
 	if err != nil {
