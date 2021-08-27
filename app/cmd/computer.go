@@ -4,7 +4,8 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
+	"github.com/jenkins-zh/jenkins-client/pkg/core"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -21,13 +22,13 @@ var computerCmd = &cobra.Command{
 }
 
 // GetComputerClient returns the client of computer
-func GetComputerClient(option common.Option) (*client.ComputerClient, *appCfg.JenkinsServer) {
-	jClient := &client.ComputerClient{
-		JenkinsCore: client.JenkinsCore{
+func GetComputerClient(option common.Option) (*computer.Client, *appCfg.JenkinsServer) {
+	jClient := &computer.Client{
+		JenkinsCore: core.JenkinsCore{
 			RoundTripper: option.RoundTripper,
 		},
 	}
-	return jClient, getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+	return jClient, getCurrentJenkinsAndClientV2(&(jClient.JenkinsCore))
 }
 
 // ValidAgentNames autocomplete with agent names
