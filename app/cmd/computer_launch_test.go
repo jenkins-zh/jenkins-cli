@@ -2,19 +2,19 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/jenkins-zh/jenkins-cli/util"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 
-	"github.com/jenkins-zh/jenkins-cli/client"
-
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-client/pkg/mock/mhttp"
 )
 
 var _ = Describe("computer launch command", func() {
@@ -55,7 +55,7 @@ var _ = Describe("computer launch command", func() {
 	Context("launch a default type of agent", func() {
 		It("should success", func() {
 
-			client.PrepareForLaunchComputer(roundTripper, "http://localhost:8080/jenkins",
+			computer.PrepareForLaunchComputer(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
 
 			rootCmd.SetArgs([]string{"computer", "launch", name})
@@ -83,7 +83,7 @@ var _ = Describe("computer launch command", func() {
 				RoundTrip(client.NewRequestMatcher(request)).Return(response, nil)
 
 			secret := "fake-secret"
-			client.PrepareForComputerAgentSecretRequest(roundTripper,
+			computer.PrepareForComputerAgentSecretRequest(roundTripper,
 				"http://localhost:8080/jenkins", "admin", "111e3a2f0231198855dceaff96f20540a9", name, secret)
 		})
 
