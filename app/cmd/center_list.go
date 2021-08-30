@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"encoding/xml"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 //LtsURL is the URL of stable Jenkins RSS
@@ -16,9 +17,6 @@ const LtsURL = "https://www.jenkins.io/changelog-stable/rss.xml"
 
 //WidthOfDescription is the width of the description column
 const WidthOfDescription = 60
-
-//NumberOfLinesOfDescription is the number of lines to be printed in description column
-const NumberOfLinesOfDescription = 10
 
 //ASCIIOfLineFeed is the ASCII of line feed
 const ASCIIOfLineFeed = 10
@@ -46,9 +44,12 @@ type Item struct {
 }
 
 var centerListOption CenterListOption
+var numberOfLines int
 
 func init() {
 	centerCmd.AddCommand(centerListCmd)
+	centerListCmd.Flags().IntVarP(&numberOfLines, "lines", "", 10,
+		i18n.T("the number of lines to be printed in description column"))
 }
 
 var centerListCmd = &cobra.Command{
@@ -72,7 +73,7 @@ var centerListCmd = &cobra.Command{
 			return error
 		}
 		jenkinsVersion := status.Version
-		changeLog, err := getChangelog(LtsURL, jenkinsVersion, getVersionData)
+		changeLog, err := getChangelog(LtsURL, jenkinsVersion, numberOfLines, getVersionData)
 		cmd.Println(changeLog)
 		return err
 	},
@@ -93,7 +94,7 @@ func getVersionData(rss string) ([]Item, string, error) {
 	return centerListOption.Channel.Items, centerListOption.Channel.Title, nil
 }
 
-func getChangelog(rss string, version string, getData func(rss string) ([]Item, string, error)) (changelog string, err error) {
+func getChangelog(rss string, version string, lines int, getData func(rss string) ([]Item, string, error)) (changelog string, err error) {
 	items, title, error := getData(rss)
 	if error != nil {
 		return "", error
@@ -110,7 +111,7 @@ func getChangelog(rss string, version string, getData func(rss string) ([]Item, 
 		}
 		isTheLatestVersion = 0
 		temp = trimXMLSymbols(item.Description)
-		temp = regulateWidthAndLines(temp, WidthOfDescription, NumberOfLinesOfDescription)
+		temp = regulateWidthAndLines(temp, WidthOfDescription, lines)
 		t.AppendRow([]interface{}{index + 1, item.Title, temp, item.PubDate[:17]})
 		t.AppendSeparator()
 	}

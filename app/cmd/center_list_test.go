@@ -4,13 +4,14 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/xml"
+	"io/ioutil"
+	"net/http"
+	"os"
+
 	"github.com/golang/mock/gomock"
 	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"io/ioutil"
-	"net/http"
-	"os"
 )
 
 //go:embed center_list.txt
@@ -50,7 +51,7 @@ var _ = Describe("center list command", func() {
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
-			temp, _ := getChangelog(LtsURL, jenkinsVersions[0][8:], mockGetVersionData)
+			temp, _ := getChangelog(LtsURL, jenkinsVersions[0][8:], 10, mockGetVersionData)
 			Expect(temp).To(Equal(result[0]))
 		})
 
@@ -61,7 +62,7 @@ var _ = Describe("center list command", func() {
 			Expect(err).To(BeNil())
 			err = ioutil.WriteFile(rootOptions.ConfigFile, data, 0664)
 			Expect(err).To(BeNil())
-			temp, _ := getChangelog(LtsURL, jenkinsVersions[1][8:], mockGetVersionData)
+			temp, _ := getChangelog(LtsURL, jenkinsVersions[1][8:], 10, mockGetVersionData)
 			Expect(temp).To(Equal(result[1]))
 		})
 	})
