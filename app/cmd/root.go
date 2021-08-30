@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/v29/github"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-client/pkg/core"
 	alias "github.com/linuxsuren/go-cli-alias/pkg"
 	"github.com/linuxsuren/go-cli-alias/pkg/cmd"
 	goPlugin "github.com/linuxsuren/go-cli-plugin/pkg"
@@ -441,6 +442,19 @@ func getCurrentJenkinsAndClientOrDie(jclient *client.JenkinsCore) (jenkins *appC
 
 // Deprecated see also GetCurrentJenkinsAndClient
 func getCurrentJenkinsAndClient(jClient *client.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
+	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
+		jClient.URL = jenkins.URL
+		jClient.UserName = jenkins.UserName
+		jClient.Token = jenkins.Token
+		jClient.Proxy = jenkins.Proxy
+		jClient.ProxyAuth = jenkins.ProxyAuth
+		jClient.InsecureSkipVerify = jenkins.InsecureSkipVerify
+	}
+	return
+}
+
+// this is a temporary function to adopt github.com/jenkins-zh/jenkins-client
+func getCurrentJenkinsAndClientV2(jClient *core.JenkinsCore) (jenkins *appCfg.JenkinsServer) {
 	if jenkins = GetCurrentJenkinsFromOptions(); jenkins != nil {
 		jClient.URL = jenkins.URL
 		jClient.UserName = jenkins.UserName

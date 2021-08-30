@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	cobra_ext "github.com/linuxsuren/cobra-extension"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -35,7 +35,7 @@ var computerListCmd = &cobra.Command{
 			return
 		}
 
-		var computers client.ComputerList
+		var computers computer.List
 		if computers, err = jClient.List(); err == nil {
 			computerListOption.Writer = cmd.OutOrStdout()
 			computerListOption.CellRenderMap = map[string]cobra_ext.RenderCell{
