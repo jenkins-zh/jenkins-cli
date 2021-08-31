@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -26,8 +27,8 @@ const ASCIIOfSpace = 32
 
 //CenterListOption as options for Jenkins RSS
 type CenterListOption struct {
-	Channel      Channel `xml:"channel"`
-	RoundTripper http.RoundTripper
+	Channel Channel `xml:"channel"`
+	// RoundTripper http.RoundTripper
 }
 
 //Channel as part of CenterListOption
@@ -53,9 +54,10 @@ func init() {
 }
 
 var centerListCmd = &cobra.Command{
-	Use:   "list",
-	Short: i18n.T("Print the information of recent-released Jenkins"),
-	Long:  i18n.T("Print the information of recent-released Jenkins"),
+	Use:     "list",
+	Short:   i18n.T("Print the information of recent-released Jenkins"),
+	Long:    i18n.T("Print the information of recent-released Jenkins"),
+	PreRunE: checkConnectionWithJenkins,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jenkins := getCurrentJenkinsFromOptionsOrDie()
 		jclient := &client.JenkinsStatusClient{
@@ -77,6 +79,20 @@ var centerListCmd = &cobra.Command{
 		cmd.Println(changeLog)
 		return err
 	},
+}
+
+func checkConnectionWithJenkins(cmd *cobra.Command, args []string) (err error) {
+	jCoreClient := &client.JenkinsStatusClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: pluginFormulaOption.RoundTripper,
+		},
+	}
+	getCurrentJenkinsAndClient(&(jCoreClient.JenkinsCore))
+	if _, err := jCoreClient.Get(); err != nil {
+		err = fmt.Errorf("cannot get the version of current Jenkins, error is %v", err)
+		return err
+	}
+	return err
 }
 
 func getVersionData(rss string) ([]Item, string, error) {

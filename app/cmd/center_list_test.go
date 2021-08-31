@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/golang/mock/gomock"
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -19,14 +18,14 @@ var resultOneVersionData string
 
 var _ = Describe("center list command", func() {
 	var (
-		ctrl         *gomock.Controller
-		roundTripper *mhttp.MockRoundTripper
+		ctrl *gomock.Controller
+		// roundTripper *mhttp.MockRoundTripper
 	)
 
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		roundTripper = mhttp.NewMockRoundTripper(ctrl)
-		centerListOption.RoundTripper = roundTripper
+		// roundTripper = mhttp.NewMockRoundTripper(ctrl)
+		// centerListOption.RoundTripper = roundTripper
 		rootCmd.SetArgs([]string{})
 		rootOptions.Jenkins = ""
 		rootOptions.ConfigFile = "test.yaml"
