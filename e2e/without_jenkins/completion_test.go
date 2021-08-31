@@ -1,9 +1,10 @@
-package e2e
+package withoutjenkins
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os/exec"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBashCompletion(t *testing.T) {
@@ -30,5 +31,5 @@ func TestPowerShellCompletion(t *testing.T) {
 	cmd := exec.Command("jcli", "completion", "--type", "powerShell")
 	data, err := cmd.CombinedOutput()
 	assert.Nil(t, err)
-	assert.Contains(t, string(data), "using namespace System.Management.Automation")
+	assert.Contains(t, string(data), "powershell completion for jcli")
 }
