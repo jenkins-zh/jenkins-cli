@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -44,53 +45,57 @@ type Item struct {
 	PubDate     string `xml:"pubDate"`
 }
 
-var centerListOption CenterListOption
 var numberOfLines int
+var coreVersion string
 
 func init() {
 	centerCmd.AddCommand(centerListCmd)
-	centerListCmd.Flags().IntVarP(&numberOfLines, "lines", "", 10,
-		i18n.T("the number of lines to be printed in description column"))
+	centerListCmd.Flags().IntVar(&numberOfLines, "amount", 10,
+		i18n.T("the amount of information to be printed in description column"))
+	centerListCmd.Flags().StringVarP(&coreVersion, "version", "v", "",
+		i18n.T("current jenkins version"))
 }
 
 var centerListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   i18n.T("Print the information of recent-released Jenkins"),
-	Long:    i18n.T("Print the information of recent-released Jenkins"),
+	Use:   "list",
+	Short: i18n.T("Print the information of recent-released Jenkins"),
+	Long:  i18n.T("Print the information of recent-released Jenkins which are newer than the installed one."),
+	Example: `jcli center list --version 2.345.1
+jcli center list`,
 	PreRunE: checkConnectionWithJenkins,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
-		jenkins := getCurrentJenkinsFromOptionsOrDie()
-		jclient := &client.JenkinsStatusClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: centerOption.RoundTripper,
-			},
+		var jenkinsVersion string
+		if coreVersion != "" {
+			jenkinsVersion = coreVersion
+			changeLog, err := getChangelog(LtsURL, jenkinsVersion, numberOfLines, getVersionData)
+			cmd.Println(changeLog)
+			return err
 		}
-		jclient.URL = jenkins.URL
-		jclient.UserName = jenkins.UserName
-		jclient.Token = jenkins.Token
-		jclient.Proxy = jenkins.Proxy
-		jclient.ProxyAuth = jenkins.ProxyAuth
-		status, error := jclient.Get()
-		if error != nil {
-			return error
-		}
-		jenkinsVersion := status.Version
-		changeLog, err := getChangelog(LtsURL, jenkinsVersion, numberOfLines, getVersionData)
-		cmd.Println(changeLog)
 		return err
 	},
 }
 
 func checkConnectionWithJenkins(cmd *cobra.Command, args []string) (err error) {
-	jCoreClient := &client.JenkinsStatusClient{
-		JenkinsCore: client.JenkinsCore{
-			RoundTripper: pluginFormulaOption.RoundTripper,
-		},
-	}
-	getCurrentJenkinsAndClient(&(jCoreClient.JenkinsCore))
-	if _, err := jCoreClient.Get(); err != nil {
-		err = fmt.Errorf("cannot get the version of current Jenkins, error is %v", err)
-		return err
+	if coreVersion != "" {
+		matched, _ := regexp.MatchString("^[0-9]*\\.[0-9]*\\.[0-9]*", coreVersion)
+		if matched {
+			return nil
+		} else {
+			panic("Format of the jenkins version is not correct. The format should be sth like 2.235.2")
+		}
+	} else if coreVersion == "" {
+		jCoreClient := &client.JenkinsStatusClient{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginFormulaOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jCoreClient.JenkinsCore))
+		status, err := jCoreClient.Get()
+		if err != nil {
+			err = fmt.Errorf("cannot get the version of current Jenkins, error is %v. Please check current status of your jenkins and your .jenkins-cli.yaml", err)
+			panic(err)
+		}
+		coreVersion = status.Version
 	}
 	return err
 }
@@ -126,7 +131,8 @@ func getChangelog(rss string, version string, lines int, getData func(rss string
 			break
 		}
 		isTheLatestVersion = 0
-		temp = trimXMLSymbols(item.Description)
+		temp = strings.Replace(item.Description, "\n", "", -1)
+		temp = trimXMLSymbols(temp)
 		temp = regulateWidthAndLines(temp, WidthOfDescription, lines)
 		t.AppendRow([]interface{}{index + 1, item.Title, temp, item.PubDate[:17]})
 		t.AppendSeparator()
