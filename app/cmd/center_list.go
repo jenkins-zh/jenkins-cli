@@ -80,9 +80,8 @@ func checkConnectionWithJenkins(cmd *cobra.Command, args []string) (err error) {
 		matched, _ := regexp.MatchString("^[0-9]*\\.[0-9]*\\.[0-9]*", coreVersion)
 		if matched {
 			return nil
-		} else {
-			panic("Format of the jenkins version is not correct. The format should be sth like 2.235.2")
 		}
+		panic("Format of the jenkins version is not correct. The format should be sth like 2.235.2")
 	} else if coreVersion == "" {
 		jCoreClient := &client.JenkinsStatusClient{
 			JenkinsCore: client.JenkinsCore{
@@ -90,8 +89,9 @@ func checkConnectionWithJenkins(cmd *cobra.Command, args []string) (err error) {
 			},
 		}
 		getCurrentJenkinsAndClient(&(jCoreClient.JenkinsCore))
+		var status *client.JenkinsStatus
 		status, err := jCoreClient.Get()
-		if err != nil {
+		if status.Version == "" {
 			err = fmt.Errorf("cannot get the version of current Jenkins, error is %v. Please check current status of your jenkins and your .jenkins-cli.yaml", err)
 			panic(err)
 		}
