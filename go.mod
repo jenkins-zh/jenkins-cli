@@ -10,7 +10,7 @@ require (
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v29 v29.0.3
-	github.com/hashicorp/go-version v1.2.1
+	github.com/hashicorp/go-version v1.3.0
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/jenkins-zh/jenkins-client v0.0.1
