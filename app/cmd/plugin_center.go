@@ -42,7 +42,7 @@ var pluginCenterCmd = &cobra.Command{
 		t := table.NewWriter()
 		t.AppendHeader(table.Row{"ShortName", "Version", "Released Date", "Requires Jenkins"})
 		if plugins, err = jClient.GetPlugins(1); err != nil {
-			err = fmt.Errorf("cannot get the version of current Jenkins, error is %v. Please check current status of your jenkins and your .jenkins-cli.yaml", err)
+			err = fmt.Errorf("cannot get the plugin list of current Jenkins, error is %v. Please check current status of your jenkins and your .jenkins-cli.yaml", err)
 		} else if err == nil {
 			for _, plugin := range plugins.Plugins {
 				version, date, requireCore, err := searchNewPlugin(plugin.ShortName)
