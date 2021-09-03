@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	"github.com/jenkins-zh/jenkins-cli/client"
-	"github.com/spf13/cobra"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	"github.com/jenkins-zh/jenkins-cli/client"
+	"github.com/spf13/cobra"
 )
 
 // JobLogOption is the job log option
