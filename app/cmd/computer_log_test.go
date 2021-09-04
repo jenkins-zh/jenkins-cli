@@ -2,16 +2,15 @@ package cmd
 
 import (
 	"bytes"
+	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	"io/ioutil"
 	"os"
-
-	"github.com/jenkins-zh/jenkins-cli/client"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/jenkins-zh/jenkins-cli/mock/mhttp"
+	"github.com/jenkins-zh/jenkins-client/pkg/mock/mhttp"
 )
 
 var _ = Describe("computer log command", func() {
@@ -56,7 +55,7 @@ var _ = Describe("computer log command", func() {
 		It("should success", func() {
 			name := "fake"
 
-			client.PrepareForComputerLogRequest(roundTripper, "http://localhost:8080/jenkins",
+			computer.PrepareForComputerLogRequest(roundTripper, "http://localhost:8080/jenkins",
 				"admin", "111e3a2f0231198855dceaff96f20540a9", name)
 
 			rootCmd.SetArgs([]string{"computer", "log", name})

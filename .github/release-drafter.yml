@@ -35,7 +35,12 @@ exclude-labels:
   - skip-changelog
   - invalid
 change-template: '* $TITLE (#$NUMBER) @$AUTHOR'
+replacers:
+  - search: '/(?:and )?@dependabot-preview(?:\[bot\])?,?/g'
+    replace: ''
 template: |
   ## What’s Changed
 
   $CHANGES
+
+  Thanks again to $CONTRIBUTORS! 🎉

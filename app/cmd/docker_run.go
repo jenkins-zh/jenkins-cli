@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"strconv"
 
@@ -20,20 +19,20 @@ import (
 
 func init() {
 	rootCmd.AddCommand(dockerRunCmd)
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.ImageName, "image-name", "", "",
-		i18n.T("Name of the image in docker hub which contains upgraded jenkins and plugins"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.IP, "ip", "", "127.0.0.1",
-		i18n.T("The ip address of the computer you want to use"))
+	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.ImageName, "image-name", "", "test",
+		i18n.T("name of the image which contains upgraded jenkins and plugins"))
+	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.IP, "docker-ip", "", "127.0.0.1",
+		i18n.T("the ip address of the computer you want to use"))
 	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.Tag, "tag", "", "latest",
-		i18n.T("The tag of the images"))
+		i18n.T("the tag of the images"))
 	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.DockerPort, "docker-port", "", 2375,
-		i18n.T("The port to connect to docker"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.DockerfilePath, "dockerfile-path", "", "./tmp/output/Dockerfile",
+		i18n.T("the port to connect to docker"))
+	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.DockerfilePath, "dockerfile-path", "", "/tmp/Dockerfile",
 		i18n.T("where you want the dockerfile to be placed"))
-	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.JenkinsPort, "Jenkins-port", "", 8081,
-		i18n.T("The port to connect to jenkins"))
+	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.JenkinsPort, "jenkins-port", "", 8081,
+		i18n.T("The port you want to used to connect to jenkins"))
 	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.WarPath, "war-path", "", "",
-		i18n.T("where you want the dockerfile to be placed"))
+		i18n.T("where your war is placed"))
 }
 
 //DockerRunOptions contains some of the options used to create a docker image and run a container
@@ -50,11 +49,13 @@ type DockerRunOptions struct {
 var dockerRunOptions DockerRunOptions
 
 var dockerRunCmd = &cobra.Command{
-	Use:     "docker run",
-	Short:   i18n.T("Start a container in docker where all upgraded plugins and jenkins run in order to test their eligibility"),
-	Long:    i18n.T("Start a container, where all upgraded plugins and jenkins run, using a image built by Jenkins WAR packager in order to test their eligibility"),
-	RunE:    dockerRunOptions.pullImageAndRunContainer,
-	Example: `jcli docker run`,
+	Use:   "docker run",
+	Short: i18n.T("Create a image and start a container in docker where all upgraded plugins and jenkins run in order to test their eligibility"),
+	Long: i18n.T("This command is used to create a image and start a container, where all upgraded plugins and jenkins run in. This command relies on the war file provided by Custom War Packager.\n" +
+		"The war can be made by calling 'jcli cwp --config-path <yamlfilename>' and the yaml file will be created using the command 'jcli create yaml'."),
+	PreRunE: dockerRunOptions.createDockerfile,
+	RunE:    dockerRunOptions.createImageAndRunContainer,
+	Example: `jcli docker run --docker-ip <ip> --docker-port <port> --war-path <pathToWar>`,
 }
 
 //GetDockerIPAndPort returns a string contains IP and port of a local or remote host
@@ -71,7 +72,7 @@ func (o *DockerRunOptions) ConnectToDocker() (cli *client.Client, err error) {
 	return cli, err
 }
 
-func (o *DockerRunOptions) pullImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
+func (o *DockerRunOptions) createImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
 	ctx := context.Background()
 	cli, err := o.ConnectToDocker()
 	if err != nil {
@@ -79,17 +80,9 @@ func (o *DockerRunOptions) pullImageAndRunContainer(cmd *cobra.Command, args []s
 		return err
 	}
 	imageName := o.ImageName + ":" + o.Tag
-	if o.checkImageExistsInDockerHub(cmd) {
-		reader, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
-		if err != nil {
-			cmd.Println(err)
-		}
-		cmd.Print(reader)
-	} else {
-		err := o.buildImage(cmd)
-		if err != nil {
-			cmd.Println(err)
-		}
+	err = o.buildImage(cmd)
+	if err != nil {
+		cmd.Println(err)
 	}
 	jenkinsPort, err := nat.NewPort("tcp", "8080")
 	if err != nil {
@@ -121,20 +114,7 @@ func (o *DockerRunOptions) pullImageAndRunContainer(cmd *cobra.Command, args []s
 	fmt.Println(resp.ID)
 	return nil
 }
-func (o *DockerRunOptions) checkImageExistsInDockerHub(cmd *cobra.Command) bool {
-	ip := fmt.Sprintf("https://index.docker.io/v1/repositories/%s/tags/%s", o.ImageName, o.Tag)
-	resp, err := http.Get(ip)
-	if err != nil {
-		cmd.Println(err)
-		return false
-	}
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if string(bytes) != "" {
-		cmd.Println(err)
-		return false
-	}
-	return true
-}
+
 func (o *DockerRunOptions) buildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
 	cli, _ := o.ConnectToDocker()
@@ -161,7 +141,7 @@ func (o *DockerRunOptions) buildImage(cmd *cobra.Command) error {
 	return nil
 }
 func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
-	src := []string{o.DockerfilePath, o.WarPath}
+	src := []string{o.DockerfilePath, o.WarPath, "/tmp/jenkins-cli-docker.sh"}
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 	defer tw.Close()
@@ -190,4 +170,22 @@ func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, erro
 	}
 	dockerFileTarReader := bytes.NewReader(buf.Bytes())
 	return dockerFileTarReader, nil
+}
+func (o *DockerRunOptions) createDockerfile(cmd *cobra.Command, args []string) (err error) {
+	sh := "java -jar /usr/share/jenkins/jenkins.war\n" +
+		"tail -f /dev/null"
+	err = ioutil.WriteFile("/tmp/jenkins-cli-docker.sh", []byte(sh), 0)
+	if err != nil {
+		panic(err)
+	}
+	dockerfileString := fmt.Sprintf("FROM adoptopenjdk/openjdk11\n"+
+		"LABEL Version=\"1.0-SNAPSHOT\"Description=\"Jenkins formula generated by jcli\"Vendor=\"Chinese Jenkins Community\"\n"+
+		"ADD %s /usr/share/jenkins/jenkins.war\n"+
+		"ADD /tmp/jenkins-cli-docker.sh /usr/local/bin/jenkins-cli-docker.sh\n"+
+		"ENTRYPOINT [\"sh\", \"/usr/local/bin/jenkins-cli-docker.sh\"]", o.WarPath)
+	err = ioutil.WriteFile("/tmp/Dockerfile", []byte(dockerfileString), 0)
+	if err != nil {
+		panic(err)
+	}
+	return nil
 }
