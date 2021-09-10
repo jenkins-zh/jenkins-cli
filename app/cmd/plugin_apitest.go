@@ -46,7 +46,7 @@ type apiTestOption struct {
 }
 
 type plugin struct {
-	ArtifactId string   `yaml:"artifactId"`
+	ArtifactID string   `yaml:"artifactId"`
 	API        []string `yaml:"api"`
 }
 
@@ -94,11 +94,11 @@ var pluginAPITestCmd = &cobra.Command{
 							return err
 						}
 						if statusCode != 200 {
-							errorAPI, ok := pluginsWithProblemMap[plugin.ArtifactId]
+							errorAPI, ok := pluginsWithProblemMap[plugin.ArtifactID]
 							if ok {
-								pluginsWithProblemMap[plugin.ArtifactId] = errorAPI + "   " + api
+								pluginsWithProblemMap[plugin.ArtifactID] = errorAPI + "   " + api
 							} else {
-								pluginsWithProblemMap[plugin.ArtifactId] = api
+								pluginsWithProblemMap[plugin.ArtifactID] = api
 							}
 						}
 					}
