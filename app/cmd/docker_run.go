@@ -58,13 +58,6 @@ var dockerRunCmd = &cobra.Command{
 	Example: `jcli docker run --docker-ip <ip> --docker-port <port> --war-path <pathToWar>`,
 }
 
-//GetDockerIPAndPort returns a string contains IP and port of a local or remote host
-func (o *DockerRunOptions) GetDockerIPAndPort() string {
-	ip := o.IP
-	port := o.DockerPort
-	return fmt.Sprintf("tcp://%s:%d", ip, port)
-}
-
 //ConnectToDocker returns a client which is used to connect to a local or remote docker host
 func (o *DockerRunOptions) ConnectToDocker() (cli *client.Client, err error) {
 	tcp := fmt.Sprintf("tcp://%s:%d", o.IP, o.DockerPort)
@@ -172,7 +165,7 @@ func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, erro
 	return dockerFileTarReader, nil
 }
 func (o *DockerRunOptions) createDockerfile(cmd *cobra.Command, args []string) (err error) {
-	sh := "java -jar /usr/share/jenkins/jenkins.war\n" +
+	sh := "java -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war\n" +
 		"tail -f /dev/null"
 	err = ioutil.WriteFile("/tmp/jenkins-cli-docker.sh", []byte(sh), 0)
 	if err != nil {
