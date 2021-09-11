@@ -1,4 +1,4 @@
-package cmd
+package docker
 
 import (
 	"archive/tar"
@@ -13,27 +13,8 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/spf13/cobra"
 )
-
-func init() {
-	rootCmd.AddCommand(dockerRunCmd)
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.ImageName, "image-name", "", "test",
-		i18n.T("name of the image which contains upgraded jenkins and plugins"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.IP, "docker-ip", "", "127.0.0.1",
-		i18n.T("the ip address of the computer you want to use"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.Tag, "tag", "", "latest",
-		i18n.T("the tag of the images"))
-	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.DockerPort, "docker-port", "", 2375,
-		i18n.T("the port to connect to docker"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.DockerfilePath, "dockerfile-path", "", "/tmp/Dockerfile",
-		i18n.T("where you want the dockerfile to be placed"))
-	dockerRunCmd.Flags().IntVarP(&dockerRunOptions.JenkinsPort, "jenkins-port", "", 8081,
-		i18n.T("The port you want to used to connect to jenkins"))
-	dockerRunCmd.Flags().StringVarP(&dockerRunOptions.WarPath, "war-path", "", "",
-		i18n.T("where your war is placed"))
-}
 
 //DockerRunOptions contains some of the options used to create a docker image and run a container
 type DockerRunOptions struct {
@@ -46,18 +27,6 @@ type DockerRunOptions struct {
 	WarPath        string
 }
 
-var dockerRunOptions DockerRunOptions
-
-var dockerRunCmd = &cobra.Command{
-	Use:   "docker run",
-	Short: i18n.T("Create a image and start a container in docker where all upgraded plugins and jenkins run in order to test their eligibility"),
-	Long: i18n.T("This command is used to create a image and start a container, where all upgraded plugins and jenkins run in. This command relies on the war file provided by Custom War Packager.\n" +
-		"The war can be made by calling 'jcli cwp --config-path <yamlfilename>' and the yaml file will be created using the command 'jcli create yaml'."),
-	PreRunE: dockerRunOptions.createDockerfile,
-	RunE:    dockerRunOptions.createImageAndRunContainer,
-	Example: `jcli docker run --docker-ip <ip> --docker-port <port> --war-path <pathToWar>`,
-}
-
 //ConnectToDocker returns a client which is used to connect to a local or remote docker host
 func (o *DockerRunOptions) ConnectToDocker() (cli *client.Client, err error) {
 	tcp := fmt.Sprintf("tcp://%s:%d", o.IP, o.DockerPort)
@@ -65,7 +34,8 @@ func (o *DockerRunOptions) ConnectToDocker() (cli *client.Client, err error) {
 	return cli, err
 }
 
-func (o *DockerRunOptions) createImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
+//CreateImageAndRunContainer  is to create an docker image and run a container from the image
+func (o *DockerRunOptions) CreateImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
 	ctx := context.Background()
 	cli, err := o.ConnectToDocker()
 	if err != nil {
@@ -73,7 +43,7 @@ func (o *DockerRunOptions) createImageAndRunContainer(cmd *cobra.Command, args [
 		return err
 	}
 	imageName := o.ImageName + ":" + o.Tag
-	err = o.buildImage(cmd)
+	err = o.BuildImage(cmd)
 	if err != nil {
 		cmd.Println(err)
 	}
@@ -108,10 +78,11 @@ func (o *DockerRunOptions) createImageAndRunContainer(cmd *cobra.Command, args [
 	return nil
 }
 
-func (o *DockerRunOptions) buildImage(cmd *cobra.Command) error {
+//BuildImage is used to build an image
+func (o *DockerRunOptions) BuildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
 	cli, _ := o.ConnectToDocker()
-	dockerFileTarReader, _ := o.getTarReader(cmd)
+	dockerFileTarReader, _ := o.GetTarReader(cmd)
 	buildOptions := types.ImageBuildOptions{
 		Context:    dockerFileTarReader,
 		Dockerfile: o.DockerfilePath,
@@ -133,7 +104,9 @@ func (o *DockerRunOptions) buildImage(cmd *cobra.Command) error {
 	cmd.Println(buf.String())
 	return nil
 }
-func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
+
+//GetTarReader creates tarReader for args in function BuildImage
+func (o *DockerRunOptions) GetTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
 	src := []string{o.DockerfilePath, o.WarPath, "/tmp/jenkins-cli-docker.sh"}
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
@@ -164,7 +137,9 @@ func (o *DockerRunOptions) getTarReader(cmd *cobra.Command) (*bytes.Reader, erro
 	dockerFileTarReader := bytes.NewReader(buf.Bytes())
 	return dockerFileTarReader, nil
 }
-func (o *DockerRunOptions) createDockerfile(cmd *cobra.Command, args []string) (err error) {
+
+//CreateDockerfile will create a docker file for running a jenkins war contains plugins hpi
+func (o *DockerRunOptions) CreateDockerfile(cmd *cobra.Command, args []string) (err error) {
 	sh := "java -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war\n" +
 		"tail -f /dev/null"
 	err = ioutil.WriteFile("/tmp/jenkins-cli-docker.sh", []byte(sh), 0)
