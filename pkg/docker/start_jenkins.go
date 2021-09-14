@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/moby/moby/api/types"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
 	"github.com/spf13/cobra"
 )
 
@@ -153,7 +153,7 @@ func (o *RunOption) CreateDockerfile(cmd *cobra.Command, args []string) (err err
 	o.Script = filepath.Join(dir, "jenkins-cli-docker.sh")
 	err = ioutil.WriteFile(o.Script, []byte(sh), 0)
 	if err != nil {
-		panic(err)
+		cmd.Println(err)
 	}
 	o.DockerfilePath = filepath.Join(dir, "Dockerfile")
 	dockerfileString := fmt.Sprintf(`FROM adoptopenjdk/openjdk11
@@ -163,7 +163,7 @@ func (o *RunOption) CreateDockerfile(cmd *cobra.Command, args []string) (err err
 		ENTRYPOINT ["sh", "/usr/local/bin/jenkins-cli-docker.sh"]`, o.WarPath, o.Script)
 	err = ioutil.WriteFile(o.DockerfilePath, []byte(dockerfileString), 0)
 	if err != nil {
-		panic(err)
+		cmd.Println(err)
 	}
 	return nil
 }
