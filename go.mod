@@ -4,13 +4,13 @@ go 1.16
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.1
+	github.com/Microsoft/go-winio v0.4.17 // indirect
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/atotto/clipboard v0.1.4
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v29 v29.0.3
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jedib0t/go-pretty/v6 v6.2.4
@@ -30,6 +30,7 @@ require (
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.19.0
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
+	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
 	golang.org/x/text v0.3.6
 	golang.org/x/tools v0.1.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0
