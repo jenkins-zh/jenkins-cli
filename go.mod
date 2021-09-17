@@ -9,7 +9,7 @@ require (
 	github.com/atotto/clipboard v0.1.4
 	github.com/chai2010/gettext-go v0.0.0-20170215093142-bf70f2a70fb1
 	github.com/containerd/containerd v1.5.5 // indirect
-	github.com/docker/docker v20.10.8+incompatible // indirect
+	github.com/docker/docker v20.10.8+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v29 v29.0.3
