@@ -9,11 +9,13 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/util"
 	"github.com/jenkins-zh/jenkins-client/pkg/computer"
 	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"net/url"
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -213,7 +215,14 @@ jcli agent launch agent-name --type jnlp`,
 		}
 
 		var f *os.File
-		if f, err = ioutil.TempFile("/tmp", "agent.jar"); err == nil {
+		var tmpPath = "/tmp"
+		if runtime.GOOS == "windows" {
+			userHome, homeErr := homedir.Dir()
+			if homeErr == nil {
+				tmpPath = fmt.Sprintf(userHome)
+			}
+		}
+		if f, err = ioutil.TempFile(tmpPath, "agent.jar"); err == nil {
 			computerLaunchOption.Output = f.Name()
 			agentURL := fmt.Sprintf("%s/jnlpJars/agent.jar", computerLaunchOption.ComputerClient.URL)
 			logger.Debug("start to download agent.jar", zap.String("url", agentURL))
