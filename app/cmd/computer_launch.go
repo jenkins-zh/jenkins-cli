@@ -215,11 +215,11 @@ jcli agent launch agent-name --type jnlp`,
 		}
 
 		var f *os.File
-		var tmpPath = "/tmp"
+		tmpPath := "/tmp"
 		if runtime.GOOS == "windows" {
 			userHome, homeErr := homedir.Dir()
 			if homeErr == nil {
-				tmpPath = fmt.Sprintf(userHome)
+				tmpPath, _ = ioutil.TempDir(userHome, "/tmp")
 			}
 		}
 		if f, err = ioutil.TempFile(tmpPath, "agent.jar"); err == nil {
