@@ -16,6 +16,8 @@ type BackupOption struct {
 	RoundTripper http.RoundTripper
 	BackupDir    string
 	WaitTime     int
+	//Check the backup directory if a new full-date directory exists which means backup succeeds, after triggering thinBackup plugin to backup
+	CheckBackup bool
 }
 
 var backupOption BackupOption
@@ -23,8 +25,9 @@ var backupOption BackupOption
 func init() {
 	rootCmd.AddCommand(backupCmd)
 	healthCheckRegister.Register(getCmdPath(backupCmd), &backupOption)
-	backupCmd.Flags().StringVarP(&backupOption.BackupDir, "backup-dir", "d", "", i18n.T("the backup directory in thinBackup setting"))
+	backupCmd.Flags().StringVar(&backupOption.BackupDir, "backup-dir", "", i18n.T("the backup directory in thinBackup setting"))
 	backupCmd.Flags().IntVarP(&backupOption.WaitTime, "wait-time", "t", 300, i18n.T("the maximum time you would like to wait for jenkins to be idle and make a backup"))
+	backupCmd.Flags().BoolVar(&backupOption.CheckBackup, "check", false, i18n.T("if this value is set to true, it will check if a new full-backup directory exists in the backup directory"))
 }
 
 var backupCmd = &cobra.Command{
@@ -53,32 +56,37 @@ func (o *BackupOption) Backup(cmd *cobra.Command, _ []string) (err error) {
 	}
 	GetCurrentJenkinsAndClient(&(jClient.JenkinsCore))
 	cmd.Println("Please wait while making a backup.")
+	now := time.Now()
 	err = ThinBackupAPI(jClient)
 	if err != nil {
-		cmd.Println("Backup failed. Please see logging message(/yourJenkinsHome/backup.log) for detailed reasons.")
+		cmd.Println("Backup failed. Please see logging message(yourJenkinsHome/backup.log) for detailed reasons.")
+		return err
 	}
 	i := 0
-	now := time.Now()
-	for o.WaitTime-i*15 > 0 {
+	for o.WaitTime-i*15 > 0 && o.CheckBackup {
 		time.Sleep(15 * time.Second)
 		stat, err := os.Stat(o.BackupDir)
-		if err != nil {
+		if err == nil {
 			//check if the directory be modified and it is a hint that a backup may succeed
 			if stat.ModTime().After(now) {
 				modifyTime := stat.ModTime().Format("03:04:05")
 				hour := modifyTime[0:2]
 				min := modifyTime[3:5]
 				//check if thinBackup plugin createed the bakcup directory
-				_, err = os.Stat("*" + stat.ModTime().Format("2021-09-21") + "_" + hour + "-" + min)
+				_, err = os.Stat(o.BackupDir + "/FULL-" + stat.ModTime().Format("2006-01-02") + "_" + hour + "-" + min)
 				if err == nil {
 					cmd.Println("Back up successfully!")
 					return nil
 				}
 			}
 		}
-
+		i++
 	}
-	cmd.Println("Backup failed or thinBackup is still waiting for jenkins to be idle to make a backup. Please see logging message(/yourJenkinsHome/backup.log) for detailed reasons.")
+	if !o.CheckBackup {
+		cmd.Println("Trigger thinBackup plugin to backup successfully, please check the backup directory to make sure the backup succeeds or thinBackup is waiting jenkins to be idle.")
+	} else {
+		cmd.Println("Backup failed or thinBackup is still waiting for jenkins to be idle to perform a backup. Please see logging message(yourJenkinsHome/backup.log) for detailed reasons.")
+	}
 	return
 }
 
