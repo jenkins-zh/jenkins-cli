@@ -62,8 +62,7 @@ func (o *BackupOption) Backup(cmd *cobra.Command, _ []string) (err error) {
 		cmd.Println("Backup failed. Please see logging message(yourJenkinsHome/backup.log) for detailed reasons.")
 		return err
 	}
-	i := 0
-	for o.WaitTime-i*15 > 0 && o.CheckBackup {
+	for i := 0; o.WaitTime-i*15 > 0 && o.CheckBackup; i++ {
 		time.Sleep(15 * time.Second)
 		stat, err := os.Stat(o.BackupDir)
 		if err == nil {
@@ -80,7 +79,6 @@ func (o *BackupOption) Backup(cmd *cobra.Command, _ []string) (err error) {
 				}
 			}
 		}
-		i++
 	}
 	if !o.CheckBackup {
 		cmd.Println("Trigger thinBackup plugin to backup successfully, please check the backup directory to make sure the backup succeeds or thinBackup is waiting jenkins to be idle.")
