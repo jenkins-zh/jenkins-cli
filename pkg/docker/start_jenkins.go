@@ -32,6 +32,9 @@ type RunOption struct {
 	TmpDir string
 }
 
+//DockerRunOption is an option for starting a container in docker
+var DockerRunOption RunOption
+
 //ConnectToDocker returns a client which is used to connect to a local or remote docker host
 func (o *RunOption) ConnectToDocker() (cli *client.Client, err error) {
 	tcp := fmt.Sprintf("tcp://%s:%d", o.IP, o.DockerPort)
@@ -150,8 +153,8 @@ func (o *RunOption) CreateDockerfile(cmd *cobra.Command, args []string) (err err
 	o.TmpDir = dir
 	sh := "java -Djenkins.install.runSetupWizard=false -jar /usr/share/jenkins/jenkins.war\n" +
 		"tail -f /dev/null"
-	o.Script = filepath.Join(dir, "jenkins-cli-docker.sh")
-	err = ioutil.WriteFile(o.Script, []byte(sh), 0)
+	err = ioutil.WriteFile(dir+"/jenkins-cli-docker.sh", []byte(sh), 0)
+	o.Script = dir + "/jenkins-cli-docker.sh"
 	if err != nil {
 		cmd.Println(err)
 	}
