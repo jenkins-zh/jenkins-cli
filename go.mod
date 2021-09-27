@@ -37,6 +37,7 @@ require (
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781
 	golang.org/x/text v0.3.6
 	golang.org/x/tools v0.1.5 // indirect
+	gopkg.in/src-d/go-git.v4 v4.13.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0
 )
