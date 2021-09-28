@@ -213,7 +213,7 @@ jcli agent launch agent-name --type jnlp`,
 		}
 
 		var f *os.File
-		if f, err = ioutil.TempFile("", "agent.jar"); err == nil {
+		if f, err = ioutil.TempFile("/tmp", "agent.jar"); err == nil {
 			computerLaunchOption.Output = f.Name()
 			agentURL := fmt.Sprintf("%s/jnlpJars/agent.jar", computerLaunchOption.ComputerClient.URL)
 			logger.Debug("start to download agent.jar", zap.String("url", agentURL))
