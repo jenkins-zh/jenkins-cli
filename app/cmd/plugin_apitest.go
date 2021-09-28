@@ -46,7 +46,7 @@ type apiTestOption struct {
 }
 
 type plugin struct {
-	ArtifactId string   `yaml:"artifactId"`
+	ArtifactID string   `yaml:"artifactId"`
 	API        []string `yaml:"api"`
 }
 
@@ -72,7 +72,6 @@ func (o *pluginAPITestOption) test(cmd *cobra.Command, args []string) (err error
 			prompt := fmt.Sprintf("The %s doesn't exist.", o.yamlFile)
 			cmd.Println(prompt)
 		}
-<<<<<<< HEAD
 	}
 	jClient := &client.PluginManager{
 		JenkinsCore: client.JenkinsCore{
@@ -105,32 +104,6 @@ func (o *pluginAPITestOption) test(cmd *cobra.Command, args []string) (err error
 							pluginsWithProblemMap[plugin.ArtifactID] = append(pluginsWithProblemMap[plugin.ArtifactID], api)
 						} else {
 							pluginsWithProblemMap[plugin.ArtifactID] = []string{api}
-=======
-		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-		jClient.JenkinsCore.URL = fmt.Sprintf("http://%s:%s", pluginAPITestO.ip, pluginAPITestO.port)
-		if pluginAPITestO.testYaml != "" {
-			if file, err := ioutil.ReadFile(pluginAPITestO.testYaml); err == nil {
-				err := yaml.Unmarshal(file, &apiTestO)
-				if err != nil {
-					return err
-				}
-				pluginsWithProblemMap := make(map[string]string)
-				for _, plugin := range apiTestO.Plugins {
-					apis := plugin.API
-					for _, api := range apis {
-						statusCode, _, err := jClient.JenkinsCore.Request(http.MethodGet, api, nil, nil)
-						if err != nil {
-							cmd.Println(err)
-							return err
-						}
-						if statusCode != 200 {
-							errorAPI, ok := pluginsWithProblemMap[plugin.ArtifactId]
-							if ok {
-								pluginsWithProblemMap[plugin.ArtifactId] = errorAPI + "   " + api
-							} else {
-								pluginsWithProblemMap[plugin.ArtifactId] = api
-							}
->>>>>>> parent of acc31a6... fix some lint mistakes and update go.sum
 						}
 						pluginsWithProblemMap[plugin.ArtifactID][apiIndex] = api
 					}
