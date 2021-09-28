@@ -75,7 +75,7 @@ upgrade labmouse --custom-yaml <yamlfile>`,
 		pluginAPITestO.port = strconv.Itoa(docker.DockerRunOption.JenkinsPort)
 		ready, err := waitForJenkinsToBeReady(cmd)
 		if err != nil && !ready {
-			return fmt.Errorf("Oops, jenkins didn't start successfully or needed more time to be ready.")
+			return fmt.Errorf("oops, jenkins didn't start successfully or needed more time to be ready")
 		}
 		err = pluginAPITestO.test(cmd, args)
 		if err != nil {
