@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -26,8 +27,8 @@ func init() {
 
 var pluginCenterCmd = &cobra.Command{
 	Use:     "center",
-	Short:   i18n.T("Print information about new version of the plugins which are installed"),
-	Long:    i18n.T("Print information about new version of the plugins which are installed"),
+	Short:   i18n.T("Print information about the plugins which are newer than the installed"),
+	Long:    i18n.T("Print information about the plugins which are newer than the installed"),
 	Example: `jcli plugin center`,
 	RunE: func(cmd *cobra.Command, _ []string) (err error) {
 		jClient := &client.PluginManager{
@@ -40,7 +41,9 @@ var pluginCenterCmd = &cobra.Command{
 		var plugins *client.InstalledPluginList
 		t := table.NewWriter()
 		t.AppendHeader(table.Row{"ShortName", "Version", "Released Date", "Requires Jenkins"})
-		if plugins, err = jClient.GetPlugins(1); err == nil {
+		if plugins, err = jClient.GetPlugins(1); err != nil {
+			err = fmt.Errorf("cannot get the plugin list of current Jenkins, error is %v. Please check current status of your jenkins and your .jenkins-cli.yaml", err)
+		} else if err == nil {
 			for _, plugin := range plugins.Plugins {
 				version, date, requireCore, err := searchNewPlugin(plugin.ShortName)
 				if err != nil {
@@ -51,8 +54,8 @@ var pluginCenterCmd = &cobra.Command{
 					t.AppendSeparator()
 				}
 			}
+			cmd.Print(t.Render())
 		}
-		cmd.Print(t.Render())
 		return
 	},
 }
