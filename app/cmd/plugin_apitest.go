@@ -19,7 +19,7 @@ func init() {
 	pluginCmd.AddCommand(pluginAPITestCmd)
 	flags := pluginAPITestCmd.Flags()
 	flags.StringVarP(&pluginAPITestO.ip, "ip", "", "127.0.0.1",
-		i18n.T("The ip address of the jenkins you want to test"))
+		i18n.T("The ip address of the computer you want to use"))
 	flags.StringVarP(&pluginAPITestO.port, "port", "", "8080",
 		i18n.T("The port to connect to the jenkins you want to test"))
 	flags.StringVar(&pluginAPITestO.yamlFile, "yaml", "",
@@ -46,117 +46,111 @@ type apiTestOption struct {
 }
 
 type plugin struct {
-	ArtifactID string   `yaml:"artifactId"`
+	ArtifactId string   `yaml:"artifactId"`
 	API        []string `yaml:"api"`
 }
 
 var pluginAPITestO pluginAPITestOption
+var apiTestO apiTestOption
 
 var pluginAPITestCmd = &cobra.Command{
 	Use:   "api test",
 	Short: "Conduct an API test for plugins of jenkins started in a docker container with setupWizard=false",
-	Long: "Conduct an API test for plugins of jenkins started in a docker container with setupWizard=false. The API test is provided in two modes：simple and custom. " +
+	Long: "Conduct an API test for plugins of jenkins started ina docker container with setupWizard=false. The API test is provided in two modes：simple and custom. " +
 		"Choose the simple mode, a yaml file created by 'jcli create yaml' is needed. Choose the custom mode, a yaml file contains plugins artifactID and api list is needed.",
-	Example: "plugin api test",
-	RunE:    pluginAPITestO.test,
-}
-
-func (o *pluginAPITestOption) test(cmd *cobra.Command, args []string) (err error) {
-	if o.testYaml != "" {
-		if exist, _ := CheckFileExists(o.testYaml); !exist {
-			prompt := fmt.Sprintf("The %s doesn't exist.", o.testYaml)
-			cmd.Println(prompt)
-		}
-	} else if o.yamlFile != "" {
-		if exist, _ := CheckFileExists(o.yamlFile); !exist {
-			prompt := fmt.Sprintf("The %s doesn't exist.", o.yamlFile)
-			cmd.Println(prompt)
-		}
-	}
-	jClient := &client.PluginManager{
-		JenkinsCore: client.JenkinsCore{
-			RoundTripper: pluginFormulaOption.RoundTripper,
-		},
-	}
-	GetCurrentJenkinsAndClient(&(jClient.JenkinsCore))
-	jClient.JenkinsCore.URL = fmt.Sprintf("http://%s:%s", o.ip, o.port)
-	var apiTestO apiTestOption
-	if o.testYaml != "" {
-		if file, err := ioutil.ReadFile(o.testYaml); err == nil {
-			err := yaml.Unmarshal(file, &apiTestO)
-			if err != nil {
-				return err
+	Example: "jcli plugin api test",
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		if pluginAPITestO.yamlFile != "" {
+			if exist, _ := CheckFileExists(pluginAPITestO.yamlFile); !exist {
+				prompt := fmt.Sprintf("The %s doesn't exist.", pluginAPITestO.yamlFile)
+				panic(prompt)
 			}
-			pluginsWithProblemMap := make(map[string][]string)
-			for _, plugin := range apiTestO.Plugins {
-				apis := plugin.API
-				apiIndex := 0
-				for _, api := range apis {
-					statusCode, _, err := jClient.Request(http.MethodGet, api, nil, nil)
+		} else if pluginAPITestO.testYaml != "" {
+			if exist, _ := CheckFileExists(pluginAPITestO.testYaml); !exist {
+				prompt := fmt.Sprintf("The %s doesn't exist.", pluginAPITestO.testYaml)
+				panic(prompt)
+			}
+		}
+		jClient := &client.PluginManager{
+			JenkinsCore: client.JenkinsCore{
+				RoundTripper: pluginFormulaOption.RoundTripper,
+			},
+		}
+		getCurrentJenkinsAndClient(&(jClient.JenkinsCore))
+		jClient.JenkinsCore.URL = fmt.Sprintf("http://%s:%s", pluginAPITestO.ip, pluginAPITestO.port)
+		if pluginAPITestO.testYaml != "" {
+			if file, err := ioutil.ReadFile(pluginAPITestO.testYaml); err == nil {
+				err := yaml.Unmarshal(file, &apiTestO)
+				if err != nil {
+					return err
+				}
+				pluginsWithProblemMap := make(map[string]string)
+				for _, plugin := range apiTestO.Plugins {
+					apis := plugin.API
+					for _, api := range apis {
+						statusCode, _, err := jClient.JenkinsCore.Request(http.MethodGet, api, nil, nil)
+						if err != nil {
+							cmd.Println(err)
+							return err
+						}
+						if statusCode != 200 {
+							errorAPI, ok := pluginsWithProblemMap[plugin.ArtifactId]
+							if ok {
+								pluginsWithProblemMap[plugin.ArtifactId] = errorAPI + "   " + api
+							} else {
+								pluginsWithProblemMap[plugin.ArtifactId] = api
+							}
+						}
+					}
+				}
+				if len(pluginsWithProblemMap) != 0 {
+					cmd.Print("There's something wrong with the plugin(s):\n")
+					for pluginName, url := range pluginsWithProblemMap {
+						cmd.Println(fmt.Sprintf("%-18s: %s ", pluginName, url))
+					}
+				} else if len(pluginsWithProblemMap) == 0 {
+					cmd.Println("Congratulations! All your plugins work fine.")
+				}
+			}
+
+		} else if pluginAPITestO.yamlFile != "" {
+			if file, err := ioutil.ReadFile(pluginAPITestO.yamlFile); err == nil {
+				err := yaml.Unmarshal(file, &pluginAPITestO.jenkinsPluginTest)
+				if err != nil {
+					return err
+				}
+				pluginAPITestO.pluginsWithProblem = make([]string, 0)
+				var pluginBuffer bytes.Buffer
+				var i = 0
+				for _, plugin := range pluginAPITestO.jenkinsPluginTest.Plugins {
+					api := fmt.Sprintf("/pluginManager/plugin/%s/api/json", plugin.ArtifactId)
+					statusCode, _, err := jClient.JenkinsCore.Request(http.MethodGet, api, nil, nil)
 					if err != nil {
 						cmd.Println(err)
 						return err
 					}
 					if statusCode != 200 {
-						_, ok := pluginsWithProblemMap[plugin.ArtifactID]
-						if ok {
-							apiIndex++
-							pluginsWithProblemMap[plugin.ArtifactID] = append(pluginsWithProblemMap[plugin.ArtifactID], api)
-						} else {
-							pluginsWithProblemMap[plugin.ArtifactID] = []string{api}
+						pluginBuffer.WriteString(plugin.ArtifactId + "\n")
+						i++
+					}
+				}
+				pluginString := pluginBuffer.String()
+				pluginAPITestO.pluginsWithProblem = strings.Split(pluginString, "\n")
+				if len(pluginAPITestO.pluginsWithProblem) != 1 {
+					cmd.Print("There's something wrong with the plugin(s):\n")
+					for index, plugin := range pluginAPITestO.pluginsWithProblem {
+						if index%5 == 0 {
+							cmd.Println()
 						}
-						pluginsWithProblemMap[plugin.ArtifactID][apiIndex] = api
+						cmd.Print(fmt.Sprintf("%-25s", plugin))
 					}
+				} else if len(pluginAPITestO.pluginsWithProblem) == 1 {
+					cmd.Println("Congratulations! All your plugins work fine.")
 				}
-			}
-			if len(pluginsWithProblemMap) != 0 {
-				cmd.Print("There's something wrong with the plugin(s):\n")
-				for pluginName, url := range pluginsWithProblemMap {
-					cmd.Println(fmt.Sprintf("%-18s: %s ", pluginName, url))
-				}
-			} else if len(pluginsWithProblemMap) == 0 {
-				cmd.Println("Congratulations! All your plugins work fine.")
 			}
 		}
-
-	} else if o.yamlFile != "" {
-		if file, err := ioutil.ReadFile(o.yamlFile); err == nil {
-			err := yaml.Unmarshal(file, &o.jenkinsPluginTest)
-			if err != nil {
-				return err
-			}
-			o.pluginsWithProblem = make([]string, 0)
-			var pluginBuffer bytes.Buffer
-			var i = 0
-			for _, plugin := range o.jenkinsPluginTest.Plugins {
-				api := fmt.Sprintf("/pluginManager/plugin/%s/api/json", plugin.ArtifactId)
-				statusCode, _, err := jClient.Request(http.MethodGet, api, nil, nil)
-				cmd.Println(statusCode)
-				if err != nil {
-					cmd.Println(err)
-					return err
-				}
-				if statusCode != 200 {
-					pluginBuffer.WriteString(plugin.ArtifactId + "\n")
-					i++
-				}
-			}
-			pluginString := pluginBuffer.String()
-			o.pluginsWithProblem = strings.Split(pluginString, "\n")
-			if len(o.pluginsWithProblem) != 1 {
-				cmd.Print("There's something wrong with the plugin(s):\n")
-				for index, plugin := range o.pluginsWithProblem {
-					if index%5 == 0 {
-						cmd.Println()
-					}
-					cmd.Print(fmt.Sprintf("%-25s", plugin))
-				}
-			} else if len(o.pluginsWithProblem) == 1 {
-				cmd.Println("Congratulations! All your plugins work fine.")
-			}
-		}
-	}
-	return err
+		return err
+	},
 }
 
 //CheckFileExists returns true if exits and returns false if not
