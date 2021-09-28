@@ -175,8 +175,8 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 	return
 }
 
-//RunWithoutProcessExits has the same logic with function Run and the difference between them is that RunWithoutProcessExits uses exec.Command() instead of syscall.Exec()
-//which causes the process to exit without executing code after cwp.Run()
+// RunWithoutProcessExits has the same logic with function Run and the difference between them is that RunWithoutProcessExits uses exec.Command() instead of syscall.Exec()
+// which causes the process to exit without executing code after cwp.Run()
 func (o *CWPOptions) RunWithoutProcessExits(cmd *cobra.Command, args []string) (err error) {
 	var ok bool
 	if ok, err = o.isPrintVersion(cmd); ok || err != nil {
@@ -195,8 +195,6 @@ func (o *CWPOptions) RunWithoutProcessExits(cmd *cobra.Command, args []string) (
 
 	_, err = util.LookPath("java", o.LookPathContext)
 	if err == nil {
-		// env := os.Environ()
-
 		cwpArgs := []string{"java"}
 		cwpArgs = append(cwpArgs, "-jar", localCWP)
 
@@ -229,7 +227,7 @@ func (o *CWPOptions) RunWithoutProcessExits(cmd *cobra.Command, args []string) (
 			cwpArgs = append(cwpArgs, "-version", o.Version)
 		}
 
-		//The strange cwpArgs here is because exec.Command() wants separate args
+		// The strange cwpArgs here is because exec.Command() wants separate args
 		command := util.ExecCommand(nil, cwpArgs[0], cwpArgs[1], cwpArgs[2], cwpArgs[3], cwpArgs[4], cwpArgs[5], cwpArgs[6], cwpArgs[7], cwpArgs[8])
 		command.Stdout = os.Stdout
 		command.Run()
