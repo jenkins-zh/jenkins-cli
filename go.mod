@@ -15,10 +15,10 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/jenkins-zh/jenkins-client v0.0.1
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
-	github.com/linuxsuren/cobra-extension v0.0.10
+	github.com/linuxsuren/cobra-extension v0.0.11
 	github.com/linuxsuren/go-cli-alias v0.0.6
 	github.com/linuxsuren/go-cli-plugin v0.0.4
-	github.com/linuxsuren/http-downloader v0.0.33
+	github.com/linuxsuren/http-downloader v0.0.43
 	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/onsi/ginkgo v1.16.4
