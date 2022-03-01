@@ -26,7 +26,7 @@ jobs:
           sudo mv upx-3.96-amd64_linux/upx $(which upx)
           upx -V
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.7.0
+        uses: goreleaser/goreleaser-action@v2.9.1
         with:
           version: latest
           args: release --skip-publish --rm-dist
