@@ -31,12 +31,12 @@ jobs:
           version: latest
           args: release --skip-publish --rm-dist
       - name: Upload Artifact for darwin
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jcli-darwin-amd64
           path: release/jcli-darwin-amd64.tar.gz
       - name: Upload Artifact for linux
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: jcli-linux-amd64
           path: release/jcli-linux-amd64.tar.gz
