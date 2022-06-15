@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Go 1.16
-        uses: actions/setup-go@v2.1.3
+        uses: actions/setup-go@v3.2.0
         with:
           go-version: 1.16
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3.0.2
       - name: Upgrade upx
         run: |
           # try to fix https://github.com/jenkins-zh/jenkins-cli/issues/493
@@ -45,12 +45,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.16
-        uses: actions/setup-go@v2.1.3
+        uses: actions/setup-go@v3.2.0
         with:
           go-version: 1.16
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3.0.2
       - name: Go-linter-1
         uses: Jerome1337/golint-action@v1.0.2
         with:
@@ -82,7 +82,7 @@ jobs:
       GO111MODULE: on
     steps:
       - name: Checkout Source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.0.2
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
@@ -103,12 +103,12 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up Go 1.16
-        uses: actions/setup-go@v2.1.3
+        uses: actions/setup-go@v3.2.0
         with:
           go-version: 1.16
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3.0.2
       - name: Test
         run: |
           make test

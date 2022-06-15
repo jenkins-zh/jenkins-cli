@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.1
+	github.com/Microsoft/go-winio v0.4.17 // indirect
 	github.com/Netflix/go-expect v0.0.0-20180615182759-c93bf25de8e8
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/atotto/clipboard v0.1.4

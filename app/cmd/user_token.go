@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+
+	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
 	"github.com/spf13/cobra"
