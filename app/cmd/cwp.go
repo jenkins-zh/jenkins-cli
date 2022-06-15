@@ -3,6 +3,11 @@ package cmd
 import (
 	"encoding/xml"
 	"fmt"
+	"html/template"
+	"io/ioutil"
+	"os"
+	"path"
+
 	"github.com/jenkins-zh/jenkins-cli/app/cmd/common"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/util"
@@ -12,10 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
-	"html/template"
-	"io/ioutil"
-	"os"
-	"path"
 )
 
 func init() {
@@ -170,6 +171,66 @@ func (o *CWPOptions) Run(cmd *cobra.Command, args []string) (err error) {
 		}
 
 		err = util.Exec(binary, cwpArgs, env, o.SystemCallExec)
+	}
+	return
+}
+
+// RunWithoutProcessExits has the same logic with function Run and the difference between them is that RunWithoutProcessExits uses exec.Command() instead of syscall.Exec()
+// which causes the process to exit without executing code after cwp.Run()
+func (o *CWPOptions) RunWithoutProcessExits(cmd *cobra.Command, args []string) (err error) {
+	var ok bool
+	if ok, err = o.isPrintVersion(cmd); ok || err != nil {
+		return
+	}
+
+	localCWP := o.getLocalCWP()
+	_, err = os.Stat(localCWP)
+	if os.IsNotExist(err) {
+		if err = o.Download(); err != nil {
+			return
+		}
+	} else if err != nil {
+		return
+	}
+
+	_, err = util.LookPath("java", o.LookPathContext)
+	if err == nil {
+		cwpArgs := []string{"java"}
+		cwpArgs = append(cwpArgs, "-jar", localCWP)
+
+		if o.Demo {
+			cwpArgs = append(cwpArgs, "-demo")
+		}
+
+		if o.BatchMode {
+			cwpArgs = append(cwpArgs, "--batch-mode")
+		}
+
+		if o.InstallArtifacts {
+			cwpArgs = append(cwpArgs, "--installArtifacts")
+		}
+
+		configPath := o.ConfigPath
+		if configPath, err = RenderTemplate(o.ConfigPath, o.ValueSet); err != nil {
+			return
+		}
+		defer func() {
+			_ = os.RemoveAll(configPath)
+		}()
+		cwpArgs = append(cwpArgs, "-configPath", configPath)
+
+		if o.TmpDir != "" {
+			cwpArgs = append(cwpArgs, "-tmpDir", o.TmpDir)
+		}
+
+		if o.Version != "" {
+			cwpArgs = append(cwpArgs, "-version", o.Version)
+		}
+
+		// The strange cwpArgs here is because exec.Command() wants separate args
+		command := util.ExecCommand(nil, cwpArgs[0], cwpArgs[1], cwpArgs[2], cwpArgs[3], cwpArgs[4], cwpArgs[5], cwpArgs[6], cwpArgs[7], cwpArgs[8])
+		command.Stdout = os.Stdout
+		command.Run()
 	}
 	return
 }
