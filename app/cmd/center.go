@@ -26,7 +26,7 @@ var centerOption CenterOption
 
 func init() {
 	rootCmd.AddCommand(centerCmd)
-	centerCmd.AddCommand(newCenterJenkinsfileCommand())
+	centerCmd.AddCommand(newCenterJenkinsfileCommand(), newCenterLabelCommand())
 }
 
 var centerCmd = &cobra.Command{
