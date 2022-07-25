@@ -35,9 +35,12 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.19.0
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
-	golang.org/x/text v0.3.6
-	golang.org/x/tools v0.1.6 // indirect
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
+	golang.org/x/text v0.3.7
+	golang.org/x/tools v0.1.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0
 )
+
+replace github.com/jenkins-zh/jenkins-client => github.com/linuxsuren/jenkins-client v0.0.0-20220721022519-ed7879df7251
