@@ -17,7 +17,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20180616224451-1954e6464174
 	github.com/jedib0t/go-pretty/v6 v6.2.4
-	github.com/jenkins-zh/jenkins-client v0.0.10-0.20220706065616-22f8c7675234
+	github.com/jenkins-zh/jenkins-client v0.0.13
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
 	github.com/linuxsuren/cobra-extension v0.0.10
 	github.com/linuxsuren/go-cli-alias v0.0.6
@@ -42,5 +42,3 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0
 )
-
-replace github.com/jenkins-zh/jenkins-client => github.com/linuxsuren/jenkins-client v0.0.0-20220721022519-ed7879df7251

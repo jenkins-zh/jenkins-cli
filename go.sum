@@ -500,6 +500,8 @@ github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i
 github.com/jedib0t/go-pretty/v6 v6.2.4 h1:wdaj2KHD2W+mz8JgJ/Q6L/T5dB7kyqEFI16eLq7GEmk=
 github.com/jedib0t/go-pretty/v6 v6.2.4/go.mod h1:+nE9fyyHGil+PuISTCrp7avEdo6bqoMwqZnuiK2r2a0=
 github.com/jenkins-zh/jenkins-cli v0.0.32/go.mod h1:uE1mH9PNITrg0sugv6HXuM/CSddg0zxXoYu3w57I3JY=
+github.com/jenkins-zh/jenkins-client v0.0.13 h1:MIBq36M9RYaJTVOE9sHmD/NOXzf4el9qZ4RRr/1/Lxw=
+github.com/jenkins-zh/jenkins-client v0.0.13/go.mod h1:ICBk7OOoTafVP//f/VfKZ34c0ff8vJwVnOsF9btiMYU=
 github.com/jenkins-zh/jenkins-formulas v0.0.5 h1:6d/WoZCSdjTMRry1wHRe2rrf6zQHlfXmaPbp0Bi3I6w=
 github.com/jenkins-zh/jenkins-formulas v0.0.5/go.mod h1:zS8fm8u5L6FcjZM0QznXsLV9T2UtSVK+hT6Sm76iUZ4=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
@@ -558,8 +560,6 @@ github.com/linuxsuren/http-downloader v0.0.10/go.mod h1:4hVRWYnIifme60jM0gCoEzgl
 github.com/linuxsuren/http-downloader v0.0.29/go.mod h1:bniEqpLyyydtCTDyjo3nco6LD2F90ruPH87fuqAznQg=
 github.com/linuxsuren/http-downloader v0.0.33 h1:ivAVsVS5zEr8F/oPCrdRdtFP+DLWQjGmVA9AVnUu/vo=
 github.com/linuxsuren/http-downloader v0.0.33/go.mod h1:qgMo/GRgQlU6EnIQ+Ul6e0rEJiDFM6+Jcz63ZH2Dhw4=
-github.com/linuxsuren/jenkins-client v0.0.0-20220721022519-ed7879df7251 h1:m1SVsk2LY6Inlnsb7MEcwY+5/8qUW3o9KHK8KTCrR/k=
-github.com/linuxsuren/jenkins-client v0.0.0-20220721022519-ed7879df7251/go.mod h1:ICBk7OOoTafVP//f/VfKZ34c0ff8vJwVnOsF9btiMYU=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.5 h1:b6kJs+EmPFMYGkow9GiUyCyOvIwYetYJ3fSaWak/Gls=
