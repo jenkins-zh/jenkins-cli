@@ -70,7 +70,7 @@ func (o *RunOption) CreateImageAndRunContainer(cmd *cobra.Command, args []string
 		},
 	}
 	exposedPorts := map[nat.Port]struct{}{
-		jenkinsPort: struct{}{},
+		jenkinsPort: {},
 	}
 	config := &container.Config{
 		Image:        imageName,
