@@ -25,7 +25,7 @@ require (
 	github.com/linuxsuren/http-downloader v0.0.33
 	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/moby/moby v20.10.8+incompatible
+	github.com/moby/moby v20.10.20+incompatible
 	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
