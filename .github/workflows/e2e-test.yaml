@@ -22,7 +22,7 @@ jobs:
           go-version: 1.16
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v3.2.0
       - name: Build
         env:
           JENKINS_VERSION: ${{ matrix.jenkins_version }}
