@@ -5,8 +5,10 @@ import (
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
@@ -80,11 +82,12 @@ var jobArtifactDownloadCmd = &cobra.Command{
 	},
 }
 
-func (j *JobArtifactDownloadOption) download(url, fileName string) (err error) {
+func (j *JobArtifactDownloadOption) download(artifactURL, fileName string) (err error) {
+	jenkinsURL, _ := url.Parse(j.Jenkins.URL)
 	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   j.RoundTripper,
 		TargetFilePath: fileName,
-		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, url),
+		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, strings.TrimPrefix(artifactURL, jenkinsURL.Path)),
 		UserName:       j.Jenkins.UserName,
 		Password:       j.Jenkins.Token,
 		Proxy:          j.Jenkins.Proxy,
