@@ -35,10 +35,8 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.19.0
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
-	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
-	golang.org/x/text v0.3.7
-	golang.org/x/tools v0.1.11 // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
+	golang.org/x/text v0.7.0
 	gopkg.in/yaml.v2 v2.4.0
 	moul.io/http2curl v1.0.0
 )
