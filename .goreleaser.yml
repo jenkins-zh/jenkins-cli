@@ -18,9 +18,6 @@ builds:
       goarch: arm64
     - goos: darwin
       goarch: arm
-  hooks:
-    post:
-      - upx "{{ .Path }}"
   ldflags:
     - -X github.com/linuxsuren/cobra-extension/version.version={{.Version}}
     - -X github.com/linuxsuren/cobra-extension/version.commit={{.ShortCommit}}
