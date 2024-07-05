@@ -21,11 +21,18 @@ type JobLogOption struct {
 	LastBuildID   int
 	LastBuildURL  string
 	NumberOfLines int
+	ExitCode      bool
 
 	RoundTripper http.RoundTripper
 }
 
 var jobLogOption JobLogOption
+
+const (
+	LogFinishMsg     = "finish end the job logs"
+	JobResultSuccess = "SUCCESS"
+	JobResultFailed  = "FAILURE"
+)
 
 func init() {
 	jobCmd.AddCommand(jobLogCmd)
@@ -33,10 +40,12 @@ func init() {
 		i18n.T("Specific build history of log"))
 	jobLogCmd.Flags().BoolVarP(&jobLogOption.Watch, "watch", "w", false,
 		i18n.T("Watch the job logs"))
-	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 1,
-		i18n.T("Interval of watch"))
+	jobLogCmd.Flags().IntVarP(&jobLogOption.Interval, "interval", "i", 10,
+		i18n.T("Interval of watch seconds"))
 	jobLogCmd.Flags().IntVarP(&jobLogOption.NumberOfLines, "tail", "t", -1,
 		i18n.T("The last number of lines of the log"))
+	jobLogCmd.Flags().BoolVarP(&jobLogOption.ExitCode, "exit-code", "e", false,
+		i18n.T("Watch the job logs with job state, failed exit 1"))
 }
 
 var jobLogCmd = &cobra.Command{
@@ -48,6 +57,7 @@ It'll print the log text of the last build if you don't give the build id.`),
 	Example: `jcli job log <jobName> [buildID]
 jcli job log <jobName> --history 1
 jcli job log <jobName> --watch
+jcli job log <jobName> --watch --exit-code
 jcli job log <jobName> --tail <numberOfLines>`,
 	PreRunE: func(_ *cobra.Command, args []string) (err error) {
 		if len(args) >= 3 && jobLogOption.History == -1 {
@@ -62,39 +72,9 @@ jcli job log <jobName> --tail <numberOfLines>`,
 		return
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
-
-		jclient := &client.JobClient{
-			JenkinsCore: client.JenkinsCore{
-				RoundTripper: jobLogOption.RoundTripper,
-			},
-		}
-		getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
-
-		lastBuildID := -1
-		var jobBuild *client.JobBuild
-		var err error
-		for {
-			if jobBuild, err = jclient.GetBuild(name, jobLogOption.History); err == nil {
-				jobLogOption.LastBuildID = jobBuild.Number
-				jobLogOption.LastBuildURL = jobBuild.URL
-			} else {
-				break
-			}
-
-			if lastBuildID != jobLogOption.LastBuildID {
-				lastBuildID = jobLogOption.LastBuildID
-				cmd.Println("Current build number:", jobLogOption.LastBuildID)
-				cmd.Println("Current build url:", jobLogOption.LastBuildURL)
-
-				err = printLog(jclient, cmd, name, jobLogOption.History, 0, jobLogOption.NumberOfLines)
-			}
-
-			if err != nil || !jobLogOption.Watch {
-				break
-			}
-
-			time.Sleep(time.Duration(jobLogOption.Interval) * time.Second)
+		err := printLogRunFunc(args[0], jobLogOption, cmd)
+		if err != nil {
+			logger.Sugar().Infof("[ERR] print log func error %v", err.Error())
 		}
 	},
 }
@@ -133,7 +113,59 @@ func printLog(jclient *client.JobClient, cmd *cobra.Command, jobName string, his
 
 		if jobLog.HasMore {
 			err = printLog(jclient, cmd, jobName, history, jobLog.NextStart, numberOfLines)
+		} else {
+			err = fmt.Errorf(LogFinishMsg)
 		}
+	}
+	return
+}
+
+func printLogRunFunc(jobName string, jobLogOption JobLogOption, cmd *cobra.Command) (err error) {
+	name := jobName
+
+	jclient := &client.JobClient{
+		JenkinsCore: client.JenkinsCore{
+			RoundTripper: jobLogOption.RoundTripper,
+		},
+	}
+	getCurrentJenkinsAndClientOrDie(&(jclient.JenkinsCore))
+
+	lastBuildID := -1
+	var jobBuild *client.JobBuild
+	for {
+		if jobBuild, err = jclient.GetBuild(name, jobLogOption.History); err == nil {
+			jobLogOption.LastBuildID = jobBuild.Number
+			jobLogOption.LastBuildURL = jobBuild.URL
+		} else {
+			logger.Sugar().Fatal("[ERR] get job build info failed...")
+		}
+
+		if lastBuildID != jobLogOption.LastBuildID {
+			lastBuildID = jobLogOption.LastBuildID
+			cmd.Println("Current build number:", jobLogOption.LastBuildID)
+			cmd.Println("Current build url:", jobLogOption.LastBuildURL)
+
+			err = printLog(jclient, cmd, name, jobLogOption.History, 0, jobLogOption.NumberOfLines)
+		}
+
+		if err != nil || !jobLogOption.Watch {
+			if err.Error() == LogFinishMsg {
+				err = nil
+				cmd.Println("[INFO] current log finish output")
+				if jobLogOption.ExitCode {
+					if jobBuild, err = jclient.GetBuild(name, jobLogOption.History); err == nil {
+						if jobBuild.Result == JobResultFailed {
+							logger.Sugar().Fatalf("[ERR] job build %v end with build state failed [%vconsole], exit...", jobLogOption.LastBuildID, jobLogOption.LastBuildURL)
+						}
+					} else {
+						logger.Sugar().Fatal("[ERR] get job build info failed...")
+					}
+				}
+			}
+			break
+		}
+
+		time.Sleep(time.Duration(jobLogOption.Interval) * time.Second)
 	}
 	return
 }
