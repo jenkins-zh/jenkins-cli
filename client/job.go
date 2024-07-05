@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -14,6 +13,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
+
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 
 	"go.uber.org/zap"
 	"moul.io/http2curl"
@@ -24,6 +26,8 @@ const (
 	StringParameterDefinition = "StringParameterDefinition"
 	// FileParameterDefinition is the definition for file parameter
 	FileParameterDefinition = "FileParameterDefinition"
+	// QueueWaitDefinition is the definition for file queue state wait define
+	QueueWaitDefinition = "hudson.model.Queue$WaitingItem"
 )
 
 // JobClient is client for operate jobs
@@ -160,7 +164,7 @@ func (q *JobClient) BuildWithParams(jobName string, parameters []ParameterDefini
 		formData := url.Values{"json": {fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))}}
 		payload := strings.NewReader(formData.Encode())
 
-		_, err = q.RequestWithoutData(http.MethodPost, api,
+		_, err = q.RequestWithDataResponse(http.MethodPost, api,
 			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 201)
 	}
 	return
@@ -458,6 +462,115 @@ func ParseJobPath(jobName string) (path string) {
 	return
 }
 
+// BuildWithParamsGetResponse get params request response with run id...
+func (q *JobClient) BuildWithParamsGetResponse(jobName string, parameters []ParameterDefinition, options JobCmdOptionsCommon) (resp JenkinsBuildState, err error) {
+	path := ParseJobPath(jobName)
+	api := fmt.Sprintf("%s/buildWithParameters?", path)
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	defer writer.Close()
+
+	hasFileParam := false
+	stringParameters := make([]ParameterDefinition, 0, len(parameters))
+	formData := url.Values{}
+	for _, parameter := range parameters {
+		if parameter.Type == FileParameterDefinition {
+			hasFileParam = true
+			var file *os.File
+			file, err = os.Open(parameter.Filepath)
+			if err != nil {
+				return
+			}
+			defer file.Close()
+
+			var fWriter io.Writer
+			fWriter, err = writer.CreateFormFile(parameter.Filepath, filepath.Base(parameter.Filepath))
+			if err != nil {
+				return
+			}
+			_, err = io.Copy(fWriter, file)
+		} else {
+			stringParameters = append(stringParameters, parameter)
+			formData.Set(parameter.Name, parameter.Value)
+		}
+	}
+
+	var paramJSON []byte
+	if len(stringParameters) == 1 {
+		paramJSON, err = json.Marshal(stringParameters[0])
+	} else {
+		paramJSON, err = json.Marshal(stringParameters)
+	}
+	if err != nil {
+		return
+	}
+
+	if hasFileParam {
+		if err = writer.WriteField("json", fmt.Sprintf("{\"parameter\": %s}", string(paramJSON))); err != nil {
+			return
+		}
+
+		if err = writer.Close(); err != nil {
+			return
+		}
+
+		_, err = q.RequestWithoutData(http.MethodPost, api,
+			map[string]string{httpdownloader.ContentType: writer.FormDataContentType()}, body, 201)
+	} else {
+		payload := strings.NewReader(formData.Encode())
+		var jobRespState JenkinsBuildState
+		var queueResp JenkinsBuildExecutable
+
+		jobRespState, err = q.RequestWithDataResponse(http.MethodPost, api,
+			map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 201)
+		logger.Info("Build job trigger response msg...",
+			zap.Int("statusCode", jobRespState.StatusCode),
+			zap.Int64("queueId", jobRespState.QueueId),
+			zap.Bool("isWaitForRunID", options.Wait))
+
+		// if wait will query runId
+		if options.Wait {
+			if jobRespState.QueueId > 0 {
+				if queueResp, err = q.GetBuildQueueIdResponseWait(jobRespState.QueueId, options.WaitInterval); err == nil {
+					jobRespState.RunId = queueResp.Executable.Number
+					jobRespState.BuildUrl = queueResp.Executable.URL
+				}
+				resp = jobRespState
+				logger.Info("Build job state msg",
+					zap.Int64("runId", jobRespState.RunId),
+					zap.String("buildUrl", jobRespState.BuildUrl),
+					zap.Int("statusCode", jobRespState.StatusCode),
+				)
+			}
+		}
+	}
+	return
+}
+
+// GetBuildQueueIdResponse get queue api by queue id
+func (q *JobClient) GetBuildQueueIdResponseWait(queueId int64, interval int) (resp JenkinsBuildExecutable, err error) {
+	if queueId > 0 {
+		for {
+			time.Sleep(time.Duration(interval) * time.Second)
+			logger.Info("Waiting seconds for query run id by queue id...", zap.Int("interval", interval), zap.Int64("queueId", queueId))
+			if err = q.RequestWithData(http.MethodGet, GetQueueApi(queueId), nil, nil, 200, &resp); err != nil {
+				logger.Error("failed to get queue item", zap.Error(err))
+				return
+			}
+			if !resp.isWaitItem() {
+				break
+			}
+		}
+	}
+	return
+}
+
+// GetQueue api uri
+func GetQueueApi(queueId int64) string {
+	return fmt.Sprintf("queue/item/%d/api/json", queueId)
+}
+
 // JobLog holds the log text
 type JobLog struct {
 	HasMore   bool
@@ -545,6 +658,39 @@ type JobBuild struct {
 	Timestamp         int64
 	PreviousBuild     SimpleJobBuild
 	NextBuild         SimpleJobBuild
+}
+
+// Jenkins build state for job
+type JenkinsBuildState struct {
+	StatusCode int    `json:"-"`
+	RunId      int64  `json:"run_id,omitempty"`
+	BuildUrl   string `json:"build_url,omitempty"`
+	QueueId    int64  `json:"queue_id,omitempty"`
+	BodyData   []byte `json:"-"`
+}
+
+// Jenkins build executable for response
+type JenkinsBuildExecutable struct {
+	Class      string                       `json:"_class,omitempty"`
+	Executable JenkinsBuildExecutableInline `json:"executable,omitempty"`
+}
+
+// Jenkins build executable inline for response
+type JenkinsBuildExecutableInline struct {
+	Class  string `json:"_class,omitempty"`
+	Number int64  `json:"number,omitempty"`
+	URL    string `json:"url,omitempty"`
+}
+
+func (j *JenkinsBuildExecutable) isWaitItem() bool {
+	return j.Class == QueueWaitDefinition
+}
+
+type JobCmdOptionsCommon struct {
+	Wait         bool
+	WaitTime     int
+	LogConsole   bool
+	WaitInterval int
 }
 
 // Pipeline represents a pipeline
