@@ -142,8 +142,8 @@ func printLogRunFunc(jobName string, jobLogOption JobLogOption, cmd *cobra.Comma
 
 		if lastBuildID != jobLogOption.LastBuildID {
 			lastBuildID = jobLogOption.LastBuildID
-			cmd.Println("Current build number:", jobLogOption.LastBuildID)
-			cmd.Println("Current build url:", jobLogOption.LastBuildURL)
+			cmd.Println("[INFO] Current build number:", jobLogOption.LastBuildID)
+			cmd.Printf("[INFO] Current build url: %sconsole\n", jobLogOption.LastBuildURL)
 
 			err = printLog(jclient, cmd, name, jobLogOption.History, 0, jobLogOption.NumberOfLines)
 		}
@@ -151,7 +151,7 @@ func printLogRunFunc(jobName string, jobLogOption JobLogOption, cmd *cobra.Comma
 		if err != nil || !jobLogOption.Watch {
 			if err.Error() == LogFinishMsg {
 				err = nil
-				cmd.Println("[INFO] current log finish output")
+				cmd.Println("[INFO] current log finish output... exit")
 				if jobLogOption.ExitCode {
 					if jobBuild, err = jclient.GetBuild(name, jobLogOption.History); err == nil {
 						if jobBuild.Result == JobResultFailed {
@@ -168,4 +168,18 @@ func printLogRunFunc(jobName string, jobLogOption JobLogOption, cmd *cobra.Comma
 		time.Sleep(time.Duration(jobLogOption.Interval) * time.Second)
 	}
 	return
+}
+
+// JobLogOptionGetDefault get default config for job log
+func JobLogOptionGetDefault(runId int) JobLogOption {
+	return JobLogOption{
+		History: runId,
+		WatchOption: common.WatchOption{
+			Watch:    true,
+			Interval: jobBuildOption.WaitInterval,
+			Count:    9999,
+		},
+		NumberOfLines: 9999,
+		ExitCode:      true,
+	}
 }

@@ -14,31 +14,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//LtsURL is the URL of stable Jenkins RSS
+// LtsURL is the URL of stable Jenkins RSS
 const LtsURL = "https://www.jenkins.io/changelog-stable/rss.xml"
 
-//WidthOfDescription is the width of the description column
+// WidthOfDescription is the width of the description column
 const WidthOfDescription = 60
 
-//ASCIIOfLineFeed is the ASCII of line feed
+// ASCIIOfLineFeed is the ASCII of line feed
 const ASCIIOfLineFeed = 10
 
-//ASCIIOfSpace is the ASCII of space
+// ASCIIOfSpace is the ASCII of space
 const ASCIIOfSpace = 32
 
-//CenterListOption as options for Jenkins RSS
+// CenterListOption as options for Jenkins RSS
 type CenterListOption struct {
 	Channel Channel `xml:"channel"`
 	// RoundTripper http.RoundTripper
 }
 
-//Channel as part of CenterListOption
+// Channel as part of CenterListOption
 type Channel struct {
 	Title string `xml:"title"`
 	Items []Item `xml:"item"`
 }
 
-//Item as a option for information of newly-released Jenkins
+// Item as a option for information of newly-released Jenkins
 type Item struct {
 	Title       string `xml:"title"`
 	Description string `xml:"description"`

@@ -26,6 +26,10 @@ weight: 80
 
 `jcli job build job/test -b --wait`
 
+触发并等待日志输出，失败退出日志exit 1，成功exit 0:
+
+`jcli job build job/test -b --url https://xxxx.com --username xxx --token xxxx --param '{"limit":"3","timeoutLimit":"10"}' --config-load false --wait -l --logger-level info`
+
 ## 交互式输入
 
 执行到 Jenkins 流水线中的 `input` 指令时，会有交互式输入的提示。下面是一个样例：

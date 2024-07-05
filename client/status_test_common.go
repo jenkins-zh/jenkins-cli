@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-//PrepareGetStatus only for test
+// PrepareGetStatus only for test
 func PrepareGetStatus(roundTripper *mhttp.MockRoundTripper, rootURL, user, password string) {
 	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/json", rootURL), nil)
 	response := &http.Response{

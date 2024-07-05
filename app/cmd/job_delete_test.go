@@ -13,7 +13,6 @@ import (
 
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/golang/mock/gomock"
-	"github.com/hinshun/vt10x"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/require"
@@ -180,9 +179,9 @@ func RunTest(t *testing.T, test func(terminal.Stdio) error, procedures ...func(*
 	// Multiplex output to a buffer as well for the raw bytes.
 	buf := new(bytes.Buffer)
 
-	//c, err := expect.NewConsole(expect.WithStdout(buf))
+	c, err := expect.NewConsole(expect.WithStdout(buf))
 	//c, err := expect.NewConsole(expect.WithStdout(os.Stdout))
-	c, _, err := vt10x.NewVT10XConsole(expect.WithStdout(buf))
+	//c, _, err := vt10x.New(expect.WithStdout(buf))
 
 	require.Nil(t, err)
 	defer c.Close()

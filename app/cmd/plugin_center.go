@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//NewPluginOption consists of four options
+// NewPluginOption consists of four options
 type NewPluginOption struct {
 	Name         string `json:"name"`
 	Version      string `json:"gav"`
