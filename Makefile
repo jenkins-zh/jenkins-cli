@@ -115,6 +115,7 @@ test-slow:
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestBashCompletion$
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestZshCompletion$
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestPowerShellCompletion$
+	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestFishCompletion$
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestListComputers$
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigList$
 	go test github.com/jenkins-zh/jenkins-cli/e2e -v -test.run ^TestConfigGenerate$
