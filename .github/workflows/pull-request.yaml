@@ -18,10 +18,9 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3.0.2
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.7.0
+        uses: goreleaser/goreleaser-action@v6.0.0
         with:
-          version: latest
-          args: release --skip-publish --rm-dist
+          args: release --snapshot --clean
       - name: Upload Artifact for darwin
         uses: actions/upload-artifact@v2
         with:
