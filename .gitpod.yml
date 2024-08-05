@@ -1,6 +1,3 @@
-image:
-  file: .gitpod.Dockerfile
-
 tasks:
   - init: |
       [[ ! -z "${DOCKER_USER}" && ! -z "${DOCKER_PASSWD}" ]] && docker login -u${DOCKER_USER} -p${DOCKER_PASSWD}
