@@ -14,7 +14,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v29 v29.0.3
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/hashicorp/go-version v1.2.1
+	github.com/hashicorp/go-version v1.7.0
 	github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/jenkins-zh/jenkins-client v0.0.13
