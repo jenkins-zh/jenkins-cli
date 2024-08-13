@@ -5,13 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"log"
-	"moul.io/http2curl"
 	"net/http"
+	"strconv"
 	"time"
+
+	"go.uber.org/zap"
+	"moul.io/http2curl"
 
 	"github.com/jenkins-zh/jenkins-cli/util"
 	ext "github.com/linuxsuren/cobra-extension/version"
@@ -167,7 +169,43 @@ func (j *JenkinsCore) RequestWithoutData(method, api string, headers map[string]
 		statusCode != successCode {
 		err = j.ErrorHandle(statusCode, data)
 	}
+
 	return
+}
+
+// RequestWithoutData requests the api without handling data
+func (j *JenkinsCore) RequestWithDataResponse(method, api string, headers map[string]string,
+	payload io.Reader, successCode int) (JenkinsBuildState, error) {
+	var (
+		data  []byte
+		state JenkinsBuildState
+	)
+
+	if response, err := j.RequestWithResponse(method, api, headers, payload); err == nil {
+		statusCode := response.StatusCode
+		data, _ = ioutil.ReadAll(response.Body)
+		if statusCode == successCode {
+			state.BodyData = data
+			state.StatusCode = response.StatusCode
+			if len(response.Header.Get("Location")) > 0 {
+				locationSlice := util.ArraySplitAndDeleteEmpty(response.Header.Get("Location"), "/")
+				queueId := locationSlice[len(locationSlice)-1]
+				if len(queueId) > 0 {
+					if state.QueueId, err = strconv.ParseInt(queueId, 10, 64); err != nil {
+						logger.Error("request job run queue error", zap.String("queue id", queueId))
+						return state, err
+					}
+				}
+			}
+		} else {
+			err = j.ErrorHandle(statusCode, data)
+			return state, err
+		}
+	} else {
+		return state, err
+	}
+
+	return state, nil
 }
 
 // ErrorHandle handles the error cases

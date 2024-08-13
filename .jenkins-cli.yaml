@@ -1,0 +1,12 @@
+current: test
+jenkins_servers:
+- name: yourServer
+  url: http://localhost:8080/jenkins
+  username: test
+  token: 211e3a2f0231198856dceaff96f2v75ce3
+  insecureSkipVerify: true
+#mirrors:
+#- name: default
+#  url: http://mirrors.jenkins.io/
+# Language context is accept-language for HTTP header, It contains zh-CN/zh-TW/en/en-US/ja and so on
+# Goto 'http://localhost:8080/jenkins/me/configure', then you can generate your token.
