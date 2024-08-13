@@ -1,5 +1,4 @@
 # Official documentation at http://goreleaser.com
-project_name: jcli
 builds:
 - env:
   - CGO_ENABLED=0
@@ -27,12 +26,6 @@ builds:
 dist: release
 archives:
 - name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}"
-  replacements:
-    darwin: darwin
-    linux: linux
-    windows: windows
-    amd64: amd64
-    arm64: arm64
   format_overrides:
     - goos: windows
       format: zip
@@ -44,65 +37,8 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}-next-{{.ShortCommit}}"
 changelog:
-  skip: true
   sort: asc
   filters:
     exclude:
     - '^docs:'
     - '^test:'
-brews:
-  -
-    name: jcli
-    tap:
-      owner: jenkins-zh
-      name: homebrew-jcli
-    folder: Formula
-    homepage: "https://github.com/jenkins-zh/jenkins-cli"
-    description: Jenkins CLI allows you manage your Jenkins as an easy way
-    dependencies:
-      - name: vim
-        type: optional
-      - name: bash-completion
-        type: optional
-    test: |
-      version_output = shell_output("#{bin}/jcli version")
-      assert_match version.to_s, version_output
-    install: |
-      bin.install name
-
-      # Install bash completion
-      output = Utils.popen_read("#{bin}/jcli completion")
-      (bash_completion/"jcli").write output
-
-      # Install zsh completion
-      output = Utils.popen_read("#{bin}/jcli completion --type zsh")
-      (zsh_completion/"_jcli").write output
-
-      (Pathname.pwd/"man").mkpath
-      system "#{bin}/jcli", "doc", "--doc-type", "ManPage", "man"
-      man1.install Dir["man/*.1"]
-
-      prefix.install_metafiles
-nfpms:
-  - file_name_template: "{{ .Binary }}-{{.Os}}-{{.Arch}}"
-    homepage: https://github.com/jenkins-zh/jenkins-cli
-    description: Jenkins CLI allows you manage your Jenkins as an easy way
-    maintainer: rick <rick@jenkins-zh.cn>
-    license: MIT
-    vendor: Jenkins
-    formats:
-      - deb
-      - rpm
-    suggests:
-      - java
-      - docker
-    recommends:
-      - bash-completion
-      - vim
-    bindir: /usr/bin
-    replacements:
-      amd64: 64bit
-      arm64: arm64
-      darwin: macOS
-      linux: linux
-      windows: windows
