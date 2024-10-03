@@ -16,7 +16,7 @@ require (
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec
-	github.com/jedib0t/go-pretty/v6 v6.2.4
+	github.com/jedib0t/go-pretty/v6 v6.6.0
 	github.com/jenkins-zh/jenkins-client v0.0.13
 	github.com/jenkins-zh/jenkins-formulas v0.0.5
 	github.com/linuxsuren/cobra-extension v0.0.16
@@ -32,7 +32,7 @@ require (
 	github.com/onsi/gomega v1.18.1
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/spf13/cobra v1.6.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/zalando/go-keyring v0.0.0-20200121091418-667557018717
 	go.uber.org/zap v1.19.0
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
