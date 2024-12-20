@@ -103,15 +103,15 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 	return
 }
 
+// EditBuild edit build information
 func (q *JobClient) EditBuild(jobName string, buildID int, displayName, description string) (err error) {
 	path := ParseJobPath(jobName)
 	var api string
 	if buildID == -1 {
 		err = fmt.Errorf("build id is required")
 		return
-	} else {
-		api = fmt.Sprintf("%s/%d/configSubmit", path, buildID)
 	}
+	api = fmt.Sprintf("%s/%d/configSubmit", path, buildID)
 
 	formData := url.Values{}
 	formData.Add("displayName", displayName)

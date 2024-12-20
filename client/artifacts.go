@@ -15,10 +15,12 @@ type Artifact struct {
 	Size int64
 }
 
+// JobWithArtifacts is the artifacts from a job
 type JobWithArtifacts struct {
 	Artifacts []JobArtifact `json:"artifacts"`
 }
 
+// GetArtifacts gets the artifacts from the JobWithArtifacts object
 func (j JobWithArtifacts) GetArtifacts() (artifacts []Artifact) {
 	for _, a := range j.Artifacts {
 		artifacts = append(artifacts, Artifact{
@@ -30,6 +32,7 @@ func (j JobWithArtifacts) GetArtifacts() (artifacts []Artifact) {
 	return
 }
 
+// JobArtifact represents the artifact object
 type JobArtifact struct {
 	RelativePath string `json:"relativePath"`
 	FileName     string `json:"fileName"`
