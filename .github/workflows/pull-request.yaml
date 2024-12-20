@@ -13,7 +13,7 @@ jobs:
       - name: Set up Go 1.16
         uses: actions/setup-go@v3.2.1
         with:
-          go-version: 1.16
+          go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3.0.2
@@ -22,12 +22,12 @@ jobs:
         with:
           args: release --snapshot --clean
       - name: Upload Artifact for darwin
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: jcli-darwin-amd64
           path: release/jcli-darwin-amd64.tar.gz
       - name: Upload Artifact for linux
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: jcli-linux-amd64
           path: release/jcli-linux-amd64.tar.gz
@@ -38,7 +38,7 @@ jobs:
       - name: Set up Go 1.16
         uses: actions/setup-go@v3.2.1
         with:
-          go-version: 1.16
+          go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3.0.2
@@ -96,7 +96,7 @@ jobs:
       - name: Set up Go 1.16
         uses: actions/setup-go@v3.2.1
         with:
-          go-version: 1.16
+          go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3.0.2
