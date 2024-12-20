@@ -73,7 +73,7 @@ var _ = Describe("job test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -102,7 +102,7 @@ var _ = Describe("job test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -124,7 +124,7 @@ var _ = Describe("job test", func() {
 			jobName := "fake"
 			buildID := -1
 
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/lastBuild/api/json", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/%s/lastBuild/api/json", jobClient.URL, jobName), nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -191,7 +191,7 @@ var _ = Describe("job test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -221,7 +221,7 @@ var _ = Describe("job test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -242,7 +242,7 @@ var _ = Describe("job test", func() {
 		It("get a job without in a folder", func() {
 			jobName := "fake"
 
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/job/%s/api/json", jobClient.URL, jobName), nil)
+			request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/job/%s/api/json", jobClient.URL, jobName), nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -263,7 +263,7 @@ var _ = Describe("job test", func() {
 
 	Context("GetJobTypeCategories", func() {
 		It("simple case, should success", func() {
-			request, _ := http.NewRequest("GET", fmt.Sprintf("%s/view/all/itemCategories?depth=3", jobClient.URL), nil)
+			request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/view/all/itemCategories?depth=3", jobClient.URL), nil)
 			response := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
@@ -337,7 +337,7 @@ var _ = Describe("job test", func() {
 			roundTripper.EXPECT().
 				RoundTrip(NewRequestMatcher(request)).Return(response, nil)
 
-			requestCrumb, _ := http.NewRequest("GET", fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
+			requestCrumb, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", jobClient.URL, "/crumbIssuer/api/json"), nil)
 			responseCrumb := &http.Response{
 				StatusCode: 200,
 				Proto:      "HTTP/1.1",
