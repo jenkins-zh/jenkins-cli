@@ -13,7 +13,7 @@ type CompletionOptions struct {
 
 // ShellTypes contains all types of shell
 var ShellTypes = []string{
-	"zsh", "bash", "powerShell",
+	"zsh", "bash", "powerShell", "fish",
 }
 
 var completionOptions CompletionOptions
@@ -75,6 +75,8 @@ Normally you don't need to do more extra work to have this feature if you've ins
 			err = rootCmd.GenPowerShellCompletion(cmd.OutOrStdout())
 		case "bash":
 			err = rootCmd.GenBashCompletion(cmd.OutOrStdout())
+		case "fish":
+			err = rootCmd.GenFishCompletion(cmd.OutOrStdout(), true)
 		default:
 			err = fmt.Errorf("unknown shell type %s", shellType)
 		}

@@ -33,3 +33,10 @@ func TestPowerShellCompletion(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Contains(t, string(data), "powershell completion for jcli")
 }
+
+func TestFishCompletion(t *testing.T) {
+	cmd := exec.Command("jcli", "completion", "--type", "fish")
+	data, err := cmd.CombinedOutput()
+	assert.Nil(t, err)
+	assert.Contains(t, string(data), "fish completion for jcli")
+}
