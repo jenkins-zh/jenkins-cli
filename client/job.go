@@ -99,7 +99,32 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 		api = fmt.Sprintf("%s/%d/api/json", path, id)
 	}
 
-	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &job)
+	return
+}
+
+func (q *JobClient) EditBuild(jobName string, buildID int, displayName, description string) (err error) {
+	path := ParseJobPath(jobName)
+	var api string
+	if buildID == -1 {
+		err = fmt.Errorf("build id is required")
+		return
+	} else {
+		api = fmt.Sprintf("%s/%d/configSubmit", path, buildID)
+	}
+
+	formData := url.Values{}
+	formData.Add("displayName", displayName)
+	formData.Add("description", description)
+	formData.Add("Submit", "")
+	formData.Add("core:apply", "")
+	formData.Add("json", fmt.Sprintf(`{"displayName":"%s","description":"%s","Submit":"","core:apply":"}`, displayName, description))
+	payload := strings.NewReader(formData.Encode())
+
+	header := map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}
+	_, err = q.RequestWithoutData(http.MethodPost, api, header, payload, http.StatusFound)
 	return
 }
 
