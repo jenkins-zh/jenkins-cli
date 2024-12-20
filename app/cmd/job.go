@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
-	cobra_ext "github.com/linuxsuren/cobra-extension"
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 	"github.com/spf13/cobra"
 )
 

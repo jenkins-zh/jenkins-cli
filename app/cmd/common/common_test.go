@@ -2,7 +2,7 @@ package common
 
 import (
 	"bytes"
-	cobra_ext "github.com/linuxsuren/cobra-extension"
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"reflect"

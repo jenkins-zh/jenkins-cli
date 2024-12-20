@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	cobra_ext "github.com/linuxsuren/cobra-extension"
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 	"net/http"
 
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
@@ -21,8 +21,10 @@ var jobHistoryOption JobHistoryOption
 
 func init() {
 	jobCmd.AddCommand(jobHistoryCmd)
-	jobHistoryOption.SetFlagWithHeaders(jobHistoryCmd, "DisplayName,Building,Result")
+	jobHistoryOption.SetFlagWithHeaders(jobHistoryCmd, "ID,DisplayName,Description,Building,Result")
 	jobHistoryCmd.Flags().IntVarP(&jobHistoryOption.Delete, "delete", "d", -1, "Delete a history item")
+
+	jobHistoryCmd.AddCommand(createJobHistoryEditCmd())
 }
 
 var jobHistoryCmd = &cobra.Command{
