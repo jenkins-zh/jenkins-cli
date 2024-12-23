@@ -16,7 +16,7 @@ jobs:
           go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v4
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6.1.0
         with:
@@ -41,7 +41,7 @@ jobs:
           go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v4
       - name: Go-linter-1
         uses: Jerome1337/golint-action@v1.0.2
         with:
@@ -73,7 +73,7 @@ jobs:
       GO111MODULE: on
     steps:
       - name: Checkout Source
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v4
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
@@ -99,7 +99,7 @@ jobs:
           go-version: 1.23
         id: go
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v4
       - name: Test
         run: |
           make test
