@@ -6,7 +6,7 @@ import (
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
 	"github.com/jenkins-zh/jenkins-cli/client"
 	jenkinsFormula "github.com/jenkins-zh/jenkins-formulas/pkg/common"
-	cobra_ext "github.com/linuxsuren/cobra-extension"
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 	"net/http"

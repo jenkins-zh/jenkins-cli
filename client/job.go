@@ -103,7 +103,32 @@ func (q *JobClient) GetBuild(jobName string, id int) (job *JobBuild, err error) 
 		api = fmt.Sprintf("%s/%d/api/json", path, id)
 	}
 
-	err = q.RequestWithData("GET", api, nil, nil, 200, &job)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &job)
+	return
+}
+
+// EditBuild edit build information
+func (q *JobClient) EditBuild(jobName string, buildID int, displayName, description string) (err error) {
+	path := ParseJobPath(jobName)
+	var api string
+	if buildID == -1 {
+		err = fmt.Errorf("build id is required")
+		return
+	}
+	api = fmt.Sprintf("%s/%d/configSubmit", path, buildID)
+
+	formData := url.Values{}
+	formData.Add("displayName", displayName)
+	formData.Add("description", description)
+	formData.Add("Submit", "")
+	formData.Add("core:apply", "")
+	formData.Add("json", fmt.Sprintf(`{"displayName":"%s","description":"%s","Submit":"","core:apply":""}`, displayName, description))
+	payload := strings.NewReader(formData.Encode())
+
+	header := map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}
+	_, err = q.RequestWithoutData(http.MethodPost, api, header, payload, http.StatusOK)
 	return
 }
 
@@ -175,7 +200,7 @@ func (q *JobClient) DisableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/disable", path)
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -184,7 +209,7 @@ func (q *JobClient) EnableJob(jobName string) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/enable", path)
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -199,7 +224,7 @@ func (q *JobClient) StopJob(jobName string, num int) (err error) {
 		api = fmt.Sprintf("%s/%d/stop", path, num)
 	}
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -208,7 +233,7 @@ func (q *JobClient) GetJob(name string) (job *Job, err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/api/json", path)
 
-	err = q.RequestWithData(http.MethodGet, api, nil, nil, 200, &job)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, http.StatusOK, &job)
 	return
 }
 
@@ -221,7 +246,7 @@ func (q *JobClient) AddParameters(name, parameters string) (err error) {
 		"params": {parameters},
 	}
 	payload := strings.NewReader(formData.Encode())
-	_, err = q.RequestWithoutData(http.MethodPost, api, map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, http.StatusOK)
 	return
 }
 
@@ -230,7 +255,7 @@ func (q *JobClient) RemoveParameters(name, parameters string) (err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/removeParameter?params=%s", path, parameters)
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -241,8 +266,8 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 		data       []byte
 	)
 
-	if statusCode, data, err = q.Request("GET", "/view/all/itemCategories?depth=3", nil, nil); err == nil {
-		if statusCode == 200 {
+	if statusCode, data, err = q.Request(http.MethodGet, "/view/all/itemCategories?depth=3", nil, nil); err == nil {
+		if statusCode == http.StatusOK {
 			type innerJobCategories struct {
 				Categories []JobCategory
 			}
@@ -260,7 +285,7 @@ func (q *JobClient) GetJobTypeCategories() (jobCategories []JobCategory, err err
 func (q *JobClient) GetPipeline(name string) (pipeline *Pipeline, err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul", path)
-	err = q.RequestWithData("GET", api, nil, nil, 200, &pipeline)
+	err = q.RequestWithData(http.MethodGet, api, nil, nil, http.StatusOK, &pipeline)
 	return
 }
 
@@ -272,7 +297,7 @@ func (q *JobClient) UpdatePipeline(name, script string) (err error) {
 	path := ParseJobPath(name)
 	api := fmt.Sprintf("%s/restFul/update?%s", path, formData.Encode())
 
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -298,7 +323,7 @@ func (q *JobClient) GetHistory(name string) (builds []*JobBuild, err error) {
 func (q *JobClient) DeleteHistory(jobName string, num int) (err error) {
 	path := ParseJobPath(jobName)
 	api := fmt.Sprintf("%s/%d/doDelete", path, num)
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 	return
 }
 
@@ -316,7 +341,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 		response *http.Response
 	)
 
-	req, err = http.NewRequest("GET", api, nil)
+	req, err = http.NewRequest(http.MethodGet, api, nil)
 	if err == nil {
 		err = q.AuthHandle(req)
 	}
@@ -339,7 +364,7 @@ func (q *JobClient) Log(jobName string, history int, start int64) (jobLog JobLog
 		code := response.StatusCode
 		var data []byte
 		data, err = ioutil.ReadAll(response.Body)
-		if code == 200 {
+		if code == http.StatusOK {
 			jobLog.Text = string(data)
 
 			if response.Header != nil {
@@ -378,7 +403,7 @@ func (q *JobClient) CreateJobInFolder(jobPayload CreateJobPayload, path string) 
 	api := fmt.Sprintf("/view/all%s/createItem", path)
 	var code int
 	code, err = q.RequestWithoutData(http.MethodPost, api,
-		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, 200)
+		map[string]string{httpdownloader.ContentType: httpdownloader.ApplicationForm}, payload, http.StatusOK)
 	if code == 302 {
 		err = nil
 	}
@@ -398,7 +423,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 	}
 
 	if statusCode, _, err = q.Request(http.MethodPost, api, header, nil); err == nil {
-		if statusCode != 200 && statusCode != 302 {
+		if statusCode != http.StatusOK && statusCode != 302 {
 			err = fmt.Errorf("unexpected status code: %d", statusCode)
 		}
 	}
@@ -408,7 +433,7 @@ func (q *JobClient) Delete(jobName string) (err error) {
 // GetJobInputActions returns the all pending actions
 func (q *JobClient) GetJobInputActions(jobName string, buildID int) (actions []JobInputItem, err error) {
 	path := ParseJobPath(jobName)
-	err = q.RequestWithData("GET", fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, 200, &actions)
+	err = q.RequestWithData(http.MethodGet, fmt.Sprintf("%s/%d/wfapi/pendingInputActions", path, buildID), nil, nil, http.StatusOK, &actions)
 	return
 }
 
@@ -441,7 +466,7 @@ func (q *JobClient) JobInputSubmit(jobName, inputID string, buildID int, abort b
 	paramData, _ := json.Marshal(request)
 
 	api = fmt.Sprintf("%s?json=%s", api, string(paramData))
-	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, 200)
+	_, err = q.RequestWithoutData(http.MethodPost, api, nil, nil, http.StatusOK)
 
 	return
 }

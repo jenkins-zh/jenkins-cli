@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	cobra_ext "github.com/linuxsuren/cobra-extension"
+	cobra_ext "github.com/linuxsuren/cobra-extension/pkg"
 	"net/http"
 	"strings"
 

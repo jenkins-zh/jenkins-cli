@@ -84,10 +84,12 @@ var jobArtifactDownloadCmd = &cobra.Command{
 
 func (j *JobArtifactDownloadOption) download(artifactURL, fileName string) (err error) {
 	jenkinsURL, _ := url.Parse(j.Jenkins.URL)
+	targetURL := fmt.Sprintf("%s%s", j.Jenkins.URL, strings.TrimPrefix(artifactURL, jenkinsURL.Path))
+	fmt.Println("start to download from", targetURL)
 	downloader := httpdownloader.HTTPDownloader{
 		RoundTripper:   j.RoundTripper,
 		TargetFilePath: fileName,
-		URL:            fmt.Sprintf("%s%s", j.Jenkins.URL, strings.TrimPrefix(artifactURL, jenkinsURL.Path)),
+		URL:            targetURL,
 		UserName:       j.Jenkins.UserName,
 		Password:       j.Jenkins.Token,
 		Proxy:          j.Jenkins.Proxy,

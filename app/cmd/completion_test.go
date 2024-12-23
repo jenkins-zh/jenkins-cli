@@ -79,6 +79,17 @@ var _ = Describe("completion command", func() {
 		})
 	})
 
+	Context("generate fish completion", func() {
+		BeforeEach(func() {
+			cmdArgs = []string{"completion", "--type", "fish"}
+		})
+
+		It("should success", func() {
+			Expect(err).To(BeNil())
+			Expect(buf.String()).To(ContainSubstring("fish completion for jcli"))
+		})
+	})
+
 	Context("generate unknown shell type completion", func() {
 		BeforeEach(func() {
 			cmdArgs = []string{"completion", "--type", "fake"}
