@@ -43,27 +43,27 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
       - name: Go-linter-1
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: app/cmd/...
       - name: Go-linter-2
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: app/helper/...
       - name: Go-linter-3
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: app/i18n/i18n.go
       - name: Go-linter-4
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: app/.
       - name: Go-linter-5
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: client/...
       - name: Go-linter-6
-        uses: Jerome1337/golint-action@v1.0.2
+        uses: Jerome1337/golint-action@v1.0.3
         with:
           golint-path: util/...
   Security:
