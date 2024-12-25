@@ -13,7 +13,6 @@ on:
 env:
   REGISTRY: ghcr.io
   REGISTRY_DOCKERHUB: docker.io
-  IMAGE_NAME: jenkinszh/jcli
 
 jobs:
   image:
@@ -48,8 +47,8 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/jenkins-zh/jcli
+            ${{ env.REGISTRY_DOCKERHUB }}/jenkinszh/jcli
       - name: Build and push Docker image
         id: build-and-push
         uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
