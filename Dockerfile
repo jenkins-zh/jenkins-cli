@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-FROM golang:1.12 AS builder
-=======
 FROM golang:1.23 AS builder
->>>>>>> Stashed changes
 
 WORKDIR /work
 COPY . .
