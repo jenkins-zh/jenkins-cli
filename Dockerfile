@@ -2,7 +2,7 @@ FROM golang:1.23 AS builder
 
 WORKDIR /work
 COPY . .
-RUN go build -o jcli .
+RUN CGO_ENABLED=0 go build -v -a -o jcli .
 
 FROM alpine:3.10
 COPY --from=builder /work/jcli /usr/bin/jcli
