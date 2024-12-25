@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+    branches:
+      - master
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_DOCKERHUB: docker.io
+  IMAGE_NAME: jenkinszh/jcli
+
+jobs:
+  image:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+      - name: Set output
+        id: vars
+        run: echo "tag=$(git describe --tags)" >> $GITHUB_OUTPUT
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: linuxsuren
+          password: ${{ secrets.GH_PUBLISH_SECRETS }}
+      - name: Log into registry ${{ env.REGISTRY_DOCKERHUB }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY_DOCKERHUB }}
+          username: linuxsuren
+          password: ${{ secrets.DOCKER_HUB_PUBLISH_SECRETS }}
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@ac9327eae2b366085ac7f6a2d02df8aa8ead720a
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: VERSION=${{ steps.vars.outputs.tag }}
