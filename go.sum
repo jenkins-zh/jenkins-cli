@@ -543,8 +543,8 @@ github.com/linuxsuren/go-cli-plugin v0.0.5/go.mod h1:mVRJZPWQ4lYULxE3Ufk4/SzfJwm
 github.com/linuxsuren/http-downloader v0.0.2-0.20201207132639-19888a6beaec/go.mod h1:zRZY9FCDBuYNDxbI2Ny5suasZsMk7J6q9ecQ3V3PIqI=
 github.com/linuxsuren/http-downloader v0.0.6/go.mod h1:xxgh2OE7WGL9TwDE9L8Gh7Lqq9fFPuHbh5tofUitEfE=
 github.com/linuxsuren/http-downloader v0.0.23/go.mod h1:rUjrcLzC9cAgKSgwEhwDXH5LL0Y/aK5KpTJrA3eqW1s=
-github.com/linuxsuren/http-downloader v0.0.98-0.20241225150100-81a59125792d h1:XT/5R4BLTFoLUpcdRBEg+MJWWvIzazxPJsL+UdGZU5w=
-github.com/linuxsuren/http-downloader v0.0.98-0.20241225150100-81a59125792d/go.mod h1:OngIAkbOJTMbd+IMRbt3TiWSizVJZvPfjdbTpl6uHLo=
+github.com/linuxsuren/http-downloader v0.0.98 h1:yjRpfogxOE0zebMWmNA/i5Zeq5gU2RfRKkNONhvwLUA=
+github.com/linuxsuren/http-downloader v0.0.98/go.mod h1:OngIAkbOJTMbd+IMRbt3TiWSizVJZvPfjdbTpl6uHLo=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.4/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=

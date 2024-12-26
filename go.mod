@@ -20,7 +20,7 @@ require (
 	github.com/linuxsuren/cobra-extension v0.0.16
 	github.com/linuxsuren/go-cli-alias v0.0.10
 	github.com/linuxsuren/go-cli-plugin v0.0.5
-	github.com/linuxsuren/http-downloader v0.0.98-0.20241225150100-81a59125792d
+	github.com/linuxsuren/http-downloader v0.0.98
 	github.com/magiconair/properties v1.8.5
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moby/moby v20.10.8+incompatible
