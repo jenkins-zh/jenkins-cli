@@ -4,16 +4,17 @@ import (
 	"fmt"
 	appCfg "github.com/jenkins-zh/jenkins-cli/app/config"
 	"github.com/jenkins-zh/jenkins-cli/app/i18n"
+	httpdownloader "github.com/linuxsuren/http-downloader/pkg/net"
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 
 	"github.com/jenkins-zh/jenkins-cli/app/helper"
 
 	"github.com/jenkins-zh/jenkins-cli/client"
-	httpdownloader "github.com/linuxsuren/http-downloader/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -86,16 +87,24 @@ func (j *JobArtifactDownloadOption) download(artifactURL, fileName string) (err 
 	jenkinsURL, _ := url.Parse(j.Jenkins.URL)
 	targetURL := fmt.Sprintf("%s%s", j.Jenkins.URL, strings.TrimPrefix(artifactURL, jenkinsURL.Path))
 	fmt.Println("start to download from", targetURL)
-	downloader := httpdownloader.HTTPDownloader{
-		RoundTripper:   j.RoundTripper,
-		TargetFilePath: fileName,
-		URL:            targetURL,
-		UserName:       j.Jenkins.UserName,
-		Password:       j.Jenkins.Token,
-		Proxy:          j.Jenkins.Proxy,
-		ProxyAuth:      j.Jenkins.ProxyAuth,
-		ShowProgress:   j.ShowProgress,
-	}
-	err = downloader.DownloadFile()
+	//downloader := httpdownloader.HTTPDownloader{
+	//	RoundTripper:   j.RoundTripper,
+	//	TargetFilePath: fileName,
+	//	URL:            targetURL,
+	//	UserName:       j.Jenkins.UserName,
+	//	Password:       j.Jenkins.Token,
+	//	Proxy:          j.Jenkins.Proxy,
+	//	ProxyAuth:      j.Jenkins.ProxyAuth,
+	//	ShowProgress:   j.ShowProgress,
+	//	Thread:         10,
+	//}
+	//err = downloader.DownloadFile()
+
+	download := &httpdownloader.MultiThreadDownloader{}
+	download.WithBasicAuth(j.Jenkins.UserName, j.Jenkins.Token)
+	download.WithShowProgress(j.ShowProgress)
+	download.WithKeepParts(true)
+	download.WithRoundTripper(j.RoundTripper)
+	err = download.Download(targetURL, fileName, runtime.NumCPU())
 	return
 }
