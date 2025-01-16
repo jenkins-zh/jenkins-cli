@@ -148,7 +148,7 @@ func (j *JobEditOption) getSampleJenkinsfile() string {
 `
 }
 
-//func getPipeline(name string) (script string, err error) {
+// func getPipeline(name string) (script string, err error) {
 func (j *JobEditOption) getPipeline(jClient *client.JobClient, name string) (script string, err error) {
 	script = j.Script //we take the script from input firstly
 	if script != "" {

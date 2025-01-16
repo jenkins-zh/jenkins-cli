@@ -14,7 +14,7 @@ type PluginDepCheck struct {
 	pluginName, targetVersion string
 }
 
-//NewChecker returns a plugin dep checker
+// NewChecker returns a plugin dep checker
 func NewChecker(jenkins *appCfg.JenkinsServer, roundTripper http.RoundTripper, pluginName, targetVersion string) (
 	checker *PluginDepCheck) {
 	checker = &PluginDepCheck{

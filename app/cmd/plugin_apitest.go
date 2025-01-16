@@ -159,7 +159,7 @@ func (o *pluginAPITestOption) test(cmd *cobra.Command, args []string) (err error
 	return err
 }
 
-//CheckFileExists returns true if exits and returns false if not
+// CheckFileExists returns true if exits and returns false if not
 func CheckFileExists(path string) (exist bool, err error) {
 	_, err = os.Stat(path)
 	if err == nil {

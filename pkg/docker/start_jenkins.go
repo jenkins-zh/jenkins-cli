@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//RunOption contains some of the options used to create a docker image and run a container
+// RunOption contains some of the options used to create a docker image and run a container
 type RunOption struct {
 	ImageName      string
 	Tag            string
@@ -32,17 +32,17 @@ type RunOption struct {
 	TmpDir string
 }
 
-//DockerRunOption is an option for starting a container in docker
+// DockerRunOption is an option for starting a container in docker
 var DockerRunOption RunOption
 
-//ConnectToDocker returns a client which is used to connect to a local or remote docker host
+// ConnectToDocker returns a client which is used to connect to a local or remote docker host
 func (o *RunOption) ConnectToDocker() (cli *client.Client, err error) {
 	tcp := fmt.Sprintf("tcp://%s:%d", o.IP, o.DockerPort)
 	cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation(), client.WithHost(tcp))
 	return cli, err
 }
 
-//CreateImageAndRunContainer  is to create an docker image and run a container from the image
+// CreateImageAndRunContainer  is to create an docker image and run a container from the image
 func (o *RunOption) CreateImageAndRunContainer(cmd *cobra.Command, args []string) (err error) {
 	ctx := context.Background()
 	cli, err := o.ConnectToDocker()
@@ -87,7 +87,7 @@ func (o *RunOption) CreateImageAndRunContainer(cmd *cobra.Command, args []string
 	return nil
 }
 
-//BuildImage is used to build an image
+// BuildImage is used to build an image
 func (o *RunOption) BuildImage(cmd *cobra.Command) error {
 	ctx := context.Background()
 	cli, _ := o.ConnectToDocker()
@@ -114,7 +114,7 @@ func (o *RunOption) BuildImage(cmd *cobra.Command) error {
 	return nil
 }
 
-//GetTarReader creates tarReader for args in function BuildImage
+// GetTarReader creates tarReader for args in function BuildImage
 func (o *RunOption) GetTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
 	src := []string{o.DockerfilePath, o.WarPath, o.Script}
 	buf := new(bytes.Buffer)
@@ -147,7 +147,7 @@ func (o *RunOption) GetTarReader(cmd *cobra.Command) (*bytes.Reader, error) {
 	return dockerFileTarReader, nil
 }
 
-//CreateDockerfile will create a docker file for running a jenkins war contains plugins hpi
+// CreateDockerfile will create a docker file for running a jenkins war contains plugins hpi
 func (o *RunOption) CreateDockerfile(cmd *cobra.Command, args []string) (err error) {
 	dir, _ := ioutil.TempDir("", "jenkins-cli")
 	o.TmpDir = dir

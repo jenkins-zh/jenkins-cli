@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//BackupOption is an option for backup
+// BackupOption is an option for backup
 type BackupOption struct {
 	RoundTripper http.RoundTripper
 	BackupDir    string
@@ -38,7 +38,7 @@ var backupCmd = &cobra.Command{
 	RunE: backupOption.Backup,
 }
 
-//Check will find out whether Thin Backup Plugin installed or not
+// Check will find out whether Thin Backup Plugin installed or not
 func (o *BackupOption) Check() (err error) {
 	opt := PluginOptions{
 		Option: common.Option{RoundTripper: o.RoundTripper},
@@ -47,7 +47,7 @@ func (o *BackupOption) Check() (err error) {
 	return
 }
 
-//Backup will trigger thinBackup plugin to make a backup
+// Backup will trigger thinBackup plugin to make a backup
 func (o *BackupOption) Backup(cmd *cobra.Command, _ []string) (err error) {
 	jClient := &client.CoreClient{
 		JenkinsCore: client.JenkinsCore{
@@ -88,7 +88,7 @@ func (o *BackupOption) Backup(cmd *cobra.Command, _ []string) (err error) {
 	return
 }
 
-//ThinBackupAPI requests backupManual api
+// ThinBackupAPI requests backupManual api
 func ThinBackupAPI(client *client.CoreClient) (err error) {
 	_, err = client.RequestWithoutData(http.MethodGet, "/thinBackup/backupManual", nil, nil, 200)
 	return err
